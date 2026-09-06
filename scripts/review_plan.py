@@ -9,6 +9,7 @@ import argparse
 import asyncio
 import hashlib
 import json
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -24,6 +25,7 @@ async def main():
     parser.add_argument("--timeout", type=int, default=600)
     parser.add_argument("--output", default="docs/delivery/reviews/P0-raw.json")
     parser.add_argument("--question-file", help="Use a focused Paranoia query instead of another critique")
+    parser.add_argument("--base-ref", help="Run the bounded C06 branch review from this committed implementation base")
     args = parser.parse_args()
     repo = Path(args.repo).resolve()
     paths = ["docs/delivery/PLAN.md", "docs/delivery/ACCEPTANCE.md",
@@ -41,6 +43,15 @@ async def main():
         "focus": "Find only substantive in-scope delivery gaps, dependency cycles, untestable acceptance, circular oracles, false-green escape routes, unsupported runtime assumptions, or disproportionate governance. Check whether a fresh execution agent can deliver end to end. Cite document and section/line. Limit to the most consequential findings; no speculative hardening or unlimited review machinery.",
     }
     tool_name = "critique_plan"
+    if args.base_ref:
+        tool_name="critique_branch"
+        request=dict(repo_path=str(repo),base_ref=args.base_ref,head_ref='HEAD',include_uncommitted=False,
+            isolate=False,converge=False,class_closure=False,round=1,engine=args.engine,effort='medium',web_search=False,
+            stakes='Trusted single-user local MIDI-only development utility on Ubuntu 20.04 WSL. Risks are misleading tests, native runtime mismatch and local project damage. No financial system, hostile users, physical hardware certification or mandatory audio support.',
+            project_summary='General-purpose official norns/grid runtime with separate Mosaic fixtures; shared native input path for browser and API. Delivery is at C06/M1, not full release.',
+            diff_intent='Implement C00–C06 boot/device/control foundations and a four-step Mosaic edit/play/save/autosave/restart/load slice. Read docs/delivery/PLAN.md C06, ACCEPTANCE.md M1, C06 evidence and current residuals. Later workflow, timing, release and Linux cards are not claimed complete.',
+            focus='Find reproducible substantive M1 blockers: secretly mocked musical paths, false readiness, circular MIDI/frame oracles, stale or incomplete evidence, browser/API disagreement, error/cleanup failures, application coupling. Include D15 signed grid-level packing correction and native MIDI parser/source-time capture. R08 repeated-pitch overlap remains mandatory C12 work; do not silently waive it or demand all future-card scope at M1. Keep this one-shot review proportionate.')
+        packet+=subprocess.check_output(['git','diff','--no-ext-diff',args.base_ref,'HEAD'],cwd=repo,text=True)
     if args.question_file:
         tool_name = "query"
         request = {

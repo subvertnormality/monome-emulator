@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "package-run",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "kind": {
+      "const": "native-package"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "backend": {
+      "const": "native"
+    },
+    "fidelity": {
+      "const": "native-norns"
+    },
+    "tier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "enum": [
+        "E",
+        "B"
+      ]
+    },
+    "family": {
+      "const": "A01"
+    },
+    "clock_mode": {
+      "const": "real-time"
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "revision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "digest": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "sha256": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000000000
+              }
+            },
+            "required": [
+              "path",
+              "sha256",
+              "size"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "revision",
+        "digest",
+        "files"
+      ],
+      "additionalProperties": false
+    },
+    "platform": {
+      "type": "object"
+    },
+    "collected": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "passed": {
+      "type": "boolean"
+    },
+    "exit_code": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "passed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "passed"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0,
+      "maxItems": 10000
+    },
+    "phases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "directory": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "session_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "role",
+          "directory",
+          "session_id"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0,
+      "maxItems": 10000
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "sha256": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000000000
+          }
+        },
+        "required": [
+          "path",
+          "sha256",
+          "size"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0,
+      "maxItems": 10000
+    },
+    "error": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "run_id",
+    "scenario_id",
+    "backend",
+    "fidelity",
+    "tier",
+    "family",
+    "clock_mode",
+    "source",
+    "platform",
+    "collected",
+    "passed",
+    "exit_code",
+    "checks",
+    "phases",
+    "artifacts",
+    "error"
+  ],
+  "additionalProperties": false
+}

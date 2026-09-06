@@ -130,6 +130,10 @@
     {
       "path": "patches/norns/0010-grid-native-level-conversion.patch",
       "sha256": "fc079402b99feca9a878f2c97f02334ee75f6c06d7c4cc7d667a168935d7ad84"
+    },
+    {
+      "path": "patches/norns/0011-clock-cancel-queued-resume.patch",
+      "sha256": "40bb49162614d014a4b56f1189dcb9345991d0c1548a48fdf2518cdfea614499"
     }
   ],
   "serialosc": {

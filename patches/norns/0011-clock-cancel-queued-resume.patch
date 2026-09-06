@@ -1,0 +1,14 @@
+--- a/lua/core/clock.lua
++++ b/lua/core/clock.lua
+@@ -58,6 +58,11 @@
+ -- todo: use c api instead
+ clock.resume = function(coro_id, ...)
+   local coro = clock.threads[coro_id]
++  -- Native scheduler events may already be queued when clock.cancel removes a
++  -- thread. IDs are monotonic and never reused: a previously allocated absent
++  -- ID is cancelled/completed, not an unknown caller-supplied ID.
++  if coro == nil and type(coro_id) == "number" and coro_id % 1 == 0
++      and coro_id >= 1 and coro_id < clock_id_counter then return end
+ 
+   local result, mode, time, offset = coroutine.resume(coro, ...)
+ 

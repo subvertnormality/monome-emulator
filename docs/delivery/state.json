@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "updated": "2026-09-06",
+  "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C06",
-  "next_action": "Create a four-step Mosaic pattern through actual controls, verify playback/edit/save/reload through API and browser, then conduct P1 including D15 grid fidelity correction.",
+  "next_action": "C06: finish isolated browser package (exec 13847), diagnose any network failure from browser-driver.log. API package passed at artifacts/c06/46570af5cb314d96b34edcae9d2bcd30. Clock race baseline failed and patched native probe passed at artifacts/runs/e827d694d9034c2d91ec39f743cf4e8f. Finish current-source API/browser evidence, then commit review candidate and invoke bounded P1.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -43,7 +43,8 @@
     {
       "id": "C06",
       "status": "in_progress",
-      "evidence": null
+      "evidence": null,
+      "start_revision": "52ba51e"
     },
     {
       "id": "C07",

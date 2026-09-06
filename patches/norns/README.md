@@ -86,3 +86,14 @@ native clamp. Bounds on coordinates remain for memory safety. The signed/oversiz
 level fixture and actual Mosaic playback cover this correction; Mosaic is not
 patched. This patch is removable with an upstream virtual-grid transport that
 already models the same packing.
+
+`0011-clock-cancel-queued-resume.patch` prevents native queued resume events from
+calling a Lua coroutine after `clock.cancel` removed it. The scheduler clears its
+future slot but cannot retract a resume already in the native event queue. Lua
+clock IDs are monotonic and never reused, so only previously allocated absent IDs
+are discarded; unknown/fractional IDs retain an error. No scheduler, time source
+or musical callback is replaced. The `clock-cancel-race` probe forces 24 due
+resumes into the native queue while one key callback blocks, cancels them, and
+requires a subsequent live clock to emit MIDI. It fails on the unpatched build
+with the same error observed in Mosaic stop/reload. Remove when the official
+runtime handles this cancellation race itself.

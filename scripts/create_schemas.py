@@ -59,3 +59,9 @@ browser_fields=dict(schema_version=const(1),kind=const('browser-package'),run_id
  toolchain=dict(type='object'),collected=integer(1),passed=dict(type='boolean'),exit_code=integer(0,255),
  checks=array(obj(dict(name=string(),passed=dict(type='boolean'),detail=string()),['name','passed']),1),artifacts=array(artifact,1))
 save('browser-run',obj(browser_fields))
+package_fields=dict(schema_version=const(1),kind=const('native-package'),run_id=string(),scenario_id=string(),
+ backend=const('native'),fidelity=const('native-norns'),tier=string(enum=['E','B']),family=const('A01'),clock_mode=const('real-time'),
+ source=identity,platform=dict(type='object'),collected=integer(),passed=dict(type='boolean'),exit_code=integer(0,255),
+ checks=array(obj(dict(name=string(),passed=dict(type='boolean')))),phases=array(obj(dict(role=string(),directory=string(),session_id=string()))),
+ artifacts=array(artifact),error={'oneOf':[dict(type='null'),dict(type='object')]})
+save('package-run',obj(package_fields))

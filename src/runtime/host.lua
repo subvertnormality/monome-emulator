@@ -76,6 +76,15 @@ _norns.emu_observe=function()
   for _,name in ipairs(enabled) do if mods.is_loaded(name) then loaded=loaded+1 end end
   for _,thread in pairs(clock.threads) do if coroutine.status(thread)~='dead' then threads=threads+1 end end
   for _,timer in pairs(metro.metros) do if timer.is_running then metros=metros+1 end end
-  report(8,string.format('%s\t%.9f\t%.6f\t%d\t%d\t%d\t%d\t%d\t%d',norns.state.name,
-    clock.get_beats(),clock.get_tempo(),#params.params,#enabled,loaded,threads,metros,norns.menu.status() and 1 or 0))
+  -- Public parameter declarations aid navigation without invoking param actions.
+  -- This is a root-level declaration inventory, not a second menu implementation.
+  local roots,i={},1
+  while i<=params.count do
+    if params:visible(i) then
+      roots[#roots+1]=string.format('%d\t%s\t%s',i,tostring(params:get_id(i)):gsub('[%c]',' '),tostring(params:get_name(i)):gsub('[%c]',' '))
+    end
+    i=i+(params:t(i)==params.tGROUP and params:get(i)+1 or 1)
+  end
+  report(8,string.format('%s\t%.9f\t%.6f\t%d\t%d\t%d\t%d\t%d\t%d\t%s',norns.state.name,
+    clock.get_beats(),clock.get_tempo(),#params.params,#enabled,loaded,threads,metros,norns.menu.status() and 1 or 0,table.concat(roots,'\n')))
 end

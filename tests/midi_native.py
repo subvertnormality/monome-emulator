@@ -9,9 +9,10 @@ from devices.midi import Capture
 import app_fixtures
 
 class Client:
-    def __init__(self,mosaic=False,limit=1000000):
+    def __init__(self,mosaic=False,limit=1000000,data_seed=None):
         options=app_fixtures.launch_options('mosaic','base-midi') if mosaic else dict(script=ROOT/'fixtures/probes/midi-probe/midi-probe.lua',code_root=ROOT/'fixtures/probes')
         if mosaic:options['data_seeds']=[dict(source=str(ROOT/'fixtures/apps/mosaic-config/minimal'),destination='mosaic/config',format='json-files')]
+        if data_seed:options['data_seeds']=[dict(source=str(data_seed),destination='mosaic')]
         self.info=session.start('native',midi_config=dict(ports=['Emulator MIDI','Second MIDI','Norns2sinfonion'],capture_limit=limit),**options)
         self.sid=self.info['session_id'];self.seq=0;self.observations=[]
     def action(self,**body):
@@ -35,7 +36,7 @@ class Client:
             time.sleep(.03)
         raise AssertionError('Expected native MIDI/grid observation did not arrive')
     def finish(self,name):
-        session.stop(self.sid);source=session.SESSIONS/self.sid;out=ROOT/'artifacts/c05'/name/self.sid;out.mkdir(parents=True)
+        session.stop(self.sid);source=session.SESSIONS/self.sid;out=getattr(self,'output_root',ROOT/'artifacts/c05')/name/self.sid;out.mkdir(parents=True)
         for p in source.iterdir():
             if p.suffix in ('.log','.jsonl') or p.name in ('cleanup.json','native-config.json','frame.bgra'):shutil.copyfile(p,out/p.name)
         assert all(c['returncode']==0 for c in read_json(out/'cleanup.json') if c['service']!='sclang')

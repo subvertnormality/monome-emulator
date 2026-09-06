@@ -179,9 +179,10 @@ class NativeBackend:
                     elif kind==7:
                         value=payload.decode(errors='replace'); self.absent.append(value); record['absence']=value
                     elif kind==8:
-                        name,beats,tempo,count,mods,loaded,threads,metros,menu=payload.decode().split('\t')
+                        name,beats,tempo,count,mods,loaded,threads,metros,menu,roots=payload.decode().split('\t',9)
                         self.diagnostics=dict(script=name,beats=float(beats),tempo=float(tempo),params=int(count),enabled_mods=int(mods),
-                                              loaded_mods=int(loaded),clock_threads=int(threads),running_metros=int(metros),menu_mode=bool(int(menu)))
+                                              loaded_mods=int(loaded),clock_threads=int(threads),running_metros=int(metros),menu_mode=bool(int(menu)),
+                                              parameter_roots=[dict(index=int(row.split('\t')[0]),id=row.split('\t')[1],name=row.split('\t')[2]) for row in roots.splitlines()])
                     elif kind==9:
                         if len(payload)!=3: raise ValueError('Invalid grid metadata')
                         connected,rotation,intensity=payload

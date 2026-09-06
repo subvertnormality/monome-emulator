@@ -6,6 +6,7 @@ from .protocol import ROOT,ContractError,checked,read_json
 def verify(path,current_source=True):
     path=Path(path).resolve()
     if read_json(path).get('kind')=='browser-package': return verify_browser(path,current_source)
+    if read_json(path).get('kind')=='native-package': return verify_package(path,current_source)
     manifest=checked('manifest',read_json(path))
     if not manifest['collected'] or len(manifest['results'])!=manifest['collected']:
         raise ContractError('incomplete_run','Empty or incomplete result inventory')
@@ -77,6 +78,44 @@ def verify_browser(path,current_source=True):
         from runtime.dependencies import verify_install
         if application_identity(manifest['application']['code_root'])['digest']!=manifest['application']['digest']: raise ContractError('stale_application','Browser application changed')
         verify_install(manifest['runtime'])
+    return manifest
+
+def verify_package(path,current_source=True):
+    path=Path(path).resolve(); manifest=checked('package-run',read_json(path))
+    required=['fresh-bootstrap','four-step-playback-and-live-edit','save-dialog','native-autosave','fresh-cleanup',
+              'autosave-bootstrap','file-dialog-load-and-playback','reload-cleanup']
+    if manifest['scenario_id'] not in ('mosaic-four-step-api','mosaic-four-step-browser'):
+        raise ContractError('package_inventory','Unknown procedural package')
+    if manifest['tier']!=('B' if manifest['scenario_id'].endswith('browser') else 'E'):
+        raise ContractError('package_tier','Browser/API package tier mismatch')
+    if not manifest['passed'] or manifest['exit_code'] or manifest['error'] or manifest['collected']!=len(required) or [c['name'] for c in manifest['checks']]!=required or not all(c['passed'] for c in manifest['checks']):
+        raise ContractError('failed_package','Incomplete or failed Mosaic slice')
+    if [p['role'] for p in manifest['phases']]!=['fresh','autosave'] or len({p['session_id'] for p in manifest['phases']})!=2:
+        raise ContractError('package_phases','Slice requires two fresh native processes')
+    names=[a['path'] for a in manifest['artifacts']]
+    if len(set(names))!=len(names): raise ContractError('artifact_inventory','Duplicated package artifact')
+    if 'results.json' not in names or (path.parent/'failure.json').exists():raise ContractError('package_results','Missing results or retained failure')
+    for record in manifest['artifacts']:verify_artifact(record,path.parent)
+    from .identity import application_identity
+    from runtime.dependencies import verify_install
+    for phase in manifest['phases']:
+        prefix=phase['directory']+'/'
+        needed={'identity.json','recipe.json','normalized-inputs.json','observations.json','native-events.jsonl','actions.jsonl','frame.bgra','cleanup.json'}
+        if manifest['tier']=='B':needed.add('browser.png')
+        if not {prefix+n for n in needed}.issubset(names):raise ContractError('package_artifacts','Required phase evidence missing')
+        directory=path.parent/phase['directory']; identity=read_json(directory/'identity.json')
+        if identity['session_id']!=phase['session_id'] or identity['emulator_identity']['digest']!=manifest['source']['digest']:
+            raise ContractError('package_identity','Phase belongs to another source/session')
+        cleanup=read_json(directory/'cleanup.json')
+        if not {'matron','crone','jack'}.issubset({c['service'] for c in cleanup}) or any(c['returncode']!=0 for c in cleanup if c['service']!='sclang'):
+            raise ContractError('package_cleanup','Native cleanup failed')
+        observations=read_json(directory/'observations.json')
+        if not observations or any(o['session_id']!=phase['session_id'] or o['errors'] for o in observations):raise ContractError('package_observations','Missing/wrong/failed observations')
+        if current_source:
+            verify_install(identity['runtime_identity'])
+            app=identity['application_identity']
+            if application_identity(app['code_root'])['digest']!=app['digest']:raise ContractError('stale_application','Slice app source changed')
+    if current_source and source_identity()['digest']!=manifest['source']['digest']:raise ContractError('stale_source','Slice source changed')
     return manifest
 
 def release_check(paths,milestone,platform):
