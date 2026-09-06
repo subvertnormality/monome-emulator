@@ -1,0 +1,93 @@
+{
+  "passed": true,
+  "implementation_revision": "e2c452f",
+  "source_digest": "f85131aa3160433221aed501d9a06e9fe15e94d4e1a1ea9b08a561df8749d796",
+  "contracts": {
+    "collected": 28,
+    "skipped": 0,
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 83.331
+  },
+  "startup_cleanup": {
+    "collected": 3,
+    "passed": true,
+    "skipped": 0
+  },
+  "packages": [
+    {
+      "path": "artifacts/c06/cf62d410a31649af913ad5af02afa5fc/manifest.json",
+      "run_id": "cf62d410a31649af913ad5af02afa5fc",
+      "scenario_id": "mosaic-four-step-api",
+      "collected": 8,
+      "passed": true
+    },
+    {
+      "path": "artifacts/c06/7e6ff6fdb29d4a559a510713b6a9ee08/manifest.json",
+      "run_id": "7e6ff6fdb29d4a559a510713b6a9ee08",
+      "scenario_id": "mosaic-four-step-browser",
+      "collected": 8,
+      "passed": true
+    },
+    {
+      "path": "artifacts/runs/ccbec6f08ce44599969c8388b90acca5/manifest.json",
+      "run_id": "ccbec6f08ce44599969c8388b90acca5",
+      "scenario_id": "native-clock-cancel-race",
+      "collected": 5,
+      "passed": true
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/c06/cf62d410a31649af913ad5af02afa5fc/manifest.json",
+      "sha256": "34c47c820535042cc04b9b03638cc41563c1c5b01814eba0ac318178deb658f2",
+      "size": 26992
+    },
+    {
+      "path": "artifacts/c06/7e6ff6fdb29d4a559a510713b6a9ee08/manifest.json",
+      "sha256": "48381f7034db681caa1791ab6022995284747fa4a721f650fda83e45b2c1c23c",
+      "size": 27797
+    },
+    {
+      "path": "artifacts/runs/ccbec6f08ce44599969c8388b90acca5/manifest.json",
+      "sha256": "f28d2938ea3cab0426d5d6db2545901cea19437f78db5fb02f5ee6d425459a0c",
+      "size": 44108
+    },
+    {
+      "path": "artifacts/c06-final-slices.log",
+      "sha256": "cbf9f83aeb293c7647c3728496e3c0db6c65df7c0599216b9bbeeca1aa32e1e2",
+      "size": 352
+    },
+    {
+      "path": "artifacts/c06-final-contracts.log",
+      "sha256": "f94293769d0f55b18d25d5182105dd9ca9f197672ebf5237f94d3a2a03b8f58e",
+      "size": 2485
+    },
+    {
+      "path": "artifacts/c06-final-clock.json",
+      "sha256": "c60477bd41fc6cb9d9a0c1fb850145cdad0575b4dfe3c9bc92ebe27975a2032c",
+      "size": 161
+    },
+    {
+      "path": "artifacts/c06-native-deadline-cleanup.json",
+      "sha256": "1c7f8a45d5a89cfceea7d7f2bbe9f341fe2095db6c27840355fab4d61c507be4",
+      "size": 452
+    },
+    {
+      "path": "artifacts/c06-native-startup-cleanup.json",
+      "sha256": "ff0e7104d27f7b438bec55d695dbbe45485f629b93faf71b2a3ed699c41e01c2",
+      "size": 569
+    },
+    {
+      "path": "artifacts/c06-browser-startup-cleanup.json",
+      "sha256": "08997a0ac3ac9a84a63be21ed29ac8fb82ab994aa9c15a35a7cd31022f0c5d21",
+      "size": 40
+    }
+  ],
+  "review": {
+    "initial": "docs/delivery/reviews/P1-raw.json",
+    "recovered": "docs/delivery/reviews/P1-recovered.md",
+    "followup": "docs/delivery/reviews/P1-followup-raw.json",
+    "triage": "docs/delivery/reviews/P1-triage.md"
+  }
+}

@@ -2,8 +2,8 @@
   "schema_version": 1,
   "updated": "2026-09-07",
   "mode": "executing",
-  "current_card": "C06",
-  "next_action": "C06: finish isolated browser package (exec 13847), diagnose any network failure from browser-driver.log. API package passed at artifacts/c06/46570af5cb314d96b34edcae9d2bcd30. Clock race baseline failed and patched native probe passed at artifacts/runs/e827d694d9034c2d91ec39f743cf4e8f. Finish current-source API/browser evidence, then commit review candidate and invoke bounded P1.",
+  "current_card": "C07",
+  "next_action": "Start C07 real-time clock/metro contracts, beat-anchored replay and scheduling responsiveness (R10). C06 completed: docs/delivery/completions/C06-evidence.json and P1-triage.md. No active native sessions or reviews remain.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -42,8 +42,8 @@
     },
     {
       "id": "C06",
-      "status": "in_progress",
-      "evidence": null,
+      "status": "done",
+      "evidence": "docs/delivery/completions/C06.md",
       "start_revision": "52ba51e"
     },
     {
@@ -99,7 +99,7 @@
   ],
   "milestones": {
     "M0": "passed",
-    "M1": "not_run",
+    "M1": "passed",
     "M2": "not_run",
     "M3": "not_run",
     "M4": "not_run",
@@ -107,7 +107,7 @@
   },
   "reviews": {
     "P0": "done",
-    "P1": "not_run",
+    "P1": "done",
     "P2": "not_run",
     "P3": "not_run",
     "P4": "not_run",

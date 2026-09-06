@@ -1,0 +1,60 @@
+{
+  "started_at": "2026-09-06T23:35:39.216400+00:00",
+  "packet_sha256": "fd304600ef9237ed481b89df3ea2e3a444ca62631ee879d127887854b12b7ed1",
+  "files": [
+    "docs/delivery/PLAN.md",
+    "docs/delivery/ACCEPTANCE.md",
+    "docs/delivery/RUNBOOK.md",
+    "docs/delivery/DECISIONS.md",
+    "docs/delivery/UPSTREAM.md"
+  ],
+  "tool": "query",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator",
+    "engine": "claude",
+    "question": "This is the single focused follow-up for P1, not a new whole-branch review.\nKeep the response bounded to the changes below; aim to finish within 5 minutes.\n\nThe prior critique_branch call timed out at 600 seconds. Its Claude session\n42320688-61c0-4db5-9d7f-7309be75ccc6 produced the complete final response nine\nseconds later. That unaltered text is in docs/delivery/reviews/P1-recovered.md.\nRead it and P1-triage.md as the prior findings/dispositions. Confirm whether the\nrecovered final response plus this focused Paranoia response resolves the review\ncheckpoint; do not label it tracked convergence.\n\nReview only substantive M1 objections to these fixes:\n1. tests/frame_oracle.py and mosaic_slice.py now require independently specified\n   native title/tab pixels at fresh boot and after actual editing. Literal expected\n   Note Masks/Device Config names and tab positions come from pinned page.lua,\n   pages.lua and channel_edit_page_ui.lua; Cairo/font reuse is a rasterization\n   primitive, not a captured Mosaic golden. Blank screen must fail.\n2. session.py/server.py now unwind initialization on launcher failure/SIGTERM,\n   and /stop shuts HTTP down even after backend cleanup errors. Actual native\n   deadline-before-discovery and first-health failure probes plus actual Chromium\n   failed-navigation tests are in tests/startup_cleanup.py. Contracts exercise\n   HTTP cleanup failure. Check for remaining concrete leaks caused by these edits.\n3. D16, capabilities and docs/architecture/midi-contract.md explicitly disclose\n   stock-runtime MIDI/clock correction differences. Deferred minor findings have\n   concrete C07/C10/C14 owners without release exemptions.\n\nFinal evidence is being refreshed on the frozen implementation: API/browser\nfull slices, cancellation regression, contracts. Do not repeat \"pending evidence\"\nas an implementation flaw; completion remains gated on verified manifests and\nC06-evidence.json. No hardware/audio or future-card scope is claimed. Identify\nonly remaining in-scope substantive blockers, or state none found with limits.\n",
+    "files": [
+      {
+        "path": "docs/delivery/PLAN.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/ACCEPTANCE.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/RUNBOOK.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/DECISIONS.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/UPSTREAM.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/reviews/P1-triage.md",
+        "reason": "Findings and fixes"
+      }
+    ],
+    "web_search": false,
+    "effort": "medium"
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "**Answer:** No remaining in-scope substantive M1 blockers. The recovered final response plus this focused query resolves the P1 review checkpoint, subject to the already-stated gate on refreshed manifests and a written C06-evidence.json.\n\n**Fix 1, screen oracle: holds.** The literals in `tests/frame_oracle.py` match the pinned Mosaic sources independently of any captured frame:\n- Title at (0,9), level 10, font size 8: `upstream/mosaic/lib/ui_components/page.lua:44-47` (`screen.text(self.sub_name_func() .. self.name)`).\n- Tabs `_` at x=(i-1)*10, y=1, level 10 selected / 1 otherwise: `pages.lua:16-24`.\n- Six pages with Masks first and Device Config fifth: `channel_edit_page_ui.lua:355-360`.\n- `m` at (120,9): `upstream/mosaic/lib/ui.lua:42-46`.\n\n`matches()` requires byte equality across the whole first 10 rows (alpha excluded), so a blank frame fails, and the explicit blank check at `mosaic_slice.py:76` guards the oracle itself. Both HEAD-revision slices (`artifacts/c06/cf62d410\u2026`, `7e6ff6fd\u2026`, revision `e2c452f`) passed `fresh-bootstrap` and the post-edit `Device Config` header. Non-substantive note: the oracle passes antialias `2` (`CAIRO_ANTIALIAS_GRAY`), while `script.lua:124` puts matron in `screen.aa(0)` = `NONE`; the pixel font makes them identical here, but the comment implies NONE.\n\n**Fix 2, cleanup: no concrete leak found.** Native `close()` is idempotent (`native.py:266`), so the triple call path (/stop \u2192 `serve_application` finally \u2192 `serve` finally) is safe and still writes `stopped.json`. `NativeBackend.__init__` wraps launch in try/`close()` (`native.py:50-55`), so a SIGTERM-raised `ContractError` during initialization unwinds owned groups; `session.start` now terminates and waits 30 s on any failure (`session.py:66-76`). `Browser.__init__` closes on failed open with `proc=None` handled. Contracts suite at HEAD: 28/28 OK including `test_shutdown_error_still_closes_http_server`. Residual, not a blocker: a *first* SIGTERM landing inside `close()` itself (only the second is ignored) could interrupt cleanup mid-loop.\n\n**Fix 3, disclosure: substantively done, cosmetically broken.** `midi-contract.md:10-24`, capabilities (`server.py:159,161`) and D16 state the 0009/0011 divergences and the stricter F7/status validation, owners C07/C10/C14 in R10\u2013R12 with no exemption. However D16 and R10\u2013R12 are appended *after* the closing paragraphs of their files (`DECISIONS.md:23`, `RESIDUALS.md:17-19`), so they are not structurally part of the tables and render as literal pipe text. Move them above the paragraphs. `UPSTREAM.md` does not mention these divergences; that is acceptable because it defines the patch policy rather than listing patches.\n\n**Confidence: High** on fixes 1 and 2 (verified against source and HEAD-revision passing artifacts). **Medium** on completeness of fix 3 only because I did not confirm every `docs/delivery/PLAN.md`/`ACCEPTANCE.md` cross-reference; the caller's suggested files were not changed in `e2c452f`. Checkpoint still requires C06-evidence.json and state.json reconciliation, which do not yet exist.\n\n---\n_paranoia-local \u00b7 engine=claude \u00b7 session_ref=`7d8cabfc-54e2-4053-bf5d-a428a1787ee6` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "status": "returned",
+  "finished_at": "2026-09-06T23:40:55.437826+00:00"
+}

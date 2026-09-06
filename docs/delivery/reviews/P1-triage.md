@@ -24,3 +24,7 @@ before P1 is marked done. This is not tracked convergence.
 | Minor: personal Windows browser paths | Existing C14 portability owner; C06 reproduction explicitly names the dependency. |
 
 P1/M1 remain pending until the focused response and refreshed evidence are recorded.
+
+## Completion
+
+Focused query returned 2026-09-06T23:40:55Z, Claude session 7d8cabfc-54e2-4053-bf5d-a428a1787ee6 (P1-followup-raw.json): no remaining substantive M1 blockers. Both final native slices and the cancellation probe verified against e2c452f content; C06-evidence.json records all digests, 28 contracts and three actual startup cleanup regressions. The table formatting notes are fixed. First-signal-during-close is recorded as R13 for C11; pixel-font antialias modes are equivalent for this literal title oracle, with no claim for arbitrary fonts. P1 is complete with one recovered critique and one focused follow-up, not convergence.
