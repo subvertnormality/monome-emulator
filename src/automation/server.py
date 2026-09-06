@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import selectors
+import signal
 import subprocess
 import sys
 import threading
@@ -99,6 +100,10 @@ class Application:
 
 def serve(directory):
     app=Application(directory)
+    try: serve_application(directory,app)
+    finally: app.backend.close()
+
+def serve_application(directory,app):
     from .identity import source_identity
     app.config['emulator_identity']=source_identity()
     watchdog_stop=threading.Event()
@@ -151,9 +156,9 @@ def serve(directory):
                     if self.command=='GET' and self.path=='/snapshot': self.respond(200,app.snapshot()); return
                     if self.command=='GET' and self.path=='/capabilities':
                         self.respond(200,checked('capability',dict(schema_version=1,backend=app.config['backend'],
-                          fidelity=app.backend.fidelity,supported=(['native script loading','native keys/encoders','Cairo framebuffer','grid128 LED/relative/bulk/refresh, rotation, intensity, holds and reconnect','configured native MIDI ports, byte-stream input and emission-time capture'] if app.config['backend']=='native' else ['contract counter','ordered action acknowledgment']),
+                          fidelity=app.backend.fidelity,supported=(['native script loading','native keys/encoders','Cairo framebuffer','grid128 LED/relative/bulk/refresh, rotation, intensity, holds and reconnect','configured native MIDI ports, byte-stream input and emission-time capture','patched v2.9.4: realtime MIDI preserves partial messages (0009); cancelled queued clock resumes are ignored (0011)'] if app.config['backend']=='native' else ['contract counter','ordered action acknowledgment']),
                           absent=['physical Crow','GPIO/SPI','network manager'] if app.config['backend']=='native' else [],
-                          unsupported=['audio engines','physical peripherals','grid tilt'] if app.config['backend']=='native' else ['native norns','application workflows']))); return
+                          unsupported=['audio engines','physical peripherals','grid tilt','MIDI isolated F7 or status-interrupted partial messages (stricter than stock v2.9.4; C10)'] if app.config['backend']=='native' else ['native norns','application workflows']))); return
                     if self.command=='POST' and self.path=='/action': self.respond(200,app.action(payload)); return
                     if self.command=='POST' and self.path=='/fixture-fault':
                         if app.config['backend']!='contract-fixture': raise ContractError('unsupported','Fixture faults require the contract backend')
@@ -161,9 +166,11 @@ def serve(directory):
                         app.backend.query(payload); raise ContractError('fault_not_triggered','Fixture fault did not fail')
                     if self.command=='POST' and self.path=='/stop':
                         watchdog_stop.set()
-                        app.backend.close()
-                        self.respond(200,dict(status='stopped',session_id=app.config['session_id']))
-                        threading.Thread(target=self.server.shutdown,daemon=True).start(); return
+                        try:
+                            app.backend.close()
+                            self.respond(200,dict(status='stopped',session_id=app.config['session_id']))
+                        finally: threading.Thread(target=self.server.shutdown,daemon=True).start()
+                        return
                 raise ContractError('endpoint','Unknown endpoint')
             except ContractError as error: self.respond(400,error.as_dict())
             except (ValueError,OSError) as error: self.respond(400,ContractError('request_failed',str(error)).as_dict())
@@ -183,6 +190,11 @@ def serve(directory):
 
 if __name__=='__main__':
     directory=Path(sys.argv[1])
+    def terminate(signum,frame):
+        # A second signal must not interrupt the first signal's owned cleanup.
+        signal.signal(signal.SIGTERM,signal.SIG_IGN)
+        raise ContractError('session_terminated','Session launcher requested shutdown')
+    signal.signal(signal.SIGTERM,terminate)
     try: serve(directory)
     except Exception as error:
         value=error.as_dict() if isinstance(error,ContractError) else ContractError('server_error',repr(error)).as_dict()

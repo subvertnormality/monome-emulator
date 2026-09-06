@@ -20,3 +20,4 @@
 | D15 | Preserve native signed LED storage and official mext four-bit packing, including wrapped absolute values; retain coordinate bounds | C05 actual Mosaic playback exposed C03's stricter level rejection. `device_monome.c` stores int8/uint8 and pinned libmonome `mext.c:pack_nybbles` sends low nibbles. Patch 0010 and native level fixture amend the grid contract; P1 must include this correction in its runtime-boundary review. No Mosaic patch or weakened MIDI expectation. |
 
 Execution is authorized. No recurring jobs have been created.
+| D16 | Explicitly disclose emulator corrections of stock v2.9.4 realtime-byte parsing (0009) and cancelled queued clock resumes (0011) | Focused independent native probes justify these corrections for local development. They are not stock-hardware equivalence; capabilities and MIDI contract disclose differences. P1 includes them; C14 checks patch removal against the official update candidate. |

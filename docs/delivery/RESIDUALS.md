@@ -14,3 +14,6 @@
 
 No identified in-scope defect may be put here as `later` if it prevents a required
 acceptance row from passing.
+| R10 | Scheduled MIDI holds the action lock for up to two seconds, delaying snapshots and browser heartbeats | fold:C07 | Real-time input scheduling must preserve client leases and measured responsiveness | P1; M1 uses immediate input, but timing acceptance may not waive this interaction. |
+| R11 | MIDI prevalidation rejects isolated F7 and interrupted partial messages accepted by stock norns | fold:C10 | Native input boundary cases must align validation before full recording/mapping acceptance | P1; explicitly reported unsupported until verified. |
+| R12 | Historical build-specific patch generators and spike duplicates remain in source tree | fold:C14 | Remove superseded or unsafe cache-mutating generators before distribution | P1; locked patches are the actual build inputs. |

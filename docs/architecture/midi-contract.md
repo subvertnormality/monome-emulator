@@ -7,11 +7,21 @@ reserved by upstream vport discovery. Both source configuration and actual nativ
 discovery are tested. Mosaic fixtures remain outside the generic runtime.
 
 MIDI actions carry a physical port number and raw bytes. Channel information is
-encoded in those bytes. Native input uses the pinned upstream parser, including
+encoded in those bytes. Native input uses the pinned parser with explicit patch
+0009, including
 running status and three-byte SysEx callbacks, rather than calling application
 MIDI handlers directly. Interleaved realtime messages leave partial parser state
-intact in the virtual profile. Undefined statuses, orphan data and malformed
+intact in the virtual profile. This corrects a pinned-runtime defect and is a
+known difference from stock v2.9.4, whose parser can discard a partial message
+when realtime bytes interrupt it. Passing this case here does not establish that
+unpatched hardware accepts it. Patch 0011 likewise suppresses the pinned norns
+cancelled-clock resume race; both corrections are reported capabilities.
+Undefined statuses, orphan data and malformed
 streams fail before entering the native parser. Partial messages may span actions.
+Currently this validation also rejects an isolated F7 and a new status interrupting
+a partial message, although stock norns accepts those streams. C10 owns adding
+native acceptance cases and aligning input validation; this limitation is explicit
+until then.
 
 Optional `at_monotonic_ns` schedules injection on the backend monotonic clock,
 within the next two seconds; absent values apply immediately. Acknowledgement

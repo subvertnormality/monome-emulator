@@ -25,6 +25,7 @@ async def main():
     parser.add_argument("--timeout", type=int, default=600)
     parser.add_argument("--output", default="docs/delivery/reviews/P0-raw.json")
     parser.add_argument("--question-file", help="Use a focused Paranoia query instead of another critique")
+    parser.add_argument("--triage-file", default="docs/delivery/reviews/P0-triage.md")
     parser.add_argument("--base-ref", help="Run the bounded C06 branch review from this committed implementation base")
     args = parser.parse_args()
     repo = Path(args.repo).resolve()
@@ -54,11 +55,13 @@ async def main():
         packet+=subprocess.check_output(['git','diff','--no-ext-diff',args.base_ref,'HEAD'],cwd=repo,text=True)
     if args.question_file:
         tool_name = "query"
+        question=(repo / args.question_file).read_text()
+        packet+='\n'+question+'\n'+(repo / args.triage_file).read_text()
         request = {
             "repo_path": str(repo), "engine": args.engine,
-            "question": (repo / args.question_file).read_text(),
+            "question": question,
             "files": [{"path": p, "reason": "Updated delivery contract"} for p in paths]
-                + [{"path": "docs/delivery/reviews/P0-triage.md", "reason": "Findings and fixes"}],
+                + [{"path": args.triage_file, "reason": "Findings and fixes"}],
             "web_search": False, "effort": "medium",
         }
     record = {"started_at": datetime.now(timezone.utc).isoformat(),

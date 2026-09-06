@@ -68,6 +68,12 @@ class Slice(Client):
         self.action(type='grid',x=4,y=4,state=0)
         self.action(type='grid',x=1,y=4,state=0)
         self.wait(lambda s:s['grid'][16]==15)
+    def screen_header(self,text):
+        from frame_oracle import header,matches
+        expected=header(text)
+        # Await the named stable page, retaining every intervening observation.
+        self.wait(lambda state:matches(state,expected))
+        assert not matches(dict(frame=dict(pixels_base64='AAAA'*8192)),expected),'Blank-frame fault escaped the content oracle'
     def notes(self,state,start):
         return [m for m in state['midi'] if m['index']>start and m['port']==1 and m['bytes'][0]==144 and m['bytes'][2]>0]
     def play(self):
@@ -82,7 +88,8 @@ class Slice(Client):
         phase=[v for n,v in sequence].index(edited[0]['bytes'][2])
         assert [m['bytes'][1:] for m in edited]==[sequence[(phase+i)%4] for i in range(len(edited))]
         self.tap(1,8)
-        assert self.snapshot()['midi_capture']['outstanding']==[]
+        self.wait(lambda s:s['midi_capture']['outstanding']==[])
+        self.tap(3,8);self.screen_header('Ch. 1 Device Config')
         return dict(passed=True,first_eight_notes=[m['bytes'] for m in self.notes(state,start)[:8]])
     def parameter_menu(self):
         roots=self.snapshot()['diagnostics']['parameter_roots']
@@ -122,7 +129,7 @@ class Slice(Client):
         before=self.snapshot()['midi_count'];self.tap(1,8)
         state=self.wait(lambda s:len(self.notes(s,before))>=8)
         exact(self.notes(state,before)[:8],[(1,[144,n,v]) for _ in range(2) for n,v in [(60,127),(62,117),(67,107),(65,97)]])
-        self.tap(1,8);assert self.snapshot()['midi_capture']['outstanding']==[]
+        self.tap(1,8);self.wait(lambda s:s['midi_capture']['outstanding']==[])
         return dict(passed=True,reloaded_notes=[m['bytes'] for m in self.notes(state,before)[:8]])
 
 def run(browser=False):
@@ -137,6 +144,7 @@ def run(browser=False):
         c=Slice(browser=browser)
         try:
             assert c.snapshot()['ready'] and not (Path(c.info['data'])/'mosaic/autosave.ptn').exists()
+            c.screen_header('Ch. 1 Note Masks')
             passed('fresh-bootstrap')
             c.configure();result=c.play();passed('four-step-playback-and-live-edit')
             result['saved']=c.save();passed('save-dialog');print(mode+' save passed',flush=True)

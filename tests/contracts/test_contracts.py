@@ -5,6 +5,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
+import time
 import unittest
 from unittest import mock
 
@@ -64,6 +66,39 @@ class Contracts(unittest.TestCase):
         session.stop(a)
         with self.assertRaises(ContractError): session.request(a,'/snapshot')
         self.assertTrue((session.SESSIONS/a/'stopped.json').exists())
+    def test_first_health_failure_cleans_owned_server(self):
+        original=session.request
+        def fail_health(sid,path,*args,**kwargs):
+            if path=='/health': raise ContractError('probe_readiness_failure','Injected first-health failure')
+            return original(sid,path,*args,**kwargs)
+        with mock.patch.object(session,'request',side_effect=fail_health):
+            with self.assertRaises(ContractError) as caught: session.start()
+        self.assertEqual(caught.exception.code,'probe_readiness_failure')
+        sid=caught.exception.session_id
+        self.assertTrue((session.SESSIONS/sid/'stopped.json').exists())
+        with self.assertRaises(ContractError): original(sid,'/health')
+    def test_shutdown_error_still_closes_http_server(self):
+        from automation.server import Application,serve_application
+        sid=uid();directory=session.SESSIONS/sid;directory.mkdir()
+        write_json(directory/'config.json',dict(session_id=sid,token=uid(),backend='contract-fixture'))
+        app=Application(directory);real_close=app.backend.close;closed=[]
+        def failed_close():
+            real_close()
+            if not closed:
+                closed.append(True)
+                raise ContractError('cleanup_failed','Injected native-style shutdown error')
+        app.backend.close=failed_close
+        thread=threading.Thread(target=serve_application,args=(directory,app),daemon=True)
+        thread.start()
+        try:
+            deadline=time.monotonic()+5
+            while not (directory/'session.json').exists() and time.monotonic()<deadline:time.sleep(.02)
+            with self.assertRaises(ContractError) as caught:session.stop(sid)
+            self.assertEqual(caught.exception.code,'cleanup_failed')
+            thread.join(timeout=5)
+            self.assertFalse(thread.is_alive(),'HTTP server survived failed native cleanup')
+            self.assertTrue((directory/'stopped.json').exists())
+        finally:real_close()
     def test_success_is_verifiable_and_replayable(self):
         path,result=self.run_recipe()
         self.assertTrue(result['passed']); self.assertEqual(evidence.verify(path)['run_id'],result['run_id'])

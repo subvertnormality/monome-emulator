@@ -1,0 +1,32 @@
+{
+  "started_at": "2026-09-06T23:09:55.075098+00:00",
+  "packet_sha256": "e0e617afea6408e215babb473cb030b36d2f74d594b172970c012d447f74459c",
+  "files": [
+    "docs/delivery/PLAN.md",
+    "docs/delivery/ACCEPTANCE.md",
+    "docs/delivery/RUNBOOK.md",
+    "docs/delivery/DECISIONS.md",
+    "docs/delivery/UPSTREAM.md"
+  ],
+  "tool": "critique_branch",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator",
+    "base_ref": "20e66d2e639fb3c7d27671c9a9042275e749ff6d",
+    "head_ref": "HEAD",
+    "include_uncommitted": false,
+    "isolate": false,
+    "converge": false,
+    "class_closure": false,
+    "round": 1,
+    "engine": "claude",
+    "effort": "medium",
+    "web_search": false,
+    "stakes": "Trusted single-user local MIDI-only development utility on Ubuntu 20.04 WSL. Risks are misleading tests, native runtime mismatch and local project damage. No financial system, hostile users, physical hardware certification or mandatory audio support.",
+    "project_summary": "General-purpose official norns/grid runtime with separate Mosaic fixtures; shared native input path for browser and API. Delivery is at C06/M1, not full release.",
+    "diff_intent": "Implement C00\u2013C06 boot/device/control foundations and a four-step Mosaic edit/play/save/autosave/restart/load slice. Read docs/delivery/PLAN.md C06, ACCEPTANCE.md M1, C06 evidence and current residuals. Later workflow, timing, release and Linux cards are not claimed complete.",
+    "focus": "Find reproducible substantive M1 blockers: secretly mocked musical paths, false readiness, circular MIDI/frame oracles, stale or incomplete evidence, browser/API disagreement, error/cleanup failures, application coupling. Include D15 signed grid-level packing correction and native MIDI parser/source-time capture. R08 repeated-pitch overlap remains mandatory C12 work; do not silently waive it or demand all future-card scope at M1. Keep this one-shot review proportionate."
+  },
+  "status": "error",
+  "error": "TimeoutError: ",
+  "finished_at": "2026-09-06T23:19:57.270344+00:00"
+}

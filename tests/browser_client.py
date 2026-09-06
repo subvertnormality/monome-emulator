@@ -10,8 +10,13 @@ def windows_path(path):
 class Browser:
     def __init__(self,url,directory):
         self.log=open(directory/'browser-driver.log','w')
-        self.proc=subprocess.Popen(['/mnt/c/Users/andy/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe',windows_path(ROOT/'tests/browser_driver.cjs')],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=self.log,text=True)
-        self.request(dict(open=url))
+        self.proc=None
+        try:
+            self.proc=subprocess.Popen(['/mnt/c/Users/andy/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe',windows_path(ROOT/'tests/browser_driver.cjs')],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=self.log,text=True)
+            self.request(dict(open=url))
+        except Exception:
+            self.close()
+            raise
     def request(self,value):
         self.proc.stdin.write(json.dumps(value)+'\n');self.proc.stdin.flush()
         with selectors.DefaultSelector() as selector:
@@ -21,7 +26,9 @@ class Browser:
         if not result['ok']:raise ContractError('browser_action',result['error'])
     def close(self):
         try:
-            if self.proc.poll() is None:self.request(dict(close=True));self.proc.wait(timeout=5)
+            if self.proc is not None and self.proc.poll() is None:self.request(dict(close=True));self.proc.wait(timeout=5)
         finally:
-            if self.proc.poll() is None:self.proc.kill();self.proc.wait(timeout=5)
+            if self.proc is not None and self.proc.poll() is None:self.proc.kill();self.proc.wait(timeout=5)
+            if self.proc is not None:
+                self.proc.stdin.close();self.proc.stdout.close()
             self.log.close()

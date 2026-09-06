@@ -51,20 +51,29 @@ def start(backend='contract-fixture',script=None,code_root=None,data=None,enable
                           stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
     log.close()
     deadline=time.monotonic()+(60 if backend=='native' else 10)
-    while time.monotonic()<deadline:
-        if proc.poll() is not None:
-            if (directory/'startup-error.json').exists():
-                error=read_json(directory/'startup-error.json')
-                failure=ContractError(error['code'],error['message']+'; logs: '+str(directory))
-                failure.session_id=session_id
-                raise failure
-            raise ContractError('startup_failed','Session server exited; '+str(directory/'server.log'))
-        if (directory/'session.json').exists():
-            info=metadata(session_id)
-            if request(session_id,'/health')['status']=='ready': return info
-        time.sleep(0.05)
-    proc.terminate(); proc.wait(timeout=5)
-    raise ContractError('startup_timeout','Session server did not become ready')
+    try:
+        while time.monotonic()<deadline:
+            if proc.poll() is not None:
+                if (directory/'startup-error.json').exists():
+                    error=read_json(directory/'startup-error.json')
+                    raise ContractError(error['code'],error['message']+'; logs: '+str(directory))
+                raise ContractError('startup_failed','Session server exited; '+str(directory/'server.log'))
+            if (directory/'session.json').exists():
+                info=metadata(session_id)
+                if request(session_id,'/health')['status']=='ready': return info
+            time.sleep(0.05)
+        raise ContractError('startup_timeout','Session server did not become ready')
+    except Exception as failure:
+        failure.session_id=session_id
+        # SIGTERM unwinds server initialization as well as the serving loop. Its
+        # finally blocks own native groups, even before discovery is published.
+        if proc.poll() is None:
+            proc.terminate()
+            try: proc.wait(timeout=30)
+            except subprocess.TimeoutExpired:
+                write_json(directory/'cleanup-error.json',dict(code='cleanup_timeout',message='Owned server did not finish cleanup within 30 seconds',pid=proc.pid))
+                raise ContractError('cleanup_timeout','Startup failed and owned server cleanup timed out; '+str(directory)) from failure
+        raise
 
 def stop(session_id):
     info=metadata(session_id)
