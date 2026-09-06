@@ -1,0 +1,7 @@
+/upstream/
+/artifacts/
+/.runtime/
+/.venv/
+/node_modules/
+__pycache__/
+*.pyc

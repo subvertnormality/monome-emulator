@@ -1,0 +1,25 @@
+# Proportionate defaults for this local development tool.
+# See docs/delivery/RUNBOOK.md; override stakes for the actual review unit.
+converge = false
+class_closure = false
+effort = "medium"
+web_search = false
+
+project_summary = """
+Mosaic development emulator, WSL2 Ubuntu 20.04 first and native Linux later.
+Actual norns runtime with virtual grid, display/controls and MIDI. All documented
+Mosaic software workflows need automated acceptance and LLM-readable diagnostics.
+Audio engines and physical peripheral correctness are outside the first release.
+The repository currently contains a delivery plan; consult current files before
+assuming an implementation exists.
+"""
+
+stakes = """
+Trusted single-user local development environment. In-scope failures are false
+green tests, inaccurate runtime behaviour, lost or incorrect MIDI, broken UI/input
+paths, unreproducible diagnostics, and accidental local project corruption.
+No financial certification, public hosting, multi-tenancy, hostile local actors,
+or exact electrical/hard-real-time hardware equivalence. Keep ordinary loopback,
+bounded-input, data-isolation and process-cleanup safeguards. Avoid speculative
+hardening and indefinite review convergence.
+"""

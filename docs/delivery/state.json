@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "updated": "2026-09-06",
+  "mode": "ready_for_execution",
+  "current_card": null,
+  "next_action": "When implementation is requested, read the plan/runbook/acceptance and execute C00 against the existing Ubuntu 20.04 WSL environment.",
+  "decisions_file": "docs/delivery/DECISIONS.md",
+  "cards": [
+    {
+      "id": "C00",
+      "status": "planned",
+      "evidence": null
+    },
+    {
+      "id": "C01",
+      "status": "planned",
+      "evidence": null
+    },
+    {
+      "id": "C02",
+      "status": "planned",
+      "evidence": null
+    },
+    {
+      "id": "C03",
+      "status": "planned",
+      "evidence": null
+    },
+    {
+      "id": "C04",
+      "status": "planned",
+      "evidence": null
+    },
+    {
+      "id": "C05",
+      "status": "planned",
+      "evidence": null
+    },
+    {
+      "id": "C06",
+      "status": "planned",
+      "evidence": null
+    },
+    {
+      "id": "C07",
+      "status": "planned",
+      "evidence": null
+    },
+    {
+      "id": "C08",
+      "status": "planned",
+      "evidence": null
+    },
+    {
+      "id": "C09",
+      "status": "planned",
+      "evidence": null
+    },
+    {
+      "id": "C10",
+      "status": "planned",
+      "evidence": null
+    },
+    {
+      "id": "C11",
+      "status": "planned",
+      "evidence": null
+    },
+    {
+      "id": "C12",
+      "status": "planned",
+      "evidence": null
+    },
+    {
+      "id": "C13",
+      "status": "planned",
+      "evidence": null
+    },
+    {
+      "id": "C14",
+      "status": "planned",
+      "evidence": null
+    },
+    {
+      "id": "C15",
+      "status": "planned",
+      "evidence": null
+    },
+    {
+      "id": "C16",
+      "status": "planned",
+      "evidence": null
+    }
+  ],
+  "milestones": {
+    "M0": "not_run",
+    "M1": "not_run",
+    "M2": "not_run",
+    "M3": "not_run",
+    "M4": "not_run",
+    "M5": "not_run"
+  },
+  "reviews": {
+    "P0": "done",
+    "P1": "not_run",
+    "P2": "not_run",
+    "P3": "not_run",
+    "P4": "not_run",
+    "P5": "not_run"
+  },
+  "plan_review_evidence": "docs/delivery/reviews/P0-triage.md"
+}

@@ -1,0 +1,55 @@
+{
+  "started_at": "2026-09-06T11:51:52.429849+00:00",
+  "packet_sha256": "3f26fdbfae24c1c2aabdce711a9ceffa6e04e8010ad26208449121c3401e7321",
+  "files": [
+    "docs/delivery/PLAN.md",
+    "docs/delivery/ACCEPTANCE.md",
+    "docs/delivery/RUNBOOK.md",
+    "docs/delivery/DECISIONS.md"
+  ],
+  "tool": "query",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator",
+    "engine": "claude",
+    "question": "Review the corrected emulator delivery plan only for unresolved substantive gaps\nfrom P0 and problems introduced by its fixes. This is the single budgeted focused\nfollow-up, not a request to start full adversarial convergence. Read current\nPLAN.md, ACCEPTANCE.md and P0-triage.md. Answer whether any in-scope blocker/major\nremains, with a small actionable list and file/section evidence; do not return\nnew minor hardening requests.\n\nCorrections to check:\n\n1. C07 is real-time contracts/replay only; deterministic C16/M5 is downstream of\n   usable WSL/Linux releases, and cannot substitute for their E/R acceptance.\n2. Every required software scenario needs E and every A01\u2013A22 family needs E/R;\n   C01/release-check enforce this. A23/A24 have explicit platform applicability.\n3. C00 now empirically probes virtual MIDI input/output and browser automation,\n   not merely their presence. It rejects the actual Mosaic unit-runner skip path.\n4. Matrix/toolkit are pinned/activated and their effect on Mosaic MIDI parameters\n   is owned. Physical Sinfonion is excluded while its software MIDI is tested.\n5. Readiness, autosave fixtures, whole dust-root isolation, config-before-boot,\n   and pulse-quantised scheduling expectations have concrete contracts.\n\nStakes are a trusted single-user MIDI-only local development tool, Ubuntu 20.04\nWSL first. No hardware or manual tests, no finance or hostile multi-tenancy.\nExternal runtime feasibility is unverified and belongs to empirical C00, not this\nstructural review. A bounded review plus evidence/dispositions satisfies P0; do\nnot require vendor convergence or invent heavyweight governance. The prior\nattempt-2 record lacked a status only because you read it while that review was\nstill running; it has now returned successfully. The first CLI PATH failure was\ndiagnosed and corrected. No implementation has been performed.\n",
+    "files": [
+      {
+        "path": "docs/delivery/PLAN.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/ACCEPTANCE.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/RUNBOOK.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/DECISIONS.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/reviews/P0-triage.md",
+        "reason": "Findings and fixes"
+      }
+    ],
+    "web_search": false,
+    "effort": "medium"
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "**Answer: no in-scope blocker or major remains.** All five corrections are present in the current PLAN/ACCEPTANCE text, and every \"source-verified\" claim in the triage checks out against the Mosaic inspection checkout. The fixes introduced one small contract wrinkle and left one original gap without an explicit disposition line, both minor and non-blocking.\n\n**Verification of the five corrections**\n\n1. **C07 real-time only / C16 downstream.** PLAN.md:105\u2013114 puts C16 after C15; C07 step 5 (PLAN.md:377\u2013379) and its On-fail (:385) forbid virtual-time substitution; ACCEPTANCE.md:93 \"D ... does not gate M0\u2013M4\"; C16 On-fail (PLAN.md:654\u2013656) keeps M3/M4 independent of C16 outcome. D09 recorded. Resolved.\n2. **E for every software scenario, E/R per family, A23/A24 platform gates.** ACCEPTANCE.md:85\u201391 and the Required-inventory gate (:144); C01 step 3 (PLAN.md:193\u2013196) and release-check (:207\u2013209) enforce; C08 step 4 and C09 step 4 repeat it per card. Resolved.\n3. **C00 empirical probes.** Browser fixture actually launched (PLAN.md:134\u2013136); vport enumeration, outbound capture, inbound callback, ALSA/kernel probe (:152\u2013156, Done-when :169\u2013170); unit runner isolation and skip rejection (:145\u2013149). Confirmed against `upstream/mosaic/lib/tests/run_tests.lua:16\u201319`, which `return`s with exit 0 after printing \"Skipping.\" when `/home/we/norns/lua/core/norns.lua` exists. Resolved.\n4. **Matrix/toolkit and Sinfonion.** README.md:1123 links both mods; C00 step 2, C02 step 4, C09 step 1 and A17 (ACCEPTANCE.md:126) own pin/activate/MIDI-effect. `lib/m_midi.lua:253\u2013260` sends `program_change` to any vport whose name is exactly `Norns2sinfonion`; C05 step 5 and C10 step 3 name that vport. D10 recorded. Resolved.\n5. **Readiness, autosave, dust root, config-before-boot, pulse quantisation.** ACCEPTANCE.md:166\u2013171 plus C02 Done-when (PLAN.md:238\u2013241), C06 step 2, C12 step 2, C02 step 2 / C11 step 4, C06 step 1, C07 step 4 and ACCEPTANCE.md:158\u2013161. Source matches: `mosaic.lua:30\u201331,121\u2013143,367` (60 s autosave and autosave load at init), `:182` (`math.randomseed(os.time())`), `lib/devices/device_map.lua:25` prints `Error: JSON is invalid:` and `:335` reads `norns.state.data .. \"config\"`. Resolved.\n\n**Small actionable list (both minor, no gate blocked)**\n\n- **Fix 2 side effect: A20 and A21 have no natural E/R case.** ACCEPTANCE.md:86\u201387 now requires every A01\u2013A22 family to have a required E or R case, but A20 (LLM exercise, C13) and A21 (error observability, C01/C02/C12) are exercise/fault families whose oracles are runner exit codes, not workflow runs. As written, release-check must either invent a label or fail. One-line clarification in ACCEPTANCE (e.g. A20's E evidence is the independent rerun of affected suites in C13 step 5; A21's is the real-runtime coroutine-error injection in C02 step 5 / C12 step 3). Owner: C01 verifier.\n- **Original P0 gap with no triage row: nb \"Mods and Software Devices\" (README.md:187\u2013189).** The triage table does not disposition it. Source supports exclusion: nb software devices are audio engines or i2c hardware (Crow/JF/Ansible), and `device_map.lua:341\u2013344` already drops nb `midi*` players from Mosaic's device list, so nothing MIDI-observable is lost under D03/R01. C00 step 6's \"map exclusions individually\" covers it structurally; add one row to P0-triage.md so the record is complete.\n\n**Note that lowers risk, no action needed.** The random splash font (`mosaic.lua:155`) is set and cleared synchronously inside `do_autosave` (`:122\u2013126`), and the redraw coroutine only runs from the event loop, so that frame is effectively never rendered during autosave. The plan's guard is harmless but the pollution concern was overstated.\n\n**Confidence: High** on the structural question. Not verifiable here, by design: whether norns hardcodes `/home/we` such that per-session dust roots (C02 step 2) need a patch or namespace rather than an env var, and all other host/runtime premises, which remain C00/C02 empirical work.\n\n---\n_paranoia-local \u00b7 engine=claude \u00b7 session_ref=`d00a0e1b-1327-43a8-b4e7-252a6eb4061f` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "status": "returned",
+  "finished_at": "2026-09-06T11:54:46.485806+00:00"
+}

@@ -1,0 +1,26 @@
+{
+  "status": "structural_review_complete",
+  "runtime_validation": "not_run",
+  "files": [
+    {
+      "path": "docs/delivery/PLAN.md",
+      "sha256": "43dd0530b9712ec6d5bdbfd7c74c80fb058ea6ff791a7c2e952863b408762697"
+    },
+    {
+      "path": "docs/delivery/ACCEPTANCE.md",
+      "sha256": "abc62bbf56140536f6345a7a4a0b69a1df06a20c3632ede732390b91ab17f5cb"
+    },
+    {
+      "path": "docs/delivery/RUNBOOK.md",
+      "sha256": "017516eb6b325585d8d3bcf4d7d68951ff542778dc309f97523440922a712bde"
+    },
+    {
+      "path": "docs/delivery/DECISIONS.md",
+      "sha256": "1ba6de74b622b5736ab08bbb1b991e2c88e54c0cf4b303af615553c44f78bea2"
+    },
+    {
+      "path": "docs/delivery/reviews/P0-triage.md",
+      "sha256": "a496306c429be8c5fb12a83a533aff07c92cc8ae18cc2050da82349c3dd5ac18"
+    }
+  ]
+}
