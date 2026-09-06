@@ -1,0 +1,249 @@
+{
+  "schema_version": 1,
+  "id": "G02-grid-boundaries",
+  "backend": "native",
+  "tier": "I",
+  "family": "G02",
+  "script": "fixtures/probes/grid-probe/grid-probe.lua",
+  "code_root": "fixtures/probes",
+  "deadline_ms": 60000,
+  "steps": [
+    {
+      "action": {
+        "type": "grid",
+        "x": 1,
+        "y": 1,
+        "state": 1
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.0",
+        "equals": 15
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 1,
+        "y": 1,
+        "state": 0
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.0",
+        "equals": 0
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 16,
+        "y": 1,
+        "state": 1
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.15",
+        "equals": 15
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 16,
+        "y": 1,
+        "state": 0
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.15",
+        "equals": 0
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 1,
+        "y": 8,
+        "state": 1
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.112",
+        "equals": 15
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 1,
+        "y": 8,
+        "state": 0
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.112",
+        "equals": 0
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 16,
+        "y": 8,
+        "state": 1
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.127",
+        "equals": 15
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 16,
+        "y": 8,
+        "state": 0
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.127",
+        "equals": 0
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 8,
+        "y": 4,
+        "state": 1
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.55",
+        "equals": 15
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 8,
+        "y": 4,
+        "state": 0
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.55",
+        "equals": 0
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 9,
+        "y": 5,
+        "state": 1
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.72",
+        "equals": 15
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 9,
+        "y": 5,
+        "state": 0
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.72",
+        "equals": 0
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 2,
+        "y": 3,
+        "state": 1
+      }
+    },
+    {
+      "action": {
+        "type": "grid_connection",
+        "connected": false
+      }
+    },
+    {
+      "wait": {
+        "path": "state.held",
+        "equals": []
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "wait": {
+        "path": "state.grid_device.connected",
+        "equals": false
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid_connection",
+        "connected": true
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid_device.connected",
+        "equals": true
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 2,
+        "y": 3,
+        "state": 1
+      }
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 2,
+        "y": 3,
+        "state": 0
+      }
+    }
+  ]
+}

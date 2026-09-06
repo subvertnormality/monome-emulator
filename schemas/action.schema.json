@@ -105,6 +105,22 @@
           "type": "object",
           "properties": {
             "type": {
+              "const": "grid_connection"
+            },
+            "connected": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "connected"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
               "const": "midi"
             },
             "port": {

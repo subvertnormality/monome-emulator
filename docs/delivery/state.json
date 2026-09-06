@@ -2,8 +2,8 @@
   "schema_version": 1,
   "updated": "2026-09-06",
   "mode": "executing",
-  "current_card": "C03",
-  "next_action": "Implement grid conformance, held-input policy, device reconnect and actual Mosaic navigation through the native event path.",
+  "current_card": "C04",
+  "next_action": "Implement browser screen/grid rendering and controls through the shared API, with focus-loss/disconnect release and automated browser evidence.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -24,8 +24,9 @@
     },
     {
       "id": "C03",
-      "status": "planned",
-      "evidence": null
+      "status": "done",
+      "evidence": "docs/delivery/completions/C03.md",
+      "start_revision": "2c30799"
     },
     {
       "id": "C04",

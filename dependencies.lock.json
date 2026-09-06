@@ -118,6 +118,10 @@
     {
       "path": "patches/norns/0007-crone-thread-shutdown.patch",
       "sha256": "a733a8b3daf2834f9193c38fb33e00c4b3dd817041236385b43974f37a32719f"
+    },
+    {
+      "path": "patches/norns/0008-grid-device-contract.patch",
+      "sha256": "647f46a6619fd36d968dff2e2990ca46ad373dae023773f65595bad26ba7c247"
     }
   ],
   "serialosc": {

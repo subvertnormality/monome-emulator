@@ -1,0 +1,344 @@
+{
+  "schema_version": 1,
+  "id": "A02-grid-navigation-reconnect",
+  "backend": "native",
+  "tier": "E",
+  "family": "A02",
+  "fixture": "mosaic",
+  "fixture_profile": "base-midi",
+  "deadline_ms": 60000,
+  "steps": [
+    {
+      "action": {
+        "type": "grid",
+        "x": 3,
+        "y": 8,
+        "state": 1
+      }
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 3,
+        "y": 8,
+        "state": 0
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.114",
+        "equals": 15
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 4,
+        "y": 8,
+        "state": 1
+      }
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 4,
+        "y": 8,
+        "state": 0
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.115",
+        "equals": 15
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 5,
+        "y": 8,
+        "state": 1
+      }
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 5,
+        "y": 8,
+        "state": 0
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.116",
+        "equals": 5
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 5,
+        "y": 8,
+        "state": 1
+      }
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 5,
+        "y": 8,
+        "state": 0
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.116",
+        "equals": 10
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 5,
+        "y": 8,
+        "state": 1
+      }
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 5,
+        "y": 8,
+        "state": 0
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.116",
+        "equals": 15
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 6,
+        "y": 8,
+        "state": 1
+      }
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 6,
+        "y": 8,
+        "state": 0
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.117",
+        "equals": 15
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 3,
+        "y": 8,
+        "state": 1
+      }
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 3,
+        "y": 8,
+        "state": 0
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.114",
+        "equals": 15
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid_connection",
+        "connected": false
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid",
+        "equals": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "timeout_ms": 2000
+    },
+    {
+      "action": {
+        "type": "grid_connection",
+        "connected": true
+      }
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 4,
+        "y": 8,
+        "state": 1
+      }
+    },
+    {
+      "action": {
+        "type": "grid",
+        "x": 4,
+        "y": 8,
+        "state": 0
+      }
+    },
+    {
+      "wait": {
+        "path": "state.grid.115",
+        "equals": 15
+      },
+      "timeout_ms": 2000
+    }
+  ]
+}

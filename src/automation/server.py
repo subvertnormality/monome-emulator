@@ -50,6 +50,8 @@ class Application:
         if payload['session_id']!=self.config['session_id']: raise ContractError('session_mismatch','Action targets another session')
         if payload['sequence']!=self.sequence+1: raise ContractError('sequence','Expected action sequence '+str(self.sequence+1))
         if payload['action_id'] in self.action_ids: raise ContractError('duplicate_action','Action identity was already applied')
+        if self.config['backend']=='contract-fixture' and payload['action']['type']=='grid_connection':
+            raise ContractError('unsupported','Grid connection requires the native backend')
         self.backend.query({'action':payload['action']})
         self.sequence+=1; self.action_ids.add(payload['action_id'])
         return checked('ack',dict(schema_version=1,session_id=payload['session_id'],action_id=payload['action_id'],
@@ -84,9 +86,9 @@ def serve(directory):
                     if self.command=='GET' and self.path=='/snapshot': self.respond(200,app.snapshot()); return
                     if self.command=='GET' and self.path=='/capabilities':
                         self.respond(200,checked('capability',dict(schema_version=1,backend=app.config['backend'],
-                          fidelity=app.backend.fidelity,supported=(['native script loading','native keys/encoders','Cairo framebuffer','grid128 probe','MIDI event probe'] if app.config['backend']=='native' else ['contract counter','ordered action acknowledgment']),
+                          fidelity=app.backend.fidelity,supported=(['native script loading','native keys/encoders','Cairo framebuffer','grid128 LED/relative/bulk/refresh, rotation, intensity, holds and reconnect','MIDI event probe'] if app.config['backend']=='native' else ['contract counter','ordered action acknowledgment']),
                           absent=['physical Crow','GPIO/SPI','network manager'] if app.config['backend']=='native' else [],
-                          unsupported=['audio engines','physical peripherals'] if app.config['backend']=='native' else ['native norns','application workflows']))); return
+                          unsupported=['audio engines','physical peripherals','grid tilt'] if app.config['backend']=='native' else ['native norns','application workflows']))); return
                     if self.command=='POST' and self.path=='/action': self.respond(200,app.action(payload)); return
                     if self.command=='POST' and self.path=='/fixture-fault':
                         if app.config['backend']!='contract-fixture': raise ContractError('unsupported','Fixture faults require the contract backend')

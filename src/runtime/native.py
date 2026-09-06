@@ -30,6 +30,8 @@ class NativeBackend:
         self.frame_revision=0; self.grid_revision=0; self.frame=bytes(32768); self.grid=[0]*128
         self.midi=deque(maxlen=4096); self.midi_count=0; self.diagnostics={}
         self.held={}; self.condition=threading.Condition(); self.io_lock=threading.Lock()
+        from devices.grid import GridInput
+        self.grid_input=GridInput(); self.grid_device=dict(connected=True,rotation=0,intensity=15,serial='emu-grid-128',cols=16,rows=8)
         install=read_json(ROOT/'.runtime/current.json')
         from .dependencies import verify_install
         verify_install(install)
@@ -158,6 +160,11 @@ class NativeBackend:
                         name,beats,tempo,count,mods,loaded,threads,metros=payload.decode().split('\t')
                         self.diagnostics=dict(script=name,beats=float(beats),tempo=float(tempo),params=int(count),enabled_mods=int(mods),
                                               loaded_mods=int(loaded),clock_threads=int(threads),running_metros=int(metros))
+                    elif kind==9:
+                        if len(payload)!=3: raise ValueError('Invalid grid metadata')
+                        connected,rotation,intensity=payload
+                        self.grid_device.update(connected=bool(connected),rotation=rotation,intensity=intensity,device_id=identifier)
+                        record.update(self.grid_device)
                     else: raise ValueError('Unknown native packet '+str(kind))
                     self.events.write(json.dumps(record)+'\n'); self.condition.notify_all()
         except (OSError,ValueError) as error:
@@ -176,6 +183,8 @@ class NativeBackend:
         with self.io_lock:
             self.check_processes(); self.sequence+=1
             packet=struct.pack('=6i',self.sequence,kind,*(list(args)+[0]*(4-len(args))))
+            with self.condition:
+                self.events.write(json.dumps(dict(kind='input',sequence=self.sequence,type=kind,args=list(args),monotonic_ns=time.monotonic_ns()))+'\n')
             self.controller.send(packet)
             end=time.monotonic()+2
             with self.condition:
@@ -191,7 +200,16 @@ class NativeBackend:
             action=payload['action']; kind=action['type']
             if kind=='key': self.send(1,action['n'],action['state'])
             elif kind=='enc': self.send(2,action['n'],action['delta'])
-            elif kind=='grid': self.send(3,action['x']-1,action['y']-1,action['state'])
+            elif kind=='grid':
+                self.grid_input.validate(action)
+                self.send(3,action['x']-1,action['y']-1,action['state'])
+                self.grid_input.applied(action)
+            elif kind=='grid_connection':
+                connected=action['connected']
+                if connected==self.grid_input.connected: raise ContractError('grid_connection','Grid already has requested connection state')
+                if not connected:
+                    for held in list(self.grid_input.held.values()): self.query({'action':dict(held,state=0)})
+                self.send(6,int(connected)); self.grid_input.connected=connected
             elif kind=='midi':
                 if action['port']!=1 or len(action['bytes'])>3: raise ContractError('unsupported_midi','C02 probe supports one MIDI event port; full streams attach in C05')
                 self.send(4,len(action['bytes']),*action['bytes'])
@@ -210,7 +228,7 @@ class NativeBackend:
             return dict(frame_revision=revision,grid_revision=self.grid_revision,state=dict(
               ready=self.ready,script=self.app_name,frame=dict(path=str(frame_path),width=128,height=64,format='BGRA8',
                 sha256=hashlib.sha256(frame).hexdigest()),grid=self.grid.copy(),midi=list(self.midi),midi_count=self.midi_count,
-              held=list(self.held.values()),diagnostics=dict(self.diagnostics),absent=self.absent[-64:]))
+              held=list(self.held.values()),grid_device=dict(self.grid_device),diagnostics=dict(self.diagnostics),absent=self.absent[-64:]))
     def close(self):
         if self.closed: return
         cleanup=[]

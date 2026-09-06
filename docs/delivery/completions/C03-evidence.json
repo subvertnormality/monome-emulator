@@ -1,0 +1,307 @@
+{
+  "results": [
+    {
+      "name": "grid-contract",
+      "passed": true,
+      "checks": "128 cells, levels 0–15, bulk/refresh, relative clamps, four rotations, intensity, holds, duplicates, reconnect"
+    },
+    {
+      "name": "mosaic-navigation",
+      "passed": true
+    },
+    {
+      "name": "swapped-coordinates",
+      "passed": true,
+      "detected": "('coordinate callback', {'index': 1, 'device_id': 0, 'monotonic_ns': 1981319523581859, 'bytes': [176, 3, 2]})"
+    },
+    {
+      "name": "missing-release",
+      "passed": true,
+      "detected": "grid callback missing"
+    },
+    {
+      "name": "native-grid-contract",
+      "passed": true,
+      "manifest": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/artifacts/runs/7795dfde5bf9493b9f110e53348e67a6/manifest.json"
+    },
+    {
+      "name": "mosaic-grid-navigation",
+      "passed": true,
+      "manifest": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/artifacts/runs/cfa64c96767243d39b0c1d75bd00092e/manifest.json"
+    }
+  ],
+  "source_digest": "3971837a7088733719881626dfc7507b49287ac578ebabdb71ad88e09cadda74",
+  "native_checks": 6,
+  "passed": true,
+  "card": "C03",
+  "start_revision": "2c30799",
+  "artifacts": [
+    {
+      "sha256": "fef0d3c4458d64c1f705dd4234726595ba2863e1fc3b86913dec1130d0f66e0e",
+      "size": 13124,
+      "path": "artifacts/c03/results.json"
+    },
+    {
+      "sha256": "03ac032e3a9ececb763e9eb49f9b2c25a4b10716eceb0e6e261c1148974ada11",
+      "size": 1911,
+      "path": "artifacts/c03-contracts.log"
+    },
+    {
+      "sha256": "57cec0e4c3e3b4bc240ac4f6662db5cf42b6140ab794ceffa1b92cd36cf28c31",
+      "size": 19193,
+      "path": "artifacts/c03-build-result.json"
+    },
+    {
+      "sha256": "a70082885b033e34fbfc7abdb3290466d3fe832b0f1d8ee26879711dc6efac6b",
+      "size": 436,
+      "path": "artifacts/c03/conformance/cleanup.json"
+    },
+    {
+      "sha256": "e4434bd640d39694ff63378e5c757f47983cdb8180f0d4df799457b8636beccc",
+      "size": 3261,
+      "path": "artifacts/c03/conformance/crone.log"
+    },
+    {
+      "sha256": "01ac002cdc73255a0e1c67730739ad0f4ad0e3b6944b98fc31ab13981806a7ac",
+      "size": 32768,
+      "path": "artifacts/c03/conformance/frame.bgra"
+    },
+    {
+      "sha256": "2ec71d5c89995fbb3d691482b018677b595efb86528edc931431bfca9ff966c2",
+      "size": 21886,
+      "path": "artifacts/c03/conformance/identity.json"
+    },
+    {
+      "sha256": "702ebb800d6aaa190fa564b65a3871b4327f65e76fda2fb2772a31cf5dee53d9",
+      "size": 61486,
+      "path": "artifacts/c03/conformance/jack.log"
+    },
+    {
+      "sha256": "0c5c8eec6c7667423c6be2cacc1806ff41c168461a085bedc0b147326ce1a3af",
+      "size": 5366,
+      "path": "artifacts/c03/conformance/matron.log"
+    },
+    {
+      "sha256": "4a40340266c954f0015dfe1b50fbece48af43d291fdcffac58327af4fdcc763c",
+      "size": 589,
+      "path": "artifacts/c03/conformance/native-config.json"
+    },
+    {
+      "sha256": "4d0736bc749588bf89e84f1ca70457d0c9c7e9d45806eed030afeb55690f58e2",
+      "size": 351167,
+      "path": "artifacts/c03/conformance/native-events.jsonl"
+    },
+    {
+      "sha256": "465f4f980dec99e66de1f7dddc43b249346747d77b4dd3c39bf7bcf4078f9d02",
+      "size": 17221770,
+      "path": "artifacts/c03/conformance/observations.json"
+    },
+    {
+      "sha256": "d24b39cd51cdd145711667df86e4bf966f961f291162ebe999fc58b2e7b94e62",
+      "size": 2591,
+      "path": "artifacts/c03/conformance/sclang.log"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "path": "artifacts/c03/conformance/server.log"
+    },
+    {
+      "sha256": "7ce63a8b187fb506b14d8d5bdd91f8e1cc0bee9bb03e079e472e76a99a990bb7",
+      "size": 165923,
+      "path": "artifacts/c03/conformance/trace.json"
+    },
+    {
+      "sha256": "16c4976c6ef9528e5dbed9d6674b5e9cb785b0640deaec199b315b2331835f92",
+      "size": 437,
+      "path": "artifacts/c03/mosaic/cleanup.json"
+    },
+    {
+      "sha256": "e4434bd640d39694ff63378e5c757f47983cdb8180f0d4df799457b8636beccc",
+      "size": 3261,
+      "path": "artifacts/c03/mosaic/crone.log"
+    },
+    {
+      "sha256": "0553d30c95c63e39d993a9370ed1d60f06a83923b848ecf27fea1e6a566fd373",
+      "size": 32768,
+      "path": "artifacts/c03/mosaic/frame.bgra"
+    },
+    {
+      "sha256": "6bc2812587103ba3663bc7c1355f2aae7157e0c0250a3c68a68a08e41ba9dded",
+      "size": 51943,
+      "path": "artifacts/c03/mosaic/identity.json"
+    },
+    {
+      "sha256": "7adbc8e60fd7925c8b23dd735104747d7fcc2aa86114c628c446ddfc248dd342",
+      "size": 32786,
+      "path": "artifacts/c03/mosaic/jack.log"
+    },
+    {
+      "sha256": "efb9f07d7e624453cc68ec16c8f5b5b0a6e8d744e0fd70cf76255f1d824b5ec7",
+      "size": 18214,
+      "path": "artifacts/c03/mosaic/matron.log"
+    },
+    {
+      "sha256": "15fc5b167a1d8f31ec5f6088e27aa1bea509b2add7fab2b95969d9eb9a71ea94",
+      "size": 639,
+      "path": "artifacts/c03/mosaic/native-config.json"
+    },
+    {
+      "sha256": "55087d2c0db30ba0a87948c3774b4f7e407f27ef05725854b3bb3803a11bcd5b",
+      "size": 33874,
+      "path": "artifacts/c03/mosaic/native-events.jsonl"
+    },
+    {
+      "sha256": "496acd8c2759b98622830df4b7d6d43f20d7e3215079ea1fca6d89417d3c9a0f",
+      "size": 47533,
+      "path": "artifacts/c03/mosaic/observations.json"
+    },
+    {
+      "sha256": "d215f89b955f92571deb748f692449d7f6fd254c0b74d76b3b43b0511d668b0f",
+      "size": 2591,
+      "path": "artifacts/c03/mosaic/sclang.log"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "path": "artifacts/c03/mosaic/server.log"
+    },
+    {
+      "sha256": "9d508385285ca912f3ee4869dbcffdad1e6a8df8e190beea11a371b099709280",
+      "size": 9660,
+      "path": "artifacts/c03/mosaic/trace.json"
+    },
+    {
+      "sha256": "5692a67f624453a9dcc06585e5781434eab49b4ca5e596c23ba85cd6a7e821ec",
+      "size": 437,
+      "path": "artifacts/c03/fault-swapped-coordinates/cleanup.json"
+    },
+    {
+      "sha256": "e4434bd640d39694ff63378e5c757f47983cdb8180f0d4df799457b8636beccc",
+      "size": 3261,
+      "path": "artifacts/c03/fault-swapped-coordinates/crone.log"
+    },
+    {
+      "sha256": "01ac002cdc73255a0e1c67730739ad0f4ad0e3b6944b98fc31ab13981806a7ac",
+      "size": 32768,
+      "path": "artifacts/c03/fault-swapped-coordinates/frame.bgra"
+    },
+    {
+      "sha256": "c043f691da47e790ea0ae1776f4afb5115f59e78e3f878c52776c5934135eea7",
+      "size": 20815,
+      "path": "artifacts/c03/fault-swapped-coordinates/identity.json"
+    },
+    {
+      "sha256": "42c389d157b244cf4e68ee17b0143c029e6c99bf9e6493ac59927608c06b36c3",
+      "size": 30115,
+      "path": "artifacts/c03/fault-swapped-coordinates/jack.log"
+    },
+    {
+      "sha256": "9e324846a725c60e481ec8b2f6195ca85471c24e8d737eb7a3a7012e2a401208",
+      "size": 1958,
+      "path": "artifacts/c03/fault-swapped-coordinates/matron.log"
+    },
+    {
+      "sha256": "3b7cfc4a9db561242dfa339fcd1e3deb82596410829c4e53957e27505c757971",
+      "size": 649,
+      "path": "artifacts/c03/fault-swapped-coordinates/native-config.json"
+    },
+    {
+      "sha256": "f334b6bda2699a21b160696f6c484f622cd509e6b13d300ed3128c2909c23535",
+      "size": 22104,
+      "path": "artifacts/c03/fault-swapped-coordinates/native-events.jsonl"
+    },
+    {
+      "sha256": "3e5806f39d6975fb61260ef1b14ff781e596456801d7fd1b71880ab5158a7a93",
+      "size": 5804,
+      "path": "artifacts/c03/fault-swapped-coordinates/observations.json"
+    },
+    {
+      "sha256": "62f00d0a56bd3f0df16168b77367dece05477adfba713cf18201ced61ab9e466",
+      "size": 2591,
+      "path": "artifacts/c03/fault-swapped-coordinates/sclang.log"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "path": "artifacts/c03/fault-swapped-coordinates/server.log"
+    },
+    {
+      "sha256": "4ad1858f324f22f14608a06c54969f77341cf483742674b8225afd409285e1c1",
+      "size": 540,
+      "path": "artifacts/c03/fault-swapped-coordinates/trace.json"
+    },
+    {
+      "sha256": "4b863dd22f011d1ebe7147f0f4d422a34203ee3e6f6bad5a3d8f10456b2ef933",
+      "size": 436,
+      "path": "artifacts/c03/fault-missing-release/cleanup.json"
+    },
+    {
+      "sha256": "e4434bd640d39694ff63378e5c757f47983cdb8180f0d4df799457b8636beccc",
+      "size": 3261,
+      "path": "artifacts/c03/fault-missing-release/crone.log"
+    },
+    {
+      "sha256": "01ac002cdc73255a0e1c67730739ad0f4ad0e3b6944b98fc31ab13981806a7ac",
+      "size": 32768,
+      "path": "artifacts/c03/fault-missing-release/frame.bgra"
+    },
+    {
+      "sha256": "ad35a7a2bf928ee393172ae5915695d42b3548ccff4a723746b814e41f9184ec",
+      "size": 20803,
+      "path": "artifacts/c03/fault-missing-release/identity.json"
+    },
+    {
+      "sha256": "4c9f4cf17b817b773ab96c7704273fdc4b0231826b07c4c37a2459addade0e03",
+      "size": 16713,
+      "path": "artifacts/c03/fault-missing-release/jack.log"
+    },
+    {
+      "sha256": "2afb3474b43832eab64f007d9a938e254ed72a0e1f7d58011543cd6a4a6aded2",
+      "size": 2168,
+      "path": "artifacts/c03/fault-missing-release/matron.log"
+    },
+    {
+      "sha256": "4324e8af32d73cc4ebcf46a8c6032d1140bbe8d16a44a873ca6a867bb0c7d123",
+      "size": 641,
+      "path": "artifacts/c03/fault-missing-release/native-config.json"
+    },
+    {
+      "sha256": "f57794733a0280399972d1d30329258e7651af9353e8ce0f0cf8f0734e9fa147",
+      "size": 29318,
+      "path": "artifacts/c03/fault-missing-release/native-events.jsonl"
+    },
+    {
+      "sha256": "64799c6460f641346b04af7bd43408d327eb503caaaaaaa4e0cb66d223b0e977",
+      "size": 109007,
+      "path": "artifacts/c03/fault-missing-release/observations.json"
+    },
+    {
+      "sha256": "b4531e68d43567af0fd63346bc4a6a012e7e3f3188cf8f87a1489ab1c7c7adb2",
+      "size": 2591,
+      "path": "artifacts/c03/fault-missing-release/sclang.log"
+    },
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "path": "artifacts/c03/fault-missing-release/server.log"
+    },
+    {
+      "sha256": "86e472cb3ab86050d731e53009b5034238c209238c79856028c042b469c0ab85",
+      "size": 1077,
+      "path": "artifacts/c03/fault-missing-release/trace.json"
+    },
+    {
+      "sha256": "527d7979d4eb243cd1bb9ba3dc8561621f8b1fcc2c929d23e55410fb88730aeb",
+      "size": 39618,
+      "path": "artifacts/runs/7795dfde5bf9493b9f110e53348e67a6/manifest.json"
+    },
+    {
+      "sha256": "1b96550b50ed190608fcb09e53d5c3051e44306f7a3359c21e09d707c4ccad0d",
+      "size": 68846,
+      "path": "artifacts/runs/cfa64c96767243d39b0c1d75bd00092e/manifest.json"
+    }
+  ],
+  "skipped": 0,
+  "contract_tests": 21
+}

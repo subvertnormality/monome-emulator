@@ -58,3 +58,13 @@ startup/quit, including exact service exit codes, is the regression boundary.
 
 All patches use the official base above, in lock-file order. These patches do
 not establish full API or application compatibility by themselves.
+
+`0008-grid-device-contract.patch` supplies physical-to-logical rotations matching
+official libmonome, intensity metadata, and connection events through native
+weaver callbacks. Virtual device storage survives disconnect so queued Lua draws
+cannot address freed memory; reconnect clears its buffers and rebuilds native
+Lua discovery. Four internal quadrants accommodate either logical orientation
+of the physical 16×8 surface. LED validation and unsupported tilt become named
+Lua errors. Remove when upstream supports equivalent memory-backed grid devices.
+The C03 package tests all 128 coordinates, relative/absolute brightness, refresh,
+four rotations, separate holds/releases, reconnect and actual Mosaic navigation.
