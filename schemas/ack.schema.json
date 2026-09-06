@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ack",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "action_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "status": {
+      "const": "applied"
+    },
+    "monotonic_ns": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100000000000000000000
+    }
+  },
+  "required": [
+    "schema_version",
+    "session_id",
+    "action_id",
+    "sequence",
+    "status",
+    "monotonic_ns"
+  ],
+  "additionalProperties": false
+}

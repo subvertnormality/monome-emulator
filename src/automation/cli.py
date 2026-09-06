@@ -1,0 +1,60 @@
+"""CLI routes are generic; application fixtures never control core dispatch."""
+import argparse
+import json
+from pathlib import Path
+import platform
+import shutil
+import sys
+from . import evidence,runner,session
+from .protocol import ContractError,ROOT,read_json,uid
+
+def main(argv=None):
+    parser=argparse.ArgumentParser(prog='emu')
+    commands=parser.add_subparsers(dest='command',required=True)
+    doctor=commands.add_parser('doctor'); doctor.add_argument('--json',action='store_true')
+    start=commands.add_parser('start'); start.add_argument('--backend',default='native',choices=['native','contract-fixture'])
+    start.add_argument('--script'); start.add_argument('--code-root'); start.add_argument('--data'); start.add_argument('--profile',default='wsl')
+    for name in ['snapshot','stop','capabilities']:
+        command=commands.add_parser(name); command.add_argument('session_id')
+    action=commands.add_parser('action'); action.add_argument('session_id'); action.add_argument('json_action')
+    run=commands.add_parser('run'); run.add_argument('scenario')
+    verify=commands.add_parser('verify-evidence'); verify.add_argument('manifest')
+    replay=commands.add_parser('replay'); replay.add_argument('manifest')
+    release=commands.add_parser('release-check'); release.add_argument('--milestone',required=True); release.add_argument('--profile',required=True); release.add_argument('manifests',nargs='*')
+    tests=commands.add_parser('test'); tests.add_argument('--suite',required=True); tests.add_argument('--require-all',action='store_true')
+    args=parser.parse_args(argv)
+    try:
+        if args.command=='doctor':
+            result=dict(platform=platform.platform(),kernel=platform.release(),python=sys.version,
+                tools={k:shutil.which(k) for k in ['gcc','lua5.3','jackd','sclang']},
+                capability='contract-fixture-only; native product backend attaches in C02',
+                native_probe_available=(ROOT/'artifacts/c00/native-probe.json').exists())
+        elif args.command=='start': result=session.start(args.backend,args.script,args.code_root,args.data)
+        elif args.command=='snapshot': result=session.request(args.session_id,'/snapshot')
+        elif args.command=='capabilities': result=session.request(args.session_id,'/capabilities')
+        elif args.command=='stop': result=session.stop(args.session_id)
+        elif args.command=='action':
+            info=session.request(args.session_id,'/health')
+            result=session.request(args.session_id,'/action',dict(schema_version=1,session_id=args.session_id,action_id=uid(),
+                sequence=info['sequence']+1,action=json.loads(args.json_action)))
+        elif args.command=='verify-evidence':
+            value=evidence.verify(args.manifest); result=dict(passed=True,run_id=value['run_id'],fidelity=value['fidelity'])
+        elif args.command in ('run','replay'):
+            path=args.scenario if args.command=='run' else str(Path(args.manifest).resolve().parent/'scenario.json')
+            if args.command=='replay': evidence.verify(args.manifest)
+            manifest,value=runner.run(path); print(json.dumps(dict(manifest=str(manifest),passed=value['passed'],error=value['error'])))
+            return value['exit_code']
+        elif args.command=='release-check': result=evidence.release_check(args.manifests,args.milestone,args.profile)
+        elif args.command=='test':
+            if args.suite!='contracts': raise ContractError('unknown_suite','Suite not implemented: '+args.suite)
+            import unittest
+            suite=unittest.defaultTestLoader.discover(str(ROOT/'tests/contracts'))
+            count=suite.countTestCases()
+            if count==0: raise ContractError('empty_selection','No tests collected')
+            result=unittest.TextTestRunner(verbosity=2).run(suite)
+            print(json.dumps(dict(suite='contracts',collected=count,passed=result.wasSuccessful(),skipped=len(result.skipped))))
+            return 0 if result.wasSuccessful() and not result.skipped else 1
+        print(json.dumps(result,indent=2)); return 0
+    except (ContractError,ValueError,OSError) as error:
+        value=error.as_dict() if isinstance(error,ContractError) else ContractError('command_failed',str(error)).as_dict()
+        print(json.dumps(value),file=sys.stderr); return 1

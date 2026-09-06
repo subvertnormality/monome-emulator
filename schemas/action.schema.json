@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "action",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "action_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "action": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "key"
+            },
+            "n": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3
+            },
+            "state": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "type",
+            "n",
+            "state"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "enc"
+            },
+            "n": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3
+            },
+            "delta": {
+              "type": "integer",
+              "minimum": -127,
+              "maximum": 127
+            }
+          },
+          "required": [
+            "type",
+            "n",
+            "delta"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "grid"
+            },
+            "x": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 16
+            },
+            "y": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8
+            },
+            "state": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "type",
+            "x",
+            "y",
+            "state"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "midi"
+            },
+            "port": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 16
+            },
+            "bytes": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 255
+              },
+              "minItems": 1,
+              "maxItems": 4096
+            }
+          },
+          "required": [
+            "type",
+            "port",
+            "bytes"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "release_all"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "session_id",
+    "action_id",
+    "sequence",
+    "action"
+  ],
+  "additionalProperties": false
+}

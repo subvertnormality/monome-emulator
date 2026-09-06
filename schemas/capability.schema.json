@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "capability",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "backend": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "fidelity": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "supported": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096
+      },
+      "minItems": 0,
+      "maxItems": 10000
+    },
+    "absent": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096
+      },
+      "minItems": 0,
+      "maxItems": 10000
+    },
+    "unsupported": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096
+      },
+      "minItems": 0,
+      "maxItems": 10000
+    }
+  },
+  "required": [
+    "schema_version",
+    "backend",
+    "fidelity",
+    "supported",
+    "absent",
+    "unsupported"
+  ],
+  "additionalProperties": false
+}

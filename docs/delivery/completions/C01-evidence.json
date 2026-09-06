@@ -1,0 +1,252 @@
+{
+  "test_log_sha256": "1b5227dd3c2d8afca0cb2e62a5e580879516ba24673db27173bc24c07390e3e8",
+  "sample_run": {
+    "schema_version": 1,
+    "run_id": "9e2a08ad68374270a8677726127b3d79",
+    "scenario_id": "contract-counter",
+    "session_id": "6875755b7c824e08a6622f41f73ea5af",
+    "backend": "contract-fixture",
+    "fidelity": "contract-fixture-only",
+    "tier": "U",
+    "family": "contract",
+    "clock_mode": "real-time",
+    "platform": {
+      "system": "Linux",
+      "kernel": "6.6.87.2-microsoft-standard-WSL2",
+      "profile": "wsl"
+    },
+    "source": {
+      "revision": "80f3c002900373cb288f06fb0fbdae97eb33dbf0",
+      "digest": "073dc16fbfad9e89c79625185631067c180cf8c8b64c7ccd7e10b8f59375e582",
+      "files": [
+        {
+          "path": "compatibility/apis.json",
+          "sha256": "dacc4af5df33a929b5b7e16323bb160757f365930fcc4eb47306c883d6aa035b",
+          "size": 28454
+        },
+        {
+          "path": "compatibility/conformance.json",
+          "sha256": "787a629ef50efc51b717f023f549580daa384f767f77f149096b8864a3d89aef",
+          "size": 18954
+        },
+        {
+          "path": "compatibility/workflows.json",
+          "sha256": "7ce676565700eb3d79930f824d05e4915df23708b8470607eda05414c11c011d",
+          "size": 114838
+        },
+        {
+          "path": "dependencies.lock.json",
+          "sha256": "8a9e32e2f0007dbf2764522a447c2a0353e0d1027deb4a20ad4e03d4f843a7cf",
+          "size": 4546
+        },
+        {
+          "path": "dev/emu",
+          "sha256": "233566026d1b039bc2671e5dc83e43618db85e7cea8f133e5778e7d687e25eae",
+          "size": 269
+        },
+        {
+          "path": "fixtures/apps/mosaic.lock.json",
+          "sha256": "de54846cb382c7890e3457ac7bbc334401daf0f2731a7289639f72c5ab58cf9a",
+          "size": 1956
+        },
+        {
+          "path": "fixtures/probes/README.md",
+          "sha256": "917c640f79ba23519b4cbf803a2755d7aa3e20dfe4bd5eb7d24c0190985e3e0d",
+          "size": 576
+        },
+        {
+          "path": "fixtures/probes/probe-b/probe-b.lua",
+          "sha256": "9d1ba673d7c033730679d90387979dcc6e974f7b8afc650eed01c2d8cc221769",
+          "size": 915
+        },
+        {
+          "path": "fixtures/probes/probe-support/math_probe.lua",
+          "sha256": "ea6a6c83a575dbef72c862e5f7a5c933138a9355c98b3c1f54d9dfc487cacc80",
+          "size": 50
+        },
+        {
+          "path": "fixtures/scenarios/contract-counter.json",
+          "sha256": "562f4ce78f849d4521aeceec41ae88815afe8960f1d3dd30a0ab4c4a6d398632",
+          "size": 388
+        },
+        {
+          "path": "patches/norns/0001-desktop-architecture.patch",
+          "sha256": "1945a65e586446e5ae6a75cac646fc468aace34914c8f19a5d192925ad314e78",
+          "size": 472
+        },
+        {
+          "path": "patches/norns/0002-platform-read.patch",
+          "sha256": "745d47530e0769f8edceee525fa2e5cf35fa75cd9f180a3866bccffa35bd9a63",
+          "size": 615
+        },
+        {
+          "path": "patches/norns/0003-portable-display-conversion.patch",
+          "sha256": "a6f14a5cb4bba9203f3738b605a5d6902a8612b73c45c07a998a73fcad322ba9",
+          "size": 1504
+        },
+        {
+          "path": "patches/norns/0004-virtual-device-spike.patch",
+          "sha256": "0b7fc1089332629f9cbd64933d04136974c978f347af5376eb22009925dcb173",
+          "size": 9889
+        },
+        {
+          "path": "patches/norns/README.md",
+          "sha256": "abf5ac80cbfcda4e0afa82fe238658337b2f691201d45a5a472edb7098045c4e",
+          "size": 2190
+        },
+        {
+          "path": "schemas/ack.schema.json",
+          "sha256": "d1c7822a3d8a7a02bed6cf0f930ad199fecb5ff968cd29ac1fd91118066827e8",
+          "size": 826
+        },
+        {
+          "path": "schemas/action.schema.json",
+          "sha256": "2e84e4b5c7ddfbda52d27a0de0182211d55e142022ec0db81ca1aacac0795699",
+          "size": 3501
+        },
+        {
+          "path": "schemas/capability.schema.json",
+          "sha256": "1b3d91c7bc94168885fb3c17bb21303ba2541741b3edf43981cee943e4d6d6ad",
+          "size": 1170
+        },
+        {
+          "path": "schemas/error.schema.json",
+          "sha256": "a6abcafc39a6c0a5345a1adc7a5e6f447740e0f9751b2b3e11ef940ba04dd2c8",
+          "size": 626
+        },
+        {
+          "path": "schemas/manifest.schema.json",
+          "sha256": "3fed13869eb5fe7160e944163caf75f846ecd82f7c60b46ec94f93dc19246189",
+          "size": 5476
+        },
+        {
+          "path": "schemas/observation.schema.json",
+          "sha256": "c42702ed7a5cd73e6066d1bd5185e083b1388cc60240e575e327f39966c700e4",
+          "size": 1656
+        },
+        {
+          "path": "schemas/scenario.schema.json",
+          "sha256": "397ae99b774630ce8cccc4d2e5a8fc66a9b0451b60d46a0fb6e622c6952c82de",
+          "size": 7548
+        },
+        {
+          "path": "src/automation/__init__.py",
+          "sha256": "9ae95d342ef96abaf86230d056156b65e4218258895d252ca9eb2f1a03d927e6",
+          "size": 67
+        },
+        {
+          "path": "src/automation/cli.py",
+          "sha256": "9842dfe8848a4e75137b3089c698ae922a708e87dff694516b2b42a8ae78c59a",
+          "size": 4333
+        },
+        {
+          "path": "src/automation/evidence.py",
+          "sha256": "30530129b6c74c9c36aea528e187d0b30a6b55344701a51376dc512226721a77",
+          "size": 5993
+        },
+        {
+          "path": "src/automation/fixture_backend.py",
+          "sha256": "119ef4cb2af366152e368b3f2f1782046ec1543a2c1faef3ec633450517e36f5",
+          "size": 1274
+        },
+        {
+          "path": "src/automation/identity.py",
+          "sha256": "940d4272013f647b113cb89f30e361c4be1077a3fe485f75356dafa4d0200058",
+          "size": 1401
+        },
+        {
+          "path": "src/automation/protocol.py",
+          "sha256": "48fe52a70372aec6dcd9deff54faa7bf8f0ed670ab26ea248a22c3e190f226c2",
+          "size": 4295
+        },
+        {
+          "path": "src/automation/runner.py",
+          "sha256": "57d3aff00ba30b244b93024c96c522977473763bea027db994efb2d0d930ed03",
+          "size": 6029
+        },
+        {
+          "path": "src/automation/server.py",
+          "sha256": "ac2f535d965aabc777ade15440433e309ce5919f9bed07ad0bf30069b67174c7",
+          "size": 6885
+        },
+        {
+          "path": "src/automation/session.py",
+          "sha256": "cb999129064ecb259cfcee1635813a108f43793694a1d71ae6cc70085acd8fb6",
+          "size": 3476
+        },
+        {
+          "path": "tests/contracts/test_contracts.py",
+          "sha256": "ba32877bea5fe25a553e9b55f4883cd64ea9d62abdbfb73819c0689b2e94db69",
+          "size": 8961
+        }
+      ]
+    },
+    "scenario": {
+      "path": "scenario.json",
+      "sha256": "9db9052784f8c5f9847561695e0f60dc65b7de61b935102cd98ae8d2ef48f6bd",
+      "size": 548
+    },
+    "started_ns": 1977153239763878,
+    "finished_ns": 1977154107454542,
+    "collected": 4,
+    "passed": true,
+    "exit_code": 0,
+    "results": [
+      {
+        "index": 0,
+        "kind": "action",
+        "passed": true,
+        "detail": "Applied and acknowledged"
+      },
+      {
+        "index": 1,
+        "kind": "action",
+        "passed": true,
+        "detail": "Applied and acknowledged"
+      },
+      {
+        "index": 2,
+        "kind": "assertion",
+        "passed": true,
+        "detail": "Observable assertion passed"
+      },
+      {
+        "index": 3,
+        "kind": "assertion",
+        "passed": true,
+        "detail": "Observable assertion passed"
+      }
+    ],
+    "artifacts": [
+      {
+        "path": "backend.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 0
+      },
+      {
+        "path": "failure.json",
+        "sha256": "38e0b9de817f645c4bec37c0d4a3e58baecccb040f5718dc069a72c7385a0bed",
+        "size": 5
+      },
+      {
+        "path": "observations.json",
+        "sha256": "983dcc307c71d8da08c27f1f42ff8785ee8019e72486e65d35d6d29cd81e5b14",
+        "size": 837
+      },
+      {
+        "path": "server.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 0
+      },
+      {
+        "path": "trace.json",
+        "sha256": "3f3cae1737c96721b5553239b473a0b45fd23b3d8a02ec7c0b00c4385793d415",
+        "size": 1043
+      }
+    ],
+    "error": null
+  },
+  "tests": 19,
+  "card": "C01",
+  "skipped": 0
+}

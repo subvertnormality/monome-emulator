@@ -1,0 +1,273 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "scenario",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "backend": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "enum": [
+        "contract-fixture",
+        "native"
+      ]
+    },
+    "tier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "enum": [
+        "U",
+        "I",
+        "E",
+        "B",
+        "R",
+        "F",
+        "D"
+      ]
+    },
+    "family": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "deadline_ms": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 600000
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "action": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "key"
+                      },
+                      "n": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 3
+                      },
+                      "state": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "n",
+                      "state"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "enc"
+                      },
+                      "n": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 3
+                      },
+                      "delta": {
+                        "type": "integer",
+                        "minimum": -127,
+                        "maximum": 127
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "n",
+                      "delta"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "grid"
+                      },
+                      "x": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 16
+                      },
+                      "y": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 8
+                      },
+                      "state": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "x",
+                      "y",
+                      "state"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "midi"
+                      },
+                      "port": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 16
+                      },
+                      "bytes": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 255
+                        },
+                        "minItems": 1,
+                        "maxItems": 4096
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "port",
+                      "bytes"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "release_all"
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "required": [
+              "action"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "assertion": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  "equals": {}
+                },
+                "required": [
+                  "path",
+                  "equals"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "assertion"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "wait": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  "equals": {}
+                },
+                "required": [
+                  "path",
+                  "equals"
+                ],
+                "additionalProperties": false
+              },
+              "timeout_ms": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 60000
+              }
+            },
+            "required": [
+              "wait",
+              "timeout_ms"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "fixture_fault": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "enum": [
+                  "crash",
+                  "stall"
+                ]
+              }
+            },
+            "required": [
+              "fixture_fault"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 10000
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "backend",
+    "tier",
+    "family",
+    "deadline_ms",
+    "steps"
+  ],
+  "additionalProperties": false
+}

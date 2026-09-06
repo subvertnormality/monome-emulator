@@ -2,8 +2,8 @@
   "schema_version": 1,
   "updated": "2026-09-06",
   "mode": "executing",
-  "current_card": "C01",
-  "next_action": "Implement the bounded automation protocol, fixture runner, session isolation and evidence verifier.",
+  "current_card": "C02",
+  "next_action": "Attach the official runtime to the session server, implement generic script loading and prove isolated Mosaic boot.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -14,12 +14,12 @@
     },
     {
       "id": "C01",
-      "status": "in_progress",
-      "evidence": null
+      "status": "done",
+      "evidence": "docs/delivery/completions/C01.md"
     },
     {
       "id": "C02",
-      "status": "planned",
+      "status": "in_progress",
       "evidence": null
     },
     {
