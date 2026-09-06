@@ -1,0 +1,31 @@
+{
+  "status": "structural_amendment_review_complete",
+  "runtime_validation": "not_run",
+  "supersedes": "P0-final-manifest.json",
+  "files": [
+    {
+      "path": "docs/delivery/PLAN.md",
+      "sha256": "1794ce8a6f79dc3bc81fb8ce40e873a0f6ebb32e51ba51d48d5922bd74b3f5fd"
+    },
+    {
+      "path": "docs/delivery/ACCEPTANCE.md",
+      "sha256": "c7792b2e1415547737dcb17960941cf00fe1d084d61d38c3922dd9a0729123a3"
+    },
+    {
+      "path": "docs/delivery/UPSTREAM.md",
+      "sha256": "63839971ae3bddf173cc8cf5e57ac821a66852318bb7dc5fe7a9d375b87ba442"
+    },
+    {
+      "path": "docs/delivery/RUNBOOK.md",
+      "sha256": "177af2891c0408e3dc5c2034ab67bd93b1944d0a65bbcef19b6bbd33f18ab5af"
+    },
+    {
+      "path": "docs/delivery/DECISIONS.md",
+      "sha256": "4f3d5669e890107abb28ebcbf273a68ca84cac31080bb5bbbae620e67860e2c0"
+    },
+    {
+      "path": "docs/delivery/reviews/P0A1-triage.md",
+      "sha256": "9a2a5ec898b74da77843871bec8d0934383d4085bf5e065b6b95a529b18d71fa"
+    }
+  ]
+}

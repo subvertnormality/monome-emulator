@@ -27,7 +27,8 @@ async def main():
     args = parser.parse_args()
     repo = Path(args.repo).resolve()
     paths = ["docs/delivery/PLAN.md", "docs/delivery/ACCEPTANCE.md",
-             "docs/delivery/RUNBOOK.md", "docs/delivery/DECISIONS.md"]
+             "docs/delivery/RUNBOOK.md", "docs/delivery/DECISIONS.md",
+             "docs/delivery/UPSTREAM.md"]
     packet = "\n\n".join(f"# FILE: {p}\n\n{(repo / p).read_text()}" for p in paths)
     output = repo / args.output
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -35,7 +36,7 @@ async def main():
         "repo_path": str(repo), "plan_text": packet, "engine": args.engine,
         "round": 1, "class_closure": False, "claim_verification": False,
         "web_search": False, "effort": "medium",
-        "stakes": "Trusted single-user local Mosaic development emulator. WSL2 Ubuntu 20.04 first, native Linux later. MIDI-only, no physical hardware or audio acceptance. Realistic risks: misleading green tests, runtime/API mismatch, unusable LLM control/diagnostics, accidental local project clobber, wasted engineering. No finance, hostile actors, multi-tenancy or hard-real-time hardware certification. One bounded structural review; empirical external premises are explicitly gated in C00 and later cards.",
+        "stakes": "Trusted single-user general-purpose norns/grid utility, official monome runtime dependencies, Mosaic as separate acceptance fixture. WSL2 Ubuntu 20.04 first, native Linux later. MIDI-only, no physical hardware or audio acceptance. Realistic risks: app coupling, update breakage, misleading green tests, runtime/API mismatch, unusable LLM diagnostics, local project clobber. No finance, hostile actors, multi-tenancy or hard-real-time hardware certification. One bounded structural review; empirical premises are gated in C00 and later cards.",
         "context": "The user requested a proportionate adaptation of Parallax's heavyweight process. This is a planning deliverable, not implementation. Mosaic inspection checkout exists at upstream/mosaic. No emulator has been built or tested. Existing Ubuntu 20.04 must be probed before suggesting any distro migration. Manual testing is forbidden as acceptance; LLMs need real runtime interaction and observations.",
         "focus": "Find only substantive in-scope delivery gaps, dependency cycles, untestable acceptance, circular oracles, false-green escape routes, unsupported runtime assumptions, or disproportionate governance. Check whether a fresh execution agent can deliver end to end. Cite document and section/line. Limit to the most consequential findings; no speculative hardening or unlimited review machinery.",
     }

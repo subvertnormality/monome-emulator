@@ -3,7 +3,7 @@
   "updated": "2026-09-06",
   "mode": "ready_for_execution",
   "current_card": null,
-  "next_action": "When implementation is requested, read the plan/runbook/acceptance and execute C00 against the existing Ubuntu 20.04 WSL environment.",
+  "next_action": "When delivery implementation is requested, execute C00 with the general-purpose official-upstream contract and separate Mosaic fixture in the existing Ubuntu 20.04 WSL environment.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -106,7 +106,8 @@
     "P2": "not_run",
     "P3": "not_run",
     "P4": "not_run",
-    "P5": "not_run"
+    "P5": "not_run",
+    "P0A1": "done"
   },
-  "plan_review_evidence": "docs/delivery/reviews/P0-triage.md"
+  "plan_review_evidence": "docs/delivery/reviews/P0A1-triage.md"
 }

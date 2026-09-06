@@ -6,9 +6,11 @@ effort = "medium"
 web_search = false
 
 project_summary = """
-Mosaic development emulator, WSL2 Ubuntu 20.04 first and native Linux later.
+General-purpose norns/grid utility, WSL2 Ubuntu 20.04 first and native Linux later.
 Actual norns runtime with virtual grid, display/controls and MIDI. All documented
-Mosaic software workflows need automated acceptance and LLM-readable diagnostics.
+Mosaic software workflows are a separate comprehensive acceptance fixture.
+Generic conformance must pass without Mosaic installed. Official monome runtime
+dependencies are pinned and independently updateable, with minimal adapters.
 Audio engines and physical peripheral correctness are outside the first release.
 The repository currently contains a delivery plan; consult current files before
 assuming an implementation exists.

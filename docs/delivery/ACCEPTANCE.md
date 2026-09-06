@@ -1,12 +1,20 @@
 # Automated acceptance contract
 
-This is the release contract for a Mosaic development environment, not a claim
+This is the release contract for a general-purpose norns/grid development utility,
+with Mosaic as its first comprehensive application fixture, not a claim
 of electrical or hard real-time equivalence with a norns. All required tests are
 automated. No hardware, listening, human screenshot approval, or manual clicking
 is required. The browser can be used interactively, but manual use earns no
 acceptance credit.
 
 ## Scope and runtime fidelity
+
+[UPSTREAM.md](UPSTREAM.md) defines mandatory generic G01–G06 gates and the
+official-runtime/app-fixture boundary. Core installation, native API conformance
+and generic script loading must pass without Mosaic or its dependencies present.
+The A01–A24 suite below is an additional app-level contract, not a core dependency
+or permission to special-case the runtime. Runtime APIs and updates come from
+official monome sources; app behaviour is never copied into emulator modules.
 
 Run the pinned Mosaic application entry point, actual Mosaic scheduler, native
 norns Lua/core libraries, params, and runtime clocks in the real-time lane.
@@ -27,12 +35,15 @@ port named `Norns2sinfonion`; only the physical MIDI-to-module conversion is
 excluded. The README's LFO/modulation workflow requires pinned `sixolet/matrix`
 and `sixolet/toolkit` mods, installed/enabled through actual norns mod lifecycle.
 Both base-MIDI (without optional mods) and MIDI-modulation fixture profiles are
-mandatory at full release. Mod audio functionality remains outside this contract.
+mandatory in the Mosaic compatibility fixture at full release, not installed by
+default in the generic utility. Mod audio functionality remains outside this contract.
 
 Reference upstream sources (revisions must be locked by C00):
 
 - `https://github.com/subvertnormality/mosaic` — application, README, tests.
 - `https://github.com/monome/norns` — runtime and core API behaviour.
+- `https://github.com/monome/libmonome` and `https://github.com/monome/serialosc`
+  — official grid integration dependencies/protocol references as applicable.
 - `https://monome.org/docs/norns/` — software/control/display documentation.
 - `https://monome.org/docs/grid/` and serialosc protocol documentation linked
   there — grid device and transport contracts.
@@ -109,6 +120,11 @@ to pass. Future delivery milestones are not prerequisites for earlier gates:
 | M3 / C14 | All A01–A23 scenarios on WSL, including C13 LLM proof; A24 is not yet claimed |
 | M4 / C15 | All portable A01–A22 scenarios plus A24 on native Linux; retain WSL A23 evidence and rerun affected WSL checks if portability changes affect shared code |
 | M5 / C16 | Declared supported D scenarios plus affected E/R regressions; no weakening of M3/M4 scope |
+
+Every milestone also enforces applicable G01–G06 from UPSTREAM.md. The runtime-only
+installation test deliberately has no app fixture dependencies; full delivery
+verification then acquires the app fixture separately. Missing fixture access
+blocks an app compatibility claim, not ordinary generic script use.
 
 `D` supplements `E/R`; it cannot stand in for them and does not gate M0–M4.
 C16 adds M5 after usable releases. Virtual time must include
@@ -203,7 +219,9 @@ Use `./dev/emu` as the stable Linux/WSL entry point.
 ./dev/emu doctor --json
 ./dev/emu fetch --locked
 ./dev/emu build
-./dev/emu start --profile wsl --mosaic /path/to/mosaic --data .runtime/session-a
+./dev/emu start --profile wsl --script /path/to/code/my-app/main.lua --code-root /path/to/code --data .runtime/session-a
+./dev/emu fixtures fetch mosaic --locked
+./dev/emu test --suite conformance --require-all
 ./dev/emu status --json
 ./dev/emu run scenarios/smoke/boot.json --artifacts artifacts/runs/boot
 ./dev/emu test --suite workflow --require-all
@@ -219,7 +237,7 @@ Scenario vocabulary: `grid.down/up`, `key.down/up`, `encoder.delta`,
 controlled-time `advance` where explicitly supported. Inputs have sequence IDs;
 acks distinguish received, applied, and rendered. Frame/LED revisions and MIDI
 sequence numbers tie assertions to the action that caused them. API mutation of
-Mosaic globals is not an action. Optional debug inspection is read-only.
+application globals is not an action. Optional debug inspection is read-only.
 
 A failure bundle contains manifest, input trace, raw MIDI with timestamps,
 raw framebuffer and LED states, browser screenshot where relevant, stdout/stderr,

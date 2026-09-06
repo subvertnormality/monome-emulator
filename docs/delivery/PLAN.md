@@ -1,18 +1,24 @@
-# Mosaic emulator: staged autonomous delivery plan
+# General-purpose monome emulator: staged autonomous delivery plan
 
 You are an execution agent. When implementation is authorized, execute the cards
 below in graph order using [RUNBOOK.md](RUNBOOK.md); resume from `state.json`.
 Read [ACCEPTANCE.md](ACCEPTANCE.md) before making runtime or test-design choices.
+Read [UPSTREAM.md](UPSTREAM.md) for the general-purpose product boundary, official
+runtime dependencies, independent app fixtures and update acceptance (D11/D12).
 Do not treat this document's proposed commands or unverified premises as existing
 implementation. This planning deliverable does not itself start implementation.
 
 ## Outcome and current facts
 
-Deliver an environment in which a developer or LLM can edit Mosaic, reproduce
-realistic interactions, observe the screen/grid/MIDI effects, and run automated
+Deliver a general-purpose norns/grid utility that loads external scripts without
+a Mosaic dependency. Mosaic is the first comprehensive acceptance fixture: a
+developer or LLM can edit Mosaic, reproduce realistic interactions, observe the
+screen/grid/MIDI effects, and run automated
 regression checks without a norns or physical grid. WSL2 is the first release;
 native Linux follows. MIDI only; no audio acceptance. Cover all documented Mosaic
 software workflows. No required manual tests, including final certification.
+Generic G01–G06 gates are equally mandatory. Passing Mosaic alone cannot establish
+the product's general-purpose or upstream-updateability claims.
 
 Planning workspace: `C:\Users\andy\Documents\ChatGPT\monome-emulator`.
 Existing WSL distro: `ubuntu-20.04`. The user corrected the earlier willingness
@@ -34,12 +40,14 @@ successful boot or test run.
 ## Architecture hypothesis and boundaries
 
 Prefer a Linux-hosted build of actual norns matron/core, retaining production
-screen drawing, Lua loading, params, clocks, and Mosaic code. Provide virtual
+screen drawing, Lua loading, params and clocks from pinned official monome sources.
+Application scripts are loaded as external inputs. Provide virtual
 hardware and an automation bridge at the native device/event boundaries. Run
 supporting norns services only as required for faithful startup/control; dummy
-audio is acceptable and need not be exposed as a feature. Reuse an existing
-desktop norns approach if its pinned code proves suitable; don't copy its claims
-of compatibility into this project's acceptance report.
+audio is acceptable and need not be exposed as a feature. Reuse desktop projects'
+approaches or explicit patches on top of an official monome/norns ref; never pin
+a community fork as the runtime dependency. Do not copy their compatibility
+claims into this project's acceptance report.
 
 The runtime, browser, and test harness share one event path. Browser inputs and
 scenario inputs become the same ordered device events. The browser renders actual
@@ -82,6 +90,8 @@ before proving Mosaic can boot through the native runtime.
 | V08 | All documented software workflows have executable independent oracles | Unverified | C00 inventory; C08–C12 implement and audit |
 | V09 | LLMs can diagnose and repair a Mosaic regression from the tool outputs | Unverified | C13 blind, isolated repair exercise |
 | V10 | WSL and native Linux pass the same workflow contract | Unverified | C14 WSL; C15 native host evidence separately |
+| V11 | Generic native script loading works without Mosaic or its dependencies | Unverified | C00/C02 G01–G03; no core application-name special cases |
+| V12 | Official runtime dependencies can be updated without coupling app revisions or growing a fork | Unverified | C00 lock/patch graph; C14 real update and rollback rehearsal, G04/G05 |
 
 Unknowns block only their dependent scope. A plan review does not change a runtime
 premise to verified. Do not claim “cannot work” from a failed broad search; inspect
@@ -97,7 +107,7 @@ system or automatically create Codex tasks to run it.
 |---|---|---|---|
 | C00 | Prove host/runtime feasibility and freeze compatibility inventory | P0 plan review | M0 foundation |
 | C01 | Establish automation protocol, evidence schema, runner and launcher shell | C00 | M0 |
-| C02 | Run real norns and Mosaic bootstrap with isolated data | C00, C01 | M0 |
+| C02 | Run official norns, generic script loading and separate Mosaic fixture | C00, C01 | M0 |
 | C03 | Deliver virtual grid through the real runtime | C02 | M1 first usable slice |
 | C04 | Deliver screen, controls, browser and input lifecycle | C02, C03 | M1 |
 | C05 | Deliver virtual MIDI input/output and timestamped capture | C02 | M1 |
@@ -109,21 +119,24 @@ system or automatically create Codex tasks to run it.
 | C11 | Verify persistence, dialogs, lifecycle and project isolation | C06, C08 | M2 |
 | C12 | Close workflow inventory; fault, timing and endurance acceptance | C09, C10, C11 | M2 + P2 review |
 | C13 | Prove autonomous LLM Mosaic iteration and usable diagnostics | C12 | M3 WSL release |
-| C14 | Package and automatically accept WSL2 release | C13 | M3 + P3 review |
+| C14 | Package WSL2 release and verified official-dependency update workflow | C13 | M3 + P3 review |
 | C15 | Deliver native Linux parity with the same automated suite | C14 | M4 + P4 review |
 | C16 | Add deterministic time as a subsequent feedback-speed enhancement | C15 | M5 faster verification |
 
-M0: actual native runtime feasible and a boot path exists, with automated errors.
+M0: actual native runtime and generic script boot work without Mosaic installed.
 M1: usable virtual device environment demonstrates a real Mosaic edit/play/save.
 M2: complete software workflow suite, not just mocks, detects seeded defects.
-M3: LLM iteration and repeatable installation pass on existing WSL profile.
+M3: LLM iteration, independent runtime installation and official-dependency update
+acceptance pass on the existing WSL profile.
 M4: native Linux acceptance passes independently.
 M5: controlled-time verification accelerates the already-working real-time suite.
 
 ## C00 — Empirical foundation and scope inventory
 
-**Depends:** P0: a completed Paranoia response plus recorded findings/dispositions
-in `docs/delivery/reviews/P0-triage.md`, with substantive fixes resolved. A pending
+**Depends:** P0 plus applicable user-scope amendments: completed Paranoia responses
+and findings/dispositions referenced by `state.json`'s `plan_review_evidence`, with
+substantive fixes resolved. Original P0 is `docs/delivery/reviews/P0-triage.md`;
+the general-purpose amendment is P0A1. A pending
 or errored tool call is not that artifact; no particular engine is mandatory.
 **Goal:** Choose a viable runtime/host path from measured evidence before building
 dependent interfaces. **Inputs:** This contract; local Mosaic inspection checkout;
@@ -135,7 +148,11 @@ upstream norns/desktop repositories and official API/protocol docs.
    the pinned browser automation tool and render/control a fixture, rather than
    merely checking installation. A Windows browser runner may serve WSL. Probe the
    existing Ubuntu 20.04 environment first. Avoid unrelated package upgrades.
-2. Lock full Mosaic/norns/nb commits and all needed submodules. Also acquire and
+2. Establish the official runtime lock separately from app fixture locks as defined
+   in UPSTREAM.md. Pin monome/norns and its actual official/transitive build graph,
+   including libmonome/serialosc where used, with no duplicate submodule pins.
+   Identify a feasible pair of official runtime refs for C14's real update test.
+   Lock Mosaic/nb only in `fixtures/apps/mosaic.lock.json`. Also acquire and
    lock the README-linked `sixolet/matrix` and `sixolet/toolkit` mods and their
    required transitive dependencies for A17. Define base-MIDI and MIDI-modulation
    fixture profiles; both are mandatory at full release, while audio components
@@ -156,7 +173,11 @@ upstream norns/desktop repositories and official API/protocol docs.
    semantics rather than assuming ALSA exists. Inspect desktop projects
    only to choose a workable implementation. Identify required crone/JACK services
    and whether they can use a dummy backend. No silent assumption of audio-free boot.
-5. Enumerate Mosaic's transitive runtime APIs, nb startup needs, mod/peripheral
+5. Define the claimed generic controls/display/grid/MIDI and script-services API
+   surface from official monome contracts, independently of Mosaic. Create two
+   non-Mosaic probe applications with distinct code names and a sibling library.
+   Prove core startup/build without app fixture caches/dependencies. Separately
+   enumerate Mosaic's transitive runtime APIs, nb startup needs, mod/peripheral
    accesses, file paths and all time sources. Classify supported/absent/unsupported.
 6. Convert every software feature section of the pinned Mosaic README into a
    `compatibility/workflows.json` row: feature, source, scenario IDs, oracle,
@@ -172,7 +193,8 @@ nonzero (failures, if any, are explicitly recorded rather than green);
 locked source identities and baseline test results exist; every documented
 software workflow has an owner/oracle; runtime/peripheral inventory is explicit.
 The result distinguishes proven boundaries from deferred C02/C03 full integration.
-**Outputs:** `dependencies.lock.json`, `compatibility/{apis,workflows}.json`, runtime
+**Outputs:** Runtime-only `dependencies.lock.json`, `fixtures/apps/mosaic.lock.json`,
+generic conformance inventory, `compatibility/{apis,workflows}.json`, runtime
 decision, probe sources/logs, C00 completion. **On fail:** Diagnose exact package,
 transport or permission failure. Test a contained alternative before proposing a
 distro change. No UI implementation past an unproven native runtime premise.
@@ -187,6 +209,8 @@ the outset. **Inputs:** Runtime decision, workflows inventory, proposed CLI/API.
 1. Implement `dev/emu` command routing and schemas for scenarios, action acks,
    observations, capability reports, errors and run manifests. Begin with a tiny
    contract fixture; do not pretend it is a norns implementation.
+   Commands take generic `--script`/`--code-root` inputs. No Mosaic-only CLI option
+   or mandatory app bootstrap; fixture fetch is separate from default runtime fetch.
 2. Give each session/action/run a unique identity. Define grid (1-based) vs wire
    coordinates explicitly, key/encoder IDs, monotonic timestamps, beat units,
    frame revisions, bounds and transport ordering. Reject invalid requests.
@@ -194,6 +218,7 @@ the outset. **Inputs:** Runtime decision, workflows inventory, proposed CLI/API.
    checks and nonzero exit propagation. Enforce mandatory E evidence for software
    scenarios, E/R for each A01–A22 family, and platform-specific A23/A24 gates.
    Reject D-only/mock-only coverage. No `sleep`-then-unconditional-success.
+   Also enforce applicable generic G01–G06 gates, independent of Mosaic results.
 4. Add isolated runtime/data directories, process ownership, port discovery,
    source/config identity and explicit stop/cleanup. Bind control services locally.
 5. Implement the failure bundle and evidence verifier. Test empty selection,
@@ -208,9 +233,10 @@ C01 completion. **On fail:** Fix runner truthfulness before attaching workflows;
 never hand-edit a generated result to mark a test passed. **Refs:** A21; CLI and
 artifact contract; RUNBOOK evidence rules.
 
-## C02 — Real norns runtime and Mosaic startup
+## C02 — Official norns runtime, generic loading and Mosaic fixture
 
-**Depends:** C00, C01. **Goal:** Load production norns libraries and actual Mosaic
+**Depends:** C00, C01. **Goal:** Load production norns libraries and arbitrary supported
+script entrypoints, including the independently installed Mosaic fixture,
 with only explicit hardware adaptations. **Inputs:** Locked sources, native
 runtime spike, API inventory, launcher/protocol.
 
@@ -219,11 +245,15 @@ runtime spike, API inventory, launcher/protocol.
    norns patches under `patches/norns/` with rationale and affected API contracts.
 2. Start actual matron and required support services, with a separate entire dust
    root per session, not just a data directory. Mount each selected source tree as
-   `<session-dust>/code/mosaic` and keep `_path.code`/`norns.state.path` consistent
-   with Mosaic's mixed include/require paths. Integrate lifecycle and logs.
+   `<session-dust>/code/<declared-app-name>` and keep `_path.code`/`norns.state.path`
+   consistent with native include/require rules and optional code-root inputs.
+   Only the Mosaic fixture declares the name `mosaic`. Prove both distinct probe
+   apps with all Mosaic-specific source/dependencies absent. Integrate lifecycle/logs.
 3. Attach ordered input and raw screen observation at the runtime boundary. Keep
    application `include`, params, clock, metro and scheduler semantics intact.
-4. Load nb submodule and model absent physical devices deliberately. Install and
+4. In the opt-in Mosaic fixture only, load nb and its activation configuration.
+   Model absent physical devices using native platform capability semantics;
+   the core must not branch on application identity. For the fixture install and
    activate the pinned matrix/toolkit mods through real norns mod setup/allow-list
    for the required modulation fixture profile; verify they register expected
    parameter hooks. Keep base-MIDI startup tested without them. Audit each
@@ -235,8 +265,9 @@ runtime spike, API inventory, launcher/protocol.
    coroutine errors, screen refresh and absent peripherals. Record remaining
    device dependencies to C03/C05 explicitly.
 
-**Done when:** Core runtime probes pass; Mosaic init returns, expected redraw and
-scheduler clocks are active, and a first script frame is observed without
+**Done when:** Generic G01/G02 boot and include contracts pass independently of
+Mosaic, core has no fixture imports or app-name dispatch, and Mosaic init returns,
+expected redraw and scheduler clocks are active, and a first script frame is observed without
 unexpected errors. Report device attachment separately; do not invent a Mosaic
 device-wait state. Failures in
 init/background coroutine become structured nonzero results. No broad mocked
@@ -256,6 +287,8 @@ contract, runtime, scenario runner.
    native route. Preserve reported dimensions and 1-based Lua coordinates.
 2. Implement every LED command reached by Mosaic, including bulk updates, plus
    refresh semantics and brightness 0–15. Track displayed matrix revisions.
+   Cover the full grid API surface claimed by the capability manifest using
+   official contract probes; Mosaic's calls are not the platform coverage limit.
 3. Inject down/up events through the real grid input boundary; support multiple
    held keys, ordered chords, duplicate/invalid input policy and reconnect.
 4. Test every corner and row/column boundary with an independent device probe.
@@ -288,6 +321,8 @@ and LLMs, with automated evidence that the browser is wired correctly.
    Playwright). Automate real DOM/pointer/keyboard controls and compare runtime
    event traces, rendered pixels and raw observations at settled frame revisions.
 5. Exercise script pages, shift interaction, norns menu entry/exit and tooltips.
+   Run the same browser control/render tests against both differently named generic
+   probe apps with Mosaic dependencies absent, as required by G02/G03.
    Add a stale-frame injection that leaves backend state right but rendering wrong.
 
 **Done when:** Browser actions and equivalent API actions yield the same normalized
@@ -487,7 +522,9 @@ isolated data and source mounting policy.
    seam. Assert existing valid user data is preserved and errors are visible.
 4. Test script reload, changed-source reload, cleanup with active notes/timers and
    two isolated sessions with distinct full dust roots and source trees each
-   mounted at `code/mosaic`. Never use the user's project for
+   mounted at their declared application paths (`code/mosaic` for the Mosaic
+   fixture). Repeat with both generic probes to prove app/data independence.
+   Never use the user's project for
    destructive/error fixtures. Separate source checkout from writable session data.
 5. Verify 10 reload/reset cycles and no held input, clock/process or port leaks.
 
@@ -508,6 +545,9 @@ runtime errors/captures, scenario families and central timing contract.
 1. Reconcile each pinned README software feature section against the inventory,
    collected tests and executed assertion results. Fail omissions and blanket
    exclusions; resolve unowned features in the existing appropriate card.
+   Independently reconcile every claimed generic API against native conformance
+   evidence and G01–G04. Catch core imports of fixture modules and app-name
+   conditionals; fixtures may contain app-specific setup, the runtime may not.
 2. Run U/I/E/B families across required base-MIDI and modulation profiles and the
    10-minute R mixed-feature fixture with transport,
    concurrent editing, chords, locks and transitions. Check timestamps/phase,
@@ -525,9 +565,9 @@ runtime errors/captures, scenario families and central timing contract.
 5. Perform P2 review of coverage and false-green paths. Fix substantive findings,
    then rerun affected suites. Record remaining out-of-scope limitations precisely.
 
-**Done when:** Every M2 inventory row (A01–A19 and A21–A22) has passing mandatory
-evidence, all
-central timing/endurance gates pass, each selected defect is detected by its
+**Done when:** Generic G01–G04 and every M2 inventory row (A01–A19 and A21–A22)
+have passing mandatory evidence, all central timing/endurance gates pass,
+each selected defect is detected by its
 intended assertion, and P2 findings are closed. No manual testing item remains.
 **Outputs:** M2 manifest/coverage table, F reports, P2 triage, C12 completion.
 **On fail:** Block M2 with specific scenario/cause; do not disable tests, sort away
@@ -581,6 +621,8 @@ full mandatory inventory and LLM workflow.
 1. Package `doctor/fetch/build/start/run/test/replay/stop/release-check` as a documented
    repeatable setup. Default to existing Ubuntu 20.04 WSL; if C00 justified a
    container, provide that transparently without moving the user's distro.
+   Default installation must not acquire Mosaic/nb/mod sources. Separate runtime
+   conformance from opt-in app fixtures; demonstrate loading an external named app.
 2. Automate clean session/data bootstrap, dependency cache reuse, source checkout
    selection and Windows-browser access. Validate paths containing spaces and
    explain recommended WSL ext4 source placement if measurements require it.
@@ -591,11 +633,16 @@ full mandatory inventory and LLM workflow.
 4. Run mandatory release-check on a clean supported-profile session with all
    required suites, no skipped features. Test failed install/config diagnosis and
    an upgrade/reload using retained project data fixtures.
+   Implement and test UPSTREAM.md's real official-ref update, independent app pins,
+   regression rejection, patch-conflict report and rollback. A no-op ref change
+   or changing Mosaic simultaneously does not satisfy G05. Run full required
+   Mosaic fixture after generic candidate-runtime conformance.
 5. Perform P3 review on the release package. Apply substantive fixes and rerun
    affected checks; bind final manifest to final tested tree. Write release notes
    with supported source/profile identities, limits and repeatable commands.
 
-**Done when:** A23 passes on actual WSL, all in-scope required suites pass, P3 is
+**Done when:** G01–G06 (WSL applicability), A23 and all in-scope required suites
+pass on actual WSL, the real upstream update/rollback is proven, P3 is
 complete, and a new LLM can run the documented flow without manual tests. Full
 Mosaic source/patch identity and data location are explicit. Native Linux remains
 unclaimed until C15. **Outputs:** Setup/package scripts, WSL job, M3 release
@@ -614,6 +661,8 @@ forking application behaviour. **Inputs:** WSL release package and exact invento
    source revisions; isolate host differences to launcher/device transport.
 2. Add a genuine Linux CI/host execution lane and automated browser tests. Record
    host facts proving this is native Linux, not an assumed WSL equivalent.
+   Run runtime-only installation with fixtures absent and generic G01–G06
+   conformance, then install the Mosaic fixture for app acceptance separately.
 3. Run the same mandatory full acceptance selection, with explicit platform-specific
    configuration. Compare normalized semantic outputs across platforms; timing
    passes the central contract separately on each declared profile.

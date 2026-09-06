@@ -1,0 +1,60 @@
+{
+  "started_at": "2026-09-06T19:22:53.281572+00:00",
+  "packet_sha256": "24419ca2f8b88ff29c6f497354ae68d7fc549a7d9708e6cad0d999b3530dbb3f",
+  "files": [
+    "docs/delivery/PLAN.md",
+    "docs/delivery/ACCEPTANCE.md",
+    "docs/delivery/RUNBOOK.md",
+    "docs/delivery/DECISIONS.md",
+    "docs/delivery/UPSTREAM.md"
+  ],
+  "tool": "query",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator",
+    "engine": "claude",
+    "question": "Perform one focused structural review of a user-authorized architecture amendment:\nthis must be a general-purpose norns/grid utility using proper official monome\nrepos as dependencies for easy updates. Mosaic is the first comprehensive test\nfixture, not a runtime dependency or hardcoded app. Review current UPSTREAM.md,\nPLAN.md, ACCEPTANCE.md and DECISIONS.md; previous P0 packets are historical.\n\nCheck only material gaps in: independence of core build/install/load from Mosaic;\ngeneric script names/include paths/data; official-source pins vs community forks;\nruntime/app dependency lock separation; meaningful generic conformance; explicit\nupstream update, failure rejection and rollback; ownership of these in existing\ncards. Preserve the earlier complete Mosaic acceptance and MIDI-only WSL-first\nscope. Host feasibility is explicitly C00 work, not an established fact.\n\nStakes: trusted single-user local development utility. No hostile multi-tenancy,\nfinancial correctness, audio promise or universal third-party-script certification.\nWe want small adapters around official norns, not a complete parallel Lua runtime\nor a new package manager. Flag concrete blocker/major gaps only, with actionable\nfile/section citations. No need to rerun the earlier complete P0 review, demand\ndual-vendor convergence, or request minor speculative hardening. This is a scoped\nreview for newly requested product boundaries, not a third round on old findings.\n",
+    "files": [
+      {
+        "path": "docs/delivery/PLAN.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/ACCEPTANCE.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/RUNBOOK.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/DECISIONS.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/UPSTREAM.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/reviews/P0-triage.md",
+        "reason": "Findings and fixes"
+      }
+    ],
+    "web_search": false,
+    "effort": "medium"
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "**Answer: no blocker. One material wording gap worth fixing, and two small consistency nits. The amendment otherwise covers every requested boundary with named owners in existing cards.**\n\n**Material gap (major, one-paragraph fix): the official-vs-fork rule has a documented-substitution loophole.**\n`docs/delivery/PLAN.md:47-49` still says \"Reuse an existing desktop norns approach if its pinned code proves suitable\", and `docs/delivery/UPSTREAM.md:24` forbids only *silently* substituting a fork. Read together, C00 could pin `schollz/norns-desktop`'s norns fork as the runtime entry in `dependencies.lock.json` with a note, and satisfy the letter of both. That defeats \"official repos for easy updates\" because G05's update path would then track the fork's cadence. Fix: state in UPSTREAM.md's boundary section that the lock's `norns` entry must have canonical URL `github.com/monome/norns` (plus its own official submodules), and that anything taken from a community project enters only as an entry under `patches/norns/` with reason, upstream base and removal condition. Reword PLAN.md:47-49 to \"reuse a desktop project's *patches/approach* on top of the official ref\". `dependencies.lock.json`'s \"canonical URL ... local patch identity\" fields at UPSTREAM.md:26-28 already imply this; it just needs to be said.\n\n**Minor nits (not blockers):**\n- `docs/delivery/DECISIONS.md:15` D11 calls Mosaic \"a separate optional application/acceptance fixture\". \"Optional\" is about installation, but read alone it contradicts the mandatory A01\u2013A24 suite. Say \"opt-in-installed fixture whose full acceptance remains mandatory for release\".\n- `docs/delivery/UPSTREAM.md:106` names C04 as a G02 owner for controls/screen, but C04's procedure (`PLAN.md:304-329`) exercises only Mosaic pages and never mentions the probe apps. Add one line to C04 step 5.\n\n**Checked and adequately covered:**\n- Core independence from Mosaic: UPSTREAM.md:37-42, G01, C02 step 2 (\"Prove both distinct probe apps with all Mosaic-specific source/dependencies absent\"), C14 step 1, C15 step 2.\n- Generic names/include paths/data: UPSTREAM.md:44-50 and C02/C11. The claim that Mosaic must mount at `code/mosaic` is true: `upstream/mosaic/mosaic.lua:12-16` uses `include(\"mosaic/lib/...\")`, which native `include()` resolves via `_path.code`.\n- Lock separation: runtime-only `dependencies.lock.json` vs `fixtures/apps/mosaic.lock.json` owning Mosaic, n.b., matrix and toolkit (UPSTREAM.md:26, 53-57; C00 step 2). Default fetch excludes fixtures.\n- Generic conformance: C00 step 5 defines the API surface from official contracts independently of Mosaic; G04 and C12 step 1 reconcile every manifest-claimed API against conformance evidence; C03 step 2 explicitly refuses Mosaic's calls as the coverage limit.\n- Update/rejection/rollback: UPSTREAM.md:72-91 requires isolated candidate lock, patch-conflict as useful failure, conformance before Mosaic regression, unchanged app pins, one-command rollback, and a real ref change (no-op rejected). C00 step 2 identifies the ref pair; C14 step 4 implements and proves it; G05 owned by C14; P3 checkpoint in RUNBOOK.md:86 names it.\n- Preserved scope: A01\u2013A24, both base-MIDI and modulation profiles, Norns2sinfonion, D01/D02 MIDI-only WSL-first all unchanged. V04/V11/V12 correctly remain unverified with C00 owners.\n\n**Confidence: High** that no blocker exists in the documents as written. This is a structural read of a plan, not evidence that official norns builds on the host or that the patch set will stay small; both remain C00's empirical work.\n\n---\n_paranoia-local \u00b7 engine=claude \u00b7 session_ref=`8fcec847-fe00-4bb6-b255-bd608e19646d` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "status": "returned",
+  "finished_at": "2026-09-06T19:24:43.517105+00:00"
+}

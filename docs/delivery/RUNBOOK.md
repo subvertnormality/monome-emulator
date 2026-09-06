@@ -4,6 +4,9 @@ You are the execution agent. Deliver the cards in PLAN.md in dependency order;
 make routine engineering decisions, test them, and leave a resumable record.
 This document governs execution here. Parallax's policy does not apply by
 inheritance.
+The product boundary and official-dependency update policy are in UPSTREAM.md.
+Generic runtime conformance and Mosaic compatibility are separate mandatory
+delivery evidence layers; the application must never become a core dependency.
 
 ## Source and deliberate simplifications
 
@@ -65,8 +68,8 @@ block. A retry budget is not permission to mark failure as success.
 
 ## Proportionate Paranoia
 
-Stakes: a trusted, single-user local development tool processing local Mosaic
-scripts and test fixtures. Consequences are wasted development time, misleading
+Stakes: a trusted, single-user local norns/grid utility processing user-selected
+scripts and separate test fixtures, initially Mosaic. Consequences are wasted development time, misleading
 green tests, incorrect MIDI, and accidental changes to local projects. Priorities
 are runtime fidelity, real input/output coverage, reliable replay, and honest
 release gates. No remote multi-tenancy, hostile insiders, financial certification,
@@ -80,7 +83,7 @@ Required checkpoints:
 | P0 | This complete plan, runbook, acceptance contract, dependency graph | 1 critique + 1 focused follow-up |
 | P1 | C06 first real Mosaic vertical slice and runtime boundary | 1 critique + 1 focused follow-up |
 | P2 | C12 complete MIDI workflow and failure-verification package | 1 critique + 1 focused follow-up |
-| P3 | C14 WSL release candidate, especially false-green gates and LLM workflow | 1 critique + 1 focused follow-up |
+| P3 | C14 WSL release candidate, generic/app separation, official-dependency update/rollback, false-green gates and LLM workflow | 1 critique + 1 focused follow-up |
 | P4 | C15 Linux portability diff and platform-specific evidence only | 1 critique + 1 focused follow-up |
 | P5 | C16 controlled-clock adapter, after real-time releases | 1 critique + 1 focused follow-up |
 
@@ -128,7 +131,7 @@ against disposable fixtures/builds and assert that the intended check fails.
 Do not run a whole-repository mutation campaign.
 
 Every acceptance run records: emulator source revision and dirty patch digest,
-Mosaic/norns/submodule revisions, dependency image/tool versions, platform facts,
+official runtime and selected app/submodule revisions, dependency image/tool versions, platform facts,
 scenario version and seed, logical and wall-clock mode, test selection and counts,
 results including skips, input trace, output evidence, errors, and exit status.
 Use a run-specific directory under `artifacts/runs/<run-id>/` and a schema-checked
