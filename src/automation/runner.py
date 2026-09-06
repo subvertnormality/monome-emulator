@@ -34,6 +34,7 @@ def run(path,backend=None):
             options=app_fixtures.launch_options(scenario['fixture'],scenario.get('fixture_profile','base-midi'))
         elif 'script' in scenario:
             options=dict(script=ROOT/scenario['script'],code_root=ROOT/scenario['code_root'] if 'code_root' in scenario else None)
+        if 'midi_config' in scenario: options['midi_config']=scenario['midi_config']
         info=session.start(scenario['backend'],**options)
         for index,step in enumerate(scenario['steps']):
             kind=next(key for key in ('action','assertion','wait','fixture_fault') if key in step)

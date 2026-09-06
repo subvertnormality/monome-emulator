@@ -1,0 +1,18 @@
+{
+  "schema_version":1,"id":"native-midi-stream","backend":"native","tier":"I","family":"G04","deadline_ms":60000,
+  "script":"fixtures/probes/midi-probe/midi-probe.lua","code_root":"fixtures/probes",
+  "midi_config":{"ports":["Emulator MIDI","Second MIDI","Norns2sinfonion"]},
+  "steps":[
+    {"assertion":{"path":"state.midi_count","equals":0}},
+    {"action":{"type":"midi","port":3,"bytes":[159,0,1,159,127,127,143,0,0,159,127,0]}},
+    {"assertion":{"path":"state.midi_count","equals":4}},
+    {"assertion":{"path":"state.midi.0.port","equals":3}},
+    {"assertion":{"path":"state.midi.0.bytes","equals":[159,0,1]}},
+    {"assertion":{"path":"state.midi.1.bytes","equals":[159,127,127]}},
+    {"assertion":{"path":"state.midi.2.bytes","equals":[143,0,0]}},
+    {"assertion":{"path":"state.midi.3.bytes","equals":[159,127,0]}},
+    {"assertion":{"path":"state.midi.3.decoded.0.type","equals":"note_off"}},
+    {"assertion":{"path":"state.midi_capture.outstanding","equals":[]}},
+    {"assertion":{"path":"state.midi_capture.dropped","equals":0}}
+  ]
+}

@@ -68,7 +68,8 @@
   "data_seeds": [
     {
       "source": "mosaic/lib/config",
-      "destination": "mosaic/config"
+      "destination": "mosaic/config",
+      "format": "json-files"
     }
   ]
 }

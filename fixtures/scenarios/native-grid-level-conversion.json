@@ -1,0 +1,9 @@
+{"schema_version":1,"id":"native-grid-level-conversion","backend":"native","tier":"I","family":"G02","deadline_ms":60000,
+"script":"fixtures/probes/grid-level-probe/grid-level-probe.lua","code_root":"fixtures/probes",
+"steps":[
+{"assertion":{"path":"state.grid.0","equals":12}},
+{"assertion":{"path":"state.grid.1","equals":15}},
+{"assertion":{"path":"state.grid.2","equals":4}},
+{"assertion":{"path":"state.grid.3","equals":0}},
+{"assertion":{"path":"state.grid.127","equals":15}}
+]}

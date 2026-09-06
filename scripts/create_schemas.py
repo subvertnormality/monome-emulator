@@ -17,7 +17,7 @@ action={'oneOf':[
  obj(dict(type=const('enc'),n=integer(1,3),delta=integer(-127,127))),
  obj(dict(type=const('grid'),x=integer(1,16),y=integer(1,8),state=integer(0,1))),
  obj(dict(type=const('grid_connection'),connected=dict(type='boolean'))),
- obj(dict(type=const('midi'),port=integer(1,16),bytes=array(integer(0,255),1,4096))),
+ obj(dict(type=const('midi'),port=integer(1,16),bytes=array(integer(0,255),1,4096),at_monotonic_ns=integer(0,10**20)),['type','port','bytes']),
  obj(dict(type=const('release_all'))),
 ]}
 envelope=dict(schema_version=const(1),session_id=string(),action_id=string(),sequence=integer(1),action=action)
@@ -40,6 +40,7 @@ scenario_fields=dict(schema_version=const(1),id=string(),backend=string(enum=['c
  deadline_ms=integer(1,600000),steps=array(step,1,10000))
 required=list(scenario_fields)
 scenario_fields.update(script=string(),code_root=string(),fixture=string(),fixture_profile=string())
+scenario_fields['midi_config']=obj(dict(ports=array(string(),1,16),capture_limit=integer(1,1000000)),['ports'])
 save('scenario',obj(scenario_fields,required))
 artifact=obj(dict(path=string(),sha256=string(),size=integer(0,10**12)))
 identity=obj(dict(revision=string(),digest=string(),files=array(artifact,1)))

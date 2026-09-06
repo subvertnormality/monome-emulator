@@ -137,6 +137,11 @@
               },
               "minItems": 1,
               "maxItems": 4096
+            },
+            "at_monotonic_ns": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000000000000000
             }
           },
           "required": [

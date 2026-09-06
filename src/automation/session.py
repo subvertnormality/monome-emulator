@@ -28,8 +28,10 @@ def request(session_id,path,payload=None,timeout=5):
         raise ContractError(value.get('code','http_error'),value.get('message',str(error))) from error
     except (OSError,ValueError) as error: raise ContractError('session_unavailable',str(error)) from error
 
-def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None):
+def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None,midi_config=None):
     if backend not in ('contract-fixture','native'): raise ContractError('unsupported_backend',backend)
+    from devices.midi import configuration
+    midi_config=configuration(midi_config)
     session_id=uid(); directory=SESSIONS/session_id
     directory.mkdir(parents=True)
     dust=directory/'dust'
@@ -41,7 +43,7 @@ def start(backend='contract-fixture',script=None,code_root=None,data=None,enable
     else: data_path=dust/'data'
     config=dict(session_id=session_id,token=uid(),backend=backend,script=str(Path(script).absolute()) if script else None,
                 code_root=str(Path(code_root).absolute()) if code_root else None,data=str(data_path),dust=str(dust),
-                enabled_mods=enabled_mods or [],data_seeds=data_seeds or [])
+                enabled_mods=enabled_mods or [],data_seeds=data_seeds or [],midi_config=midi_config)
     write_json(directory/'config.json',config)
     log=open(directory/'server.log','w')
     env=dict(os.environ,PYTHONPATH=str(ROOT/'src'))

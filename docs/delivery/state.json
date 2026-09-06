@@ -2,8 +2,8 @@
   "schema_version": 1,
   "updated": "2026-09-06",
   "mode": "executing",
-  "current_card": "C05",
-  "next_action": "Implement configurable native MIDI ports, source emission sequence and independent decoder/capture tests.",
+  "current_card": "C06",
+  "next_action": "Create a four-step Mosaic pattern through actual controls, verify playback/edit/save/reload through API and browser, then conduct P1 including D15 grid fidelity correction.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -36,12 +36,13 @@
     },
     {
       "id": "C05",
-      "status": "in_progress",
-      "evidence": null
+      "status": "done",
+      "evidence": "docs/delivery/completions/C05.md",
+      "start_revision": "a2b5314"
     },
     {
       "id": "C06",
-      "status": "planned",
+      "status": "in_progress",
       "evidence": null
     },
     {

@@ -1,6 +1,14 @@
 -- Host profile applied after native startup installs its core/menu functions.
 -- Preserve script loading, drawing, params and clocks. No musical logic lives here.
 local report = _norns.emu_report
+local native_grid_led = _norns.grid_set_led
+_norns.grid_set_led = function(device, x, y, level, relative)
+  local ok, err = pcall(native_grid_led, device, x, y, level, relative)
+  if not ok then
+    local message=debug.traceback(string.format('%s (grid x=%s y=%s level=%s relative=%s)', tostring(err), tostring(x), tostring(y), tostring(level), tostring(relative)), 2)
+    report(5, message); error(message, 0)
+  end
+end
 local old_try = norns.try
 norns.try = function(f, message)
   -- Upstream's try reports only the phase to scripterror, then prints the

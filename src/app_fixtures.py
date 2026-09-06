@@ -26,4 +26,4 @@ def launch_options(name,profile):
         if not link.exists(): link.symlink_to(code/app,target_is_directory=True)
         elif link.resolve()!=(code/app).resolve(): raise ContractError('fixture_path','Unexpected profile source mapping')
     return dict(script=selected/value['entrypoint'],code_root=selected,enabled_mods=settings['enabled_mods'],
-      data_seeds=[dict(source=str(code/seed['source']),destination=seed['destination']) for seed in value.get('data_seeds',[])])
+      data_seeds=[dict(seed,source=str(code/seed['source'])) for seed in value.get('data_seeds',[])])

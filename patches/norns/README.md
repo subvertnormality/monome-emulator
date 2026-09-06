@@ -68,3 +68,21 @@ of the physical 16×8 surface. LED validation and unsupported tilt become named
 Lua errors. Remove when upstream supports equivalent memory-backed grid devices.
 The C03 package tests all 128 coordinates, relative/absolute brightness, refresh,
 four rotations, separate holds/releases, reconnect and actual Mosaic navigation.
+
+`0009-midi-device-contract.patch` adds ordered named virtual MIDI devices, keeps
+their names owned for the native device lifetime, exposes the existing native
+input parser, and captures emission sequence/time before transport. Realtime
+bytes are delivered separately without destroying a partial/running-status or
+SysEx message in the emulator profile. The pinned parser otherwise overwrites
+that state on interleaved realtime input. Literal stream/clock/SysEx probes cover
+the correction. Remove when upstream supplies these virtual boundary facilities
+and equivalent realtime parsing; physical-device behaviour is unchanged.
+
+`0010-grid-native-level-conversion.patch` removes stricter-than-upstream level
+validation introduced in 0008. Norns stores absolute values as int8/uint8 and
+libmonome `src/proto/mext.c:pack_nybbles` transmits the low four bits. The virtual
+frame now exposes that physical LED level. Relative values still use the original
+native clamp. Bounds on coordinates remain for memory safety. The signed/oversized
+level fixture and actual Mosaic playback cover this correction; Mosaic is not
+patched. This patch is removable with an upstream virtual-grid transport that
+already models the same packing.

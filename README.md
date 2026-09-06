@@ -4,7 +4,8 @@ Delivery is in progress. The native launcher runs official norns on Ubuntu 20.04
 WSL2 and boots generic scripts and both Mosaic MIDI fixture profiles. Automated
 checks cover native input, framebuffer capture, timers, structured errors and
 isolated session cleanup. The browser renders the actual norns screen and grid,
-with keys, encoders, mouse and keyboard controls. Complete MIDI/workflow acceptance
+with keys, encoders, mouse and keyboard controls. Configurable native MIDI ports
+support input streams and timestamped capture. Complete Mosaic workflow acceptance
 is still being implemented; this is not yet a complete emulator release.
 A general-purpose norns and grid development utility, built around the official
 monome software. Run local scripts, operate virtual controls, inspect MIDI and

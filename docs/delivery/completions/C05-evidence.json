@@ -1,0 +1,75 @@
+{
+  "passed": true,
+  "start_revision": "a2b5314",
+  "source_digest": "183bc9f9980c15a75b9b67659b603c34048f6bbb533fe2131b8168895de7261a",
+  "native_paths": [
+    "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/artifacts/c05/roundtrip/a2656cf47c08402a988ebc36f28c035d",
+    "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/artifacts/c05/overflow/5a52d22e2887405eb5a9b9e6e8a72468",
+    "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/artifacts/c05/mosaic/83b6a8d0944f40cb8a11096c2955fc69",
+    "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/artifacts/c05/configs"
+  ],
+  "contracts": {
+    "collected": 25,
+    "skipped": 0,
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 72.282
+  },
+  "artifacts": [
+    {
+      "sha256": "ede0fe2321857b9862f75fd2457a95e82285154343a7405958513c049c346c08",
+      "size": 17529,
+      "path": "artifacts/c05/results.json"
+    },
+    {
+      "sha256": "d040e02e8f4eb04e0972f19b702e2fca9da7f790bffb6d68c71a08a93ceca9f1",
+      "size": 254,
+      "path": "artifacts/c05-native.log"
+    },
+    {
+      "sha256": "5d8a8c665ed36b21393e45935810399791578c4e857f1b7b93f8d1f737191c63",
+      "size": 2260,
+      "path": "artifacts/c05-contracts.log"
+    },
+    {
+      "sha256": "58692f5c6b7a564606306fd1ab2eeca7727aba581114c28fec7d0b7ed8c74270",
+      "size": 19519,
+      "path": "artifacts/c05-build-result.json"
+    },
+    {
+      "sha256": "1015f5162dc79a1205e2184efd4e2d5eeb2602204fbbd13ea716fc63c7300770",
+      "size": 41678,
+      "path": "artifacts/runs/1dc194d2f78245a89455342d47f5e0c6/manifest.json"
+    },
+    {
+      "sha256": "492e4f62dccb779e4cae9d4f04e6019ccf1d096e0a0c6b43846140eefd24caa3",
+      "size": 42567,
+      "path": "artifacts/runs/b1108a26cf004782aac06a46370e2fc6/manifest.json"
+    },
+    {
+      "sha256": "8de707060db59a9376abb28d9c017348c212553b72abd0a8d43fdda6f66f81e7",
+      "size": 72921,
+      "path": "artifacts/runs/bf058e7812f94acb8a669aa1874b677e/manifest.json"
+    }
+  ],
+  "native_checks": [
+    {
+      "name": "native-midi-roundtrip",
+      "passed": true,
+      "emissions": 1189
+    },
+    {
+      "name": "native-capture-overflow",
+      "passed": true
+    },
+    {
+      "name": "mosaic-port-channel-and-sinfonion-controls",
+      "passed": true
+    },
+    {
+      "name": "malformed-and-missing-configs",
+      "passed": true
+    }
+  ],
+  "card": "C05"
+}

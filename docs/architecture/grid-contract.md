@@ -24,8 +24,12 @@ disconnect, preventing stale queued redraws from addressing freed memory.
 Duplicate down/up transitions and input to a disconnected grid fail explicitly.
 Multiple keys remain independently held until released; `release_all` uses the
 same input path. Physical tilt is unsupported and produces a named Lua error.
-Out-of-range LED writes fail in the virtual device profile instead of wrapping
-into unrelated backing cells. See patch 0008 and `tests/grid_native.py`.
+Out-of-range LED coordinates fail instead of addressing unrelated backing cells.
+Levels follow pinned norns int8 storage and official libmonome mext four-bit
+packing: absolute -4 displays 12, 31 displays 15 and 260 displays 4. Relative
+addition retains the upstream clamp to 0–15. Patch 0010 corrects C03's overly
+strict level validation; actual Mosaic playback exposed that fidelity defect.
+See `native-grid-level-conversion.json` and `tests/grid_native.py`.
 
 The full conformance probe checks all 128 positions through native callbacks and
 literal MIDI coordinate reports, and separately asserts the raw transport

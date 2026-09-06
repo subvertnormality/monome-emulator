@@ -10,6 +10,7 @@ import struct
 import subprocess
 import threading
 import time
+import copy
 from collections import deque
 from automation.protocol import ROOT,ContractError,read_json,write_json
 
@@ -29,7 +30,11 @@ class NativeBackend:
         self.processes=[]; self.logs=[]; self.closed=False
         self.errors=[]; self.absent=[]; self.ready=False; self.sequence=0; self.acks={}
         self.frame_revision=0; self.grid_revision=0; self.frame=bytes(32768); self.grid=[0]*128
-        self.midi=deque(maxlen=4096); self.midi_count=0; self.diagnostics={}
+        from devices.midi import Capture,Decoder,configuration
+        self.midi_config=configuration(config.get('midi_config'))
+        self.capture=Capture(self.midi_config['ports'],self.midi_config['capture_limit'])
+        self.midi_inputs=[Decoder() for _ in self.midi_config['ports']]
+        self.midi=self.capture.tail; self.midi_count=0; self.diagnostics={}
         self.held={}; self.condition=threading.Condition(); self.io_lock=threading.Lock()
         from devices.grid import GridInput
         self.grid_input=GridInput(); self.grid_device=dict(connected=True,rotation=0,intensity=15,serial='emu-grid-128',cols=16,rows=8)
@@ -86,6 +91,14 @@ class NativeBackend:
         for seed in self.config.get('data_seeds',[]):
             import shutil
             source=Path(seed['source']).resolve(); target=(dust/'data'/seed['destination']).resolve()
+            if not source.is_dir(): raise ContractError('seed_missing','Data seed directory is missing: '+str(source))
+            if seed.get('format')=='json-files':
+                files=list(source.glob('*.json'))
+                if not files: raise ContractError('seed_missing','No required JSON configuration files in '+str(source))
+                for file in files:
+                    try: json.loads(file.read_text())
+                    except (ValueError,OSError) as error: raise ContractError('seed_json','Invalid required JSON configuration '+str(file)+': '+str(error))
+            elif seed.get('format') is not None: raise ContractError('seed_format','Unknown data seed format')
             try: target.relative_to((dust/'data').resolve())
             except ValueError: raise ContractError('seed_path','Data seed escapes isolated data')
             if target.exists(): raise ContractError('seed_exists','Refusing to overwrite data seed target')
@@ -102,9 +115,9 @@ class NativeBackend:
             QTWEBENGINE_DISABLE_SANDBOX='1',QTWEBENGINE_CHROMIUM_FLAGS='--disable-gpu',
             LD_LIBRARY_PATH=str(ROOT/'.runtime/prefix/lib'),JACK_DEFAULT_SERVER='emu-'+self.config['session_id'][:16],
             NORNS_EMU_CRONE_PORT=str(self.ports['crone']),NORNS_EMU_MATRON_PORT=str(self.ports['matron']),
-            NORNS_EMU_SC_PORT=str(self.ports['scsynth']))
+            NORNS_EMU_SC_PORT=str(self.ports['scsynth']),NORNS_EMU_MIDI_PORTS='\n'.join(self.midi_config['ports']))
         write_json(self.directory/'native-config.json',dict(script=str(entry),mapped=str(self.mapped_entry),code_root=str(code),
-            ports=self.ports,jack_server=self.env['JACK_DEFAULT_SERVER'],enabled_mods=mods,runtime=str(self.native)))
+            ports=self.ports,midi=self.midi_config,jack_server=self.env['JACK_DEFAULT_SERVER'],enabled_mods=mods,runtime=str(self.native)))
     def launch(self,name,args,bridge=False):
         logfile=open(self.directory/(name+'.log'),'w'); self.logs.append(logfile)
         env=dict(self.env)
@@ -131,7 +144,7 @@ class NativeBackend:
     def check_processes(self):
         for name,process in self.processes:
             if process.poll() is not None: raise ContractError('backend_dead',name+' exited '+str(process.returncode)+'; '+str(self.directory/(name+'.log')))
-        if self.errors: raise ContractError('lua_error',self.errors[0]['message'])
+        if self.errors: raise ContractError(self.errors[0]['code'],self.errors[0]['message'])
     def receive(self):
         try:
             while not self.closed:
@@ -149,8 +162,16 @@ class NativeBackend:
                         if len(payload)!=128: raise ValueError('Invalid grid length')
                         self.grid=list(payload); self.grid_revision+=1; record.update(leds=self.grid)
                     elif kind==3:
-                        self.midi_count+=1; item=dict(index=self.midi_count,device_id=identifier,monotonic_ns=ns,bytes=list(payload))
-                        self.midi.append(item); record.update(item)
+                        if len(payload)<9: raise ValueError('Short native MIDI emission')
+                        sequence=struct.unpack('=Q',payload[:8])[0]
+                        raw=list(payload[8:]); record.update(sequence=sequence,bytes=raw)
+                        # Retain the offending emission even if its capture contract fails.
+                        try: item=self.capture.accept(sequence,identifier+1,ns,raw)
+                        except ContractError as error:
+                            self.events.write(json.dumps(record)+'\n')
+                            if not self.errors: self.errors.append(dict(code=error.code,message=str(error)))
+                            self.condition.notify_all(); continue
+                        self.midi_count=self.capture.count; record.update(item)
                     elif kind==4: self.acks[identifier]=ns
                     elif kind==5:
                         item=dict(code='lua_error',message=payload.decode(errors='replace')); self.errors.append(item); record.update(item)
@@ -183,7 +204,7 @@ class NativeBackend:
     def send(self,kind,*args):
         with self.io_lock:
             self.check_processes(); self.sequence+=1
-            packet=struct.pack('=6i',self.sequence,kind,*(list(args)+[0]*(4-len(args))))
+            packet=(struct.pack('=4i',self.sequence,kind,args[0],len(args[1]))+bytes(args[1])) if kind==7 else struct.pack('=6i',self.sequence,kind,*(list(args)+[0]*(4-len(args))))
             with self.condition:
                 self.events.write(json.dumps(dict(kind='input',sequence=self.sequence,type=kind,args=list(args),monotonic_ns=time.monotonic_ns()))+'\n')
             self.controller.send(packet)
@@ -215,8 +236,14 @@ class NativeBackend:
                     for held in list(self.grid_input.held.values()): self.query({'action':dict(held,state=0)})
                 self.send(6,int(connected)); self.grid_input.connected=connected
             elif kind=='midi':
-                if action['port']!=1 or len(action['bytes'])>3: raise ContractError('unsupported_midi','C02 probe supports one MIDI event port; full streams attach in C05')
-                self.send(4,len(action['bytes']),*action['bytes'])
+                port=action['port']
+                if port>len(self.midi_inputs): raise ContractError('midi_port','Requested MIDI port is not configured')
+                candidate=copy.deepcopy(self.midi_inputs[port-1]); candidate.feed(action['bytes'])
+                if 'at_monotonic_ns' in action:
+                    delay=(action['at_monotonic_ns']-time.monotonic_ns())/1e9
+                    if delay<0 or delay>2: raise ContractError('midi_input_time','Scheduled MIDI input must be in the next two seconds on the backend monotonic clock')
+                    time.sleep(delay)
+                self.send(7,port,action['bytes']); self.midi_inputs[port-1]=candidate
             elif kind=='release_all':
                 for held in list(self.held.values()):
                     release=dict(held,state=0); self.query({'action':release})
@@ -232,6 +259,7 @@ class NativeBackend:
             return dict(frame_revision=revision,grid_revision=self.grid_revision,state=dict(
               ready=self.ready,script=self.app_name,frame=dict(path=str(frame_path),width=128,height=64,format='BGRA8',
                 sha256=hashlib.sha256(frame).hexdigest(),pixels_base64=base64.b64encode(frame).decode()),grid=self.grid.copy(),midi=list(self.midi),midi_count=self.midi_count,
+              midi_capture=self.capture.state(),midi_ports=self.midi_config['ports'],
               held=list(self.held.values()),grid_device=dict(self.grid_device),diagnostics=dict(self.diagnostics),absent=self.absent[-64:]))
     def close(self):
         if self.closed: return

@@ -151,7 +151,7 @@ def serve(directory):
                     if self.command=='GET' and self.path=='/snapshot': self.respond(200,app.snapshot()); return
                     if self.command=='GET' and self.path=='/capabilities':
                         self.respond(200,checked('capability',dict(schema_version=1,backend=app.config['backend'],
-                          fidelity=app.backend.fidelity,supported=(['native script loading','native keys/encoders','Cairo framebuffer','grid128 LED/relative/bulk/refresh, rotation, intensity, holds and reconnect','MIDI event probe'] if app.config['backend']=='native' else ['contract counter','ordered action acknowledgment']),
+                          fidelity=app.backend.fidelity,supported=(['native script loading','native keys/encoders','Cairo framebuffer','grid128 LED/relative/bulk/refresh, rotation, intensity, holds and reconnect','configured native MIDI ports, byte-stream input and emission-time capture'] if app.config['backend']=='native' else ['contract counter','ordered action acknowledgment']),
                           absent=['physical Crow','GPIO/SPI','network manager'] if app.config['backend']=='native' else [],
                           unsupported=['audio engines','physical peripherals','grid tilt'] if app.config['backend']=='native' else ['native norns','application workflows']))); return
                     if self.command=='POST' and self.path=='/action': self.respond(200,app.action(payload)); return

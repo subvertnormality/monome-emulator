@@ -17,5 +17,6 @@
 
 | D13 | Execute staged delivery, beginning C00 on the existing distro | User: “Execute”, 2026-09-06 |
 | D14 | Use official C matron/crone release with real SC core and dummy JACK; native virtual-device event adapter | C00 empirical probe and runtime-decision.md; no Lua runtime replacement |
+| D15 | Preserve native signed LED storage and official mext four-bit packing, including wrapped absolute values; retain coordinate bounds | C05 actual Mosaic playback exposed C03's stricter level rejection. `device_monome.c` stores int8/uint8 and pinned libmonome `mext.c:pack_nybbles` sends low nibbles. Patch 0010 and native level fixture amend the grid contract; P1 must include this correction in its runtime-boundary review. No Mosaic patch or weakened MIDI expectation. |
 
 Execution is authorized. No recurring jobs have been created.

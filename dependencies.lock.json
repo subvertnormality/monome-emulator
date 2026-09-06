@@ -122,6 +122,14 @@
     {
       "path": "patches/norns/0008-grid-device-contract.patch",
       "sha256": "647f46a6619fd36d968dff2e2990ca46ad373dae023773f65595bad26ba7c247"
+    },
+    {
+      "path": "patches/norns/0009-midi-device-contract.patch",
+      "sha256": "6233f827a3bbf090d3a6b7470569b3f232fe551bea7a94a5e24168c521955cc0"
+    },
+    {
+      "path": "patches/norns/0010-grid-native-level-conversion.patch",
+      "sha256": "fc079402b99feca9a878f2c97f02334ee75f6c06d7c4cc7d667a168935d7ad84"
     }
   ],
   "serialosc": {
