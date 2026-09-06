@@ -3,8 +3,9 @@
 Delivery is in progress. The native launcher runs official norns on Ubuntu 20.04
 WSL2 and boots generic scripts and both Mosaic MIDI fixture profiles. Automated
 checks cover native input, framebuffer capture, timers, structured errors and
-isolated session cleanup. Browser controls and complete device/workflow acceptance
-are still being implemented; this is not yet a complete emulator release.
+isolated session cleanup. The browser renders the actual norns screen and grid,
+with keys, encoders, mouse and keyboard controls. Complete MIDI/workflow acceptance
+is still being implemented; this is not yet a complete emulator release.
 A general-purpose norns and grid development utility, built around the official
 monome software. Run local scripts, operate virtual controls, inspect MIDI and
 screen/grid output, and automate verification without physical hardware.
@@ -26,6 +27,9 @@ The development CLI is `./dev/emu` inside WSL. Runtime installation uses
 `fixtures fetch mosaic --locked`. Start an external script with
 `start --script /path/to/code/app/app.lua --code-root /path/to/code`, then use
 `snapshot`, `action`, `capabilities` and `stop` with its returned session ID.
+Open the returned `browser_url` on the Windows host to use its controls. The URL
+contains the local session token; treat it as a session credential. See the
+[browser contract](docs/architecture/browser-contract.md) for bindings and testing.
 See [native sessions](docs/architecture/native-sessions.md) for the current
 implementation boundary and [C02 evidence](docs/delivery/completions/C02.md).
 

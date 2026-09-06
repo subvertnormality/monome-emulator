@@ -15,7 +15,7 @@ def artifact(path,base):
 
 def source_identity():
     files=[]
-    for name in ['src','dev','scripts','schemas','patches','compatibility','fixtures','tests']:
+    for name in ['src','ui','dev','scripts','schemas','patches','compatibility','fixtures','tests']:
         for p in (ROOT/name).rglob('*'):
             if p.is_file() and '__pycache__' not in p.parts and p.suffix!='.pyc': files.append(artifact(p,ROOT))
     files.append(artifact(ROOT/'dependencies.lock.json',ROOT))

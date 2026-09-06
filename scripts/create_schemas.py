@@ -20,7 +20,9 @@ action={'oneOf':[
  obj(dict(type=const('midi'),port=integer(1,16),bytes=array(integer(0,255),1,4096))),
  obj(dict(type=const('release_all'))),
 ]}
-save('action',obj(dict(schema_version=const(1),session_id=string(),action_id=string(),sequence=integer(1),action=action)))
+envelope=dict(schema_version=const(1),session_id=string(),action_id=string(),sequence=integer(1),action=action)
+envelope_required=list(envelope); envelope['client_id']=string()
+save('action',obj(envelope,envelope_required))
 save('ack',obj(dict(schema_version=const(1),session_id=string(),action_id=string(),sequence=integer(1),
                    status=const('applied'),monotonic_ns=integer(0,10**20))))
 save('error',obj(dict(schema_version=const(1),code=string(),message=string(),monotonic_ns=integer(0,10**20))))
@@ -50,3 +52,9 @@ save('manifest',obj(dict(schema_version=const(1),run_id=string(),scenario_id=str
  artifacts=array(artifact,1),application={'oneOf':[dict(type='null'),dict(type='object')]},
  runtime={'oneOf':[dict(type='null'),dict(type='object')]},error={'oneOf':[dict(type='null'),dict(type='object')]})))
 if __name__=='__main__': print('Wrote strict automation schemas')
+browser_fields=dict(schema_version=const(1),kind=const('browser-package'),run_id=string(),scenario_id=string(),
+ backend=const('native'),fidelity=const('native-norns'),tier=const('B'),family=string(),clock_mode=const('real-time'),
+ source=identity,application=dict(type='object'),runtime=dict(type='object'),platform=dict(type='object'),
+ toolchain=dict(type='object'),collected=integer(1),passed=dict(type='boolean'),exit_code=integer(0,255),
+ checks=array(obj(dict(name=string(),passed=dict(type='boolean'),detail=string()),['name','passed']),1),artifacts=array(artifact,1))
+save('browser-run',obj(browser_fields))

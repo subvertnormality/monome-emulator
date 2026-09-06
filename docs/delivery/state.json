@@ -2,8 +2,8 @@
   "schema_version": 1,
   "updated": "2026-09-06",
   "mode": "executing",
-  "current_card": "C04",
-  "next_action": "Implement browser screen/grid rendering and controls through the shared API, with focus-loss/disconnect release and automated browser evidence.",
+  "current_card": "C05",
+  "next_action": "Implement configurable native MIDI ports, source emission sequence and independent decoder/capture tests.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -30,12 +30,13 @@
     },
     {
       "id": "C04",
-      "status": "planned",
-      "evidence": null
+      "status": "done",
+      "evidence": "docs/delivery/completions/C04.md",
+      "start_revision": "2d9c55f"
     },
     {
       "id": "C05",
-      "status": "planned",
+      "status": "in_progress",
       "evidence": null
     },
     {

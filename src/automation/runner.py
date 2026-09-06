@@ -82,7 +82,7 @@ def run(path,backend=None):
     write_json(out/'failure.json',error)
     if info:
         directory=session.SESSIONS/info['session_id']
-        for name in ['server.log','backend.log','matron.log','sclang.log','jack.log','crone.log','native-events.jsonl','frame.bgra','native-config.json','startup-error.json','cleanup.json']:
+        for name in ['server.log','backend.log','matron.log','sclang.log','jack.log','crone.log','native-events.jsonl','actions.jsonl','frame.bgra','native-config.json','startup-error.json','cleanup.json']:
             source=directory/name
             if source.exists(): (out/name).write_bytes(source.read_bytes())
     manifest=checked('manifest',dict(schema_version=1,run_id=run_id,scenario_id=scenario['id'],session_id=info['session_id'] if info else 'startup-failed',

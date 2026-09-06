@@ -5,6 +5,7 @@ from .protocol import ROOT,ContractError,checked,read_json
 
 def verify(path,current_source=True):
     path=Path(path).resolve()
+    if read_json(path).get('kind')=='browser-package': return verify_browser(path,current_source)
     manifest=checked('manifest',read_json(path))
     if not manifest['collected'] or len(manifest['results'])!=manifest['collected']:
         raise ContractError('incomplete_run','Empty or incomplete result inventory')
@@ -54,6 +55,28 @@ def verify(path,current_source=True):
             verify_install(manifest['runtime'])
         if current_source and application_identity(manifest['application']['code_root'])['digest']!=manifest['application']['digest']:
             raise ContractError('stale_application','Application source no longer matches evidence')
+    return manifest
+
+def verify_browser(path,current_source=True):
+    path=Path(path).resolve(); manifest=checked('browser-run',read_json(path))
+    if not manifest['passed'] or manifest['exit_code'] or manifest['collected']!=len(manifest['checks']) or not all(c['passed'] for c in manifest['checks']):
+        raise ContractError('failed_browser_run','Browser package is incomplete or failed')
+    names=[r['path'] for r in manifest['artifacts']]
+    if len(names)!=len(set(names)) or not {'results.json','observations.json','native-events.jsonl','actions.jsonl','cleanup.json','frame.bgra'}.issubset(names) or not any(n.endswith('.png') for n in names):
+        raise ContractError('browser_artifacts','Missing browser/runtime evidence')
+    for record in manifest['artifacts']: verify_artifact(record,path.parent)
+    result=read_json(path.parent/'results.json')
+    if (path.parent/'failure.json').exists(): raise ContractError('failed_browser_run','Browser failure artifact is present')
+    cleanup=read_json(path.parent/'cleanup.json')
+    if not cleanup or not {'matron','crone','jack'}.issubset({c['service'] for c in cleanup}) or any(c['returncode']!=0 for c in cleanup if c['service']!='sclang'):
+        raise ContractError('browser_cleanup','Native services did not stop cleanly')
+    if not result['passed'] or result['results']!=manifest['checks']: raise ContractError('browser_results','Captured browser results differ from manifest')
+    if current_source:
+        if manifest['source']['digest']!=source_identity()['digest']: raise ContractError('stale_source','Browser evidence does not match current sources')
+        from .identity import application_identity
+        from runtime.dependencies import verify_install
+        if application_identity(manifest['application']['code_root'])['digest']!=manifest['application']['digest']: raise ContractError('stale_application','Browser application changed')
+        verify_install(manifest['runtime'])
     return manifest
 
 def release_check(paths,milestone,platform):

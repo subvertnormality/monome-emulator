@@ -1,5 +1,6 @@
 """Own actual norns services and adapt native packets to automation observations."""
 import hashlib
+import base64
 import json
 import os
 from pathlib import Path
@@ -157,9 +158,9 @@ class NativeBackend:
                     elif kind==7:
                         value=payload.decode(errors='replace'); self.absent.append(value); record['absence']=value
                     elif kind==8:
-                        name,beats,tempo,count,mods,loaded,threads,metros=payload.decode().split('\t')
+                        name,beats,tempo,count,mods,loaded,threads,metros,menu=payload.decode().split('\t')
                         self.diagnostics=dict(script=name,beats=float(beats),tempo=float(tempo),params=int(count),enabled_mods=int(mods),
-                                              loaded_mods=int(loaded),clock_threads=int(threads),running_metros=int(metros))
+                                              loaded_mods=int(loaded),clock_threads=int(threads),running_metros=int(metros),menu_mode=bool(int(menu)))
                     elif kind==9:
                         if len(payload)!=3: raise ValueError('Invalid grid metadata')
                         connected,rotation,intensity=payload
@@ -198,7 +199,10 @@ class NativeBackend:
         self.check_processes()
         if 'action' in payload:
             action=payload['action']; kind=action['type']
-            if kind=='key': self.send(1,action['n'],action['state'])
+            if kind=='key':
+                key=('key',action['n'],None,None)
+                if bool(action['state'])==(key in self.held): raise ContractError('duplicate_key_transition','Norns key already has requested state')
+                self.send(1,action['n'],action['state'])
             elif kind=='enc': self.send(2,action['n'],action['delta'])
             elif kind=='grid':
                 self.grid_input.validate(action)
@@ -227,7 +231,7 @@ class NativeBackend:
             frame_path=self.directory/'frame.bgra'; frame_path.write_bytes(frame)
             return dict(frame_revision=revision,grid_revision=self.grid_revision,state=dict(
               ready=self.ready,script=self.app_name,frame=dict(path=str(frame_path),width=128,height=64,format='BGRA8',
-                sha256=hashlib.sha256(frame).hexdigest()),grid=self.grid.copy(),midi=list(self.midi),midi_count=self.midi_count,
+                sha256=hashlib.sha256(frame).hexdigest(),pixels_base64=base64.b64encode(frame).decode()),grid=self.grid.copy(),midi=list(self.midi),midi_count=self.midi_count,
               held=list(self.held.values()),grid_device=dict(self.grid_device),diagnostics=dict(self.diagnostics),absent=self.absent[-64:]))
     def close(self):
         if self.closed: return

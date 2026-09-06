@@ -23,5 +23,7 @@ function enc(n,d)
   if n==3 then params:delta('value',d); redraw() end
 end
 function redraw()
-  screen.clear(); screen.level(15); screen.rect(10,10,20,10); screen.fill(); screen.update()
+  screen.clear(); screen.level(15); screen.rect(10,10,20,10); screen.fill()
+  for level=0,15 do screen.level(level); screen.rect(level*8,60,8,4); screen.fill() end
+  screen.update()
 end

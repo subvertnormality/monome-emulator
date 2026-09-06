@@ -68,6 +68,6 @@ _norns.emu_observe=function()
   for _,name in ipairs(enabled) do if mods.is_loaded(name) then loaded=loaded+1 end end
   for _,thread in pairs(clock.threads) do if coroutine.status(thread)~='dead' then threads=threads+1 end end
   for _,timer in pairs(metro.metros) do if timer.is_running then metros=metros+1 end end
-  report(8,string.format('%s\t%.9f\t%.6f\t%d\t%d\t%d\t%d\t%d',norns.state.name,
-    clock.get_beats(),clock.get_tempo(),#params.params,#enabled,loaded,threads,metros))
+  report(8,string.format('%s\t%.9f\t%.6f\t%d\t%d\t%d\t%d\t%d\t%d',norns.state.name,
+    clock.get_beats(),clock.get_tempo(),#params.params,#enabled,loaded,threads,metros,norns.menu.status() and 1 or 0))
 end
