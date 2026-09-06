@@ -1,0 +1,3401 @@
+{
+  "schema_version": 1,
+  "mosaic_revision": "160d1ea7506773e65f298094e11d005dcb568dff",
+  "readme_sha256": "c66fe4506846a0087308b5bf42d9d68ccadd5f43c751f0806cfa555dc8c23ccf",
+  "status": "Inventory obligations; no workflow acceptance claimed",
+  "families": {
+    "A01": {
+      "requirement": "Fresh boot, no existing data, stable initial screen/grid, reload",
+      "observable_oracle": "Ready state, frame/LED layout, no Lua errors, capability inventory",
+      "owner": "C06"
+    },
+    "A02": {
+      "requirement": "Grid coordinates, levels 0\u201315, multiple held keys, press/release and reconnect",
+      "observable_oracle": "Runtime key trace and raw LED matrix; no stuck held input",
+      "owner": "C03/C04"
+    },
+    "A03": {
+      "requirement": "Three keys/encoders, shift combinations, param menus, confirm/cancel, file/text dialogs",
+      "observable_oracle": "Callback order, screen state and resulting public behaviour",
+      "owner": "C04/C11"
+    },
+    "A04": {
+      "requirement": "Create/edit trigs, note and velocity pages, remove trigs, page cycling",
+      "observable_oracle": "Grid cells and exact note/velocity event table before/after edit",
+      "owner": "C08"
+    },
+    "A05": {
+      "requirement": "Channels, device/channel selection, pattern assignment, merge modes, mute, length and wrap",
+      "observable_oracle": "MIDI port/channel, merged event tables, mute silence, independent channel lengths",
+      "owner": "C08"
+    },
+    "A06": {
+      "requirement": "Scale, root, degree, rotation, transposition, octave, masks and chords; quantiser options",
+      "observable_oracle": "Independently computed small pitch tables and chord note sets",
+      "owner": "C08"
+    },
+    "A07": {
+      "requirement": "Start/stop, reset options, clock divisions, tempo changes, swing/shuffle",
+      "observable_oracle": "Note/transport ordering, beat-domain phase and wall-clock bounds",
+      "owner": "C07/C09"
+    },
+    "A08": {
+      "requirement": "Probability and random pitch/trig options with fixed seeds and boundary probabilities",
+      "observable_oracle": "Repeatable trace, 0/100% boundaries, pitch membership; avoid flaky statistical gates",
+      "owner": "C09"
+    },
+    "A09": {
+      "requirement": "Trig locks, trigless locks, slides and wrap options, scale/transposition/octave locks",
+      "observable_oracle": "Notes/CCs/values at defined steps and boundary transitions",
+      "owner": "C09"
+    },
+    "A10": {
+      "requirement": "Strum, arpeggio, acceleration, spread, chord shape/velocity/mute-root options",
+      "observable_oracle": "Ordered note-on/off tables, positive durations, documented overlap behaviour",
+      "owner": "C09"
+    },
+    "A11": {
+      "requirement": "Song slot operations, repeats, sequence length, transitions, song mode/reset choices",
+      "observable_oracle": "Pattern sequence and boundary events; no missing/double transition",
+      "owner": "C09"
+    },
+    "A12": {
+      "requirement": "Live MIDI recording, held-step entry, chords, quantised starts/lengths, record arm/disarm",
+      "observable_oracle": "Replay captured input as expected output; grid/screen shows edit",
+      "owner": "C10"
+    },
+    "A13": {
+      "requirement": "MIDI controller mapping, relative binary-offset encoders, ranges/channels/selected-channel mapping",
+      "observable_oracle": "Intended value changes only; wrong port/channel does not alter target",
+      "owner": "C10"
+    },
+    "A14": {
+      "requirement": "Device configuration discovery and malformed config handling; CC/program changes including Elektron and Sinfonion software output",
+      "observable_oracle": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices",
+      "owner": "C05/C10"
+    },
+    "A15": {
+      "requirement": "Undo/redo and memory operations, change cancellation",
+      "observable_oracle": "Previous and reapplied project behaviour through output and display",
+      "owner": "C08/C11"
+    },
+    "A16": {
+      "requirement": "Save/load/new/autosave, params/PSETs/PMAPs, missing/corrupt data, reload/restart",
+      "observable_oracle": "Round-trip MIDI trace and visible edits; original files preserved on failure",
+      "owner": "C11"
+    },
+    "A17": {
+      "requirement": "Matrix/toolkit LFOs/modulation and parameter mapping interactions",
+      "observable_oracle": "Both mod paths change actual Mosaic MIDI-device parameters with known shape/range/rate and emitted MIDI effects",
+      "owner": "C00/C02/C09"
+    },
+    "A18": {
+      "requirement": "MIDI panic, pending note cancellation, repeated stop/start and disconnected client",
+      "observable_oracle": "No outstanding notes after defined drain, no duplicate active clocks",
+      "owner": "C12"
+    },
+    "A19": {
+      "requirement": "Dirty display/grid refresh, page indicators, tooltips, edits during playback",
+      "observable_oracle": "Rendered state updates; seeded stale-frame defect is detected",
+      "owner": "C04/C12"
+    },
+    "A20": {
+      "requirement": "LLM reproduce/edit/reload/verify loop on a candidate Mosaic change",
+      "observable_oracle": "Saved input recipe, failing baseline, passing candidate, unaffected regressions",
+      "owner": "C13"
+    },
+    "A21": {
+      "requirement": "Error observability: Lua exceptions including coroutine errors, backend death, API failure",
+      "observable_oracle": "Nonzero runner exit and structured diagnostic artifacts, never timeout-as-pass",
+      "owner": "C01/C02/C12"
+    },
+    "A22": {
+      "requirement": "Real-time mixed-feature endurance and clock/MIDI ordering",
+      "observable_oracle": "Bounded timing, no lost events, no stuck inputs/notes or leaked sessions",
+      "owner": "C12"
+    },
+    "A23": {
+      "requirement": "Automated clean install and execution on declared WSL profile",
+      "observable_oracle": "Inventory complete, browser + runtime checks, host facts identify WSL",
+      "owner": "C14"
+    },
+    "A24": {
+      "requirement": "Native Linux portability on declared profile",
+      "observable_oracle": "Same suite and fixtures, host facts identify native Linux",
+      "owner": "C15"
+    }
+  },
+  "sections": [
+    {
+      "id": "README-148",
+      "feature": "Getting Started",
+      "scope": "documentation",
+      "source": {
+        "path": "README.md",
+        "line": 148,
+        "end_line": 149
+      },
+      "family": "A23",
+      "owner_card": "C14",
+      "required_tiers": [],
+      "scenario_ids": [],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L148",
+        "observable": "Inventory complete, browser + runtime checks, host facts identify WSL"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ],
+      "disposition": "No software scenario: navigation/physical setup/future development text; child software sections tracked separately"
+    },
+    {
+      "id": "README-150",
+      "feature": "Install",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 150,
+        "end_line": 155
+      },
+      "family": "A23",
+      "owner_card": "C14",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A23-install"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L150",
+        "observable": "Inventory complete, browser + runtime checks, host facts identify WSL"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-156",
+      "feature": "Setup",
+      "scope": "documentation",
+      "source": {
+        "path": "README.md",
+        "line": 156,
+        "end_line": 157
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [],
+      "scenario_ids": [],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L156",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ],
+      "disposition": "No software scenario: navigation/physical setup/future development text; child software sections tracked separately"
+    },
+    {
+      "id": "README-158",
+      "feature": "Hardware",
+      "scope": "documentation",
+      "source": {
+        "path": "README.md",
+        "line": 158,
+        "end_line": 165
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [],
+      "scenario_ids": [],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L158",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ],
+      "disposition": "No software scenario: navigation/physical setup/future development text; child software sections tracked separately"
+    },
+    {
+      "id": "README-166",
+      "feature": "MIDI Device Configuration",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 166,
+        "end_line": 167
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A14-midi-device-configuration"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L166",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-168",
+      "feature": "Stock Devices",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 168,
+        "end_line": 180
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A14-stock-devices"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L168",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-181",
+      "feature": "Adding Custom Devices",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 181,
+        "end_line": 186
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A14-adding-custom-devices"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L181",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-187",
+      "feature": "Mods and Software Devices",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 187,
+        "end_line": 190
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A14-mods-and-software-devices"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L187",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-191",
+      "feature": "MIDI Keyboard Input",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 191,
+        "end_line": 197
+      },
+      "family": "A12",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A12-midi-keyboard-input"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L191",
+        "observable": "Replay captured input as expected output; grid/screen shows edit"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-198",
+      "feature": "MIDI Controller Mapping",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 198,
+        "end_line": 219
+      },
+      "family": "A13",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A13-midi-controller-mapping"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L198",
+        "observable": "Intended value changes only; wrong port/channel does not alter target"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-220",
+      "feature": "Getting Around Mosaic",
+      "scope": "documentation",
+      "source": {
+        "path": "README.md",
+        "line": 220,
+        "end_line": 221
+      },
+      "family": "A07",
+      "owner_card": "C07",
+      "required_tiers": [],
+      "scenario_ids": [],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L220",
+        "observable": "Note/transport ordering, beat-domain phase and wall-clock bounds"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ],
+      "disposition": "No software scenario: navigation/physical setup/future development text; child software sections tracked separately"
+    },
+    {
+      "id": "README-222",
+      "feature": "Sequencer Start and Stop",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 222,
+        "end_line": 234
+      },
+      "family": "A07",
+      "owner_card": "C07",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A07-sequencer-start-and-stop"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L222",
+        "observable": "Note/transport ordering, beat-domain phase and wall-clock bounds"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-235",
+      "feature": "Arm live record",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 235,
+        "end_line": 262
+      },
+      "family": "A12",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A12-arm-live-record"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L235",
+        "observable": "Replay captured input as expected output; grid/screen shows edit"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-263",
+      "feature": "Grid Menu Navigation",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 263,
+        "end_line": 288
+      },
+      "family": "A19",
+      "owner_card": "C04",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A19-grid-menu-navigation"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L263",
+        "observable": "Rendered state updates; seeded stale-frame defect is detected"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-289",
+      "feature": "Norns Menu Navigation",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 289,
+        "end_line": 303
+      },
+      "family": "A19",
+      "owner_card": "C04",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A19-norns-menu-navigation"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L289",
+        "observable": "Rendered state updates; seeded stale-frame defect is detected"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-304",
+      "feature": "Tooltips",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 304,
+        "end_line": 307
+      },
+      "family": "A19",
+      "owner_card": "C04",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A19-tooltips"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L304",
+        "observable": "Rendered state updates; seeded stale-frame defect is detected"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-308",
+      "feature": "MIDI Panic",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 308,
+        "end_line": 311
+      },
+      "family": "A18",
+      "owner_card": "C12",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A18-midi-panic"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L308",
+        "observable": "No outstanding notes after defined drain, no duplicate active clocks"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-312",
+      "feature": "Cheat Sheet",
+      "scope": "documentation",
+      "source": {
+        "path": "README.md",
+        "line": 312,
+        "end_line": 315
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [],
+      "scenario_ids": [],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L312",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ],
+      "disposition": "No software scenario: navigation/physical setup/future development text; child software sections tracked separately"
+    },
+    {
+      "id": "README-316",
+      "feature": "Typical Workflow",
+      "scope": "documentation",
+      "source": {
+        "path": "README.md",
+        "line": 316,
+        "end_line": 319
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [],
+      "scenario_ids": [],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L316",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ],
+      "disposition": "No software scenario: navigation/physical setup/future development text; child software sections tracked separately"
+    },
+    {
+      "id": "README-320",
+      "feature": "Sound Design",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 320,
+        "end_line": 327
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A14-sound-design"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L320",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-328",
+      "feature": "Rhythm Section Design",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 328,
+        "end_line": 335
+      },
+      "family": "A04",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A04-rhythm-section-design"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L328",
+        "observable": "Grid cells and exact note/velocity event table before/after edit"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-336",
+      "feature": "Harmony Design",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 336,
+        "end_line": 343
+      },
+      "family": "A06",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-harmony-design"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L336",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-344",
+      "feature": "Sequence Composition",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 344,
+        "end_line": 347
+      },
+      "family": "A05",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A05-sequence-composition"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L344",
+        "observable": "MIDI port/channel, merged event tables, mute silence, independent channel lengths"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-348",
+      "feature": "Using Merge Modes",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 348,
+        "end_line": 351
+      },
+      "family": "A05",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A05-using-merge-modes"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L348",
+        "observable": "MIDI port/channel, merged event tables, mute silence, independent channel lengths"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-352",
+      "feature": "Melody Composition",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 352,
+        "end_line": 357
+      },
+      "family": "A05",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A05-melody-composition"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L352",
+        "observable": "MIDI port/channel, merged event tables, mute silence, independent channel lengths"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-358",
+      "feature": "Modulation, Movement, and Interest",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 358,
+        "end_line": 361
+      },
+      "family": "A17",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A17-modulation-movement-and-interest"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L358",
+        "observable": "Both mod paths change actual Mosaic MIDI-device parameters with known shape/range/rate and emitted MIDI effects"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-362",
+      "feature": "Song Composition",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 362,
+        "end_line": 367
+      },
+      "family": "A11",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A11-song-composition"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L362",
+        "observable": "Pattern sequence and boundary events; no missing/double transition"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-368",
+      "feature": "Dig Deeper",
+      "scope": "documentation",
+      "source": {
+        "path": "README.md",
+        "line": 368,
+        "end_line": 371
+      },
+      "family": "A04",
+      "owner_card": "C08",
+      "required_tiers": [],
+      "scenario_ids": [],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L368",
+        "observable": "Grid cells and exact note/velocity event table before/after edit"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ],
+      "disposition": "No software scenario: navigation/physical setup/future development text; child software sections tracked separately"
+    },
+    {
+      "id": "README-372",
+      "feature": "Pattern Editor",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 372,
+        "end_line": 384
+      },
+      "family": "A04",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A04-pattern-editor"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L372",
+        "observable": "Grid cells and exact note/velocity event table before/after edit"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-385",
+      "feature": "Adding Trigs",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 385,
+        "end_line": 440
+      },
+      "family": "A04",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A04-adding-trigs"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L385",
+        "observable": "Grid cells and exact note/velocity event table before/after edit"
+      },
+      "boundaries": [
+        "toggle first/last step",
+        "held trig length bounded by next trig",
+        "drum/tresillo/Euclidean/NE numeric algorithms",
+        "all four algorithm selections",
+        "bank and fine/coarse faders",
+        "prime shows preview without committing",
+        "paint toggles overlaps",
+        "repeated paint undo",
+        "cancel preview",
+        "left/right/reset shift",
+        "tresillo multiplier"
+      ]
+    },
+    {
+      "id": "README-441",
+      "feature": "Adding Notes",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 441,
+        "end_line": 476
+      },
+      "family": "A04",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A04-adding-notes"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L441",
+        "observable": "Grid cells and exact note/velocity event table before/after edit"
+      },
+      "boundaries": [
+        "positive/negative note values",
+        "page endpoints",
+        "channel visualizer",
+        "note editing leaves rhythm intact"
+      ]
+    },
+    {
+      "id": "README-477",
+      "feature": "Adding Velocity",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 477,
+        "end_line": 491
+      },
+      "family": "A04",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A04-adding-velocity"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L477",
+        "observable": "Grid cells and exact note/velocity event table before/after edit"
+      },
+      "boundaries": [
+        "minimum/maximum MIDI velocity",
+        "single press value change",
+        "long press to extrema",
+        "channel visualizer"
+      ]
+    },
+    {
+      "id": "README-492",
+      "feature": "Channel Editor",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 492,
+        "end_line": 504
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A14-channel-editor"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L492",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-505",
+      "feature": "Devices",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 505,
+        "end_line": 515
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A14-devices"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L505",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-516",
+      "feature": "MIDI Sound Sources",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 516,
+        "end_line": 521
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A14-midi-sound-sources"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L516",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-522",
+      "feature": "Norns Sound Sources with n.b.",
+      "scope": "excluded-audio",
+      "source": {
+        "path": "README.md",
+        "line": 522,
+        "end_line": 537
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [],
+      "scenario_ids": [],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L522",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ],
+      "disposition": "No software scenario: audio engine output excluded; nb startup retained in A01"
+    },
+    {
+      "id": "README-538",
+      "feature": "Device Parameters",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 538,
+        "end_line": 548
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A14-device-parameters"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L538",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-549",
+      "feature": "Adding Patterns to Channels",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 549,
+        "end_line": 561
+      },
+      "family": "A05",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A05-adding-patterns-to-channels"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L549",
+        "observable": "MIDI port/channel, merged event tables, mute silence, independent channel lengths"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-562",
+      "feature": "Masks",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 562,
+        "end_line": 574
+      },
+      "family": "A05",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A05-masks"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L562",
+        "observable": "MIDI port/channel, merged event tables, mute silence, independent channel lengths"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-575",
+      "feature": "Adding Trig Masks",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 575,
+        "end_line": 586
+      },
+      "family": "A06",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-adding-trig-masks"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L575",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-587",
+      "feature": "Adding Melodic Notes over Harmony and Drums",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 587,
+        "end_line": 592
+      },
+      "family": "A06",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-adding-melodic-notes-over-harmony-and-drums"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L587",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-593",
+      "feature": "Adding Chords",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 593,
+        "end_line": 598
+      },
+      "family": "A06",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-adding-chords"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L593",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-599",
+      "feature": "Removing Masks",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 599,
+        "end_line": 610
+      },
+      "family": "A06",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-removing-masks"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L599",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-611",
+      "feature": "Merge Modes",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 611,
+        "end_line": 623
+      },
+      "family": "A05",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A05-merge-modes"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L611",
+        "observable": "MIDI port/channel, merged event tables, mute silence, independent channel lengths"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-624",
+      "feature": "Trig Merge Modes",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 624,
+        "end_line": 633
+      },
+      "family": "A05",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A05-trig-merge-modes"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L624",
+        "observable": "MIDI port/channel, merged event tables, mute silence, independent channel lengths"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-634",
+      "feature": "Note Merge Modes",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 634,
+        "end_line": 646
+      },
+      "family": "A05",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A05-note-merge-modes"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L634",
+        "observable": "MIDI port/channel, merged event tables, mute silence, independent channel lengths"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-647",
+      "feature": "Velocity Merge Modes",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 647,
+        "end_line": 657
+      },
+      "family": "A05",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A05-velocity-merge-modes"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L647",
+        "observable": "MIDI port/channel, merged event tables, mute silence, independent channel lengths"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-658",
+      "feature": "Length Merge Modes",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 658,
+        "end_line": 670
+      },
+      "family": "A05",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A05-length-merge-modes"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L658",
+        "observable": "MIDI port/channel, merged event tables, mute silence, independent channel lengths"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-671",
+      "feature": "Note Dashboard",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 671,
+        "end_line": 674
+      },
+      "family": "A05",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A05-note-dashboard"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L671",
+        "observable": "MIDI port/channel, merged event tables, mute silence, independent channel lengths"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-675",
+      "feature": "Clocks, Swing and Shuffle",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 675,
+        "end_line": 689
+      },
+      "family": "A07",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A07-clocks-swing-and-shuffle"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L675",
+        "observable": "Note/transport ordering, beat-domain phase and wall-clock bounds"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-690",
+      "feature": "Memory (undo and redo)",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 690,
+        "end_line": 711
+      },
+      "family": "A15",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A15-memory-undo-and-redo"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L690",
+        "observable": "Previous and reapplied project behaviour through output and display"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-712",
+      "feature": "Channel Length",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 712,
+        "end_line": 729
+      },
+      "family": "A05",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A05-channel-length"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L712",
+        "observable": "MIDI port/channel, merged event tables, mute silence, independent channel lengths"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-730",
+      "feature": "Muting Channels",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 730,
+        "end_line": 742
+      },
+      "family": "A05",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A05-muting-channels"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L730",
+        "observable": "MIDI port/channel, merged event tables, mute silence, independent channel lengths"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-743",
+      "feature": "Trig Parameters",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 743,
+        "end_line": 764
+      },
+      "family": "A09",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A09-trig-parameters"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L743",
+        "observable": "Notes/CCs/values at defined steps and boundary transitions"
+      },
+      "boundaries": [
+        "10 parameter slots",
+        "page/parameter/value encoder routing",
+        "shift fine adjustment",
+        "K2 assignment",
+        "step hold plus E3 locks",
+        "unlocked step default value",
+        "off lock preserves prior locked value"
+      ]
+    },
+    {
+      "id": "README-765",
+      "feature": "Sequencer Params",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 765,
+        "end_line": 768
+      },
+      "family": "A09",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A09-sequencer-params"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L765",
+        "observable": "Notes/CCs/values at defined steps and boundary transitions"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-769",
+      "feature": "Trig Probability",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 769,
+        "end_line": 772
+      },
+      "family": "A08",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A08-trig-probability"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L769",
+        "observable": "Repeatable trace, 0/100% boundaries, pitch membership; avoid flaky statistical gates"
+      },
+      "boundaries": [
+        "0 percent silence",
+        "100 percent all trigs",
+        "seeded intermediate probability"
+      ]
+    },
+    {
+      "id": "README-773",
+      "feature": "Fixed Note",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 773,
+        "end_line": 776
+      },
+      "family": "A06",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-fixed-note"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L773",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "absolute MIDI note overrides quantised and random settings",
+        "MIDI range endpoints"
+      ]
+    },
+    {
+      "id": "README-777",
+      "feature": "Quantised Fixed Note",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 777,
+        "end_line": 780
+      },
+      "family": "A06",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-quantised-fixed-note"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L777",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "0 maps to root",
+        "higher scale degrees",
+        "overrides pattern and random pitch"
+      ]
+    },
+    {
+      "id": "README-781",
+      "feature": "Random Note",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 781,
+        "end_line": 784
+      },
+      "family": "A08",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A08-random-note"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L781",
+        "observable": "Repeatable trace, 0/100% boundaries, pitch membership; avoid flaky statistical gates"
+      },
+      "boundaries": [
+        "0 unchanged",
+        "1 -> offsets {0,1}",
+        "2 -> {-1,0,1}",
+        "4 -> {-2,-1,0,1,2}",
+        "pentatonic option on/off"
+      ]
+    },
+    {
+      "id": "README-785",
+      "feature": "Random Twos Note",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 785,
+        "end_line": 788
+      },
+      "family": "A08",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A08-random-twos-note"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L785",
+        "observable": "Repeatable trace, 0/100% boundaries, pitch membership; avoid flaky statistical gates"
+      },
+      "boundaries": [
+        "0 unchanged",
+        "1 -> offsets {0,2}",
+        "2 -> {-2,0,2}",
+        "combination with random note"
+      ]
+    },
+    {
+      "id": "README-789",
+      "feature": "Chord Strum",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 789,
+        "end_line": 792
+      },
+      "family": "A10",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A10-chord-strum"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L789",
+        "observable": "Ordered note-on/off tables, positive durations, documented overlap behaviour"
+      },
+      "boundaries": [
+        "each chord note once",
+        "division-scaled spacing",
+        "scale change during strum"
+      ]
+    },
+    {
+      "id": "README-793",
+      "feature": "Chord Arpeggio",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 793,
+        "end_line": 796
+      },
+      "family": "A10",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A10-chord-arpeggio"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L793",
+        "observable": "Ordered note-on/off tables, positive durations, documented overlap behaviour"
+      },
+      "boundaries": [
+        "repeat for step length",
+        "empty chord mask rests",
+        "arpeggio overrides strum",
+        "ratchet without chord masks"
+      ]
+    },
+    {
+      "id": "README-797",
+      "feature": "Chord Acceleration",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 797,
+        "end_line": 800
+      },
+      "family": "A10",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A10-chord-acceleration"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L797",
+        "observable": "Ordered note-on/off tables, positive durations, documented overlap behaviour"
+      },
+      "boundaries": [
+        "inactive without strum/arp",
+        "positive/negative acceleration",
+        "interaction with spread"
+      ]
+    },
+    {
+      "id": "README-801",
+      "feature": "Chord Spread",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 801,
+        "end_line": 804
+      },
+      "family": "A10",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A10-chord-spread"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L801",
+        "observable": "Ordered note-on/off tables, positive durations, documented overlap behaviour"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-805",
+      "feature": "Chord Velocity Modifier",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 805,
+        "end_line": 808
+      },
+      "family": "A10",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A10-chord-velocity-modifier"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L805",
+        "observable": "Ordered note-on/off tables, positive durations, documented overlap behaviour"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-809",
+      "feature": "Chord Shape Modifier",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 809,
+        "end_line": 812
+      },
+      "family": "A10",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A10-chord-shape-modifier"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L809",
+        "observable": "Ordered note-on/off tables, positive durations, documented overlap behaviour"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-813",
+      "feature": "Mute Root Note",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 813,
+        "end_line": 816
+      },
+      "family": "A10",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A10-mute-root-note"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L813",
+        "observable": "Ordered note-on/off tables, positive durations, documented overlap behaviour"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-817",
+      "feature": "Fully Quantise Mask",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 817,
+        "end_line": 820
+      },
+      "family": "A06",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-fully-quantise-mask"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L817",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-821",
+      "feature": "Scale Editor",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 821,
+        "end_line": 843
+      },
+      "family": "A06",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-scale-editor"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L821",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-844",
+      "feature": "Transposition",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 844,
+        "end_line": 856
+      },
+      "family": "A06",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-transposition"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L844",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-857",
+      "feature": "Song Editor",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 857,
+        "end_line": 868
+      },
+      "family": "A11",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A11-song-editor"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L857",
+        "observable": "Pattern sequence and boundary events; no missing/double transition"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-869",
+      "feature": "Button Indicators",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 869,
+        "end_line": 874
+      },
+      "family": "A11",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A11-button-indicators"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L869",
+        "observable": "Pattern sequence and boundary events; no missing/double transition"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-875",
+      "feature": "Interacting with Slots",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 875,
+        "end_line": 882
+      },
+      "family": "A11",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A11-interacting-with-slots"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L875",
+        "observable": "Pattern sequence and boundary events; no missing/double transition"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-883",
+      "feature": "Song Mode Operations",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 883,
+        "end_line": 886
+      },
+      "family": "A11",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A11-song-mode-operations"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L883",
+        "observable": "Pattern sequence and boundary events; no missing/double transition"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-887",
+      "feature": "Adjusting Song Sequence Length",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 887,
+        "end_line": 902
+      },
+      "family": "A11",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A11-adjusting-song-sequence-length"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L887",
+        "observable": "Pattern sequence and boundary events; no missing/double transition"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-903",
+      "feature": "Navigating the Norns Display",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 903,
+        "end_line": 907
+      },
+      "family": "A11",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A11-navigating-the-norns-display"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L903",
+        "observable": "Pattern sequence and boundary events; no missing/double transition"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-908",
+      "feature": "Locks",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 908,
+        "end_line": 911
+      },
+      "family": "A09",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A09-locks"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L908",
+        "observable": "Notes/CCs/values at defined steps and boundary transitions"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-912",
+      "feature": "Trig Param Locks",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 912,
+        "end_line": 936
+      },
+      "family": "A09",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A09-trig-param-locks"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L912",
+        "observable": "Notes/CCs/values at defined steps and boundary transitions"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-937",
+      "feature": "Param Slides",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 937,
+        "end_line": 954
+      },
+      "family": "A09",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A09-param-slides"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L937",
+        "observable": "Notes/CCs/values at defined steps and boundary transitions"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-955",
+      "feature": "Mask Locks",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 955,
+        "end_line": 979
+      },
+      "family": "A09",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A09-mask-locks"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L955",
+        "observable": "Notes/CCs/values at defined steps and boundary transitions"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-980",
+      "feature": "Scale Locks",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 980,
+        "end_line": 998
+      },
+      "family": "A09",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A09-scale-locks"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L980",
+        "observable": "Notes/CCs/values at defined steps and boundary transitions"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-999",
+      "feature": "Transposition Locks",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 999,
+        "end_line": 1012
+      },
+      "family": "A09",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A09-transposition-locks"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L999",
+        "observable": "Notes/CCs/values at defined steps and boundary transitions"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1013",
+      "feature": "Octave Locks",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1013,
+        "end_line": 1024
+      },
+      "family": "A09",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A09-octave-locks"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1013",
+        "observable": "Notes/CCs/values at defined steps and boundary transitions"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1025",
+      "feature": "Save and Load",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1025,
+        "end_line": 1032
+      },
+      "family": "A16",
+      "owner_card": "C11",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A16-save-and-load"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1025",
+        "observable": "Round-trip MIDI trace and visible edits; original files preserved on failure"
+      },
+      "boundaries": [
+        "new/save/load/overwrite/cancel through dialogs",
+        "save/reload preserves MIDI sequence",
+        "60-second stopped autosave",
+        "missing and corrupt project",
+        "restart isolates user source"
+      ]
+    },
+    {
+      "id": "README-1033",
+      "feature": "Options",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1033,
+        "end_line": 1036
+      },
+      "family": "A07",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A07-options"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1033",
+        "observable": "Note/transport ordering, beat-domain phase and wall-clock bounds"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1037",
+      "feature": "Sequencer Options",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1037,
+        "end_line": 1038
+      },
+      "family": "A07",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A07-sequencer-options"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1037",
+        "observable": "Note/transport ordering, beat-domain phase and wall-clock bounds"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1039",
+      "feature": "Shift press stop",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1039,
+        "end_line": 1042
+      },
+      "family": "A07",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A07-shift-press-stop"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1039",
+        "observable": "Note/transport ordering, beat-domain phase and wall-clock bounds"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1043",
+      "feature": "Song Mode",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1043,
+        "end_line": 1046
+      },
+      "family": "A07",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A07-song-mode"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1043",
+        "observable": "Note/transport ordering, beat-domain phase and wall-clock bounds"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1047",
+      "feature": "Reset at Song Editor Pattern Change",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1047,
+        "end_line": 1050
+      },
+      "family": "A07",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A07-reset-at-song-editor-pattern-change"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1047",
+        "observable": "Note/transport ordering, beat-domain phase and wall-clock bounds"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1051",
+      "feature": "Reset at Pattern Repeat",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1051,
+        "end_line": 1054
+      },
+      "family": "A07",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A07-reset-at-pattern-repeat"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1051",
+        "observable": "Note/transport ordering, beat-domain phase and wall-clock bounds"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1055",
+      "feature": "Parameter Slides Wrap",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1055,
+        "end_line": 1058
+      },
+      "family": "A09",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A09-parameter-slides-wrap"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1055",
+        "observable": "Notes/CCs/values at defined steps and boundary transitions"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1059",
+      "feature": "Elektron Program Changes",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1059,
+        "end_line": 1062
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A14-elektron-program-changes"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1059",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1063",
+      "feature": "Elektron Program Change Channel",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1063,
+        "end_line": 1066
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A14-elektron-program-change-channel"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1063",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1067",
+      "feature": "Parameter Lock Options",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1067,
+        "end_line": 1068
+      },
+      "family": "A09",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A09-parameter-lock-options"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1067",
+        "observable": "Notes/CCs/values at defined steps and boundary transitions"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1069",
+      "feature": "Trigless Locks",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1069,
+        "end_line": 1072
+      },
+      "family": "A09",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A09-trigless-locks"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1069",
+        "observable": "Notes/CCs/values at defined steps and boundary transitions"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1073",
+      "feature": "Quantiser Options",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1073,
+        "end_line": 1074
+      },
+      "family": "A06",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-quantiser-options"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1073",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1075",
+      "feature": "Snap Note Masks to Scale",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1075,
+        "end_line": 1078
+      },
+      "family": "A06",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-snap-note-masks-to-scale"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1075",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1079",
+      "feature": "Quantise Note Masks",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1079,
+        "end_line": 1082
+      },
+      "family": "A06",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-quantise-note-masks"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1079",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1083",
+      "feature": "Scales Lock Until Pattern End",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1083,
+        "end_line": 1086
+      },
+      "family": "A06",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-scales-lock-until-pattern-end"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1083",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1087",
+      "feature": "Lock All to Pentatonic",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1087,
+        "end_line": 1090
+      },
+      "family": "A06",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-lock-all-to-pentatonic"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1087",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1091",
+      "feature": "Lock Random to Pentatonic",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1091,
+        "end_line": 1094
+      },
+      "family": "A06",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-lock-random-to-pentatonic"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1091",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1095",
+      "feature": "Lock Merged to Pentatonic",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1095,
+        "end_line": 1098
+      },
+      "family": "A06",
+      "owner_card": "C08",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A06-lock-merged-to-pentatonic"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1095",
+        "observable": "Independently computed small pitch tables and chord note sets"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1099",
+      "feature": "MIDI Controller Options",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1099,
+        "end_line": 1100
+      },
+      "family": "A13",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A13-midi-controller-options"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1099",
+        "observable": "Intended value changes only; wrong port/channel does not alter target"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1101",
+      "feature": "Map Scale to White Keys",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1101,
+        "end_line": 1104
+      },
+      "family": "A13",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A13-map-scale-to-white-keys"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1101",
+        "observable": "Intended value changes only; wrong port/channel does not alter target"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1105",
+      "feature": "Honor Scale Rotations",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1105,
+        "end_line": 1108
+      },
+      "family": "A13",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A13-honor-scale-rotations"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1105",
+        "observable": "Intended value changes only; wrong port/channel does not alter target"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1109",
+      "feature": "Honor Scale Degree",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1109,
+        "end_line": 1112
+      },
+      "family": "A13",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A13-honor-scale-degree"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1109",
+        "observable": "Intended value changes only; wrong port/channel does not alter target"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1113",
+      "feature": "Honour Scale Transpose",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1113,
+        "end_line": 1116
+      },
+      "family": "A13",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A13-honour-scale-transpose"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1113",
+        "observable": "Intended value changes only; wrong port/channel does not alter target"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1117",
+      "feature": "Sinfonion Connect",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1117,
+        "end_line": 1120
+      },
+      "family": "A14",
+      "owner_card": "C10",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A14-sinfonion-connect"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1117",
+        "observable": "Expected MIDI bytes/order; invalid config diagnostic and absence from selectable devices"
+      },
+      "boundaries": [
+        "Norns2sinfonion port selection",
+        "init program change",
+        "scale/root/rotation updates",
+        "missing virtual destination diagnostics"
+      ],
+      "exclusions": [
+        "Physical MIDI-to-CV/module conversion only; MIDI output remains required"
+      ]
+    },
+    {
+      "id": "README-1121",
+      "feature": "LFOs and Modulation",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1121,
+        "end_line": 1125
+      },
+      "family": "A17",
+      "owner_card": "C09",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A17-lfos-and-modulation"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1121",
+        "observable": "Both mod paths change actual Mosaic MIDI-device parameters with known shape/range/rate and emitted MIDI effects"
+      },
+      "boundaries": [
+        "base profile without mods",
+        "native matrix+toolkit activation",
+        "sine/saw/pulse/random shapes",
+        "depth zero/positive/negative",
+        "rate",
+        "simultaneous MIDI mapping",
+        "MIDI CC capture"
+      ]
+    },
+    {
+      "id": "README-1126",
+      "feature": "Performance Management",
+      "scope": "software",
+      "source": {
+        "path": "README.md",
+        "line": 1126,
+        "end_line": 1137
+      },
+      "family": "A22",
+      "owner_card": "C12",
+      "required_tiers": [
+        "E"
+      ],
+      "scenario_ids": [
+        "A22-performance-management"
+      ],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1126",
+        "observable": "Bounded timing, no lost events, no stuck inputs/notes or leaked sessions"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ]
+    },
+    {
+      "id": "README-1138",
+      "feature": "Development",
+      "scope": "documentation",
+      "source": {
+        "path": "README.md",
+        "line": 1138,
+        "end_line": 1147
+      },
+      "family": "A22",
+      "owner_card": "C12",
+      "required_tiers": [],
+      "scenario_ids": [],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1138",
+        "observable": "Bounded timing, no lost events, no stuck inputs/notes or leaked sessions"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ],
+      "disposition": "No software scenario: navigation/physical setup/future development text; child software sections tracked separately"
+    },
+    {
+      "id": "README-1148",
+      "feature": "Roadmap",
+      "scope": "documentation",
+      "source": {
+        "path": "README.md",
+        "line": 1148,
+        "end_line": 1151
+      },
+      "family": "A22",
+      "owner_card": "C12",
+      "required_tiers": [],
+      "scenario_ids": [],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1148",
+        "observable": "Bounded timing, no lost events, no stuck inputs/notes or leaked sessions"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ],
+      "disposition": "No software scenario: navigation/physical setup/future development text; child software sections tracked separately"
+    },
+    {
+      "id": "README-1152",
+      "feature": "Interesting Components for Norns Script Developers",
+      "scope": "documentation",
+      "source": {
+        "path": "README.md",
+        "line": 1152,
+        "end_line": 1157
+      },
+      "family": "A22",
+      "owner_card": "C12",
+      "required_tiers": [],
+      "scenario_ids": [],
+      "status": "not_implemented",
+      "oracle": {
+        "type": "documented rule plus independently authored event/frame fixture",
+        "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L1152",
+        "observable": "Bounded timing, no lost events, no stuck inputs/notes or leaked sessions"
+      },
+      "boundaries": [
+        "Exercise each documented choice in this section",
+        "Compare visible edit and subsequent MIDI behaviour",
+        "Test endpoints/cancel/wrap where the section defines them"
+      ],
+      "disposition": "No software scenario: navigation/physical setup/future development text; child software sections tracked separately"
+    }
+  ]
+}

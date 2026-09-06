@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "fixture": "mosaic",
+  "install_by_default": false,
+  "sources": {
+    "mosaic": {
+      "url": "https://github.com/subvertnormality/mosaic.git",
+      "commit": "160d1ea7506773e65f298094e11d005dcb568dff",
+      "submodules": [
+        {
+          "path": "lib/nb",
+          "commit": "503be3ae9a7f4368a8bc35d6081795e0a130cadf",
+          "url": "https://github.com/sixolet/nb.git"
+        }
+      ],
+      "license_files": [
+        {
+          "path": "LICENSE",
+          "sha256": "8b1ba204bb69a0ade2bfcf65ef294a920f6bb361b317dba43c7ef29d96332b9b"
+        }
+      ],
+      "license_status": "root file recorded; transitive notices retained in source"
+    },
+    "matrix": {
+      "url": "https://github.com/sixolet/matrix.git",
+      "commit": "41e11286bee8dbe48e8746e7a456400f93dc739a",
+      "submodules": [],
+      "license_files": [],
+      "license_status": "No root license found; do not redistribute fixture sources"
+    },
+    "toolkit": {
+      "url": "https://github.com/sixolet/toolkit.git",
+      "commit": "2e9fb56fe7b2b25bd6a0d80c40e82f7a7f9368a7",
+      "submodules": [],
+      "license_files": [],
+      "license_status": "No root license found; do not redistribute fixture sources"
+    }
+  },
+  "profiles": {
+    "base-midi": {
+      "code": [
+        "mosaic"
+      ],
+      "enabled_mods": [],
+      "audio_required": false
+    },
+    "midi-modulation": {
+      "code": [
+        "mosaic",
+        "matrix",
+        "toolkit"
+      ],
+      "enabled_mods": [
+        "matrix",
+        "toolkit"
+      ],
+      "audio_required": false
+    }
+  },
+  "setup": [
+    "Preserve mosaic code-directory name and pinned nb submodule",
+    "Copy configs into isolated data/mosaic/config before init",
+    "Enable mods through native system.mods lifecycle, never by replacing params",
+    "Provide Norns2sinfonion virtual MIDI output for software sync scenarios"
+  ],
+  "baseline": "artifacts/c00/mosaic-unit.json"
+}

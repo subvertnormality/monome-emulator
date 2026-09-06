@@ -1,19 +1,20 @@
 {
   "schema_version": 1,
   "updated": "2026-09-06",
-  "mode": "ready_for_execution",
-  "current_card": null,
-  "next_action": "When delivery implementation is requested, execute C00 with the general-purpose official-upstream contract and separate Mosaic fixture in the existing Ubuntu 20.04 WSL environment.",
+  "mode": "executing",
+  "current_card": "C01",
+  "next_action": "Implement the bounded automation protocol, fixture runner, session isolation and evidence verifier.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
       "id": "C00",
-      "status": "planned",
-      "evidence": null
+      "status": "done",
+      "evidence": "docs/delivery/completions/C00.md",
+      "start_revision": "20e66d2e639fb3c7d27671c9a9042275e749ff6d"
     },
     {
       "id": "C01",
-      "status": "planned",
+      "status": "in_progress",
       "evidence": null
     },
     {

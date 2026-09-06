@@ -15,5 +15,7 @@
 | D11 | Product is a general-purpose norns/grid utility using official monome dependencies; Mosaic is an opt-in-installed fixture whose full applicable acceptance remains mandatory for release | User, 2026-09-06; supersedes any Mosaic-only product or hardcoded loader design |
 | D12 | Runtime and application locks, installation, data and test layers remain separate; dependency updates require conformance and app regression evidence | Architectural implementation of D11; see UPSTREAM.md |
 
-Execution starts only when requested. This planning task does not launch an
-unattended implementation campaign or create recurring jobs.
+| D13 | Execute staged delivery, beginning C00 on the existing distro | User: “Execute”, 2026-09-06 |
+| D14 | Use official C matron/crone release with real SC core and dummy JACK; native virtual-device event adapter | C00 empirical probe and runtime-decision.md; no Lua runtime replacement |
+
+Execution is authorized. No recurring jobs have been created.

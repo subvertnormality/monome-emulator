@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "status": "C00 feasibility; not release certification",
+  "dependencies": {
+    "norns": {
+      "url": "https://github.com/monome/norns.git",
+      "commit": "14bbeae8646c6717f6bb44c8cd60250bf94b6042",
+      "submodules": [
+        {
+          "path": "crone/lib/readerwriterqueue",
+          "commit": "4927fe6d22720366aa249e1abc3d2144498dea09",
+          "url": "https://github.com/cameron314/readerwriterqueue.git"
+        },
+        {
+          "path": "crone/softcut",
+          "commit": "ce870c55fae1b58fd357ca639bbfe0754c0760e4",
+          "url": "https://github.com/monome/softcut-lib.git"
+        },
+        {
+          "path": "third-party/doctest",
+          "commit": "1da23a3e8119ec5cce4f9388e91b065e20bf06f5",
+          "url": "https://github.com/doctest/doctest.git"
+        },
+        {
+          "path": "third-party/link",
+          "commit": "adbbb529831c22edecba20e983343b3b23a73f60",
+          "url": "https://github.com/Ableton/link.git"
+        },
+        {
+          "path": "third-party/link/modules/asio-standalone",
+          "commit": "01b4e87c04abd4daec58e40463bcdc150085b269",
+          "url": "https://github.com/chriskohlhoff/asio.git"
+        },
+        {
+          "path": "third-party/trompeloeil",
+          "commit": "2a633b923f32cebc336dc8a6a77e4c04f2238106",
+          "url": "https://github.com/rollbear/trompeloeil.git"
+        }
+      ],
+      "license_files": [
+        {
+          "path": "LICENSE.txt",
+          "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+        }
+      ],
+      "license_status": "root file recorded; transitive notices retained in source"
+    },
+    "libmonome": {
+      "url": "https://github.com/monome/libmonome.git",
+      "commit": "9055ea22fd824839be821c10f6e9b13e9d2aa3cd",
+      "submodules": [],
+      "license_files": [
+        {
+          "path": "src/libmonome.c",
+          "sha256": "f53775969240599d51c09d0d90eb21dba0bb1c3f333a3f44dcf00270a826216e"
+        }
+      ],
+      "license_status": "root file recorded; transitive notices retained in source"
+    }
+  },
+  "build": {
+    "profile": "ubuntu-20.04-wsl2-x86_64",
+    "norns_configure": [
+      "--desktop"
+    ],
+    "targets": [
+      "matron",
+      "crone"
+    ],
+    "cflags": [
+      "-I<runtime-prefix>/include",
+      "-Wno-error=unused-result"
+    ],
+    "ldflags": [
+      "-L<runtime-prefix>/lib"
+    ],
+    "libmonome_configure": [
+      "--enable-embedded-protos",
+      "--prefix=<runtime-prefix>"
+    ],
+    "services": [
+      "JACK dummy 48000Hz/128 frames, non-realtime priority",
+      "official crone",
+      "sclang with official sc/core"
+    ],
+    "packages": {
+      "exit_code": 0,
+      "stdout": "jackd2\t1.9.12~dfsg-2ubuntu2\nlibasound2-dev:amd64\t1.2.2-2.1ubuntu2.5\nlibavahi-compat-libdnssd-dev:amd64\t0.7-4ubuntu7.3\nlibcairo2-dev:amd64\t1.16.0-4ubuntu1\nlibevdev-dev:amd64\t1.9.0+dfsg-1ubuntu0.2\nlibgpiod-dev:amd64\t1.4.1-4\nlibjack-jackd2-dev:amd64\t1.9.12~dfsg-2ubuntu2\nliblo-dev\t0.30-3\nliblua5.3-dev:amd64\t5.3.3-1.1ubuntu2\nlibnanomsg-dev\t1.1.5+dfsg-1\nlibsdl2-dev:amd64\t2.0.10+dfsg1-3\nlibsndfile1-dev\t1.0.28-7ubuntu0.3\nlibudev-dev:amd64\t245.4-4ubuntu3.15\n",
+      "stderr": "",
+      "supercollider": "supercollider-language\t1:3.10.0+repack-1ubuntu2\nsupercollider-server\t1:3.10.0+repack-1ubuntu2"
+    }
+  },
+  "patches": [
+    {
+      "path": "patches/norns/0001-desktop-architecture.patch",
+      "sha256": "1945a65e586446e5ae6a75cac646fc468aace34914c8f19a5d192925ad314e78"
+    },
+    {
+      "path": "patches/norns/0002-platform-read.patch",
+      "sha256": "745d47530e0769f8edceee525fa2e5cf35fa75cd9f180a3866bccffa35bd9a63"
+    },
+    {
+      "path": "patches/norns/0003-portable-display-conversion.patch",
+      "sha256": "a6f14a5cb4bba9203f3738b605a5d6902a8612b73c45c07a998a73fcad322ba9"
+    },
+    {
+      "path": "patches/norns/0004-virtual-device-spike.patch",
+      "sha256": "0b7fc1089332629f9cbd64933d04136974c978f347af5376eb22009925dcb173"
+    }
+  ],
+  "serialosc": {
+    "role": "protocol reference; physical USB daemon not used by native virtual-device backend",
+    "source": "https://monome.org/docs/serialosc/osc/"
+  },
+  "update_candidate": {
+    "ref": "a84ba1fcc9b0b1780be686c70876ba932508c9cc",
+    "tag": "v2.9.3",
+    "status": "Adjacent official C matron release fetched and diff inspected. C14 must build an isolated candidate and prove compatibility/rejection/rollback. No second build validated yet.",
+    "future_main": "cc4ba9e75ff6e97165895421780a6a9e0a8e284b"
+  }
+}

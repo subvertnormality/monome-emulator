@@ -1,0 +1,304 @@
+{
+  "card": "C00",
+  "status": "passed-foundation-only",
+  "start_revision": "20e66d2e639fb3c7d27671c9a9042275e749ff6d",
+  "recorded_at_revision": "20e66d2e639fb3c7d27671c9a9042275e749ff6d",
+  "sources": [
+    {
+      "path": "compatibility/apis.json",
+      "sha256": "dacc4af5df33a929b5b7e16323bb160757f365930fcc4eb47306c883d6aa035b",
+      "size": 28454
+    },
+    {
+      "path": "compatibility/conformance.json",
+      "sha256": "787a629ef50efc51b717f023f549580daa384f767f77f149096b8864a3d89aef",
+      "size": 18954
+    },
+    {
+      "path": "compatibility/workflows.json",
+      "sha256": "7ce676565700eb3d79930f824d05e4915df23708b8470607eda05414c11c011d",
+      "size": 114838
+    },
+    {
+      "path": "dependencies.lock.json",
+      "sha256": "8a9e32e2f0007dbf2764522a447c2a0353e0d1027deb4a20ad4e03d4f843a7cf",
+      "size": 4546
+    },
+    {
+      "path": "fixtures/apps/mosaic.lock.json",
+      "sha256": "de54846cb382c7890e3457ac7bbc334401daf0f2731a7289639f72c5ab58cf9a",
+      "size": 1956
+    },
+    {
+      "path": "fixtures/probes/probe-b/probe-b.lua",
+      "sha256": "9d1ba673d7c033730679d90387979dcc6e974f7b8afc650eed01c2d8cc221769",
+      "size": 915
+    },
+    {
+      "path": "fixtures/probes/probe-support/math_probe.lua",
+      "sha256": "ea6a6c83a575dbef72c862e5f7a5c933138a9355c98b3c1f54d9dfc487cacc80",
+      "size": 50
+    },
+    {
+      "path": "patches/norns/0001-desktop-architecture.patch",
+      "sha256": "1945a65e586446e5ae6a75cac646fc468aace34914c8f19a5d192925ad314e78",
+      "size": 472
+    },
+    {
+      "path": "patches/norns/0002-platform-read.patch",
+      "sha256": "745d47530e0769f8edceee525fa2e5cf35fa75cd9f180a3866bccffa35bd9a63",
+      "size": 615
+    },
+    {
+      "path": "patches/norns/0003-portable-display-conversion.patch",
+      "sha256": "a6f14a5cb4bba9203f3738b605a5d6902a8612b73c45c07a998a73fcad322ba9",
+      "size": 1504
+    },
+    {
+      "path": "patches/norns/0004-virtual-device-spike.patch",
+      "sha256": "0b7fc1089332629f9cbd64933d04136974c978f347af5376eb22009925dcb173",
+      "size": 9889
+    },
+    {
+      "path": "patches/norns/README.md",
+      "sha256": "abf5ac80cbfcda4e0afa82fe238658337b2f691201d45a5a472edb7098045c4e",
+      "size": 2190
+    },
+    {
+      "path": "probes/c00/baseline.py",
+      "sha256": "a49af49dd92c0fbec7e95fab27e52ccc435bf7e59dd75ff67f28d4bf49ec1850",
+      "size": 1877
+    },
+    {
+      "path": "probes/c00/boot.py",
+      "sha256": "6d3c52f150358bef1b321f5cc57e7079a4cb9080d8cb57a401f4240b4d589e75",
+      "size": 6511
+    },
+    {
+      "path": "probes/c00/browser.cjs",
+      "sha256": "1788d91f5e87013f83e93969ea993a746da63f5515af8387bd1be16ad78a057d",
+      "size": 1823
+    },
+    {
+      "path": "probes/c00/check_patches.py",
+      "sha256": "13d6985e737ec55b7688bce0c9d2e915f1ee4d057b5bba79cc5263b3c28777a5",
+      "size": 1393
+    },
+    {
+      "path": "probes/c00/emu_bridge.c",
+      "sha256": "f690bbb9e3e1a7c179c241950adb8c10804060550d541764c43e434c16c7efd6",
+      "size": 5140
+    },
+    {
+      "path": "probes/c00/emu_bridge.h",
+      "sha256": "508c074cbe04e3491b0f0c8f8a369402b964f31f8152b4f7a75f0c757f1db896",
+      "size": 423
+    },
+    {
+      "path": "probes/c00/host.py",
+      "sha256": "be4cd1abace79847895bf6819b5039061b791f51ecc3c44960b252c6a2642f48",
+      "size": 1473
+    },
+    {
+      "path": "probes/c00/inventory.py",
+      "sha256": "fefa0389d620dcb72b34a4e14536d04b5872dd4f9a12d1254aca647a823e8edc",
+      "size": 9287
+    },
+    {
+      "path": "probes/c00/isolated.sh",
+      "sha256": "544e8b98eba63b7c1c012c8432530e713be7d2e07bff2da4ca7187face256be9",
+      "size": 446
+    },
+    {
+      "path": "probes/c00/lock_sources.py",
+      "sha256": "32aff5ec8714ca04d1f5a9e1e941c47387250e3e431f2d2ef15e8dfd734a2198",
+      "size": 4054
+    },
+    {
+      "path": "probes/c00/prepare_bridge.py",
+      "sha256": "b00e406bd4cfb3cd72cbecfc83eebd11d274263fb0d9466f30d9153979fb44b2",
+      "size": 4349
+    },
+    {
+      "path": "probes/c00/prepare_build.py",
+      "sha256": "c0f95a96a76d0417e096aa185d95a6a120355c73eb0ed7807a1266a26e660399",
+      "size": 2769
+    },
+    {
+      "path": "probes/c00/record_evidence.py",
+      "sha256": "3b471e5fd2e3c422be5cc466ea154c38f3fb11a1d2f48060f51ea933d8426ea5",
+      "size": 2465
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/c00/host.json",
+      "sha256": "8e85a497caf6b9055add686cc14e00b0ed2bd4087479e782f8bfc24ab0d6b49f",
+      "size": 3456
+    },
+    {
+      "path": "artifacts/c00/native-probe.json",
+      "sha256": "fce9b17ae549bbc322a0a23522fe13bccd75ea3ebe657687bb1cd5898974b3c5",
+      "size": 470
+    },
+    {
+      "path": "artifacts/c00/browser.json",
+      "sha256": "fd863ffd4494dbd4dc3ae293df053480b8c459946535d54343dbf300d1cb0bb0",
+      "size": 445
+    },
+    {
+      "path": "artifacts/c00/patch-replay.json",
+      "sha256": "3d0c1f9e4336d467cb25497a129e5441f249b74180e7aaf8e5aaaa547e6eeb94",
+      "size": 998
+    },
+    {
+      "path": "artifacts/c00/mosaic-unit.json",
+      "sha256": "73227d8f0692e0b9dccd3bd6e57fcd762f28c11dddaa0a9ba4a53bb2094ef631",
+      "size": 355
+    },
+    {
+      "path": "artifacts/c00/mosaic-unit.log",
+      "sha256": "0a11590553ab4cf0a7766a53f11ad6de2a9ea45422f5e362bddfcf91ef0f9214",
+      "size": 701
+    },
+    {
+      "path": "artifacts/c00/matron.log",
+      "sha256": "73509decf56ccad86ec32136819b7ab3a53a541c392d5c40aa16e19b53316d39",
+      "size": 2510
+    },
+    {
+      "path": "artifacts/c00/sclang.log",
+      "sha256": "cb79bb8ab3371c4ce835f94dbbaf23b762dc5beef20b8dd1235aa729e4c0ca63",
+      "size": 2611
+    },
+    {
+      "path": "artifacts/c00/jack.log",
+      "sha256": "bd0914661f4818867ae477c7094c7bd682d1fd5e5dfe3d1167f8b97bb9402dbf",
+      "size": 520
+    },
+    {
+      "path": "artifacts/c00/crone.log",
+      "sha256": "1ee68c6fdef3777ca2bcd79e9530ffed661f1389ef9e86404900db4d8d74f950",
+      "size": 3213
+    },
+    {
+      "path": "artifacts/c00/norns-build.log",
+      "sha256": "dddd728a60a7877c26cc458bcadca60e2a017eb78f19fa82971c8f5ee7efa5b9",
+      "size": 2967
+    },
+    {
+      "path": "artifacts/c00/norns-configure.log",
+      "sha256": "0d148deca753b955dca5fc033b4bda52cce6aeabc4dd395fe7efbcebfdc924f6",
+      "size": 1389
+    },
+    {
+      "path": "artifacts/c00/crone-build.log",
+      "sha256": "44e1a152111f3099056bfcf4c7d15cd4e2d5610c487aa1c1eb5c807f2ec0de74",
+      "size": 919
+    },
+    {
+      "path": "artifacts/c00/bridge-build.log",
+      "sha256": "19978214ce79ca1adb49c9d4eeb2d6c806db3f571cefeab15467002ca8bba13c",
+      "size": 510
+    },
+    {
+      "path": "artifacts/c00/browser-fixture.png",
+      "sha256": "b99f919bbd9298e3be152c11692235a911ec1eb971063254bd5eb93cd79ed278",
+      "size": 4837
+    },
+    {
+      "path": "artifacts/c00/probe-frame.png",
+      "sha256": "7e5ed8590f1f0a6b92c030aeb28ba3401d31fff4118c6f9848be866b7ef6f1cf",
+      "size": 914
+    },
+    {
+      "path": "artifacts/c00/probe-frame.bgra",
+      "sha256": "86dad2dcf0bd1499926ac7cac956e72df6050ec39e7f5a49a5a9af992331c02d",
+      "size": 32768
+    },
+    {
+      "path": "artifacts/c00/isolated-routes.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "artifacts/c00/update-refs.txt",
+      "sha256": "9e17eeb4669056f021511436a36f3c81867750b8c511bea6cd34c90e90fd4e71",
+      "size": 116
+    },
+    {
+      "path": "artifacts/c00/update-candidate-diff.txt",
+      "sha256": "1df7a8b768f92f9dc3f6c72d7d226b8bee03e51f7b3731cf1ad603446bc0dc20",
+      "size": 7634
+    }
+  ],
+  "runtime": {
+    "norns": {
+      "url": "https://github.com/monome/norns.git",
+      "commit": "14bbeae8646c6717f6bb44c8cd60250bf94b6042",
+      "submodules": [
+        {
+          "path": "crone/lib/readerwriterqueue",
+          "commit": "4927fe6d22720366aa249e1abc3d2144498dea09",
+          "url": "https://github.com/cameron314/readerwriterqueue.git"
+        },
+        {
+          "path": "crone/softcut",
+          "commit": "ce870c55fae1b58fd357ca639bbfe0754c0760e4",
+          "url": "https://github.com/monome/softcut-lib.git"
+        },
+        {
+          "path": "third-party/doctest",
+          "commit": "1da23a3e8119ec5cce4f9388e91b065e20bf06f5",
+          "url": "https://github.com/doctest/doctest.git"
+        },
+        {
+          "path": "third-party/link",
+          "commit": "adbbb529831c22edecba20e983343b3b23a73f60",
+          "url": "https://github.com/Ableton/link.git"
+        },
+        {
+          "path": "third-party/link/modules/asio-standalone",
+          "commit": "01b4e87c04abd4daec58e40463bcdc150085b269",
+          "url": "https://github.com/chriskohlhoff/asio.git"
+        },
+        {
+          "path": "third-party/trompeloeil",
+          "commit": "2a633b923f32cebc336dc8a6a77e4c04f2238106",
+          "url": "https://github.com/rollbear/trompeloeil.git"
+        }
+      ],
+      "license_files": [
+        {
+          "path": "LICENSE.txt",
+          "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+        }
+      ],
+      "license_status": "root file recorded; transitive notices retained in source"
+    },
+    "libmonome": {
+      "url": "https://github.com/monome/libmonome.git",
+      "commit": "9055ea22fd824839be821c10f6e9b13e9d2aa3cd",
+      "submodules": [],
+      "license_files": [
+        {
+          "path": "src/libmonome.c",
+          "sha256": "f53775969240599d51c09d0d90eb21dba0bb1c3f333a3f44dcf00270a826216e"
+        }
+      ],
+      "license_status": "root file recorded; transitive notices retained in source"
+    }
+  },
+  "unit_tests": {
+    "mosaic": "160d1ea7506773e65f298094e11d005dcb568dff",
+    "norns": "14bbeae8646c6717f6bb44c8cd60250bf94b6042",
+    "collected": 474,
+    "successes": 474,
+    "failures": 0,
+    "exit_code": 0,
+    "log_sha256": "0a11590553ab4cf0a7766a53f11ad6de2a9ea45422f5e362bddfcf91ef0f9214",
+    "scope": "Unit baseline only; does not establish runtime workflow correctness"
+  },
+  "isolation": "isolated.sh under private mount/network namespaces: upstream fixtures hidden; loopback only",
+  "exclusions": "Not M0 or Mosaic workflow acceptance; see C00 completion and runtime-decision.md"
+}

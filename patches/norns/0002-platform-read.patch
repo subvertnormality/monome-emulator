@@ -1,0 +1,17 @@
+diff --git a/matron/src/hardware/platform.c b/matron/src/hardware/platform.c
+index 83c63ba..ec7a116 100644
+--- a/matron/src/hardware/platform.c
++++ b/matron/src/hardware/platform.c
+@@ -12,7 +12,11 @@ void init_platform() {
+ 
+         FILE *fptr = fopen("/sys/firmware/devicetree/base/model", "r");
+         char modelString[100];
+-        fgets(modelString, 100, fptr);
++        if (fptr == NULL) return;
++        if (fgets(modelString, sizeof(modelString), fptr) == NULL) {
++            fclose(fptr);
++            return;
++        }
+         fclose(fptr);
+ 
+         if (strstr(modelString, "Compute Module 3")) {

@@ -1,0 +1,42 @@
+diff --git a/matron/src/hardware/screen/ssd1322.c b/matron/src/hardware/screen/ssd1322.c
+index b315fe2..eee49b3 100644
+--- a/matron/src/hardware/screen/ssd1322.c
++++ b/matron/src/hardware/screen/ssd1322.c
+@@ -280,6 +280,7 @@ void ssd1322_refresh() {
+     // 0xF0, then shifted to the right by 4 bits. For whatever reason, the
+     // screen hardware likes to have the upper-nibble doubled up like this.
+ 
++#if defined(__ARM_NEON)
+     if (should_translate_color) {
+         // Preserve luminance of RGB when converting to grayscale. Use the
+         // closest multiple of 16 to the fraction to scale the channels'
+@@ -304,6 +305,16 @@ void ssd1322_refresh() {
+         }
+     }
+ 
++#else
++    for (uint32_t i = 0; i < SPIDEV_BUFFER_LEN; ++i) {
++        const uint8_t *px = (const uint8_t *)(surface_buffer + i);
++        uint8_t level = should_translate_color
++            ? (uint8_t)((px[2] * 64 + px[1] * 160 + px[0] * 32) >> 8)
++            : px[1];
++        spidev_buffer[i] = (level & 0xf0) | (level >> 4);
++    }
++#endif
++
+     gpiod_line_set_value(gpio_dc, 1);
+ 
+     const uint32_t spidev_bufsize = 8192; // Max is defined in /boot/config.txt
+diff --git a/matron/src/hardware/screen/ssd1322.h b/matron/src/hardware/screen/ssd1322.h
+index 0e3355f..4a2cff3 100644
+--- a/matron/src/hardware/screen/ssd1322.h
++++ b/matron/src/hardware/screen/ssd1322.h
+@@ -1,6 +1,8 @@
+ #pragma once
+ 
++#if defined(__ARM_NEON)
+ #include <arm_neon.h>
++#endif
+ #include <cairo.h>
+ #include <fcntl.h>
+ #include <gpiod.h>

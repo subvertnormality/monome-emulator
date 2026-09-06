@@ -1,6 +1,9 @@
 # Monome emulator
 
-This repository currently contains the delivery plan, not a working emulator.
+Delivery is in progress. The native feasibility probe runs official norns on
+Ubuntu 20.04 WSL2 with virtual keys, grid, MIDI and framebuffer capture. The
+product launcher, browser controls and full Mosaic acceptance are still being
+implemented; this is not yet a usable emulator release.
 A general-purpose norns and grid development utility, built around the official
 monome software. Run local scripts, operate virtual controls, inspect MIDI and
 screen/grid output, and automate verification without physical hardware.

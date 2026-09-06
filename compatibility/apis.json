@@ -1,0 +1,803 @@
+{
+  "schema_version": 1,
+  "status": "Static lexical inventory, including possible local-name matches; C02 classifies executed call paths",
+  "calls": {
+    "screen": {
+      "clear": [
+        "mosaic.lua:150"
+      ],
+      "level": [
+        "mosaic.lua:153",
+        "mosaic.lua:162",
+        "lib/ui.lua:44",
+        "lib/ui_components/dial.lua:26",
+        "lib/ui_components/grid_viewer.lua:23",
+        "lib/ui_components/grid_viewer.lua:29",
+        "lib/ui_components/list_selector.lua:20",
+        "lib/ui_components/list_selector.lua:22",
+        "lib/ui_components/memory_history_navigator.lua:20",
+        "lib/ui_components/memory_history_navigator.lua:22",
+        "lib/ui_components/memory_history_navigator.lua:69",
+        "lib/ui_components/memory_history_navigator.lua:82",
+        "lib/ui_components/page.lua:45",
+        "lib/ui_components/pages.lua:19",
+        "lib/ui_components/pages.lua:21",
+        "lib/ui_components/value_selector.lua:22",
+        "lib/ui_components/value_selector.lua:24",
+        "lib/ui_components/vertical_scroll_selector.lua:57",
+        "lib/ui_components/vertical_scroll_selector.lua:69",
+        "lib/ui_components/vertical_scroll_selector.lua:71",
+        "lib/ui_components/vertical_scroll_selector.lua:83"
+      ],
+      "move": [
+        "mosaic.lua:154",
+        "lib/ui.lua:45",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:294",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:298",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:306",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:310",
+        "lib/ui_components/dial.lua:30",
+        "lib/ui_components/dial.lua:45",
+        "lib/ui_components/dial.lua:48",
+        "lib/ui_components/dial.lua:51",
+        "lib/ui_components/dial.lua:141",
+        "lib/ui_components/grid_viewer.lua:22",
+        "lib/ui_components/grid_viewer.lua:28",
+        "lib/ui_components/list_selector.lua:24",
+        "lib/ui_components/list_selector.lua:27",
+        "lib/ui_components/memory_history_navigator.lua:24",
+        "lib/ui_components/memory_history_navigator.lua:27",
+        "lib/ui_components/memory_history_navigator.lua:30",
+        "lib/ui_components/memory_history_navigator.lua:70",
+        "lib/ui_components/memory_history_navigator.lua:83",
+        "lib/ui_components/page.lua:46",
+        "lib/ui_components/pages.lua:17",
+        "lib/ui_components/tooltip.lua:11",
+        "lib/ui_components/value_selector.lua:26",
+        "lib/ui_components/value_selector.lua:29",
+        "lib/ui_components/vertical_scroll_selector.lua:54",
+        "lib/ui_components/vertical_scroll_selector.lua:65",
+        "lib/ui_components/vertical_scroll_selector.lua:80"
+      ],
+      "font_face": [
+        "mosaic.lua:155",
+        "mosaic.lua:158",
+        "lib/ui.lua:43",
+        "lib/ui_components/memory_history_navigator.lua:60",
+        "lib/ui_components/memory_history_navigator.lua:87"
+      ],
+      "font_size": [
+        "mosaic.lua:156",
+        "mosaic.lua:163",
+        "lib/ui.lua:42",
+        "lib/ui_components/grid_viewer.lua:24",
+        "lib/ui_components/grid_viewer.lua:30",
+        "lib/ui_components/list_selector.lua:25",
+        "lib/ui_components/list_selector.lua:29",
+        "lib/ui_components/memory_history_navigator.lua:25",
+        "lib/ui_components/memory_history_navigator.lua:28",
+        "lib/ui_components/memory_history_navigator.lua:31",
+        "lib/ui_components/memory_history_navigator.lua:59",
+        "lib/ui_components/memory_history_navigator.lua:88",
+        "lib/ui_components/page.lua:44",
+        "lib/ui_components/tooltip.lua:12",
+        "lib/ui_components/value_selector.lua:27"
+      ],
+      "text": [
+        "mosaic.lua:157",
+        "lib/ui.lua:46",
+        "lib/ui_components/dial.lua:46",
+        "lib/ui_components/dial.lua:49",
+        "lib/ui_components/dial.lua:52",
+        "lib/ui_components/dial.lua:143",
+        "lib/ui_components/grid_viewer.lua:25",
+        "lib/ui_components/grid_viewer.lua:31",
+        "lib/ui_components/list_selector.lua:26",
+        "lib/ui_components/list_selector.lua:28",
+        "lib/ui_components/memory_history_navigator.lua:26",
+        "lib/ui_components/memory_history_navigator.lua:29",
+        "lib/ui_components/memory_history_navigator.lua:32",
+        "lib/ui_components/memory_history_navigator.lua:72",
+        "lib/ui_components/memory_history_navigator.lua:74",
+        "lib/ui_components/memory_history_navigator.lua:76",
+        "lib/ui_components/memory_history_navigator.lua:84",
+        "lib/ui_components/page.lua:47",
+        "lib/ui_components/pages.lua:23",
+        "lib/ui_components/tooltip.lua:13",
+        "lib/ui_components/value_selector.lua:28",
+        "lib/ui_components/value_selector.lua:31",
+        "lib/ui_components/value_selector.lua:33",
+        "lib/ui_components/vertical_scroll_selector.lua:59",
+        "lib/ui_components/vertical_scroll_selector.lua:61",
+        "lib/ui_components/vertical_scroll_selector.lua:74",
+        "lib/ui_components/vertical_scroll_selector.lua:76",
+        "lib/ui_components/vertical_scroll_selector.lua:85",
+        "lib/ui_components/vertical_scroll_selector.lua:87"
+      ],
+      "update": [
+        "mosaic.lua:159",
+        "mosaic.lua:165"
+      ],
+      "line": [
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:295",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:299",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:307",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:311"
+      ],
+      "stroke": [
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:296",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:300",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:308",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:312"
+      ],
+      "text_trim": [
+        "lib/ui_components/dial.lua:32"
+      ],
+      "rect": [
+        "lib/ui_components/dial.lua:82",
+        "lib/ui_components/dial.lua:90",
+        "lib/ui_components/dial.lua:103",
+        "lib/ui_components/dial.lua:111",
+        "lib/ui_components/dial.lua:126",
+        "lib/ui_components/dial.lua:134"
+      ],
+      "fill": [
+        "lib/ui_components/dial.lua:83",
+        "lib/ui_components/dial.lua:91",
+        "lib/ui_components/dial.lua:104",
+        "lib/ui_components/dial.lua:112",
+        "lib/ui_components/dial.lua:127",
+        "lib/ui_components/dial.lua:135"
+      ]
+    },
+    "grid": {
+      "connect": [
+        "mosaic.lua:49",
+        "lib/m_grid.lua:55",
+        "lib/nb/nb.lua:3"
+      ],
+      "add": [
+        "lib/m_grid.lua:54"
+      ]
+    },
+    "midi": {
+      "connect": [
+        "lib/m_midi.lua:230",
+        "lib/nb/lib/nb.lua:30"
+      ]
+    },
+    "clock": {
+      "run": [
+        "mosaic.lua:176",
+        "mosaic.lua:210",
+        "mosaic.lua:220",
+        "mosaic.lua:231",
+        "mosaic.lua:242",
+        "lib/m_grid.lua:236",
+        "lib/m_midi.lua:214",
+        "lib/clock/m_lattice.lua:85",
+        "lib/nb/nb.lua:11",
+        "lib/nb/nb.lua:19",
+        "lib/nb/lib/nb.lua:156",
+        "lib/nb/lib/player.lua:86",
+        "lib/nb/lib/player.lua:117",
+        "lib/ui_components/dial.lua:231"
+      ],
+      "sleep": [
+        "mosaic.lua:176",
+        "mosaic.lua:213",
+        "mosaic.lua:223",
+        "mosaic.lua:234",
+        "mosaic.lua:245",
+        "lib/m_grid.lua:320",
+        "lib/m_midi.lua:215",
+        "lib/nb/nb.lua:20",
+        "lib/nb/lib/nb.lua:157",
+        "lib/nb/lib/player.lua:87",
+        "lib/nb/lib/player.lua:118",
+        "lib/ui_components/dial.lua:232"
+      ],
+      "cancel": [
+        "lib/m_grid.lua:244",
+        "lib/m_grid.lua:250",
+        "lib/m_midi.lua:212",
+        "lib/clock/m_lattice.lua:94",
+        "lib/clock/m_lattice.lua:129",
+        "lib/helpers/functions.lua:16",
+        "lib/helpers/functions.lua:17",
+        "lib/nb/lib/player.lua:105",
+        "lib/ui_components/dial.lua:228",
+        "lib/ui_components/dial.lua:234"
+      ],
+      "get_tempo": [
+        "lib/m_midi.lua:154"
+      ],
+      "set_swing_or_shuffle": [
+        "lib/clock/m_clock.lua:487"
+      ],
+      "set_swing": [
+        "lib/clock/m_clock.lua:493"
+      ],
+      "set_shuffle_feel": [
+        "lib/clock/m_clock.lua:499"
+      ],
+      "set_shuffle_basis": [
+        "lib/clock/m_clock.lua:505"
+      ],
+      "set_shuffle_amount": [
+        "lib/clock/m_clock.lua:511"
+      ],
+      "set_division": [
+        "lib/clock/m_clock.lua:518"
+      ],
+      "sync": [
+        "lib/clock/m_lattice.lua:149",
+        "lib/nb/nb.lua:16"
+      ],
+      "get_beat_sec": [
+        "lib/nb/lib/player.lua:118"
+      ]
+    },
+    "metro": {
+      "init": [
+        "mosaic.lua:30",
+        "mosaic.lua:31",
+        "mosaic.lua:138",
+        "mosaic.lua:399",
+        "lib/ui_components/tooltip.lua:36"
+      ],
+      "free": [
+        "mosaic.lua:135",
+        "mosaic.lua:397",
+        "lib/ui_components/tooltip.lua:28"
+      ]
+    },
+    "params": {
+      "read": [
+        "mosaic.lua:81"
+      ],
+      "write": [
+        "mosaic.lua:100"
+      ],
+      "add_group": [
+        "mosaic.lua:253",
+        "lib/m_midi.lua:441",
+        "lib/m_midi.lua:549",
+        "lib/m_midi.lua:631",
+        "lib/devices/param_manager.lua:26",
+        "lib/nb/lib/nb.lua:35"
+      ],
+      "add_separator": [
+        "mosaic.lua:254",
+        "mosaic.lua:322",
+        "mosaic.lua:337",
+        "mosaic.lua:339",
+        "mosaic.lua:346",
+        "mosaic.lua:354",
+        "lib/m_midi.lua:439",
+        "lib/m_midi.lua:442",
+        "lib/m_midi.lua:496",
+        "lib/m_midi.lua:551",
+        "lib/m_midi.lua:592",
+        "lib/m_midi.lua:633",
+        "lib/m_midi.lua:670"
+      ],
+      "add_trigger": [
+        "mosaic.lua:255",
+        "mosaic.lua:262",
+        "mosaic.lua:269"
+      ],
+      "set_action": [
+        "mosaic.lua:256",
+        "mosaic.lua:263",
+        "mosaic.lua:270",
+        "mosaic.lua:277",
+        "mosaic.lua:287",
+        "mosaic.lua:296",
+        "mosaic.lua:305",
+        "mosaic.lua:314",
+        "mosaic.lua:327",
+        "mosaic.lua:348",
+        "lib/m_midi.lua:451",
+        "lib/m_midi.lua:506",
+        "lib/m_midi.lua:560",
+        "lib/m_midi.lua:602",
+        "lib/m_midi.lua:642",
+        "lib/m_midi.lua:679",
+        "lib/devices/param_manager.lua:34",
+        "lib/devices/param_manager.lua:82",
+        "lib/devices/param_manager.lua:115",
+        "lib/devices/param_manager.lua:155",
+        "lib/devices/param_manager.lua:171",
+        "lib/devices/param_manager.lua:180",
+        "lib/devices/param_manager.lua:190",
+        "lib/nb/lib/nb.lua:161",
+        "lib/nb/lib/nb.lua:169",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:138"
+      ],
+      "add_option": [
+        "mosaic.lua:276",
+        "mosaic.lua:295",
+        "mosaic.lua:304",
+        "mosaic.lua:323",
+        "mosaic.lua:324",
+        "mosaic.lua:325",
+        "mosaic.lua:326",
+        "mosaic.lua:333",
+        "mosaic.lua:334",
+        "mosaic.lua:335",
+        "mosaic.lua:338",
+        "mosaic.lua:340",
+        "mosaic.lua:341",
+        "mosaic.lua:342",
+        "mosaic.lua:343",
+        "mosaic.lua:344",
+        "mosaic.lua:345",
+        "mosaic.lua:347",
+        "mosaic.lua:355",
+        "mosaic.lua:356",
+        "mosaic.lua:357",
+        "mosaic.lua:358",
+        "lib/nb/lib/nb.lua:128"
+      ],
+      "hide": [
+        "mosaic.lua:284",
+        "mosaic.lua:293",
+        "mosaic.lua:302",
+        "mosaic.lua:311",
+        "mosaic.lua:320",
+        "lib/devices/param_manager.lua:27",
+        "lib/devices/param_manager.lua:93",
+        "lib/devices/param_manager.lua:172",
+        "lib/devices/param_manager.lua:181",
+        "lib/devices/param_manager.lua:185",
+        "lib/devices/param_manager.lua:191",
+        "lib/nb/lib/nb.lua:39",
+        "lib/nb/lib/nb.lua:60",
+        "lib/nb/lib/nb.lua:131",
+        "lib/nb/lib/nb.lua:200",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:137"
+      ],
+      "add_number": [
+        "mosaic.lua:286",
+        "mosaic.lua:313",
+        "mosaic.lua:336",
+        "lib/devices/param_manager.lua:32",
+        "lib/nb/lib/nb.lua:36",
+        "lib/nb/lib/nb.lua:37",
+        "lib/nb/lib/nb.lua:38"
+      ],
+      "bang": [
+        "mosaic.lua:374",
+        "lib/nb/nb.lua:21"
+      ],
+      "get": [
+        "lib/m_grid.lua:139",
+        "lib/m_grid.lua:149",
+        "lib/m_grid.lua:167",
+        "lib/m_grid.lua:294",
+        "lib/m_midi.lua:71",
+        "lib/m_midi.lua:174",
+        "lib/quantiser.lua:400",
+        "lib/quantiser.lua:401",
+        "lib/quantiser.lua:402",
+        "lib/recorder.lua:111",
+        "lib/step.lua:50",
+        "lib/step.lua:58",
+        "lib/step.lua:138",
+        "lib/step.lua:144",
+        "lib/step.lua:161",
+        "lib/step.lua:270",
+        "lib/step.lua:836",
+        "lib/step.lua:850",
+        "lib/step.lua:851",
+        "lib/step.lua:852",
+        "lib/step.lua:863",
+        "lib/step.lua:869",
+        "lib/step.lua:885",
+        "lib/step.lua:895",
+        "lib/step.lua:962",
+        "lib/step.lua:1030",
+        "lib/step.lua:1039",
+        "lib/step.lua:1042",
+        "lib/clock/m_clock.lua:288",
+        "lib/clock/m_clock.lua:362",
+        "lib/clock/m_clock.lua:380",
+        "lib/clock/m_clock.lua:381",
+        "lib/clock/m_clock.lua:410",
+        "lib/clock/m_clock.lua:432",
+        "lib/clock/m_clock.lua:767",
+        "lib/models/program.lua:754",
+        "lib/models/program.lua:761",
+        "lib/models/program.lua:762",
+        "lib/models/program.lua:771",
+        "lib/models/program.lua:772",
+        "lib/models/program.lua:781",
+        "lib/models/program.lua:782",
+        "lib/models/program.lua:791",
+        "lib/models/program.lua:792",
+        "lib/models/program.lua:928",
+        "lib/models/program.lua:931",
+        "lib/nb/lib/nb.lua:43",
+        "lib/nb/lib/nb.lua:65",
+        "lib/nb/lib/nb.lua:77",
+        "lib/nb/lib/nb.lua:92",
+        "lib/nb/lib/nb.lua:135",
+        "lib/nb/lib/nb.lua:162",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:144",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:247",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:370",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:371",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:372",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:373",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:374",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:627",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:746",
+        "lib/pages/channel_edit_page/channel_edit_page_ui_handlers.lua:52",
+        "lib/pages/channel_edit_page/channel_edit_page_ui_handlers.lua:153",
+        "lib/pages/channel_edit_page/channel_edit_page_ui_refreshers.lua:130",
+        "lib/pages/channel_edit_page/channel_edit_page_ui_refreshers.lua:155",
+        "lib/pages/channel_edit_page/channel_edit_page_ui_refreshers.lua:171",
+        "lib/pages/song_edit_page/song_edit_page.lua:123",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:323",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:327",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:340",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:349",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:357",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:365",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:373",
+        "lib/pages/trigger_edit_page/trigger_edit_page_ui.lua:107"
+      ],
+      "set": [
+        "lib/m_grid.lua:150",
+        "lib/m_grid.lua:154",
+        "lib/m_midi.lua:485",
+        "lib/m_midi.lua:540",
+        "lib/m_midi.lua:585",
+        "lib/m_midi.lua:623",
+        "lib/m_midi.lua:664",
+        "lib/m_midi.lua:697",
+        "lib/step.lua:227",
+        "lib/step.lua:239",
+        "lib/step.lua:246",
+        "lib/clock/m_lattice.lua:105",
+        "lib/devices/norns_param_state_handler.lua:26",
+        "lib/devices/param_manager.lua:265",
+        "lib/nb/lib/nb.lua:165",
+        "lib/nb/lib/nb.lua:172",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:139",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:310",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:319",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:335",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:345",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:353",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:361",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:369",
+        "lib/pages/trigger_edit_page/trigger_edit_page_ui.lua:103"
+      ],
+      "add_control": [
+        "lib/m_midi.lua:445",
+        "lib/m_midi.lua:500",
+        "lib/m_midi.lua:554",
+        "lib/m_midi.lua:596",
+        "lib/m_midi.lua:636",
+        "lib/m_midi.lua:673",
+        "lib/devices/param_manager.lua:33"
+      ],
+      "lookup_param": [
+        "lib/step.lua:59",
+        "lib/step.lua:160",
+        "lib/devices/device_map.lua:369",
+        "lib/devices/param_manager.lua:40",
+        "lib/devices/param_manager.lua:54",
+        "lib/devices/param_manager.lua:65",
+        "lib/devices/param_manager.lua:100",
+        "lib/devices/param_manager.lua:131",
+        "lib/devices/param_manager.lua:187",
+        "lib/nb/nb.lua:29",
+        "lib/nb/lib/nb.lua:132",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:617"
+      ],
+      "show": [
+        "lib/devices/device_map.lua:371",
+        "lib/devices/param_manager.lua:39",
+        "lib/devices/param_manager.lua:56",
+        "lib/devices/param_manager.lua:89",
+        "lib/devices/param_manager.lua:122",
+        "lib/devices/param_manager.lua:169",
+        "lib/nb/lib/nb.lua:55"
+      ],
+      "get_range": [
+        "lib/devices/device_map.lua:376",
+        "lib/devices/device_map.lua:377"
+      ],
+      "add_text": [
+        "lib/nb/lib/nb.lua:130"
+      ],
+      "add_binary": [
+        "lib/nb/lib/nb.lua:199"
+      ],
+      "t": [
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:129"
+      ],
+      "add": [
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:135"
+      ],
+      "delta": [
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:142"
+      ],
+      "string": [
+        "lib/pages/trigger_edit_page/trigger_edit_page.lua:179"
+      ]
+    },
+    "norns": {},
+    "crow": {
+      "ii.pullup": [
+        "mosaic.lua:208",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:578",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:585"
+      ],
+      "ii.jf.mode": [
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:579"
+      ]
+    },
+    "engine": {},
+    "softcut": {},
+    "audio": {},
+    "osc": {},
+    "util": {
+      "time": [
+        "lib/m_midi.lua:89",
+        "lib/m_midi.lua:153",
+        "lib/m_midi.lua:454",
+        "lib/m_midi.lua:509",
+        "lib/m_midi.lua:563",
+        "lib/m_midi.lua:605",
+        "lib/m_midi.lua:645",
+        "lib/m_midi.lua:682"
+      ],
+      "trim_string_to_width": [
+        "lib/m_midi.lua:244"
+      ],
+      "clamp": [
+        "lib/clock/m_lattice.lua:241",
+        "lib/clock/m_lattice.lua:247",
+        "lib/clock/m_lattice.lua:248",
+        "lib/clock/m_lattice.lua:249",
+        "lib/clock/m_lattice.lua:250",
+        "lib/clock/m_lattice.lua:251",
+        "lib/clock/m_lattice.lua:252",
+        "lib/clock/m_lattice.lua:300",
+        "lib/clock/m_lattice.lua:301",
+        "lib/clock/m_lattice.lua:302",
+        "lib/clock/m_lattice.lua:372",
+        "lib/clock/m_lattice.lua:376",
+        "lib/clock/m_lattice.lua:383",
+        "lib/clock/m_lattice.lua:388",
+        "lib/clock/m_lattice.lua:392",
+        "lib/clock/m_lattice.lua:397",
+        "lib/models/program.lua:670",
+        "lib/nb/lib/nb.lua:47",
+        "lib/nb/lib/nb.lua:66"
+      ],
+      "acronym": [
+        "lib/nb/lib/nb.lua:20"
+      ],
+      "round": [
+        "lib/nb/lib/nb.lua:72",
+        "lib/nb/lib/nb.lua:85"
+      ]
+    },
+    "os": {
+      "time": [
+        "mosaic.lua:182",
+        "lib/quantiser.lua:288",
+        "lib/scheduler.lua:22"
+      ],
+      "clock": [
+        "lib/helpers/profiler.lua:5",
+        "lib/helpers/profiler.lua:154",
+        "lib/helpers/profiler.lua:252",
+        "lib/helpers/profiler.lua:262",
+        "lib/helpers/profiler.lua:307",
+        "lib/helpers/profiler.lua:337"
+      ]
+    },
+    "math": {
+      "random": [
+        "mosaic.lua:155"
+      ],
+      "randomseed": [
+        "mosaic.lua:182"
+      ],
+      "floor": [
+        "lib/memory.lua:9",
+        "lib/m_midi.lua:28",
+        "lib/m_midi.lua:313",
+        "lib/m_midi.lua:330",
+        "lib/quantiser.lua:214",
+        "lib/quantiser.lua:363",
+        "lib/sinfonion_harmonic_sync.lua:39",
+        "lib/clock/m_clock.lua:56",
+        "lib/clock/m_clock.lua:59",
+        "lib/clock/m_clock.lua:60",
+        "lib/clock/m_clock.lua:61",
+        "lib/clock/m_clock.lua:66",
+        "lib/clock/m_clock.lua:690",
+        "lib/clock/m_lattice.lua:353",
+        "lib/clock/m_lattice.lua:438",
+        "lib/clock/m_lattice.lua:444",
+        "lib/controls/fader.lua:27",
+        "lib/controls/fader.lua:32",
+        "lib/controls/fader.lua:73",
+        "lib/controls/fader.lua:89",
+        "lib/controls/fader.lua:131",
+        "lib/controls/fade_button.lua:30",
+        "lib/controls/fade_button.lua:57",
+        "lib/helpers/drum_ops.lua:59",
+        "lib/helpers/functions.lua:488",
+        "lib/helpers/functions.lua:489",
+        "lib/helpers/functions.lua:491",
+        "lib/nb/lib/nb.lua:47",
+        "lib/nb/lib/nb.lua:66",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:62",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:63",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:64",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:65",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:67",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:68",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:69",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:70",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:75",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:76",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:77",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:79",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:80",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:81",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:82",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:102",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:107",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:663",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:667",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:671",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:675",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:679",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:683",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:687",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:1692",
+        "lib/pages/song_edit_page/song_edit_page.lua:14",
+        "lib/pages/velocity_edit_page/velocity_edit_page.lua:39",
+        "lib/pages/velocity_edit_page/velocity_edit_page.lua:55",
+        "lib/ui_components/dial.lua:76",
+        "lib/ui_components/dial.lua:97",
+        "lib/ui_components/dial.lua:120",
+        "lib/ui_components/memory_history_navigator.lua:69"
+      ],
+      "max": [
+        "lib/memory.lua:555",
+        "lib/sinfonion_harmonic_sync.lua:25",
+        "lib/clock/m_lattice.lua:244",
+        "lib/clock/m_lattice.lua:353",
+        "lib/clock/m_lattice.lua:445",
+        "lib/controls/fader.lua:89",
+        "lib/controls/fade_button.lua:28",
+        "lib/controls/fade_button.lua:38",
+        "lib/models/program.lua:306",
+        "lib/models/program.lua:365",
+        "lib/models/program.lua:384",
+        "lib/models/program.lua:524",
+        "lib/pages/velocity_edit_page/velocity_edit_page.lua:232",
+        "lib/pages/velocity_edit_page/velocity_edit_page.lua:274",
+        "lib/ui_components/dial.lua:40"
+      ],
+      "abs": [
+        "lib/m_midi.lua:164",
+        "lib/m_midi.lua:167",
+        "lib/clock/m_lattice.lua:402",
+        "lib/controls/vertical_fader.lua:45",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:662",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:666",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:670",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:674",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:678",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:682",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:686",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:764",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:789",
+        "lib/pages/channel_edit_page/channel_edit_page_ui.lua:817",
+        "lib/pages/note_edit_page/note_edit_page_ui.lua:32",
+        "lib/pages/scale_edit_page/scale_edit_page_ui.lua:123",
+        "lib/pages/scale_edit_page/scale_edit_page_ui.lua:139",
+        "lib/pages/scale_edit_page/scale_edit_page_ui.lua:147",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:101",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:113",
+        "lib/pages/song_edit_page/song_edit_page_ui.lua:166",
+        "lib/pages/trigger_edit_page/trigger_edit_page_ui.lua:64",
+        "lib/pages/trigger_edit_page/trigger_edit_page_ui.lua:74",
+        "lib/pages/trigger_edit_page/trigger_edit_page_ui.lua:86",
+        "lib/pages/velocity_edit_page/velocity_edit_page_ui.lua:24",
+        "lib/ui_components/vertical_scroll_selector.lua:112"
+      ],
+      "min": [
+        "lib/m_midi.lua:463",
+        "lib/m_midi.lua:518",
+        "lib/m_midi.lua:575",
+        "lib/m_midi.lua:617",
+        "lib/m_midi.lua:654",
+        "lib/m_midi.lua:691",
+        "lib/quantiser.lua:340",
+        "lib/sinfonion_harmonic_sync.lua:25",
+        "lib/clock/m_lattice.lua:353",
+        "lib/clock/m_lattice.lua:445",
+        "lib/controls/fade_button.lua:38",
+        "lib/models/program.lua:307",
+        "lib/models/program.lua:365",
+        "lib/models/program.lua:384",
+        "lib/models/program.lua:524",
+        "lib/pages/note_edit_page/note_edit_page.lua:208",
+        "lib/pages/note_edit_page/note_edit_page.lua:244",
+        "lib/ui_components/dial.lua:40"
+      ],
+      "ceil": [
+        "lib/quantiser.lua:32",
+        "lib/step.lua:378"
+      ],
+      "log10": [
+        "lib/clock/m_clock.lua:56"
+      ]
+    },
+    "nb": {
+      "init": [
+        "mosaic.lua:188",
+        "lib/nb/nb.lua:8",
+        "lib/nb/lib/nb.lua:111"
+      ],
+      "add_param": [
+        "mosaic.lua:190",
+        "lib/nb/nb.lua:9",
+        "lib/nb/lib/nb.lua:120"
+      ],
+      "add_player_params": [
+        "mosaic.lua:191",
+        "lib/nb/nb.lua:10",
+        "lib/nb/lib/nb.lua:192"
+      ],
+      "stop_all": [
+        "lib/clock/m_clock.lua:794",
+        "lib/nb/lib/nb.lua:214"
+      ],
+      "get_players": [
+        "lib/nb/lib/nb.lua:204"
+      ]
+    }
+  },
+  "time_sources": [
+    "native clock sync/sleep/get_beats/get_tempo",
+    "native metro",
+    "util.time wall clock",
+    "os.time startup seed and persistence timestamps",
+    "math.random/randomseed",
+    "optional profiler os.clock",
+    "matrix/toolkit native lattice"
+  ],
+  "startup_obligations": [
+    "nb must use its pinned submodule and discover players; no silent missing require",
+    "crow.ii.pullup(true) sees no connected Crow; preserve explicit absent-device semantics",
+    "Mosaic configurations copied before device_map.init",
+    "testing=false is mandatory",
+    "matrix and toolkit use native mods/hooks/params/lattice; toolkit also requires er and container/deque from norns"
+  ],
+  "observed_host_absences": [
+    "ALSA devices",
+    "GPIO/SPI screen",
+    "physical Crow",
+    "nmcli network management",
+    "vcgencmd temperature"
+  ],
+  "owners": {
+    "startup": "C02",
+    "clocks": "C07/C16",
+    "peripherals": "C02/C05",
+    "modulation": "C09"
+  }
+}
