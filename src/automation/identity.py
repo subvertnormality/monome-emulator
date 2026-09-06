@@ -15,7 +15,7 @@ def artifact(path,base):
 
 def source_identity():
     files=[]
-    for name in ['src','dev','schemas','patches','compatibility','fixtures','tests']:
+    for name in ['src','dev','scripts','schemas','patches','compatibility','fixtures','tests']:
         for p in (ROOT/name).rglob('*'):
             if p.is_file() and '__pycache__' not in p.parts and p.suffix!='.pyc': files.append(artifact(p,ROOT))
     files.append(artifact(ROOT/'dependencies.lock.json',ROOT))
@@ -27,3 +27,20 @@ def source_identity():
 def verify_artifact(record,base):
     actual=artifact(Path(base)/record['path'],base)
     if actual!=record: raise ContractError('artifact_changed',record['path'])
+
+def application_identity(code_root):
+    import os
+    base=Path(code_root).absolute(); files=[]; seen=set()
+    for current,dirs,names in os.walk(base,followlinks=True):
+        real=Path(current).resolve()
+        if real in seen: dirs[:]=[]; continue
+        seen.add(real)
+        dirs[:]=[d for d in dirs if d not in ('.git','node_modules','__pycache__','test_artefacts')]
+        for name in sorted(names):
+            p=Path(current)/name
+            if not p.is_file() or name.endswith('.pyc'): continue
+            content=p.read_bytes()
+            files.append(dict(path=p.relative_to(base).as_posix(),sha256=hashlib.sha256(content).hexdigest(),size=len(content)))
+    files.sort(key=lambda f:f['path'])
+    if not files: raise ContractError('empty_application','No application source files')
+    return dict(code_root=str(base),digest=hashlib.sha256(json.dumps(files,sort_keys=True).encode()).hexdigest(),files=files)

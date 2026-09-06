@@ -2,8 +2,8 @@
   "schema_version": 1,
   "updated": "2026-09-06",
   "mode": "executing",
-  "current_card": "C02",
-  "next_action": "Attach the official runtime to the session server, implement generic script loading and prove isolated Mosaic boot.",
+  "current_card": "C03",
+  "next_action": "Implement grid conformance, held-input policy, device reconnect and actual Mosaic navigation through the native event path.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -19,8 +19,8 @@
     },
     {
       "id": "C02",
-      "status": "in_progress",
-      "evidence": null
+      "status": "done",
+      "evidence": "docs/delivery/completions/C02.md"
     },
     {
       "id": "C03",
@@ -94,7 +94,7 @@
     }
   ],
   "milestones": {
-    "M0": "not_run",
+    "M0": "passed",
     "M1": "not_run",
     "M2": "not_run",
     "M3": "not_run",

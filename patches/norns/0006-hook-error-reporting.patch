@@ -1,0 +1,10 @@
+--- a/lua/core/hook.lua
++++ b/lua/core/hook.lua
+@@ -26,6 +26,7 @@
+       local ok, error = pcall(func, arg)
+       if not ok then
+         print('hook: ' .. k .. ' failed, error: ' .. error)
++        if _norns.emu_report then _norns.emu_report(5, 'hook: '..k..' failed: '..tostring(error)) end
+       end
+     end
+   end

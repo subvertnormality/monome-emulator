@@ -220,6 +220,26 @@
       "minItems": 1,
       "maxItems": 10000
     },
+    "application": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object"
+        }
+      ]
+    },
+    "runtime": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object"
+        }
+      ]
+    },
     "error": {
       "oneOf": [
         {
@@ -251,6 +271,8 @@
     "exit_code",
     "results",
     "artifacts",
+    "application",
+    "runtime",
     "error"
   ],
   "additionalProperties": false

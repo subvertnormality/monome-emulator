@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "id": "A01-base-midi-boot",
+  "backend": "native",
+  "fixture": "mosaic",
+  "fixture_profile": "base-midi",
+  "tier": "E",
+  "family": "A01",
+  "deadline_ms": 60000,
+  "steps": [
+    {"assertion": {"path": "state.ready", "equals": true}},
+    {"assertion": {"path": "state.script", "equals": "mosaic"}},
+    {"assertion": {"path": "state.diagnostics.enabled_mods", "equals": 0}}
+  ]
+}

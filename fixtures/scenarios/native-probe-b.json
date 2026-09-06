@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "G02-probe-b-boot",
+  "backend": "native",
+  "script": "fixtures/probes/probe-b/probe-b.lua",
+  "code_root": "fixtures/probes",
+  "tier": "I",
+  "family": "G02",
+  "deadline_ms": 60000,
+  "steps": [
+    {"assertion": {"path": "state.ready", "equals": true}},
+    {"assertion": {"path": "state.script", "equals": "probe-b"}},
+    {"action": {"type": "key", "n": 3, "state": 1}},
+    {"action": {"type": "key", "n": 3, "state": 0}},
+    {"wait": {"path": "state.midi_count", "equals": 2}, "timeout_ms": 3000},
+    {"assertion": {"path": "state.midi.0.bytes", "equals": [146, 67, 80]}},
+    {"assertion": {"path": "state.midi.1.bytes", "equals": [130, 67, 0]}},
+    {"assertion": {"path": "state.held", "equals": []}}
+  ]
+}

@@ -1,0 +1,258 @@
+--- a/matron/src/emu_bridge.h
++++ b/matron/src/emu_bridge.h
+@@ -1,10 +1,13 @@
+ #pragma once
+ #include <cairo.h>
++#include <lua.h>
+ #include <stdint.h>
+ #include <sys/types.h>
+ struct dev_midi;
+ struct dev_monome;
+ int emu_enabled(void);
++void emu_error(const char *message);
++int emu_report(lua_State *l);
+ void emu_devices(void);
+ void emu_start(void);
+ void emu_frame(cairo_surface_t *surface);
+--- a/matron/src/emu_bridge.c
++++ b/matron/src/emu_bridge.c
+@@ -6,6 +6,8 @@
+ #include "device/device.h"
+ #include "device/device_list.h"
+ #include "events.h"
++#include "event_custom.h"
++#include <lauxlib.h>
+ #include "clocks/clock_midi.h"
+ #include <pthread.h>
+ #include <stdio.h>
+@@ -31,12 +33,30 @@
+     uint64_t ns = (uint64_t)ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+     if (size > sizeof(packet)-16) { fprintf(stderr,"EMU_ERROR oversized output\n"); abort(); }
+     memcpy(packet, &kind, 4); memcpy(packet+4, &id, 4); memcpy(packet+8, &ns, 8);
+-    memcpy(packet+16, data, size);
++    if (size) memcpy(packet+16, data, size);
+     pthread_mutex_lock(&output_lock);
+     ssize_t written = send(bridge_fd, packet, size+16, MSG_NOSIGNAL);
+     pthread_mutex_unlock(&output_lock);
+     if (written != (ssize_t)(size+16)) { perror("EMU_ERROR output transport"); _exit(70); }
+ }
++
++void emu_error(const char *message) {
++    if (emu_enabled()) emit(5,0,message ? message : "unknown Lua error",strlen(message ? message : "unknown Lua error"));
++}
++int emu_report(lua_State *l) {
++    int kind=luaL_checkinteger(l,1);
++    size_t size;
++    const char *message=luaL_checklstring(l,2,&size);
++    if (kind<5 || kind>8) return luaL_error(l,"invalid emulator report kind");
++    emit(kind,0,message,size);
++    return 0;
++}
++static void acknowledge(lua_State *l, void *value, void *context) {
++    (void)l; (void)context;
++    emit(4,*(uint32_t *)value,NULL,0);
++}
++static void release_ack(void *value,void *context) { (void)context; free(value); }
++static struct event_custom_ops ack_ops={.type_name="emu_ack",.weave=acknowledge,.free=release_ack};
+ 
+ static void virtual_deinit(void *self) { (void)self; }
+ void emu_midi_init(struct dev_midi *md) {
+@@ -82,11 +102,12 @@
+ }
+ static void *receive_loop(void *unused) {
+     (void)unused;
+-    int32_t args[5];
++    int32_t packet[6];
++    int32_t *args=packet+1;
+     for (;;) {
+-        ssize_t size = recv(bridge_fd,args,sizeof(args),MSG_TRUNC);
++        ssize_t size = recv(bridge_fd,packet,sizeof(packet),MSG_TRUNC);
+         if (size==0) { event_post(event_data_new(EVENT_QUIT)); return NULL; }
+-        if (size!=sizeof(args)) { fprintf(stderr,"EMU_ERROR invalid input packet\n"); _exit(71); }
++        if (size!=sizeof(packet)) { fprintf(stderr,"EMU_ERROR invalid input packet\n"); _exit(71); }
+         union event_data *ev;
+         switch(args[0]) {
+         case 1:
+@@ -109,9 +130,16 @@
+                 if(args[2+i]>=0xf8 && midi_device->clock_enabled) clock_midi_handle_message(args[2+i]);
+             }
+             break;
++        case 5:
++            ev=event_data_new(EVENT_EXEC_CODE_LINE);
++            ev->exec_code_line.line=strdup("_norns.emu_observe()"); break;
+         default: goto invalid;
+         }
+         event_post(ev);
++        uint32_t *sequence=malloc(sizeof(uint32_t));
++        if (!sequence) abort();
++        *sequence=(uint32_t)packet[0];
++        event_post(event_custom_new(&ack_ops,sequence,NULL));
+         continue;
+ invalid:
+         fprintf(stderr,"EMU_ERROR invalid input arguments\n"); _exit(71);
+--- a/matron/src/weaver.c
++++ b/matron/src/weaver.c
+@@ -41,6 +41,7 @@
+ #include "i2c.h"
+ #include "jack_client.h"
+ #include "lua_eval.h"
++#include "emu_bridge.h"
+ #include "metro.h"
+ #include "oracle.h"
+ #include "osc.h"
+@@ -617,6 +618,8 @@
+     lua_register_norns("platform_factory", &_platform_factory);
+     lua_register_norns("platform_shield", &_platform_shield);
+ 
++    if (emu_enabled()) lua_register_norns("emu_report", &emu_report);
++
+     // name global extern table
+     lua_setglobal(lvm, "_norns");
+ 
+@@ -640,6 +643,11 @@
+ void w_startup(void) {
+     lua_getglobal(lvm, "_startup");
+     l_report(lvm, l_docall(lvm, 0, 0));
++    const char *profile=getenv("NORNS_EMU_PROFILE");
++    if (emu_enabled() && profile) {
++        lua_getglobal(lvm,"dofile"); lua_pushstring(lvm,profile);
++        l_report(lvm,l_docall(lvm,1,0));
++    }
+ }
+ 
+ void w_post_startup(void) {
+@@ -1913,6 +1921,7 @@
+ int _load_engine(lua_State *l) {
+     lua_check_num_args(1);
+     const char *s = luaL_checkstring(l, 1);
++    if (emu_enabled() && strcmp(s,"None")!=0) return luaL_error(l,"unsupported emulator audio engine: %s",s);
+     o_load_engine(s);
+     lua_settop(l, 0);
+     return 0;
+--- a/matron/src/lua_eval.c
++++ b/matron/src/lua_eval.c
+@@ -19,6 +19,7 @@
+ #include "lualib.h"
+ 
+ #include "lua_eval.h"
++#include "emu_bridge.h"
+ 
+ #define LUA_VERSUFFIX "_" LUA_VERSION_MAJOR "_" LUA_VERSION_MINOR
+ 
+@@ -92,6 +93,7 @@
+ static int report(lua_State *L, int status) {
+     if (status != LUA_OK) {
+         const char *msg = lua_tostring(L, -1);
++        emu_error(msg);
+         l_message(progname, msg);
+         lua_pop(L, 1); /* remove message */
+     }
+--- a/matron/src/main.c
++++ b/matron/src/main.c
+@@ -41,7 +41,7 @@
+ void print_version(void);
+ 
+ void cleanup(void) {
+-    dev_monitor_deinit();
++    if (!emu_enabled()) dev_monitor_deinit();
+     osc_deinit();
+     o_deinit();
+     w_deinit();
+@@ -51,7 +51,7 @@
+     battery_deinit();
+     stat_deinit();
+     jack_client_deinit();
+-    ssd1322_deinit();
++    if (!emu_enabled()) ssd1322_deinit();
+     screen_results_deinit();
+     fprintf(stderr, "matron shutdown complete\n");
+     exit(0);
+@@ -75,7 +75,7 @@
+     battery_init();
+     stat_init();
+     osc_init();
+-    ssd1322_init();
++    if (!emu_enabled()) ssd1322_init();
+     if (jack_client_init()) {
+         screen_clear();
+         screen_level(15);
+@@ -106,7 +106,7 @@
+     else dev_list_add(DEV_TYPE_MIDI_VIRTUAL, NULL, "virtual", NULL);
+ 
+     fprintf(stderr, "init dev_monitor...\n");
+-    dev_monitor_init();
++    if (!emu_enabled()) dev_monitor_init();
+ 
+     // start listening for screen events
+     screen_results_init();
+@@ -128,7 +128,7 @@
+ 
+     // scan for connected input devices
+     fprintf(stderr, "scanning devices...\n");
+-    dev_monitor_scan();
++    if (!emu_enabled()) dev_monitor_scan();
+ 
+     // handle all resulting events, then run "post-startup"
+     fprintf(stderr, "handling pending events...\n");
+--- a/matron/src/hardware/screen/ssd1322.c
++++ b/matron/src/hardware/screen/ssd1322.c
+@@ -1,4 +1,5 @@
+ #include "ssd1322.h"
++#include "emu_bridge.h"
+ 
+ #include <string.h>
+ 
+@@ -44,6 +45,7 @@
+ }
+ 
+ int ssd1322_write_command(uint8_t command, uint8_t data_len, ...) {
++    if (emu_enabled()) return 0; // physical display absent; Cairo output remains active
+     va_list args;
+     uint8_t cmd_buf[1];
+     uint8_t data_buf[256];
+--- a/crone/src/OscInterface.cpp
++++ b/crone/src/OscInterface.cpp
+@@ -5,6 +5,7 @@
+ //
+ 
+ #include <thread>
++#include <cstdlib>
+ #include <utility>
+ 
+ #include "effects/CompressorParams.h"
+@@ -38,8 +39,10 @@
+ void OscInterface::init(MixerClient *m, SoftcutClient *sc) {
+     quitFlag = false;
+     // FIXME: should get port configs from program args or elsewhere
+-    port = "9999";
+-    matronAddress = lo_address_new("127.0.0.1", "8888");
++    const char *emuPort=std::getenv("NORNS_EMU_CRONE_PORT");
++    const char *matronPort=std::getenv("NORNS_EMU_MATRON_PORT");
++    port = emuPort ? emuPort : "9999";
++    matronAddress = lo_address_new("127.0.0.1", matronPort ? matronPort : "8888");
+ 
+     st = lo_server_thread_new(port.c_str(), handleLoError);
+     addServerMethods();
+--- a/sc/core/Crone.sc
++++ b/sc/core/Crone.sc
+@@ -26,7 +26,8 @@
+ 	*initClass {
+ 		StartUp.add { // defer until after sclang init
+ 
+-			croneAddr = NetAddr("127.0.0.1", 9999);
++			if ("NORNS_EMU_MATRON_PORT".getenv.notNil) { txPort = "NORNS_EMU_MATRON_PORT".getenv.asInteger; };
++			croneAddr = NetAddr("127.0.0.1", if ("NORNS_EMU_CRONE_PORT".getenv.notNil) { "NORNS_EMU_CRONE_PORT".getenv.asInteger } { 9999 });
+ 			remoteAddr = NetAddr("127.0.0.1", txPort);
+ 
+ 			"SC_JACK_DEFAULT_INPUTS".setenv("");
+@@ -55,7 +56,9 @@
+ 			};
+ 		}, {
+ 			Server.scsynth;
+-			server = Server.local;
++			server = if ("NORNS_EMU_SC_PORT".getenv.notNil) {
++				Server(\emu, NetAddr("127.0.0.1", "NORNS_EMU_SC_PORT".getenv.asInteger));
++			} { Server.local };
+ 			serverPort = server.addr.port;
+ 			// doesn't work on supernova - "invallid argument" - too big?
+ 			// server.options.memSize = 2**16;

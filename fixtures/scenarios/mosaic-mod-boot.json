@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "A17-midi-modulation-boot",
+  "backend": "native",
+  "fixture": "mosaic",
+  "fixture_profile": "midi-modulation",
+  "tier": "E",
+  "family": "A17",
+  "deadline_ms": 60000,
+  "steps": [
+    {"assertion": {"path": "state.ready", "equals": true}},
+    {"assertion": {"path": "state.script", "equals": "mosaic"}},
+    {"assertion": {"path": "state.diagnostics.enabled_mods", "equals": 2}},
+    {"assertion": {"path": "state.diagnostics.loaded_mods", "equals": 2}}
+  ]
+}

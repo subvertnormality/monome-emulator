@@ -258,6 +258,26 @@
       },
       "minItems": 1,
       "maxItems": 10000
+    },
+    "script": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "code_root": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "fixture": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "fixture_profile": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
     }
   },
   "required": [

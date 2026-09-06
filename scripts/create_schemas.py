@@ -32,9 +32,12 @@ save('observation',observation)
 expectation=obj(dict(path=string(),equals={}))
 step={'oneOf':[obj(dict(action=action)),obj(dict(assertion=expectation)),
  obj(dict(wait=expectation,timeout_ms=integer(1,60000))),obj(dict(fixture_fault=string(enum=['crash','stall'])))]}
-save('scenario',obj(dict(schema_version=const(1),id=string(),backend=string(enum=['contract-fixture','native']),
+scenario_fields=dict(schema_version=const(1),id=string(),backend=string(enum=['contract-fixture','native']),
  tier=string(enum=['U','I','E','B','R','F','D']),family=string(),
- deadline_ms=integer(1,600000),steps=array(step,1,10000))))
+ deadline_ms=integer(1,600000),steps=array(step,1,10000))
+required=list(scenario_fields)
+scenario_fields.update(script=string(),code_root=string(),fixture=string(),fixture_profile=string())
+save('scenario',obj(scenario_fields,required))
 artifact=obj(dict(path=string(),sha256=string(),size=integer(0,10**12)))
 identity=obj(dict(revision=string(),digest=string(),files=array(artifact,1)))
 result=obj(dict(index=integer(),kind=string(),passed=dict(type='boolean'),detail=string()))
@@ -43,5 +46,6 @@ save('manifest',obj(dict(schema_version=const(1),run_id=string(),scenario_id=str
  platform=dict(type='object'),source=identity,scenario=artifact,
  started_ns=integer(0,10**20),finished_ns=integer(0,10**20),collected=integer(),
  passed=dict(type='boolean'),exit_code=integer(0,255),results=array(result),
- artifacts=array(artifact,1),error={'oneOf':[dict(type='null'),dict(type='object')]})))
+ artifacts=array(artifact,1),application={'oneOf':[dict(type='null'),dict(type='object')]},
+ runtime={'oneOf':[dict(type='null'),dict(type='object')]},error={'oneOf':[dict(type='null'),dict(type='object')]})))
 if __name__=='__main__': print('Wrote strict automation schemas')

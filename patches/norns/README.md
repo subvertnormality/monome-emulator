@@ -34,4 +34,27 @@ warnings in the log. No physical I/O acceptance is claimed. C02 owns removing
 unneeded physical device operations from the emulator profile and deciding
 whether remaining checked-I/O fixes are necessary.
 
-These are C00 feasibility patches, not a completed compatibility certification.
+`0005-native-session-hooks.patch` evolves the bridge to six-integer ordered input
+packets with acknowledgments posted after the native input callback. It adds
+structured Lua/init diagnostics, an explicit host-profile hook, isolated service
+ports, and removes physical monitor/SPI operations only in the emulator profile.
+Only Engine_None is accepted in the declared MIDI-only profile. Remove these
+adaptations when upstream provides equivalent virtual-host lifecycle hooks.
+Native loader, params/clock, deliberate-error and Mosaic boot probes exercise
+these boundaries; complete controls/grid/MIDI conformance remains C03–C05.
+
+`0006-hook-error-reporting.patch` adds one conditional structured diagnostic to
+the existing core hook failure branch. It preserves the original caught-error
+and logging behaviour, but an emulator run fails if a mod hook fails. Remove when
+upstream exposes a general caught-hook error observer. A deliberately failing
+post-init hook is the regression fixture.
+
+`0007-crone-thread-shutdown.patch` joins the disk worker before destroying its
+buffers and joins/stops OSC poll threads before their target resources are freed.
+The pinned upstream release detached these workers; gdb captured a SIGSEGV in
+BufDiskWorker::workLoop while main unmapped a buffer during normal OSC /quit.
+Remove when upstream has equivalent thread lifetime management. Repeated native
+startup/quit, including exact service exit codes, is the regression boundary.
+
+All patches use the official base above, in lock-file order. These patches do
+not establish full API or application compatibility by themselves.

@@ -35,7 +35,10 @@ class FixtureBackend:
 class Application:
     def __init__(self,directory):
         self.directory=directory; self.config=read_json(directory/'config.json')
-        self.backend=FixtureBackend(directory)
+        if self.config['backend']=='native':
+            from runtime.native import NativeBackend
+            self.backend=NativeBackend(directory,self.config)
+        else: self.backend=FixtureBackend(directory)
         self.sequence=0; self.action_ids=set(); self.lock=threading.Lock(); self.errors=[]
     def snapshot(self):
         raw=self.backend.query({})
@@ -81,10 +84,12 @@ def serve(directory):
                     if self.command=='GET' and self.path=='/snapshot': self.respond(200,app.snapshot()); return
                     if self.command=='GET' and self.path=='/capabilities':
                         self.respond(200,checked('capability',dict(schema_version=1,backend=app.config['backend'],
-                          fidelity=app.backend.fidelity,supported=['contract counter','ordered action acknowledgment'],
-                          absent=[],unsupported=['native norns','Mosaic','audio']))); return
+                          fidelity=app.backend.fidelity,supported=(['native script loading','native keys/encoders','Cairo framebuffer','grid128 probe','MIDI event probe'] if app.config['backend']=='native' else ['contract counter','ordered action acknowledgment']),
+                          absent=['physical Crow','GPIO/SPI','network manager'] if app.config['backend']=='native' else [],
+                          unsupported=['audio engines','physical peripherals'] if app.config['backend']=='native' else ['native norns','application workflows']))); return
                     if self.command=='POST' and self.path=='/action': self.respond(200,app.action(payload)); return
                     if self.command=='POST' and self.path=='/fixture-fault':
+                        if app.config['backend']!='contract-fixture': raise ContractError('unsupported','Fixture faults require the contract backend')
                         if payload not in ({'fault':'crash'},{'fault':'stall'}): raise ContractError('schema','Unknown fixture fault')
                         app.backend.query(payload); raise ContractError('fault_not_triggered','Fixture fault did not fail')
                     if self.command=='POST' and self.path=='/stop':
@@ -106,4 +111,10 @@ def serve(directory):
         server.server_close(); app.backend.close()
         write_json(directory/'stopped.json',dict(session_id=app.config['session_id'],monotonic_ns=time.monotonic_ns()))
 
-if __name__=='__main__': serve(Path(sys.argv[1]))
+if __name__=='__main__':
+    directory=Path(sys.argv[1])
+    try: serve(directory)
+    except Exception as error:
+        value=error.as_dict() if isinstance(error,ContractError) else ContractError('server_error',repr(error)).as_dict()
+        write_json(directory/'startup-error.json',value)
+        raise

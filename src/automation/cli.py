@@ -14,6 +14,11 @@ def main(argv=None):
     doctor=commands.add_parser('doctor'); doctor.add_argument('--json',action='store_true')
     start=commands.add_parser('start'); start.add_argument('--backend',default='native',choices=['native','contract-fixture'])
     start.add_argument('--script'); start.add_argument('--code-root'); start.add_argument('--data'); start.add_argument('--profile',default='wsl')
+    start.add_argument('--fixture'); start.add_argument('--fixture-profile',default='base-midi')
+    fetch=commands.add_parser('fetch'); fetch.add_argument('--locked',action='store_true',required=True)
+    commands.add_parser('build')
+    fixtures=commands.add_parser('fixtures'); fixture_commands=fixtures.add_subparsers(dest='fixture_command',required=True)
+    fixture_fetch=fixture_commands.add_parser('fetch'); fixture_fetch.add_argument('name'); fixture_fetch.add_argument('--locked',action='store_true',required=True)
     for name in ['snapshot','stop','capabilities']:
         command=commands.add_parser(name); command.add_argument('session_id')
     action=commands.add_parser('action'); action.add_argument('session_id'); action.add_argument('json_action')
@@ -27,9 +32,25 @@ def main(argv=None):
         if args.command=='doctor':
             result=dict(platform=platform.platform(),kernel=platform.release(),python=sys.version,
                 tools={k:shutil.which(k) for k in ['gcc','lua5.3','jackd','sclang']},
-                capability='contract-fixture-only; native product backend attaches in C02',
+                capability='native MIDI-only norns profile; run capabilities on a session for supported boundaries',
+                native_installation=(ROOT/'.runtime/current.json').exists(),
                 native_probe_available=(ROOT/'artifacts/c00/native-probe.json').exists())
-        elif args.command=='start': result=session.start(args.backend,args.script,args.code_root,args.data)
+        elif args.command=='fetch':
+            from runtime.dependencies import fetch
+            result=fetch()
+        elif args.command=='build':
+            from runtime.dependencies import build
+            result=build()
+        elif args.command=='fixtures':
+            import app_fixtures
+            result=app_fixtures.fetch(args.name)
+        elif args.command=='start':
+            if args.fixture:
+                if args.script or args.code_root: raise ContractError('fixture_inputs','Choose either a fixture or external script inputs')
+                import app_fixtures
+                options=app_fixtures.launch_options(args.fixture,args.fixture_profile)
+                result=session.start(args.backend,data=args.data,**options)
+            else: result=session.start(args.backend,args.script,args.code_root,args.data)
         elif args.command=='snapshot': result=session.request(args.session_id,'/snapshot')
         elif args.command=='capabilities': result=session.request(args.session_id,'/capabilities')
         elif args.command=='stop': result=session.stop(args.session_id)

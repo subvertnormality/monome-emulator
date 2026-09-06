@@ -28,8 +28,8 @@ def request(session_id,path,payload=None,timeout=5):
         raise ContractError(value.get('code','http_error'),value.get('message',str(error))) from error
     except (OSError,ValueError) as error: raise ContractError('session_unavailable',str(error)) from error
 
-def start(backend='contract-fixture',script=None,code_root=None,data=None):
-    if backend!='contract-fixture': raise ContractError('unsupported_backend','Native backend attaches in C02')
+def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None):
+    if backend not in ('contract-fixture','native'): raise ContractError('unsupported_backend',backend)
     session_id=uid(); directory=SESSIONS/session_id
     directory.mkdir(parents=True)
     dust=directory/'dust'
@@ -39,17 +39,24 @@ def start(backend='contract-fixture',script=None,code_root=None,data=None):
         data_path=Path(data).resolve()/session_id
         data_path.mkdir(parents=True,exist_ok=False)
     else: data_path=dust/'data'
-    config=dict(session_id=session_id,token=uid(),backend=backend,script=str(Path(script).resolve()) if script else None,
-                code_root=str(Path(code_root).resolve()) if code_root else None,data=str(data_path),dust=str(dust))
+    config=dict(session_id=session_id,token=uid(),backend=backend,script=str(Path(script).absolute()) if script else None,
+                code_root=str(Path(code_root).absolute()) if code_root else None,data=str(data_path),dust=str(dust),
+                enabled_mods=enabled_mods or [],data_seeds=data_seeds or [])
     write_json(directory/'config.json',config)
     log=open(directory/'server.log','w')
     env=dict(os.environ,PYTHONPATH=str(ROOT/'src'))
     proc=subprocess.Popen([sys.executable,'-m','automation.server',str(directory)],cwd=ROOT,env=env,
                           stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
     log.close()
-    deadline=time.monotonic()+10
+    deadline=time.monotonic()+(60 if backend=='native' else 10)
     while time.monotonic()<deadline:
-        if proc.poll() is not None: raise ContractError('startup_failed','Session server exited; '+str(directory/'server.log'))
+        if proc.poll() is not None:
+            if (directory/'startup-error.json').exists():
+                error=read_json(directory/'startup-error.json')
+                failure=ContractError(error['code'],error['message']+'; logs: '+str(directory))
+                failure.session_id=session_id
+                raise failure
+            raise ContractError('startup_failed','Session server exited; '+str(directory/'server.log'))
         if (directory/'session.json').exists():
             info=metadata(session_id)
             if request(session_id,'/health')['status']=='ready': return info
@@ -60,7 +67,9 @@ def start(backend='contract-fixture',script=None,code_root=None,data=None):
 def stop(session_id):
     info=metadata(session_id)
     if (SESSIONS/session_id/'stopped.json').exists(): return dict(status='stopped',session_id=session_id)
-    result=request(session_id,'/stop',{})
+    # Native cleanup owns four service groups, each with a bounded termination
+    # grace period. Stop has its own bound, separate from interactive actions.
+    result=request(session_id,'/stop',{},timeout=15)
     deadline=time.monotonic()+5
     while time.monotonic()<deadline:
         if (SESSIONS/session_id/'stopped.json').exists(): return result

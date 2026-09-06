@@ -82,15 +82,15 @@ before proving Mosaic can boot through the native runtime.
 |---|---|---|---|
 | V01 | Mosaic has desktop tests and uses mocks that omit runtime interactions | Verified by source inspection | Files above; C00 records full revision and baseline run |
 | V02 | Mosaic requires grid, params, timers, MIDI, n.b. and startup peripheral handling | Verified by source inspection, not complete inventory | `mosaic.lua`; C00 enumerates transitive calls/submodule |
-| V03 | Existing norns desktop projects can be reused for current Mosaic | Unverified | C00 compile/start spike; README claims are insufficient |
-| V04 | Existing Ubuntu 20.04 WSL can host the chosen runtime | Unverified | C00 environment and dependency probe; no distro change presumed |
-| V05 | Virtual grid can connect through real native norns event handling | Unverified | C00 transport spike; C03 full conformance |
-| V06 | Headless/no-audio startup preserves supported control behaviour | Unverified | C02 real boot and absent-device probes |
+| V03 | Existing norns desktop projects can be reused for current Mosaic | Replaced by official-runtime route | C00 selected pinned official matron/crone with explicit host patches; C02 real Mosaic boot |
+| V04 | Existing Ubuntu 20.04 WSL can host the chosen runtime | Proven for native startup and script services | C00/C02 builds and runtime packages; no distro change |
+| V05 | Virtual grid can connect through real native norns event handling | Attachment proven | C00/C02 native input/LED evidence; C03 full conformance remains |
+| V06 | Headless/no-audio startup preserves supported control behaviour | Startup and generic controls proven | C02 both Mosaic profiles, real services and explicit absent-device handling; later full workflows remain |
 | V07 | Deterministic time can cover all supported Mosaic time sources faithfully | Unverified | C16 dual-mode probes; does not gate M0–M4 |
 | V08 | All documented software workflows have executable independent oracles | Unverified | C00 inventory; C08–C12 implement and audit |
 | V09 | LLMs can diagnose and repair a Mosaic regression from the tool outputs | Unverified | C13 blind, isolated repair exercise |
 | V10 | WSL and native Linux pass the same workflow contract | Unverified | C14 WSL; C15 native host evidence separately |
-| V11 | Generic native script loading works without Mosaic or its dependencies | Unverified | C00/C02 G01–G03; no core application-name special cases |
+| V11 | Generic native script loading works without Mosaic or its dependencies | Proven for launcher/loader | C02 two generic apps with all installed app fixtures hidden and networking disabled; C04 browser and C14 packaging remain |
 | V12 | Official runtime dependencies can be updated without coupling app revisions or growing a fork | Unverified | C00 lock/patch graph; C14 real update and rollback rehearsal, G04/G05 |
 
 Unknowns block only their dependent scope. A plan review does not change a runtime

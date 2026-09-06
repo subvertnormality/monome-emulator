@@ -45,6 +45,15 @@ def verify(path,current_source=True):
     if manifest['backend']=='contract-fixture':
         if manifest['fidelity']!='contract-fixture-only' or manifest['tier'] not in ('U','F'):
             raise ContractError('false_fidelity','Contract fixtures cannot establish native/workflow acceptance')
+    if manifest['backend']=='native':
+        if manifest['fidelity']!='native-norns' or not manifest['application'] or not manifest['runtime']:
+            raise ContractError('native_identity','Missing actual runtime/application identities')
+        from .identity import application_identity
+        if current_source:
+            from runtime.dependencies import verify_install
+            verify_install(manifest['runtime'])
+        if current_source and application_identity(manifest['application']['code_root'])['digest']!=manifest['application']['digest']:
+            raise ContractError('stale_application','Application source no longer matches evidence')
     return manifest
 
 def release_check(paths,milestone,platform):

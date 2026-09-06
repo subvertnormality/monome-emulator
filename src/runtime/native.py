@@ -1,0 +1,252 @@
+"""Own actual norns services and adapt native packets to automation observations."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import signal
+import socket
+import struct
+import subprocess
+import threading
+import time
+from collections import deque
+from automation.protocol import ROOT,ContractError,read_json,write_json
+
+def free_ports(count):
+    sockets=[]
+    try:
+        for _ in range(count):
+            sock=socket.socket(socket.AF_INET,socket.SOCK_DGRAM); sock.bind(('127.0.0.1',0)); sockets.append(sock)
+        return [sock.getsockname()[1] for sock in sockets]
+    finally:
+        for sock in sockets: sock.close()
+
+class NativeBackend:
+    fidelity='native-norns'
+    def __init__(self,directory,config):
+        self.directory=Path(directory); self.config=config
+        self.processes=[]; self.logs=[]; self.closed=False
+        self.errors=[]; self.absent=[]; self.ready=False; self.sequence=0; self.acks={}
+        self.frame_revision=0; self.grid_revision=0; self.frame=bytes(32768); self.grid=[0]*128
+        self.midi=deque(maxlen=4096); self.midi_count=0; self.diagnostics={}
+        self.held={}; self.condition=threading.Condition(); self.io_lock=threading.Lock()
+        install=read_json(ROOT/'.runtime/current.json')
+        from .dependencies import verify_install
+        verify_install(install)
+        self.native=Path(install['source'])
+        self.config['runtime_identity']=install
+        self.controller,self.child=socket.socketpair(socket.AF_UNIX,socket.SOCK_SEQPACKET)
+        self.events=open(self.directory/'native-events.jsonl','w',buffering=1)
+        try:
+            self.prepare()
+            self.reader=threading.Thread(target=self.receive,daemon=True); self.reader.start()
+            self.launch_services()
+            self.await_ready()
+        except Exception:
+            self.close(); raise
+    def prepare(self):
+        if not self.config.get('script'): raise ContractError('script_required','Select an external script with --script')
+        entry=Path(self.config['script']).absolute()
+        if not entry.is_file() or entry.suffix!='.lua': raise ContractError('script_missing','Lua entrypoint not found: '+str(entry))
+        code=Path(self.config['code_root']).absolute() if self.config.get('code_root') else entry.parent.parent
+        try: relative=entry.relative_to(code)
+        except ValueError: raise ContractError('code_root','Entrypoint is outside selected code root')
+        if len(relative.parts)<2: raise ContractError('code_root','Code root must contain the application directory')
+        if any(c in str(relative) for c in '\n\r\t'): raise ContractError('script_path','Control characters in script path')
+        dust=self.directory/'dust'
+        # A short host path mirrors /home/we and avoids Lua pattern metacharacters
+        # in libraries that match debug source names against _path.code.
+        self.alias=Path('/tmp')/('norns_emu_'+self.config['session_id'])
+        self.alias.symlink_to(self.directory,target_is_directory=True)
+        runtime_dust=self.alias/'dust'
+        for folder in ('code','data','audio/tape'): (dust/folder).mkdir(parents=True,exist_ok=True)
+        # Preserve each declared code-directory name and sibling include dependency.
+        # Only link directories, never touch, reset or overwrite the selected tree.
+        for item in code.iterdir():
+            if item.is_dir() and not item.name.startswith('.'):
+                (dust/'code'/item.name).symlink_to(item,target_is_directory=True)
+        self.mapped_entry=runtime_dust/'code'/relative
+        app_name='/'.join(relative.parts[:-1])
+        if not app_name.endswith(entry.stem): app_name+='/'+entry.stem
+        self.app_name=app_name
+        from automation.identity import application_identity
+        self.config['application_identity']=application_identity(code)
+        if Path(self.config['data']).resolve()!=(dust/'data').resolve():
+            # C01 already creates a fresh owned target; this empty directory is ours.
+            (dust/'data').rmdir(); (dust/'data').symlink_to(self.config['data'],target_is_directory=True)
+        (self.directory/'norns').symlink_to(self.native,target_is_directory=True)
+        (self.directory/'matronrc.lua').write_text("_boot.add_io('screen:sdl', {})\n")
+        (self.directory/'version.txt').write_text('260906\n')
+        values=dict(script=str(self.mapped_entry),name=app_name,shortname=entry.stem,
+                    path=str(self.mapped_entry.parent)+'/',lib=str(self.mapped_entry.parent)+'/lib/',data=str(runtime_dust/'data'/app_name)+'/')
+        (dust/'data/system.state').write_text('norns.state.clean_shutdown = true\n'+''.join('norns.state.'+key+' = '+json.dumps(value)+'\n' for key,value in values.items()))
+        for seed in self.config.get('data_seeds',[]):
+            import shutil
+            source=Path(seed['source']).resolve(); target=(dust/'data'/seed['destination']).resolve()
+            try: target.relative_to((dust/'data').resolve())
+            except ValueError: raise ContractError('seed_path','Data seed escapes isolated data')
+            if target.exists(): raise ContractError('seed_exists','Refusing to overwrite data seed target')
+            shutil.copytree(source,target)
+        mods=self.config.get('enabled_mods',[])
+        (dust/'data/system.mods').write_text('return {{'+','.join(json.dumps(name) for name in mods)+'}}\n')
+        # The native keyboard configuration is a declared layout, not a missing file.
+        (dust/'data/system.kbd_layout').write_text("return 'us'\n")
+        scconfig=self.directory/'sclang.yaml'
+        scconfig.write_text('includePaths:\n  - '+str(self.native/'sc/core')+'\nexcludePaths: []\npostInlineWarnings: false\n')
+        ports=free_ports(5)
+        self.ports=dict(zip(['matron','crone','sclang','scsynth','remote'],ports))
+        self.env=dict(os.environ,HOME=str(self.alias),SDL_VIDEODRIVER='dummy',QT_QPA_PLATFORM='offscreen',
+            QTWEBENGINE_DISABLE_SANDBOX='1',QTWEBENGINE_CHROMIUM_FLAGS='--disable-gpu',
+            LD_LIBRARY_PATH=str(ROOT/'.runtime/prefix/lib'),JACK_DEFAULT_SERVER='emu-'+self.config['session_id'][:16],
+            NORNS_EMU_CRONE_PORT=str(self.ports['crone']),NORNS_EMU_MATRON_PORT=str(self.ports['matron']),
+            NORNS_EMU_SC_PORT=str(self.ports['scsynth']))
+        write_json(self.directory/'native-config.json',dict(script=str(entry),mapped=str(self.mapped_entry),code_root=str(code),
+            ports=self.ports,jack_server=self.env['JACK_DEFAULT_SERVER'],enabled_mods=mods,runtime=str(self.native)))
+    def launch(self,name,args,bridge=False):
+        logfile=open(self.directory/(name+'.log'),'w'); self.logs.append(logfile)
+        env=dict(self.env)
+        if bridge: env.update(NORNS_EMU_FD=str(self.child.fileno()),NORNS_EMU_PROFILE=str(ROOT/'src/runtime/host.lua'))
+        process=subprocess.Popen(args,cwd=self.directory,env=env,stdin=subprocess.PIPE,stdout=logfile,stderr=subprocess.STDOUT,
+                                 pass_fds=(self.child.fileno(),) if bridge else (),start_new_session=True)
+        self.processes.append((name,process)); return process
+    def wait_log(self,name,marker,timeout):
+        end=time.monotonic()+timeout
+        while time.monotonic()<end:
+            self.check_processes()
+            if marker in (self.directory/(name+'.log')).read_text(errors='replace'): return
+            time.sleep(0.05)
+        raise ContractError('service_timeout',name+' did not reach '+marker+'; inspect '+str(self.directory/(name+'.log')))
+    def launch_services(self):
+        self.launch('jack',['jackd','--name',self.env['JACK_DEFAULT_SERVER'],'--no-realtime','-d','dummy','-r','48000','-p','128'])
+        time.sleep(0.5); self.check_processes()
+        self.launch('crone',[str(self.native/'build/crone/crone')])
+        self.wait_log('crone','entering main loop',10)
+        self.launch('sclang',['sclang','-D','-u',str(self.ports['sclang']),'-l',str(self.directory/'sclang.yaml')])
+        self.wait_log('sclang','AudioContext: initPolls',40)
+        self.launch('matron',['stdbuf','-oL','-eL',str(self.native/'build/matron/matron'),
+            '-l',str(self.ports['matron']),'-c',str(self.ports['crone']),'-e',str(self.ports['sclang']),'-o',str(self.ports['remote'])],bridge=True)
+    def check_processes(self):
+        for name,process in self.processes:
+            if process.poll() is not None: raise ContractError('backend_dead',name+' exited '+str(process.returncode)+'; '+str(self.directory/(name+'.log')))
+        if self.errors: raise ContractError('lua_error',self.errors[0]['message'])
+    def receive(self):
+        try:
+            while not self.closed:
+                packet=self.controller.recv(65536)
+                if not packet: return
+                if len(packet)<16: raise ValueError('Short native packet')
+                kind,identifier,ns=struct.unpack('=IIQ',packet[:16]); payload=packet[16:]
+                record=dict(kind=kind,id=identifier,monotonic_ns=ns)
+                with self.condition:
+                    if kind==1:
+                        if len(payload)!=32768: raise ValueError('Invalid native frame length')
+                        self.frame=payload; self.frame_revision+=1
+                        record.update(revision=self.frame_revision,sha256=hashlib.sha256(payload).hexdigest())
+                    elif kind==2:
+                        if len(payload)!=128: raise ValueError('Invalid grid length')
+                        self.grid=list(payload); self.grid_revision+=1; record.update(leds=self.grid)
+                    elif kind==3:
+                        self.midi_count+=1; item=dict(index=self.midi_count,device_id=identifier,monotonic_ns=ns,bytes=list(payload))
+                        self.midi.append(item); record.update(item)
+                    elif kind==4: self.acks[identifier]=ns
+                    elif kind==5:
+                        item=dict(code='lua_error',message=payload.decode(errors='replace')); self.errors.append(item); record.update(item)
+                    elif kind==6: self.ready=True; record['script']=payload.decode(errors='replace')
+                    elif kind==7:
+                        value=payload.decode(errors='replace'); self.absent.append(value); record['absence']=value
+                    elif kind==8:
+                        name,beats,tempo,count,mods,loaded,threads,metros=payload.decode().split('\t')
+                        self.diagnostics=dict(script=name,beats=float(beats),tempo=float(tempo),params=int(count),enabled_mods=int(mods),
+                                              loaded_mods=int(loaded),clock_threads=int(threads),running_metros=int(metros))
+                    else: raise ValueError('Unknown native packet '+str(kind))
+                    self.events.write(json.dumps(record)+'\n'); self.condition.notify_all()
+        except (OSError,ValueError) as error:
+            if not self.closed:
+                with self.condition:
+                    self.errors.append(dict(code='native_transport',message=str(error))); self.condition.notify_all()
+    def await_ready(self):
+        end=time.monotonic()+20
+        with self.condition:
+            while not (self.ready and self.frame_revision):
+                self.check_processes()
+                if time.monotonic()>end: raise ContractError('init_timeout','Native script init/frame did not complete')
+                self.condition.wait(0.05)
+        self.check_processes()
+    def send(self,kind,*args):
+        with self.io_lock:
+            self.check_processes(); self.sequence+=1
+            packet=struct.pack('=6i',self.sequence,kind,*(list(args)+[0]*(4-len(args))))
+            self.controller.send(packet)
+            end=time.monotonic()+2
+            with self.condition:
+                while self.sequence not in self.acks:
+                    self.check_processes()
+                    if time.monotonic()>end: raise ContractError('native_ack_timeout','Native event callback did not complete')
+                    self.condition.wait(0.01)
+                timestamp=self.acks.pop(self.sequence)
+            self.check_processes(); return timestamp
+    def query(self,payload):
+        self.check_processes()
+        if 'action' in payload:
+            action=payload['action']; kind=action['type']
+            if kind=='key': self.send(1,action['n'],action['state'])
+            elif kind=='enc': self.send(2,action['n'],action['delta'])
+            elif kind=='grid': self.send(3,action['x']-1,action['y']-1,action['state'])
+            elif kind=='midi':
+                if action['port']!=1 or len(action['bytes'])>3: raise ContractError('unsupported_midi','C02 probe supports one MIDI event port; full streams attach in C05')
+                self.send(4,len(action['bytes']),*action['bytes'])
+            elif kind=='release_all':
+                for held in list(self.held.values()):
+                    release=dict(held,state=0); self.query({'action':release})
+            if kind in ('key','grid'):
+                key=(kind,action.get('n'),action.get('x'),action.get('y'))
+                if action['state']: self.held[key]=action
+                else: self.held.pop(key,None)
+        else: self.send(5)
+        with self.condition:
+            frame=self.frame; revision=self.frame_revision
+            # A current lossless raw frame is always available to machine clients.
+            frame_path=self.directory/'frame.bgra'; frame_path.write_bytes(frame)
+            return dict(frame_revision=revision,grid_revision=self.grid_revision,state=dict(
+              ready=self.ready,script=self.app_name,frame=dict(path=str(frame_path),width=128,height=64,format='BGRA8',
+                sha256=hashlib.sha256(frame).hexdigest()),grid=self.grid.copy(),midi=list(self.midi),midi_count=self.midi_count,
+              held=list(self.held.values()),diagnostics=dict(self.diagnostics),absent=self.absent[-64:]))
+    def close(self):
+        if self.closed: return
+        cleanup=[]
+        # Stop clients before their JACK server. Simultaneous termination can
+        # deadlock JACK shutdown and leave its finite server registry occupied.
+        # SuperCollider's normal /quit path also releases its shared-memory file.
+        if hasattr(self,'ports'):
+            with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as quit_socket:
+                quit_socket.sendto(b'/quit\0\0\0,\0\0\0',('127.0.0.1',self.ports['scsynth']))
+                quit_socket.sendto(b'/quit\0\0\0,\0\0\0',('127.0.0.1',self.ports['crone']))
+            time.sleep(0.1)
+        # EOF is the bridge's native EVENT_QUIT route. Keep draining frames while
+        # matron exits so its worker cannot block on the outbound socket.
+        try: self.controller.shutdown(socket.SHUT_WR)
+        except OSError: pass
+        for name,process in reversed(self.processes):
+            started=time.monotonic()
+            if name in ('matron','crone'):
+                try: process.wait(timeout=1)
+                except subprocess.TimeoutExpired: pass
+            if process.poll() is None:
+                try: os.killpg(process.pid,signal.SIGTERM)
+                except ProcessLookupError: pass
+            try: process.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                os.killpg(process.pid,signal.SIGKILL); process.wait(timeout=3)
+            # A reaped parent does not prove every process in its group exited.
+            try: os.killpg(process.pid,signal.SIGKILL)
+            except ProcessLookupError: pass
+            cleanup.append(dict(service=name,pid=process.pid,returncode=process.returncode,seconds=time.monotonic()-started))
+        self.closed=True
+        write_json(self.directory/'cleanup.json',cleanup)
+        self.controller.close(); self.child.close()
+        if hasattr(self,'reader'): self.reader.join(timeout=1)
+        self.events.close()
+        for logfile in self.logs: logfile.close()
+        if hasattr(self,'alias') and self.alias.is_symlink(): self.alias.unlink()
+        unexpected=[c for c in cleanup if c['returncode'] not in ((0,-signal.SIGTERM) if c['service']=='sclang' else (0,))]
+        if unexpected: raise ContractError('cleanup_failed','Unexpected native shutdown exits: '+json.dumps(unexpected))

@@ -106,6 +106,18 @@
     {
       "path": "patches/norns/0004-virtual-device-spike.patch",
       "sha256": "0b7fc1089332629f9cbd64933d04136974c978f347af5376eb22009925dcb173"
+    },
+    {
+      "path": "patches/norns/0005-native-session-hooks.patch",
+      "sha256": "f418d02d9e2ce1756b35348f432421cd0888a905c28b3740736a5459a45c0278"
+    },
+    {
+      "path": "patches/norns/0006-hook-error-reporting.patch",
+      "sha256": "fa5233c3adbadb62ec5bbe17dd41fd4e670d6a34a07ee3e1d2af2875b8143ea2"
+    },
+    {
+      "path": "patches/norns/0007-crone-thread-shutdown.patch",
+      "sha256": "a733a8b3daf2834f9193c38fb33e00c4b3dd817041236385b43974f37a32719f"
     }
   ],
   "serialosc": {

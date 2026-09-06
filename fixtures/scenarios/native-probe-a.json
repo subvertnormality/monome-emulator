@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "G02-probe-a-services",
+  "backend": "native",
+  "script": "fixtures/probes/probe-a/probe-a.lua",
+  "code_root": "fixtures/probes",
+  "tier": "I",
+  "family": "G02",
+  "deadline_ms": 60000,
+  "steps": [
+    {"assertion": {"path": "state.script", "equals": "probe-a"}},
+    {"wait": {"path": "state.midi_count", "equals": 3}, "timeout_ms": 2000},
+    {"assertion": {"path": "state.midi.0.bytes", "equals": [176, 10, 7]}},
+    {"assertion": {"path": "state.midi.1.bytes", "equals": [176, 11, 42]}},
+    {"assertion": {"path": "state.midi.2.bytes", "equals": [176, 12, 43]}},
+    {"action": {"type": "enc", "n": 3, "delta": 2}},
+    {"wait": {"path": "state.midi_count", "equals": 4}, "timeout_ms": 2000},
+    {"assertion": {"path": "state.midi.3.bytes", "equals": [176, 10, 9]}}
+  ]
+}

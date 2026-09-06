@@ -1,9 +1,10 @@
 # Monome emulator
 
-Delivery is in progress. The native feasibility probe runs official norns on
-Ubuntu 20.04 WSL2 with virtual keys, grid, MIDI and framebuffer capture. The
-product launcher, browser controls and full Mosaic acceptance are still being
-implemented; this is not yet a usable emulator release.
+Delivery is in progress. The native launcher runs official norns on Ubuntu 20.04
+WSL2 and boots generic scripts and both Mosaic MIDI fixture profiles. Automated
+checks cover native input, framebuffer capture, timers, structured errors and
+isolated session cleanup. Browser controls and complete device/workflow acceptance
+are still being implemented; this is not yet a complete emulator release.
 A general-purpose norns and grid development utility, built around the official
 monome software. Run local scripts, operate virtual controls, inspect MIDI and
 screen/grid output, and automate verification without physical hardware.
@@ -19,6 +20,14 @@ mods. Independent scripts and native API probes verify that the utility stays
 general-purpose. The first release focuses on controls/display/grid/MIDI;
 audio engines and physical peripheral behaviour remain outside its tested scope.
 Acceptance is fully automated.
+
+The development CLI is `./dev/emu` inside WSL. Runtime installation uses
+`fetch --locked` then `build`; Mosaic is separately installed with
+`fixtures fetch mosaic --locked`. Start an external script with
+`start --script /path/to/code/app/app.lua --code-root /path/to/code`, then use
+`snapshot`, `action`, `capabilities` and `stop` with its returned session ID.
+See [native sessions](docs/architecture/native-sessions.md) for the current
+implementation boundary and [C02 evidence](docs/delivery/completions/C02.md).
 
 `upstream/mosaic/` is a local inspection checkout, not vendored application code.
 The implementation must acquire pinned dependencies reproducibly. See the

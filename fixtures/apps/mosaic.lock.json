@@ -63,5 +63,12 @@
     "Enable mods through native system.mods lifecycle, never by replacing params",
     "Provide Norns2sinfonion virtual MIDI output for software sync scenarios"
   ],
-  "baseline": "artifacts/c00/mosaic-unit.json"
+  "baseline": "artifacts/c00/mosaic-unit.json",
+  "entrypoint": "mosaic/mosaic.lua",
+  "data_seeds": [
+    {
+      "source": "mosaic/lib/config",
+      "destination": "mosaic/config"
+    }
+  ]
 }

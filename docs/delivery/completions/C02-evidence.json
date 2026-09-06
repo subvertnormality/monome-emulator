@@ -1,0 +1,175 @@
+{
+  "start_revision": "226b72bee10ac194edd9347784e648a725abe396",
+  "native_checks": 9,
+  "runtime_lock_sha256": "a2d3ab2bdbd3041e58a0a8ab77cf425f9366ecdaca29059af656937b3ddf8d42",
+  "results": [
+    {
+      "name": "native-probe-a",
+      "passed": true,
+      "manifest": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/artifacts/runs/70962c0cc9b3434dbf874f026f9e39b8/manifest.json",
+      "session_id": "9ab0980338f14cd8ad5430d0fc53c6ad"
+    },
+    {
+      "name": "native-probe-b",
+      "passed": true,
+      "manifest": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/artifacts/runs/c602fbf68cf94d30a085fd0246ed644d/manifest.json",
+      "session_id": "6bf98bc91db547b190e58a58a013ca95"
+    },
+    {
+      "name": "mosaic-boot",
+      "passed": true,
+      "manifest": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/artifacts/runs/89d6f4aba20c4940adf37fe3a99d1afd/manifest.json",
+      "session_id": "66f88f86c737442b938817abab83a1a9"
+    },
+    {
+      "name": "mosaic-mod-boot",
+      "passed": true,
+      "manifest": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/artifacts/runs/05abbbb6263a499fa3c39fe1278286af/manifest.json",
+      "session_id": "4f0d088f95f1429ca8baddf0972ac341"
+    },
+    {
+      "name": "error-init",
+      "passed": true,
+      "manifest": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/artifacts/runs/97dd9d1bb4f94254bf3d52764d8bfd2d/manifest.json",
+      "error": {
+        "schema_version": 1,
+        "code": "lua_error",
+        "message": "...4d3f9fad3deb986db5d7/dust/code/error-init/error-init.lua:1: intentional native init failure\nstack traceback:\n\t[C]: in function 'error'\n\t...4d3f9fad3deb986db5d7/dust/code/error-init/error-init.lua:1: in global 'init'\n\t...09be7bdcb64d3f9fad3deb986db5d7/norns/lua/core/script.lua:139: in function 'core/script.init'\n\t[C]: in function 'xpcall'\n\t...y/Documents/ChatGPT/monome-emulator/src/runtime/host.lua:10: in function <...y/Documents/ChatGPT/monome-emulator/src/runtime/host.lua:9>\n\t[C]: in function 'xpcall'\n\t...709be7bdcb64d3f9fad3deb986db5d7/norns/lua/core/norns.lua:155: in function <...709be7bdcb64d3f9fad3deb986db5d7/norns/lua/core/norns.lua:153>\n\t(...tail calls...)\n\t...09be7bdcb64d3f9fad3deb986db5d7/norns/lua/core/engine.lua:96: in function <...09be7bdcb64d3f9fad3deb986db5d7/norns/lua/core/engine.lua:94>; logs: /mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/sessions/3709be7bdcb64d3f9fad3deb986db5d7",
+        "monotonic_ns": 1980297406688137
+      },
+      "session_id": "3709be7bdcb64d3f9fad3deb986db5d7"
+    },
+    {
+      "name": "error-coroutine",
+      "passed": true,
+      "manifest": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/artifacts/runs/5706162773fd40a4bdd1ced646f88654/manifest.json",
+      "error": {
+        "schema_version": 1,
+        "code": "lua_error",
+        "message": "...501240724d1489dbc945cea351fe604/norns/lua/core/clock.lua:68: ...ea351fe604/dust/code/error-coroutine/error-coroutine.lua:2: intentional native coroutine failure\nstack traceback:\n\t[C]: in function 'error'\n\t...501240724d1489dbc945cea351fe604/norns/lua/core/clock.lua:68: in function 'core/clock.resume'",
+        "monotonic_ns": 1980308430238252
+      },
+      "session_id": "e501240724d1489dbc945cea351fe604"
+    },
+    {
+      "name": "error-hook",
+      "passed": true,
+      "manifest": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/artifacts/runs/9da3bb50dbff4de296b90b815f461fd1/manifest.json",
+      "error": {
+        "schema_version": 1,
+        "code": "lua_error",
+        "message": "hook: intentional probe failure failed: ...45e793ba239bcf4941e1/dust/code/error-hook/error-hook.lua:3: intentional hook failure; logs: /mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/sessions/dd7bf61689d145e793ba239bcf4941e1",
+        "monotonic_ns": 1980320283223700
+      },
+      "session_id": "dd7bf61689d145e793ba239bcf4941e1"
+    },
+    {
+      "name": "concurrent-isolation-and-native-smoke",
+      "passed": true,
+      "first": "d0f46dde29a44bd5a66cd1a7e242993d"
+    },
+    {
+      "name": "owned-services-and-aliases-cleaned",
+      "passed": true,
+      "sessions": [
+        "3709be7bdcb64d3f9fad3deb986db5d7",
+        "4f0d088f95f1429ca8baddf0972ac341",
+        "66f88f86c737442b938817abab83a1a9",
+        "6bf98bc91db547b190e58a58a013ca95",
+        "723bb634aefe44599b4a0e898090f762",
+        "9ab0980338f14cd8ad5430d0fc53c6ad",
+        "d0f46dde29a44bd5a66cd1a7e242993d",
+        "dd7bf61689d145e793ba239bcf4941e1",
+        "e501240724d1489dbc945cea351fe604"
+      ]
+    }
+  ],
+  "passed": true,
+  "independent_isolated_scenarios": 2,
+  "source_digest": "4e6252f039b8b3589730ac0cad04bcf97031c1958ebffd82f68ab95577548b4f",
+  "artifacts": [
+    {
+      "path": "artifacts/c02/loader-suite.json",
+      "size": 14899,
+      "sha256": "ff9912f744bf110ef2795a5beaa3791c73f049db1dea1d764a48774cbcb9158b"
+    },
+    {
+      "path": "artifacts/c02-contracts.log",
+      "size": 1911,
+      "sha256": "5a1998015eb8d85d3a0f7a189ca7b800fbfec4f7e5de13881e6e491bb32dc650"
+    },
+    {
+      "path": "artifacts/c02/isolated-probe-a.json",
+      "size": 161,
+      "sha256": "5f398b8c4b57720d6149fad338d742242de2363bf2e90adc660ef86b157eaffd"
+    },
+    {
+      "path": "artifacts/c02/isolated-probe-b.json",
+      "size": 161,
+      "sha256": "7a71917db23e7c6182e8e842b9b8a178d35e59af7acc7838d2a6147d48fd4e80"
+    },
+    {
+      "path": "artifacts/c02/isolated-routes.txt",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/c02/crone-debug.txt",
+      "size": 6543,
+      "sha256": "ddae4d057e162aacfe785b61e303a1c2e9463a24fc07f016e475039a9289c525"
+    },
+    {
+      "path": "artifacts/c02-build-result.json",
+      "size": 19034,
+      "sha256": "4f4a1732f81a90b989c973ec3622736aa18deb15b07a5279b2ca7cd1615e2a55"
+    },
+    {
+      "path": "artifacts/runs/70962c0cc9b3434dbf874f026f9e39b8/manifest.json",
+      "size": 34794,
+      "sha256": "da3815d1e86ef08449fab13f5d98537d1cc1bb3d18422dcd5dfef1f315482452"
+    },
+    {
+      "path": "artifacts/runs/c602fbf68cf94d30a085fd0246ed644d/manifest.json",
+      "size": 34790,
+      "sha256": "d826b3d9406f918c47b910790b0fc51b200904872e506c9c0b2ea080814d1340"
+    },
+    {
+      "path": "artifacts/runs/89d6f4aba20c4940adf37fe3a99d1afd/manifest.json",
+      "size": 64172,
+      "sha256": "f31f637357d50581bcd829af100d69a413a0da7536e7f68c17195c41c339d95d"
+    },
+    {
+      "path": "artifacts/runs/05abbbb6263a499fa3c39fe1278286af/manifest.json",
+      "size": 65448,
+      "sha256": "e92473c6d40817a8de469e9ce2a4c03fcb524d5d63d44da6ac54639f85e7b71a"
+    },
+    {
+      "path": "artifacts/runs/97dd9d1bb4f94254bf3d52764d8bfd2d/manifest.json",
+      "size": 15075,
+      "sha256": "026147a7f24ddede7a6bce5f5ac2e25358e921978ddb29248c580ef2430d5ae7"
+    },
+    {
+      "path": "artifacts/runs/5706162773fd40a4bdd1ced646f88654/manifest.json",
+      "size": 34618,
+      "sha256": "62d713ce5b0a9082126b3de249693b690f291e1801b08c71daeb5b5cda660c1f"
+    },
+    {
+      "path": "artifacts/runs/9da3bb50dbff4de296b90b815f461fd1/manifest.json",
+      "size": 13657,
+      "sha256": "9da00568e501513216ec478e77a4e5792728eb3ae58344eaa4bd8a8732131fa0"
+    },
+    {
+      "path": "artifacts/runs/7cbeadb88dcf4dcc89f7f6c88e5f5635/manifest.json",
+      "size": 34794,
+      "sha256": "f8c965a4cfda8505ab65f7518c68fd8e35fe89e575fc4e54354a13a66dc0a923"
+    },
+    {
+      "path": "artifacts/runs/2f046bcd830e488b9c4c8486efd58c57/manifest.json",
+      "size": 34790,
+      "sha256": "3e900f0ef2173ae9495c83764611db5b14408f1e4be1b86b1c83873c0fc916ed"
+    }
+  ],
+  "skipped": 0,
+  "contract_tests": 21,
+  "card": "C02"
+}
