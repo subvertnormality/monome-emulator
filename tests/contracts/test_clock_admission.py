@@ -42,7 +42,7 @@ class AdmissionInventory(unittest.TestCase):
 
     def test_complete_inventory_is_only_m5_not_full_release(self):
         result=self.check();self.assertTrue(result['passed']);self.assertFalse(result['full_emulator_release'])
-        self.assertFalse(result['default_promoted']);self.assertEqual(result['application_comparisons'],13)
+        self.assertFalse(result['default_promoted']);self.assertEqual(result['application_comparisons'],14)
 
     def test_each_missing_evidence_class_blocks_admission(self):
         for field in ('repeats','generic_checks','applications'):

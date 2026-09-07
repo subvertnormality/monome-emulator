@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "M-TIM-003 controlled7ac20f9 and RT58bc139 pass native CLOCK menu, clock-only silence/Start next pulse,100BPM note spacing/lengths,Stop drain,internal handoff adopting100BPM then explicit90BPM edit. No production fix: corrected initial SYSTEM navigation and incorrect old-tempo assumption from pinned upstream code. M5 now13 comparisons;5 admission contracts pass. Next live-source pending-note transition, final-source three-repeat/E/R matrix and Codex P5. Twelve named Mosaic cases remain partial manual coverage; full manual/T01 and remaining stages required. No active runners.",
+  "next_action": "M-TIM-004 controlled939d8ae pending-note internal90 to MIDI100 handoff passes remaining-tick deadline and exact notes. RT24c9a48 fails before source selection: continuous25ms pulse deadline passes during synchronous grid/snapshot calls. Next implement bounded independently scheduled generic native MIDI input, inspect physical MIDI thread seam, preserve clock decode/Lua delivery, retain intended/actual times and cancellation cleanup; see C16-live-handoff.md. Do not retime pulses or waive failed RT case. M5 requires14 comparisons; all5 gate contracts pass. Then reverse live handoff/final3-repeat matrix/P5/full manual and remaining stages. Thirteen named Mosaic cases remain partial. No active runners.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {

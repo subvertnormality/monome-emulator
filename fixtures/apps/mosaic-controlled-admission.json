@@ -1,7 +1,7 @@
 {
   "application": "mosaic",
   "cases": {
-    "base-midi": ["M-PAT-001", "M-LEN-001", "M-LEN-002", "M-LEN-003", "M-MIDI-001", "M-SAVE-001", "M-TIM-001", "M-TIM-002", "M-TIM-003"],
+    "base-midi": ["M-PAT-001", "M-LEN-001", "M-LEN-002", "M-LEN-003", "M-MIDI-001", "M-SAVE-001", "M-TIM-001", "M-TIM-002", "M-TIM-003", "M-TIM-004"],
     "midi-modulation": ["M-PAT-001", "M-MOD-001", "M-MOD-002", "M-MOD-003"]
   },
   "scope": "C16 selected controlled application comparisons; not exhaustive manual or full release coverage"
