@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "P5-06 shared source-transition probe now passes default/candidate real time (max4.100/3.725ms) and three exact controlled repeats. Repeat verifier independently checks source/runtime identities, hashes, distinct sessions, raw MIDI and normalized equality; seven sensitivity/rejection contracts pass. Next implement complete M5 aggregator (repeat verification is only a prerequisite), refresh final-tree D and affected E/R/application evidence, resolve opening-phase Mosaic issue, then focused Codex follow-up. Full atomic manual/T01 and remaining feature families remain required; nine Mosaic cases are partial. Default unchanged, controlled-03 unadmitted. No active runners.",
+  "next_action": "M5 aggregator and native collectors implemented; five admission contracts pass, retained Mosaic native observation binding passes in E and three D runs. Candidate real-time clock suite (3 tests), transition and both controlled source faults pass. Broad contracts: 46 pass plus one initial import error; missing client contract passes with PYTHONPATH=src. Next resolve Mosaic opening-phase defect, exercise full external comparison verifier and collect final-source required D/E/R evidence, then focused Codex P5 follow-up. M5 not run; controlled-03 unadmitted; default unchanged. Nine Mosaic cases remain partial; full atomic manual/T01 and remaining stages required. No active runners; separate interactive web session stopped.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {

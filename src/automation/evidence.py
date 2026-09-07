@@ -149,7 +149,10 @@ def verify_package(path,current_source=True):
     return manifest
 
 def release_check(paths,milestone,platform):
-    if milestone not in ('M2','M3','M4'): raise ContractError('milestone','M0/M1 use explicit card packages; M5 not implemented')
+    if milestone=='M5':
+        from .clock_admission import verify_m5
+        return verify_m5(paths,platform)
+    if milestone not in ('M2','M3','M4'): raise ContractError('milestone','M0/M1 use explicit card packages')
     expected={f'A{i:02}' for i in range(1,23)}
     if milestone=='M2': expected.remove('A20')
     if milestone=='M3': expected.add('A23')

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "profiles": ["wsl"],
+  "generic_checks": {
+    "wall-default": {"probe": "controlled-wall-timer", "runtime": "default", "phases": ["native"]},
+    "wall-candidate": {"probe": "controlled-wall-timer", "runtime": "candidate", "phases": ["native"]},
+    "transition-default": {"probe": "controlled-transition", "runtime": "default", "phases": ["native"]},
+    "transition-candidate": {"probe": "controlled-transition", "runtime": "candidate", "phases": ["native"]},
+    "realtime-clocks": {"probe": "clock-probe", "runtime": "default", "phases": ["clock-contract", "reset-anchor", "future-midi"]},
+    "realtime-clocks-candidate": {"probe": "clock-probe", "runtime": "candidate", "phases": ["clock-contract", "reset-anchor", "future-midi"]},
+    "source-faults": {"probe": "controlled-midi-clock", "runtime": "candidate", "phases": ["duplicate-pulse", "unsupported-link"]}
+  },
+  "application_contracts": ["fixtures/apps/mosaic-controlled-admission.json"]
+}

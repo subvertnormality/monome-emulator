@@ -40,3 +40,9 @@ three identical controlled repetitions and passing10ms timing bounds on both
 real-time binaries. See `../completions/C16-transition-comparison.md` and its
 evidence JSON. P5-04's Mosaic musical-policy investigation and P5-05's admission
 gate remain open. No finding is waived and P5 is not complete.
+
+P5-05 now has an implemented M5 aggregator, collectors and rejection contracts;
+see `../completions/C16-admission-gate.md`. Required native clock/fault packages
+have focused passing evidence. Full final-source collection, external comparison
+validation and the resolved follow-up receipt remain outstanding, so this does
+not close P5 or admit controlled time.
