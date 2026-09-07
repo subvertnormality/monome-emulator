@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "21 Mosaic cases: adjacent/full range sweep and mute gestures passed RT/D; mute and long-hold each pass3freshD repeats. Audit/push test-only slice, then continue C08 remaining channel/harmony/undo domains. Range sweep3D repeats and full manual campaign remain incomplete; SEM-001 pending.",
+  "next_action": "M-CHANNEL-001 RT/D passed across16 MIDI channels/twoports and cumulative mute/unmute.22 cases total. Audit/push this test-only slice, then remaining C08 channel/harmony/undo and required fresh repeats. Full campaign/emulator release incomplete; SEM-001 pending.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -339,8 +339,7 @@
   "active_behaviour_test": {
     "exec_session": null,
     "sequence": [
-      "M-MUTE-001 three fresh controlled repeats",
-      "M-RANGE-001 three fresh controlled repeats"
+      "M-CHANNEL-001 real-time"
     ],
     "status": "passed",
     "candidate": "long-hold-release plus scale-stop-indicator"
@@ -517,6 +516,20 @@
         "manifest_sha256": "67b0bf0935502ccb58da1bd444444a906174e68647ed435bd50e827b5d3b0193",
         "mode": "controlled-experimental",
         "wall_elapsed_seconds": 26.65843121893704
+      }
+    ],
+    "M-CHANNEL-001": [
+      {
+        "run_id": "e354fba0289d47b59875c8e733286875",
+        "manifest_sha256": "634449ed23bf66db2b72276e73d597881f85e63ced19c642e1083dbf39bbdf84",
+        "mode": "controlled-experimental",
+        "wall_elapsed_seconds": 287.454914476024
+      },
+      {
+        "run_id": "11990779b1c547229165cefdcce3ee77",
+        "manifest_sha256": "2fd6a1007ab7a1886b5ef0e96e681eb31d1d0b5e2e9930526e844df10818a5e5",
+        "mode": "real-time",
+        "wall_elapsed_seconds": 133.0062819039449
       }
     ]
   },
