@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "Mosaic M-SAVE-001 passes real-time and three controlled repeats across autosave/fresh-process restore, checking user-created LEDs/MIDI; measured3.95x end-to-end speedup. M-PAT-001 passes real-time and three controlled repeats with pinned matrix/toolkit actually loaded. Mosaic-owned repeat.py/optional profile; evidence completions/C16-mosaic-autosave.md and Mosaic docs/testing/state.json. No new Mosaic production fix; transport-start-phase failure remains open. Next actual physical-menu modulation-to-MIDI tests, transport phase investigation, M5 gate and Codex P5. Integrated-02 candidate unchanged, default runtime unchanged, P5/M5/full manual/C08-C15 incomplete. No active runners.",
+  "next_action": "Mosaic9d7e3a4 now has real-menu macro route/clear and pulse-LFO MIDI/timing cases. Found confirmed matrix dependency stale-cache defect; original fails both modes, isolated two-line opt-in candidate passes both. LFO timing passes real time(max0.551ms) and3 exact controlled repeats. Evidence completions/C16-mosaic-modulation.md and Mosaic bug ledger. Eight named cases remain partial coverage. Next reproduce held-source binding suspicion, resolve transport-start-phase, M5 gate and bounded Codex P5; then full atomic manual/T01/remaining feature families. Candidate integrated-02 and default runtime unchanged. No active runners; M5/full campaign/C08-C15 incomplete.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
