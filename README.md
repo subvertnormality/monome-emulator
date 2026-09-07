@@ -162,6 +162,6 @@ validation, and handoff instructions.
 
 ## License
 
-This repository does not currently include a project-level license. Upstream
+This project is licensed under the [MIT License](LICENSE). Upstream
 dependencies retain their own licenses; recorded notices are listed in the
 [runtime lock](dependencies.lock.json) and [application fixture lock](fixtures/apps/mosaic.lock.json).
