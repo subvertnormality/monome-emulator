@@ -26,7 +26,7 @@ def main():
     replace('matron/src/main.c','    clock_scheduler_init();','    if (emu_clock_enabled()) { clock_scheduler_init_external(); emu_clock_init(); }\n    else clock_scheduler_init();')
     replace('matron/src/main.c','    clock_link_start();','    if (!emu_clock_enabled()) clock_link_start();')
     replace('matron/src/clock.c','    return jack_client_get_current_time();','    if (emu_clock_enabled()) return emu_clock_now()/1000000000.0;\n    return jack_client_get_current_time();')
-    replace('matron/src/clock.c','void clock_set_source(clock_source_t source) {','void clock_set_source(clock_source_t source) {\n    if (emu_clock_enabled() && source != CLOCK_SOURCE_INTERNAL) { fprintf(stderr,"EMU_ERROR unsupported controlled clock source\\n"); abort(); }')
+    replace('matron/src/clock.c','void clock_set_source(clock_source_t source) {','void clock_set_source(clock_source_t source) {\n    if (emu_clock_enabled() && source != CLOCK_SOURCE_INTERNAL && source != CLOCK_SOURCE_MIDI) { fprintf(stderr,"EMU_ERROR unsupported controlled clock source\\n"); abort(); }')
     replace('matron/src/weaver.c','    gettimeofday(&tv, &tz);','    if (emu_clock_enabled()) emu_clock_timeval(&tv); else gettimeofday(&tv, &tz);')
     replace('matron/src/weaver.c','    int usec = (float)luaL_checknumber(l, 1);','    if (emu_clock_enabled()) return luaL_error(l,"blocking micro_sleep unsupported in controlled time");\n    int usec = (float)luaL_checknumber(l, 1);')
     lua="local time,date=os.time,os.date; os.time=function(t) if t~=nil then return time(t) end local s=_norns.get_time(); return s end; os.date=function(f,t) return date(f,t or os.time()) end"
@@ -74,7 +74,7 @@ static void virtual_deinit(void *self)''')
         uint64_t logical=emu_clock_now();memcpy(packet+8,&logical,8);memcpy(packet+16,data,size);
         emit(11,md->dev.id,packet,size+16);
     } else { memcpy(packet+8,data,size);emit(3,md->dev.id,packet,size+8); }''')
-    replace('matron/src/emu_bridge.c','    if (size>32760)', '    if (size>32752)')
+    replace('matron/src/emu_bridge.c','    if (size>32760)', '    if (size>(emu_clock_enabled() ? 32752 : 32760))')
     replace('matron/wscript',"        'src/emu_bridge.c',","        'src/emu_bridge.c',\n        'src/emu_clock.c',")
     for name in ('emu_clock.c','emu_clock.h'):
         rel='matron/src/'+name;original[rel]='';changed[rel]=(ROOT/'src/runtime/native_clock'/name).read_text()

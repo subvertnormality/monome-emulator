@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "C16 experimental controlled-time Mosaic diagnostics now run through the public Session API. M-PAT-001 passes; M-LEN-001 fails on its first note (4.722ms short) while later durations match within1ns. Both affected real-time cases pass. Generic full-native absolute-sync phase probe b7c813e19b8742bfa169161a0bd26dce passes independently calculated timestamps; see completions/C16-phase-diagnostics.md and Mosaic bugs.json transport-start-phase. No new Mosaic production fix. Next phase-swept transport start/restart, tempo/reset and MIDI source contracts, mod/time-source audit, bounded Codex P5 before D admission. Candidate locator remains artifacts/c16/current-candidate.json; default lock/install unchanged. P5/M5/full campaign/C08-C15 incomplete. No active runners.",
+  "next_action": "C16 integrated-02 supports native injected MIDI clock as well as internal. Generic MIDI/tempo-reset probes pass three fresh exact normalized repeats; old controlled basic/boundaries/phase probes pass on02; explicit duplicate-clock/Link faults pass. Three unchanged real-time clock tests pass37.360s. Evidence: completions/C16-midi-tempo.md. Candidate locator artifacts/c16/current-candidate.json now selects02; default installation/lock unchanged. Mosaic/matrix/toolkit time-source audit found handled APIs; profiler inactive. Next actual Mosaic modulation-profile controlled tests and three-repeat startup/autosave/feedback-speed checks, phase-swept transport investigation, M5 gate and bounded Codex P5. Preserve Mosaic shortened-opening-note failure. P5/M5/full campaign/C08-C15 remain incomplete. No active runners.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
