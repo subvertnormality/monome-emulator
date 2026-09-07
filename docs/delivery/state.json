@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "C16 integrated-02 supports native injected MIDI clock as well as internal. Generic MIDI/tempo-reset probes pass three fresh exact normalized repeats; old controlled basic/boundaries/phase probes pass on02; explicit duplicate-clock/Link faults pass. Three unchanged real-time clock tests pass37.360s. Evidence: completions/C16-midi-tempo.md. Candidate locator artifacts/c16/current-candidate.json now selects02; default installation/lock unchanged. Mosaic/matrix/toolkit time-source audit found handled APIs; profiler inactive. Next actual Mosaic modulation-profile controlled tests and three-repeat startup/autosave/feedback-speed checks, phase-swept transport investigation, M5 gate and bounded Codex P5. Preserve Mosaic shortened-opening-note failure. P5/M5/full campaign/C08-C15 remain incomplete. No active runners.",
+  "next_action": "Mosaic M-SAVE-001 passes real-time and three controlled repeats across autosave/fresh-process restore, checking user-created LEDs/MIDI; measured3.95x end-to-end speedup. M-PAT-001 passes real-time and three controlled repeats with pinned matrix/toolkit actually loaded. Mosaic-owned repeat.py/optional profile; evidence completions/C16-mosaic-autosave.md and Mosaic docs/testing/state.json. No new Mosaic production fix; transport-start-phase failure remains open. Next actual physical-menu modulation-to-MIDI tests, transport phase investigation, M5 gate and Codex P5. Integrated-02 candidate unchanged, default runtime unchanged, P5/M5/full manual/C08-C15 incomplete. No active runners.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
