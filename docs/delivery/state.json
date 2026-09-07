@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "Post-send timing and independent host heartbeat implemented. Controlled repeat-e5e5966 passes all3 children/equality despite2.22s host sample gap (host-timing-02); prior WSL service timeout recovered without restart. Current-source RT d5fa255 fails one note by14.7326ms. All177 actions acked; log writes under2ms; heartbeat around failing deadline normal10.12-10.15ms, so global host pause does not explain this miss. Next profile native scheduler thread runnable delay versus Mosaic callback execution; no blind retry/threshold widening. M5 external E/D comparison still blocked by failed RT evidence, P5 incomplete. Full manual/T01 and later stages required. No active runners.",
+  "next_action": "ACTIVE terminal24475: Mosaic M-TIM-001 controlled run executing61 onsets/60 durations over20 phrases. Poll same handle; do not restart due to observation delay. New Mosaic cases.py/manual-inventory edits must remain frozen until run ends. Thread sampler implemented and2 ownership/filter/PID-reuse contracts pass; default wait counters unavailable(kernel schedstats0). Profile957e0a M-LEN001 RT passes; longer profilee3d81b M-TIM001 fails initial phrase with23.5ms short note. Main matron CPU burst36.5ms near late onset; all-service sampler overhead13-39ms means no precise attribution. Sampler now supports matron-only/per-thread timestamps: use narrowed profile next. Record controlled result in both repos and push Mosaic test changes after terminal. M5/P5/full manual/T01 and later delivery stages incomplete.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
