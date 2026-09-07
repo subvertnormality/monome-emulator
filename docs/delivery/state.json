@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "Mosaic M-TIM-002 passes five96PPQN restart phase offsets in controlled d6ffb42 and real time ee322cb; D observed phase within1ns of requests. M5 application contract expanded to12 comparisons including M-TIM-001/002; all5 admission contracts pass. Next actual clock-source transitions, fresh final-source D3-repeat/E/R matrix and Codex P5 follow-up. Historical RT misses remain retained; no blanket stability claim. Eleven named cases remain partial manual coverage; full atomic manual/T01 and all later stages required. No active runners.",
+  "next_action": "M-TIM-003 controlled7ac20f9 and RT58bc139 pass native CLOCK menu, clock-only silence/Start next pulse,100BPM note spacing/lengths,Stop drain,internal handoff adopting100BPM then explicit90BPM edit. No production fix: corrected initial SYSTEM navigation and incorrect old-tempo assumption from pinned upstream code. M5 now13 comparisons;5 admission contracts pass. Next live-source pending-note transition, final-source three-repeat/E/R matrix and Codex P5. Twelve named Mosaic cases remain partial manual coverage; full manual/T01 and remaining stages required. No active runners.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
