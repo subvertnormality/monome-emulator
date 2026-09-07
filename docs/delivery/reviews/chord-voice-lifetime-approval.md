@@ -1,6 +1,11 @@
 # Proposed chord voice lifetime fix
 
-Status: application rejected by automatic approval review; not applied.
+Status: user explicitly approved application and thorough unit, integration and
+behavior testing. Candidate applied; initial broad sweep117/122 passed. One stimulus-delivery
+failure was repaired and passes targeted checks in both modes; four explicit
+pre-existing failures remain. Both chord regressions, fresh controlled repeats,
+unit and integration checks pass. This is not full acceptance. The initial
+automatic rejection below is retained as history.
 Mosaic baseline: `4501e6a`, branch `codex/behaviour-validation`.
 Affected implementation: only the note-on chord bookkeeping block in `lib/m_midi.lua`.
 
