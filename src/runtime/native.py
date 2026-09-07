@@ -302,6 +302,7 @@ class NativeBackend:
             # A reaped parent does not prove every process in its group exited.
             try: os.killpg(process.pid,signal.SIGKILL)
             except ProcessLookupError: pass
+            if process.stdin: process.stdin.close()
             cleanup.append(dict(service=name,pid=process.pid,returncode=process.returncode,seconds=time.monotonic()-started))
         self.closed=True
         write_json(self.directory/'cleanup.json',cleanup)
