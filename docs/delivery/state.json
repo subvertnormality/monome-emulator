@@ -2,8 +2,8 @@
   "schema_version": 1,
   "updated": "2026-09-07",
   "mode": "executing",
-  "current_card": "C08",
-  "next_action": "D18: Mosaic-owned campaign at /home/andy/projects/mosaic-behaviour-tests on codex/behaviour-validation. Reviewed canonical docs/testing/BEHAVIOUR_PLAN.md; critique plus follow-up returned, MAN-001 resolved by user browser-derived confirmation. Two native cases executed; pattern-length baseline a1af3001 fails, corrected f1721ab9 passes; editing baseline747d1cb0/corrected0b3d9e56 pass; baseline/candidate474 units units-cf035b2b pass. Source fix applied only to Mosaic worktree; emulator fixture unchanged. Public Session native generic probe caf8c787 passes. Next expand atomic manual inventory and runner fault admission; implement C16 controlled native time from docs/architecture/controlled-time-investigation.md and P5 before D admission; continue C08-C12 remaining workflows. No active runners. Full campaign incomplete.",
+  "current_card": "C16",
+  "next_action": "C16 in progress; C08 unfinished. Codex-only future Paranoia (D19), helper enforces codex. Isolated scheduler step plus read-only pending deadlines pass original/candidate native C assertions with UBSan and source identities: artifacts/c16/b47fc3d2e0e74ce0aed10b7be517e551. Runtime lock/cache unchanged; D unavailable. Next coherent time/internal24PPQN/metro/native-event draining, generic runtime probes then Codex P5. Mosaic worktree has five named cases; restoration92b25d70, distinct-pitch64-wrap04e6ee27, repeated-pitch release89a4f8ad and editinga1f98a7c pass. New repeated-pitch bug baseline9c97dd5f emits7ons/4offs; isolated m_midi fix emits7/7. Combined fixes and unchanged474 baseline/candidate units pass units-f7b8b7b7. No active runners. Full manual reconciliation and T01 fault admission remain incomplete. Publish tested continuation and continue.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -95,8 +95,9 @@
     },
     {
       "id": "C16",
-      "status": "planned",
-      "evidence": null
+      "status": "in_progress",
+      "evidence": null,
+      "start_revision": "ce812e7"
     }
   ],
   "milestones": {

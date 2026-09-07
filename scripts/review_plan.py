@@ -21,7 +21,8 @@ async def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--server", required=True)
     parser.add_argument("--repo", required=True)
-    parser.add_argument("--engine", default="claude")
+    parser.add_argument("--engine", choices=["codex"], default="codex",
+                        help="User policy: all future Paranoia reviews use Codex")
     parser.add_argument("--timeout", type=int, default=600)
     parser.add_argument("--output", default="docs/delivery/reviews/P0-raw.json")
     parser.add_argument("--question-file", help="Use a focused Paranoia query instead of another critique")

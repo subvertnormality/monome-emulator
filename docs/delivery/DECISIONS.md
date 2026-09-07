@@ -32,3 +32,8 @@ time forward as needed for musical timing; retain real-time scheduling evidence.
 This supersedes D09's defer-C16-until-after-releases scheduling, not its mandatory
 real-time evidence. The emulator remains general purpose. Mosaic canonical plan:
 /home/andy/projects/mosaic-behaviour-tests/docs/testing/BEHAVIOUR_PLAN.md.
+# D19 — Codex-only future Paranoia reviews
+
+User instruction, 2026-09-07: use only Codex for Paranoia reviews from now on.
+The helper enforces this engine selection. Existing completed reviews remain
+historical evidence; the bounded critique/follow-up budget is unchanged.

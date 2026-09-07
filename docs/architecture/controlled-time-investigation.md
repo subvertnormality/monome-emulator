@@ -41,3 +41,30 @@ The current API has no `advance` action. A requested D test must fail capability
 admission until these proofs and implementation exist. Testing Mosaic in E can
 continue independently; the full musical-timing campaign cannot be declared
 complete while its required D capabilities are absent.
+
+## C16 first executable seam (2026-09-07)
+
+`scripts/prepare_clock_step.py` now generates an isolated scheduler-step candidate.
+The verified runtime cache and dependency lock remain unchanged. The real-time
+thread calls the extracted body at its existing1ms cadence; an external driver
+can initialize the same table without creating that thread. Controlled time is
+still unavailable until the full driver and all required time sources are wired.
+
+`tests/scheduler_step_contract.py` compiles the original and candidate C sources
+against one boundary harness with undefined-behaviour checks. Both pass identical
+literal expectations for sleep/sync strictness, fractional offset continuation,
+cancellation, same-deadline slot ordering, zero sleep, rescheduling, reset and
+capacity/reuse. Evidence: `artifacts/c16/a2399992daad4c178d1efbc7e72807a3/manifest.json`.
+This is a native boundary test with clock/event-sink control, not Mosaic workflow
+acceptance and not a complete native runtime or determinism proof.
+
+Next: expose pending scheduler deadlines without mutation; connect shared logical
+time, internal24PPQN updates and metro deadlines; drain native event consequences
+before advance acknowledgement. Then generic real-runtime probes and Codex-only
+P5 review are required before any D-mode Mosaic admission.
+
+Pending-deadline inspection now returns separate sleep and sync minima without
+mutating scheduler state. Final source-bound differential evidence (including
+compiler commands, binary, generator and candidate hashes):
+`artifacts/c16/b47fc3d2e0e74ce0aed10b7be517e551/manifest.json`.
+No scheduler seam has yet been installed in the production runtime lock.
