@@ -2,8 +2,8 @@
   "schema_version": 1,
   "updated": "2026-09-07",
   "mode": "executing",
-  "current_card": "C07",
-  "next_action": "Start C07 real-time clock/metro contracts, beat-anchored replay and scheduling responsiveness (R10). C06 completed: docs/delivery/completions/C06-evidence.json and P1-triage.md. No active native sessions or reviews remain.",
+  "current_card": "C08",
+  "next_action": "C07 passed: a7cc140 implementation, C07-evidence.json binds 32 contracts, 3 native clocks, 1 frame-I/O regression, 8 native scenarios and six-check Mosaic failed-case replay. Publish completion, then C08: promote artifacts/c08_editing_draft.py to tests/mosaic_editing.py, register A04-pattern-editor package, run it. Expand all 33 C08 software sections and their options, independent expected MIDI/LED/frame assertions. README Lower merge descriptions disagree with lib/pattern.lua's symmetric extrapolation; diagnose with real-input regression before choosing an oracle or fix. Never waive unresolved cases. Timing suites run isolated.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -48,12 +48,13 @@
     },
     {
       "id": "C07",
-      "status": "planned",
-      "evidence": null
+      "status": "done",
+      "evidence": "docs/delivery/completions/C07.md",
+      "start_revision": "80b3e69"
     },
     {
       "id": "C08",
-      "status": "planned",
+      "status": "in_progress",
       "evidence": null
     },
     {

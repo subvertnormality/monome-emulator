@@ -1,0 +1,336 @@
+{
+  "passed": true,
+  "implementation_revision": "a7cc140f193d02c769c5267fe6bbe004773f9247",
+  "source_digest": "47c452184ec78f1518509822db39e5ce8ca5920d92c1bbf541399246cb16c398",
+  "platform": "Ubuntu 20.04 / WSL2",
+  "clock_mode": "real-time",
+  "jack_profile": {
+    "driver": "dummy",
+    "rate": 48000,
+    "period": 1024,
+    "realtime": false
+  },
+  "contracts": {
+    "collected": 32,
+    "skipped": 0,
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 95.347,
+    "scope_note": "Complete contracts before framebuffer I/O fix; subsequent native-only changes validated by the affected native packages below."
+  },
+  "native_clocks": {
+    "collected": 3,
+    "passed": true,
+    "skipped": 0,
+    "seconds": 39.583
+  },
+  "frame_io": {
+    "collected": 1,
+    "passed": true,
+    "seconds": 10.065
+  },
+  "packages": [
+    {
+      "path": "artifacts/runs/39c423b8dac8443aa1ef9d1d20be9485/manifest.json",
+      "run_id": "39c423b8dac8443aa1ef9d1d20be9485",
+      "scenario_id": "native-clock-contract",
+      "collected": 9,
+      "passed": true
+    },
+    {
+      "path": "artifacts/runs/088ecde742c546ebafb139866ce79f2b/manifest.json",
+      "run_id": "088ecde742c546ebafb139866ce79f2b",
+      "scenario_id": "native-capture-cost",
+      "collected": 6,
+      "passed": true
+    },
+    {
+      "path": "artifacts/runs/5706d3f457484a2f9a3508e7a014b3d9/manifest.json",
+      "run_id": "5706d3f457484a2f9a3508e7a014b3d9",
+      "scenario_id": "native-seeded-random",
+      "collected": 11,
+      "passed": true
+    },
+    {
+      "path": "artifacts/runs/236203ff05104692b6509a273864ca5a/manifest.json",
+      "run_id": "236203ff05104692b6509a273864ca5a",
+      "scenario_id": "native-seeded-random",
+      "collected": 11,
+      "passed": true
+    },
+    {
+      "path": "artifacts/runs/6eec1f7782974114b46d77a8d3ad1631/manifest.json",
+      "run_id": "6eec1f7782974114b46d77a8d3ad1631",
+      "scenario_id": "native-seeded-random",
+      "collected": 11,
+      "passed": true
+    },
+    {
+      "path": "artifacts/runs/ca1b37e2d8e54ce0b98db2f333497686/manifest.json",
+      "run_id": "ca1b37e2d8e54ce0b98db2f333497686",
+      "scenario_id": "native-beat-replay",
+      "collected": 6,
+      "passed": true
+    },
+    {
+      "path": "artifacts/runs/909549832528449aa0d61fad64e4fbd2/manifest.json",
+      "run_id": "909549832528449aa0d61fad64e4fbd2",
+      "scenario_id": "native-beat-replay",
+      "collected": 6,
+      "passed": true
+    },
+    {
+      "path": "artifacts/runs/1f4cfce17ae246468256ffe619ff6597/manifest.json",
+      "run_id": "1f4cfce17ae246468256ffe619ff6597",
+      "scenario_id": "A01-base-midi-boot",
+      "collected": 3,
+      "passed": true
+    },
+    {
+      "path": "artifacts/c07/4ef7ff8f49b24b17a42d9f8c09d3996e/manifest.json",
+      "run_id": "4ef7ff8f49b24b17a42d9f8c09d3996e",
+      "scenario_id": "A07-sequencer-start-and-stop",
+      "collected": 6,
+      "passed": true
+    }
+  ],
+  "timing": {
+    "onset_max_absolute_error_ms": 3.138303999999925,
+    "duration_max_absolute_error_ms": 2.469631333333333,
+    "snapshot_max_seconds": 0.02799243596382439,
+    "capture_cost": "CAPTURE_COST count=1000 baseline_seconds=0.000011206 emitted_seconds=0.295950890 per_message_us=295.940"
+  },
+  "replay": {
+    "prior_run": "fe56ed95c72c40a08eefe94b8461308e",
+    "prior_passed": false,
+    "current_run": "4ef7ff8f49b24b17a42d9f8c09d3996e",
+    "passed": true
+  },
+  "artifacts": [
+    {
+      "path": "artifacts/runs/39c423b8dac8443aa1ef9d1d20be9485/manifest.json",
+      "sha256": "207e71a326d3710ce03780bdb0bc02092c10fc07ea52ea9a3f77c3439c637fbc",
+      "size": 47921
+    },
+    {
+      "path": "artifacts/runs/088ecde742c546ebafb139866ce79f2b/manifest.json",
+      "sha256": "b4f26513e3973f9fa41156890b7b50b66dd22da80942e83d64dd1d506553f9b4",
+      "size": 47557
+    },
+    {
+      "path": "artifacts/runs/5706d3f457484a2f9a3508e7a014b3d9/manifest.json",
+      "sha256": "f2f75a69def34e55b213f7027e02dcda3070bae66fb6c18f0072abb655394ea9",
+      "size": 48189
+    },
+    {
+      "path": "artifacts/runs/236203ff05104692b6509a273864ca5a/manifest.json",
+      "sha256": "c18aadcb64e0df981cfdcda4eabcadc54032d1fc80049150b6d73154b781675a",
+      "size": 48189
+    },
+    {
+      "path": "artifacts/runs/6eec1f7782974114b46d77a8d3ad1631/manifest.json",
+      "sha256": "e582926686735dbeba010ccaf010362f36798b09102e56610c29187f780d6103",
+      "size": 48189
+    },
+    {
+      "path": "artifacts/runs/ca1b37e2d8e54ce0b98db2f333497686/manifest.json",
+      "sha256": "3fa540fbbdce5d239dc950ad774d3704c2f1f351c18c9874b83068fadabd3f9b",
+      "size": 47566
+    },
+    {
+      "path": "artifacts/runs/909549832528449aa0d61fad64e4fbd2/manifest.json",
+      "sha256": "6a4d7bb886ddeb9800d38427a0512a47e5ce18f8bf540d3a41b8e471a7df885f",
+      "size": 47566
+    },
+    {
+      "path": "artifacts/runs/1f4cfce17ae246468256ffe619ff6597/manifest.json",
+      "sha256": "2a7f00b2217137f0da4b727450590ac6564ac148ad86e27367a1eaa84d9aa0f9",
+      "size": 75828
+    },
+    {
+      "path": "artifacts/c07/4ef7ff8f49b24b17a42d9f8c09d3996e/manifest.json",
+      "sha256": "0a7edd1827367270c175357dfe36d5f211001dbb893494eabcb9a3a5a5277fba",
+      "size": 25168
+    },
+    {
+      "path": "artifacts/c07/4ef7ff8f49b24b17a42d9f8c09d3996e/results.json",
+      "sha256": "2c496384226301d44441d845338beb2e4a8510dd09299aa819329f6f4c59d68f",
+      "size": 6499
+    },
+    {
+      "path": "artifacts/c07-scenarios.json",
+      "sha256": "c0a6822b50e98600a99274282642aa0b7ad9f422b8edda28406b52bff17b2462",
+      "size": 1894
+    },
+    {
+      "path": "artifacts/c07-clock-report.json",
+      "sha256": "b455810caa077aedf6fbb21335f9861cd1065a1a72214597e3c92ec6891efb79",
+      "size": 1376
+    },
+    {
+      "path": "artifacts/c07-scheduled-input.json",
+      "sha256": "a157ea1fd4718141fe7d393529b73378936b873b4dafb8ff1925e95bcd1469ab",
+      "size": 468
+    },
+    {
+      "path": "artifacts/c07-reset-anchor.json",
+      "sha256": "5f1f57d03aeb7e9156dfb2bba4477150cb4371811b085d7616a385587397c823",
+      "size": 500
+    },
+    {
+      "path": "artifacts/c07-frame-io-native.json",
+      "sha256": "af0643986542e030336fcd667e790e7014e58e58f47d690b21c54e242f9a653a",
+      "size": 770
+    },
+    {
+      "path": "artifacts/c07-contracts-final.log",
+      "sha256": "3c5d2ae1212de675b5895f7e94910c993d8742f10fbd16a283f6c8bd916c3c7f",
+      "size": 2809
+    },
+    {
+      "path": "artifacts/c07-clock-final2.log",
+      "sha256": "da0caae2f0ddf813bf9501432672a7d5867a7fc6ee83a496268b0e74299ca7fc",
+      "size": 983
+    },
+    {
+      "path": "artifacts/c07-frame-io-native-final.log",
+      "sha256": "fc9e009c6f24964fa022eb1479fe38e179a605068bd6b7d58e792cd209ca82c0",
+      "size": 173
+    },
+    {
+      "path": "artifacts/c07-mosaic-replay-final2.log",
+      "sha256": "e05326efe735ab8a648d2c0adeaae2b24f915f20e641efce3130631c24909dec",
+      "size": 512
+    },
+    {
+      "path": "artifacts/c07-scenarios-final2.log",
+      "sha256": "1d639d11f8070677a84d59d745e9d0dcb9b00a5e228e5e41cc448a7b03005a2f",
+      "size": 1147
+    },
+    {
+      "path": "artifacts/c07-jack-periods.json",
+      "sha256": "c52c68cfb03bf2d64605743c22d26836ab306775ad9ae33f0d5f0cc44f5606d9",
+      "size": 111857
+    },
+    {
+      "path": "artifacts/probe_jack_period.py",
+      "sha256": "6f43d401f60662e5f305340615fc4c94e44185378d363d11b50cc907eb5f78d8",
+      "size": 2239
+    },
+    {
+      "path": "artifacts/c07-frame-io.json",
+      "sha256": "fc5d0405c029646e231fb9807cca434166aa54b8694e106cb75c92f7eb773485",
+      "size": 292
+    },
+    {
+      "path": "artifacts/probe_frame_io.py",
+      "sha256": "594d2088a24d117c028b127f552123ee8f656d358c2243e2a21fe72180756a29",
+      "size": 564
+    },
+    {
+      "path": ".runtime/sessions/7604c233f77d490a86323f5133d42a98/cleanup.json",
+      "sha256": "35a055225315a1ff9b1b319ae018cbf0fe2bff7ba29bb1ec039016d0a38a6f7b",
+      "size": 434
+    },
+    {
+      "path": ".runtime/sessions/7604c233f77d490a86323f5133d42a98/native-config.json",
+      "sha256": "f58a3126bb4f55436b0cb11718894bd0b33baeccf1237897779fd8384f8ee2dd",
+      "size": 845
+    },
+    {
+      "path": ".runtime/sessions/7604c233f77d490a86323f5133d42a98/native-events.jsonl",
+      "sha256": "760681bf1454ce193d3f56d231d8faebb7dee18a0a5d5ef2199d5c4b8197e922",
+      "size": 35269
+    },
+    {
+      "path": ".runtime/sessions/7604c233f77d490a86323f5133d42a98/matron.log",
+      "sha256": "200fbfcfade9a37f64798b32fb3a8b05345212b25357415ea28a553ae9b6eb1f",
+      "size": 2949
+    },
+    {
+      "path": ".runtime/sessions/7604c233f77d490a86323f5133d42a98/jack.log",
+      "sha256": "388eba0e0ccfd7164a4122229f994b7236f09a9668087a8e1253a5d993267af8",
+      "size": 480
+    },
+    {
+      "path": ".runtime/sessions/0b29facc93634c15ad0e7125e66a0c43/cleanup.json",
+      "sha256": "ebaa2dd633c6f1753e3d788a4782c7f91857c8952c2063243b89079d579c7ba1",
+      "size": 431
+    },
+    {
+      "path": ".runtime/sessions/0b29facc93634c15ad0e7125e66a0c43/native-config.json",
+      "sha256": "9ed1ff93b32ed75aa1eb22c217c8d953de7bad5c234ae4ceef1ec1ed1ecf94e0",
+      "size": 887
+    },
+    {
+      "path": ".runtime/sessions/0b29facc93634c15ad0e7125e66a0c43/native-events.jsonl",
+      "sha256": "9f4714405732d1b6f750b52a9b8ce286063f0f1ab69985e9ad17c3728c92f375",
+      "size": 24886
+    },
+    {
+      "path": ".runtime/sessions/0b29facc93634c15ad0e7125e66a0c43/matron.log",
+      "sha256": "e6cfd4096af23fda8bfd7a68100590aa3882f4083dd2c13daf85590f065aa90a",
+      "size": 2168
+    },
+    {
+      "path": ".runtime/sessions/0b29facc93634c15ad0e7125e66a0c43/jack.log",
+      "sha256": "388eba0e0ccfd7164a4122229f994b7236f09a9668087a8e1253a5d993267af8",
+      "size": 480
+    },
+    {
+      "path": ".runtime/sessions/a9cb0d5f5eca49cca1af956a4666c22d/cleanup.json",
+      "sha256": "15424102a0b55efd304f6073ab8cd1f9f205a0e445382ee13b30604791b5c300",
+      "size": 432
+    },
+    {
+      "path": ".runtime/sessions/a9cb0d5f5eca49cca1af956a4666c22d/native-config.json",
+      "sha256": "4f9ed9a6bfafb2d74b30cfa497d87e82f8f5881f010ee58efb6d14bc90908c23",
+      "size": 845
+    },
+    {
+      "path": ".runtime/sessions/a9cb0d5f5eca49cca1af956a4666c22d/native-events.jsonl",
+      "sha256": "bd798f602b61306cfca96ce0509b93f3530bfb30d2ed98f0de8c0a2cb0502848",
+      "size": 23929
+    },
+    {
+      "path": ".runtime/sessions/a9cb0d5f5eca49cca1af956a4666c22d/matron.log",
+      "sha256": "f803b1095409c021a0658bff6f002631fd89762aea82ffb0ec968eebc780512d",
+      "size": 2231
+    },
+    {
+      "path": ".runtime/sessions/a9cb0d5f5eca49cca1af956a4666c22d/jack.log",
+      "sha256": "388eba0e0ccfd7164a4122229f994b7236f09a9668087a8e1253a5d993267af8",
+      "size": 480
+    },
+    {
+      "path": ".runtime/sessions/973ae6dab8364aa995b3fb391096b73e/cleanup.json",
+      "sha256": "753a0d32651e02eeab3a187b0d4b0531d54561d5cabf06d67cf868001801d244",
+      "size": 435
+    },
+    {
+      "path": ".runtime/sessions/973ae6dab8364aa995b3fb391096b73e/native-config.json",
+      "sha256": "a0a9062a251037eb701d4db1be03e0d8cc392ec980978f78d79e3aea94540413",
+      "size": 845
+    },
+    {
+      "path": ".runtime/sessions/973ae6dab8364aa995b3fb391096b73e/native-events.jsonl",
+      "sha256": "2e0035b7dc1ec5f12225246ebcb449e001b4ce7c2595772b501a1390c4eb3b26",
+      "size": 24425
+    },
+    {
+      "path": ".runtime/sessions/973ae6dab8364aa995b3fb391096b73e/matron.log",
+      "sha256": "2035785f7a2fb21c87eba7fad57e8fd9f36ff8698732fb929237cc01c371882d",
+      "size": 2367
+    },
+    {
+      "path": ".runtime/sessions/973ae6dab8364aa995b3fb391096b73e/jack.log",
+      "sha256": "388eba0e0ccfd7164a4122229f994b7236f09a9668087a8e1253a5d993267af8",
+      "size": 480
+    }
+  ],
+  "remaining": [
+    "C09 broader swing/shuffle and articulation",
+    "C12 ten-minute central timing/endurance gate",
+    "C11 Popen handoff lifecycle warning (R14)"
+  ]
+}
