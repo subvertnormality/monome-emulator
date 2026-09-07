@@ -28,6 +28,10 @@ def main():
     replace('matron/src/clock.c','    return jack_client_get_current_time();','    if (emu_clock_enabled()) return emu_clock_now()/1000000000.0;\n    return jack_client_get_current_time();')
     replace('matron/src/clock.c','void clock_set_source(clock_source_t source) {','void clock_set_source(clock_source_t source) {\n    if (emu_clock_enabled() && source != CLOCK_SOURCE_INTERNAL && source != CLOCK_SOURCE_MIDI) { fprintf(stderr,"EMU_ERROR unsupported controlled clock source\\n"); abort(); }')
     replace('matron/src/weaver.c','    gettimeofday(&tv, &tz);','    if (emu_clock_enabled()) emu_clock_timeval(&tv); else gettimeofday(&tv, &tz);')
+    edit('matron/src/time_since.c',lambda s:'#include "emu_clock.h"\n'+s)
+    replace('matron/src/time_since.c','struct timespec t0_wall;','struct timespec t0_wall;\nstatic uint64_t t0_controlled;')
+    replace('matron/src/time_since.c','void wall_time_start() {','void wall_time_start() {\n    if (emu_clock_enabled()) { t0_controlled = emu_clock_now(); return; }')
+    replace('matron/src/time_since.c','unsigned long int wall_time_get_delta_ns() {','unsigned long int wall_time_get_delta_ns() {\n    if (emu_clock_enabled()) return emu_clock_now() - t0_controlled;')
     replace('matron/src/weaver.c','    int usec = (float)luaL_checknumber(l, 1);','    if (emu_clock_enabled()) return luaL_error(l,"blocking micro_sleep unsupported in controlled time");\n    int usec = (float)luaL_checknumber(l, 1);')
     lua="local time,date=os.time,os.date; os.time=function(t) if t~=nil then return time(t) end local s=_norns.get_time(); return s end; os.date=function(f,t) return date(f,t or os.time()) end"
     replace('matron/src/weaver.c','    lua_setglobal(lvm, "_norns");','    lua_setglobal(lvm, "_norns");\n    if (emu_clock_enabled()) w_run_code('+json.dumps(lua)+');')

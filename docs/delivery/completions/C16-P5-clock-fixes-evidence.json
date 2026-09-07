@@ -1,0 +1,67 @@
+{
+  "wall_baseline": {
+    "path": "artifacts/c16/632e95b66aa54fa682891faab83051b6/manifest.json",
+    "sha256": "7f37987fea67291509de82141168a0f637eba6a65557bb8cd4069b9fa4620ff4",
+    "passed": false
+  },
+  "wall_corrected": {
+    "path": "artifacts/c16/b956f6d62b234f71953d7e024583a828/manifest.json",
+    "sha256": "b7a93af8879079fed7e2b7eaed6ed89b9e8cfe416d54fdfa646ae4ce45f7ac86",
+    "passed": true
+  },
+  "wall_default_real_time": {
+    "path": "artifacts/c16/244cdf102f0c491a8ec5aebe2dd22410/manifest.json",
+    "sha256": "a1acabcd9d338b8d17332538c145683118cab2a0703dfb9139c6046a238b1d6e",
+    "passed": true
+  },
+  "wall_candidate_real_time": {
+    "path": "artifacts/c16/dd2722c40975485b9f8df035e9422ee1/manifest.json",
+    "sha256": "a1acabcd9d338b8d17332538c145683118cab2a0703dfb9139c6046a238b1d6e",
+    "passed": true
+  },
+  "transition": {
+    "path": "artifacts/c16/60cbad41f61c4d9d839c1d90cb7988ad/manifest.json",
+    "sha256": "35cc5b05cc11ff40cf7f0215ae3ae0a25691044f53627ea72d9fb83d40391276",
+    "passed": true
+  },
+  "faults": {
+    "path": "artifacts/c16/dc387f2b672f4e3fba4a6bd92416f8f2/manifest.json",
+    "sha256": "0879e1b3bb71483bb30dd1cf83f8977c7491dfdbfb452b4b30c603c217e40142",
+    "passed": true
+  },
+  "phase_boundary": {
+    "path": "artifacts/c16/3520c8d3366146d9965b9ad3b337ac05/manifest.json",
+    "sha256": "35cc5b05cc11ff40cf7f0215ae3ae0a25691044f53627ea72d9fb83d40391276",
+    "passed": true
+  },
+  "wall_repeats": {
+    "path": "artifacts/c16/repeat-6c2000ee5f1e4fe6a564f1949cc73840/manifest.json",
+    "sha256": "212de88e3cc22e0f56092c27287adc855d3ac199a080d658b571b3f2276d2d7d",
+    "passed": true
+  },
+  "transition_repeats": {
+    "path": "artifacts/c16/repeat-69e0867e52ca4231a4f614c02a9cee83/manifest.json",
+    "sha256": "09e0996bfbc7b32d1101e4b86883e13bd6ede8300b41ef2000c5a3c6c7373cd7",
+    "passed": true
+  },
+  "phase_boundary_repeats": {
+    "path": "artifacts/c16/repeat-de0bc95a97ad4a189c10f869609598be/manifest.json",
+    "sha256": "da617b04ab93d38994af86b87b5554f7a41820995cbcc64b6a4a7e1d513de4db",
+    "passed": true
+  },
+  "candidate": {
+    "installation_sha256": "0e3c1d9f618e7d95165d25b8b25360046539bb315a2e4917741c2b01ffeb496f",
+    "build_inputs_sha256": "69c15aa91c3979c04112c9376b6b0728368769ebdd930563d89ca0bab5546764",
+    "input_files": 2554,
+    "norns_revision": "14bbeae8646c6717f6bb44c8cd60250bf94b6042",
+    "submodules": {
+      "crone/lib/readerwriterqueue": "4927fe6d22720366aa249e1abc3d2144498dea09",
+      "crone/softcut": "ce870c55fae1b58fd357ca639bbfe0754c0760e4",
+      "third-party/doctest": "1da23a3e8119ec5cce4f9388e91b065e20bf06f5",
+      "third-party/link": "adbbb529831c22edecba20e983343b3b23a73f60",
+      "third-party/link/modules/asio-standalone": "01b4e87c04abd4daec58e40463bcdc150085b269",
+      "third-party/trompeloeil": "2a633b923f32cebc336dc8a6a77e4c04f2238106"
+    },
+    "default_descriptor_unchanged": true
+  }
+}

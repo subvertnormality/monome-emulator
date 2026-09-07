@@ -23,3 +23,18 @@ One focused follow-up remains available after substantive fixes and gate
 implementation. Do not spend it on an unchanged branch or label these findings
 resolved from source edits alone. The source-bound repeat runner added after the
 reviewed commit is additional evidence plumbing, not a disposition of P5-05.
+
+## Focused fix evidence
+
+`../completions/C16-P5-clock-fixes.md` and its evidence JSON record an isolated
+controlled-03 build and native checks. P5-01 has a failing old-candidate
+reproducer, passing exact logical freeze/advance/reset, three repeats and both
+real-time binaries. P5-02 reconstructs the locked Git graph and records every
+native input; a dirty-input exclusion regression passes. P5-03's restricted
+cleanup passes both native fault cases. P5-07's boundary/restart probe passes
+three repeats. These findings have focused fix evidence, pending the final
+admission regression set and the remaining Codex follow-up.
+
+P5-06 now has three passing controlled source-transition repeats; its real-time
+comparison remains open. P5-04's Mosaic musical-policy investigation and P5-05's
+admission gate remain open. No finding is waived and P5 is not complete.

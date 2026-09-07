@@ -18,7 +18,7 @@ from automation.identity import artifact,source_identity
 from runtime.dependencies import verify_install
 
 PROBES={name:f'tests/controlled_{name}_native.py' for name in
-        ('clock','boundaries','phase','midi','tempo')}
+        ('clock','boundaries','phase','phase_boundary','midi','tempo','wall_timer','transition')}
 
 def read(path):return json.loads(path.read_text())
 

@@ -30,6 +30,7 @@ def main():
                 # abort. Admit only that exact shutdown; other exits still fail.
                 cleanup=json.loads((out/case/'cleanup.json').read_text())
                 expected_abort=(case=='unsupported-link' and any(c['service']=='matron' and c['returncode']==-6 for c in cleanup)
+                    and all(c['returncode'] in (0,-15) for c in cleanup if c['service']=='sclang')
                     and all(c['returncode']==0 for c in cleanup if c['service'] not in ('matron','sclang')))
                 if not expected_abort:failure=failure or dict(type=type(error).__name__,message=str(error))
             except Exception as error:failure=failure or dict(type=type(error).__name__,message=str(error))
