@@ -68,3 +68,34 @@ mutating scheduler state. Final source-bound differential evidence (including
 compiler commands, binary, generator and candidate hashes):
 `artifacts/c16/b47fc3d2e0e74ce0aed10b7be517e551/manifest.json`.
 No scheduler seam has yet been installed in the production runtime lock.
+
+## Internal clock and metros (2026-09-07 continuation)
+
+Previous execution produced verified scheduler evidence; this continuation makes
+further source and executable-test progress. There are no active test runners.
+
+`prepare_internal_clock_step.py` extracts one shared native reference publication
+body and adds external initialization plus an atomic tempo snapshot. The native
+thread keeps its sleep/drift/catch-up logic and the tempo snapshot from before the
+sleep. The compiled original/candidate test executes the real thread loop through
+controlled clock/sleep boundaries, including mid-sleep tempo change, restart,
+suspend/jump, stop and tick counts past32 bits. Evidence:
+`artifacts/c16/0df021d7234a4cbb9d61040534f8789e/manifest.json`.
+
+`prepare_metro_step.py` shares native stage/count/event-post logic between the
+production loop and external deadlines. Candidate external mode is enabled before
+any metro starts. Pending period changes retain the already scheduled deadline;
+future intervals use the native float-to-nanosecond conversion. Equal-deadline
+external metros use ascending ID. Restart replaces a pending deadline and cancel
+prevents future posting; already posted events remain queued for native dispatch.
+Original, modified production-loop and external-loop compiled cases all pass:
+`artifacts/c16/b4529ef8b6ed455085f9d1405cfa0b64/manifest.json`.
+
+These are isolated source candidates, not installed runtime modifications. The
+remaining integration must share logical time across clock interpolation,
+util.time and os.time/date, initialize native components in external mode, advance
+to each earliest deadline and drain bounded native event consequences before
+acknowledgement. It must also account for redraw completion and reject unsupported
+time sources. Zero-progress/runaway callbacks must fail a bounded advance, never
+hang or report success. Generic full-runtime probes and Codex-only P5 remain
+required; no D capability or completed C16/M5 is claimed.
