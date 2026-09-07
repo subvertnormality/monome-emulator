@@ -48,4 +48,27 @@ class RepeatEvidence(unittest.TestCase):
         action=copy.deepcopy(self.action);action['ack']['action_id']='another-action'
         with self.assertRaises(ContractError):self.value(action=action)
 
+    def test_runaway_rejection_requires_exact_probe_and_native_evidence(self):
+        expected=dict(code='lua_error',message='controlled clock work limit exceeded')
+        action=copy.deepcopy(self.action);del action['ack']
+        action['request']['action']['nanoseconds']=0;action['error']=dict(expected,monotonic_ns=999)
+        config=dict(script=str(probe.ROOT/'fixtures/probes/controlled-boundaries/controlled-boundaries.lua'))
+        result=dict(passed=True,failure=None,expected_fault=expected)
+        events=[dict(kind='input',type=8,args=[0,0]),dict(kind=5,**expected)]
+        def write():
+            (self.root/'native/native-config.json').write_text(json.dumps(config))
+            (self.root/'manifest.json').write_text(json.dumps(result))
+            (self.root/'native/native-events.jsonl').write_text(''.join(json.dumps(e)+'\n' for e in events))
+        write()
+        value=self.value(action=action)
+        self.assertEqual(value['expected_failures'],[dict(sequence=1,**expected)])
+        for target,key,bad in [(config,'script','other.lua'),(result,'expected_fault',None),
+                               (action['error'],'code','timeout'),(events[-1],'message','other error'),
+                               (events[0],'args',[0,1]),(action['request']['action'],'nanoseconds',1)]:
+            saved=target[key];target[key]=bad;write()
+            with self.assertRaises(ContractError):self.value(action=action)
+            target[key]=saved
+        events.append(dict(kind=5,**expected));write()
+        with self.assertRaises(ContractError):self.value(action=action)
+
 if __name__=='__main__':unittest.main()

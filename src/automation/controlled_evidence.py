@@ -10,10 +10,31 @@ def require(value,message):
 
 def normalize(directory):
     actions=[json.loads(line) for line in (directory/'native/actions.jsonl').read_text().splitlines()]
-    requests=[]
+    requests=[];failures=[]
     for index,entry in enumerate(actions,1):
-        request,ack=entry['request'],entry['ack']
+        request=entry['request']
         require(request['sequence']==index,'Unordered inputs')
+        if 'error' in entry:
+            # Only the boundary probe deliberately ends with a runaway advance.
+            # Bind that exception to native evidence, never to a pass flag alone.
+            expected=dict(code='lua_error',message='controlled clock work limit exceeded')
+            error={k:entry['error'].get(k) for k in expected}
+            config=read_json(directory/'native/native-config.json')
+            result=read_json(directory/'manifest.json')
+            events=[json.loads(line) for line in (directory/'native/native-events.jsonl').read_text().splitlines()]
+            native_errors=[{k:e.get(k) for k in expected} for e in events if e.get('kind')==5]
+            inputs=[e for e in events if e.get('kind')=='input']
+            require('ack' not in entry and index==len(actions) and
+                    request['action']==dict(type='advance',nanoseconds=0) and
+                    Path(config['script']).resolve()==(ROOT/'fixtures/probes/controlled-boundaries/controlled-boundaries.lua').resolve() and
+                    result.get('passed') is True and result.get('failure') is None and
+                    result.get('expected_fault')==expected and error==expected and native_errors==[expected] and
+                    inputs and inputs[-1]['type']==8 and inputs[-1]['args']==[0,0],
+                    'Unexpected failed input in controlled repeat')
+            failures.append(dict(sequence=index,**expected));requests.append(request['action'])
+            continue
+        require('ack' in entry,'Missing input acknowledgement')
+        ack=entry['ack']
         require(all(request[k]==ack[k] for k in ('session_id','action_id','sequence')),'Mismatched acknowledgement')
         require(ack['status']=='applied','Unapplied input')
         requests.append(request['action'])
@@ -26,7 +47,9 @@ def normalize(directory):
         states.append(dict(midi=[{k:m[k] for k in ('port','bytes','logical_ns')} for m in state['midi']],
             grid=state['grid'],frame=state['frame']['sha256'],clock=state['clock'],
             outstanding=state['midi_capture']['outstanding']))
-    return dict(actions=requests,observations=states)
+    value=dict(actions=requests,observations=states)
+    if failures:value['expected_failures']=failures
+    return value
 
 def verify_repeat(path,current_source=True):
     path=Path(path).resolve();record=read_json(path)

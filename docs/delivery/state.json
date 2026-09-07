@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "Default real-time queue pinned as0012, lock8b84937d7d187387; controlled overlay06 rebuilt. All three mandatory queue lanes pass, including three fresh controlled sessions; seven rehashed fault checks and seven admission contracts pass. Mosaic handoff oracle now anchors RT timing to emitted onset and native applied-control time; defaultc579bae and Db5007eb pass both directions. Next collect remaining seven generic groups, eight legacy D probe families x3 and all14 app/profile comparisons x3D+RT on the new lock, then Codex P5 follow-up and M5 index. Queue refill/endurance, further timing edges, full manual reconciliation and later stages remain required. No active runners.",
+  "next_action": "Boundary repeat normalizer fixed: expected terminal runaway advance now requires exact probe, public error, native fault and child result. Eight focused contracts and three fresh boundary sessions pass (repeat-c03ee342598641bc9ce293621fb8b09c). Previous batch71757 terminated at normalizer KeyError; native boundary oracle had passed. Source change makes earlier generic/queue evidence historical for M5. Next collect fresh ten generic groups and remaining seven probe families x3, then all14 Mosaic comparisons x3D+RT and Codex P5 follow-up/M5 index. Full manual and later release stages remain unfinished; web UI stopped. No active runners.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -162,5 +162,14 @@
     },
     "default_lock": "8b84937d7d187387",
     "candidate": "controlled-06"
+  },
+  "latest_generic_clock_batch": {
+    "path": "artifacts/c16/m5-generic-06-batch.json",
+    "wall_default": "artifacts/c16/check-346bbb6b65294bb781623c2e9f603da7/manifest.json",
+    "exec_session": null
+  },
+  "latest_boundary_normalization": {
+    "path": "artifacts/c16/repeat-c03ee342598641bc9ce293621fb8b09c/manifest.json",
+    "failed_repeat": "artifacts/c16/repeat-e40c8df7c79d4b8086be814cdebb8d80/manifest.json"
   }
 }
