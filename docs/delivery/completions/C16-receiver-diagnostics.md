@@ -39,3 +39,41 @@ input-log writing and socket submission, so it does not prove5.13seconds of
 native execution either. Next add post-submission timing and an independent
 host heartbeat before another diagnostic attempt. Preserve the failed package;
 it earns no repeat or M5 credit.
+
+Further diagnostic implementation adds an `input_timing` record after each send
+attempt finishes, retaining socket submission start/end and the native ack (null
+on timeout). Existing input records and the two-second deadline remain intact.
+`scripts/diagnose_host_timing.py` runs the selected command as a child and samples
+its own independent process every10ms, retaining samples in memory until exit.
+It propagates the child status and never grants an acceptance waiver.
+
+The first controlled diagnostic under this wrapper passed M-LEN-001:
+`074828c929ce4c39b9f8a9e084d82740`; wrapper evidence is
+`artifacts/c16/host-timing-01/heartbeat.json`. Maximum host sample gap was16.1ms.
+The subsequent repeat is running under `artifacts/c16/host-timing-02`; at the
+recording checkpoint its terminal handle27476 remained live and no heartbeat
+completion file existed. An independent WSL invocation failed with service
+connection timeout `Wsl/Service/0x8007274c`. This establishes current WSL service
+unavailability, not causation of the earlier timing failures. Do not restart
+the repeat solely because observation is slow, or shut down a shared WSL host
+without establishing that doing so is appropriate. Resume by polling27476 and
+inspecting the wrapper artifacts. The post-submission/heartbeat changes remain
+uncommitted at this checkpoint while that source-bound run is active.
+
+The handle subsequently completed normally: controlled repeat
+`repeat-e5e596679fbc41d4878fadd5eafcb1a0` passed all three children and normalized
+equality. `host-timing-02/heartbeat.json` records a2220.22ms maximum independent
+sample gap. No host restart or timeout change occurred. This diagnostic window
+therefore includes a substantial scheduling pause, while exact-time outputs
+remained repeatable. It does not retrospectively explain every earlier failure.
+
+A current-source real-time comparison under `host-timing-03` failed:
+`d5fa2557a53844ecb997a956c6ceb82d`. One note's duration error was14.732634ms;
+all177 native actions acknowledged, maximum socket-send duration0.296907ms,
+submission-to-native-ack50.847642ms, and event-log write1.976550ms. Independent
+heartbeat samples around the missed note-off deadline remained10.12–10.15ms
+apart, including across the expected deadline. The host-wide pause hypothesis
+does **not** explain that particular late note. Next investigate native scheduler
+thread delay and Mosaic callback execution near that deadline, with per-thread
+CPU/runnable-wait evidence or bounded profiling. Do not simply repeat until green.
+No active runners remain. M5 remains incomplete despite passing D repetition.

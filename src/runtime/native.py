@@ -231,14 +231,23 @@ class NativeBackend:
             packet=(struct.pack('=4i',self.sequence,kind,args[0],len(args[1]))+bytes(args[1])) if kind==7 else struct.pack('=6i',self.sequence,kind,*(list(args)+[0]*(4-len(args))))
             with self.condition:
                 self.events.write(json.dumps(dict(kind='input',sequence=self.sequence,type=kind,args=list(args),monotonic_ns=time.monotonic_ns()))+'\n')
+            submission_start=time.monotonic_ns()
             self.controller.send(packet)
-            end=time.monotonic()+2
-            with self.condition:
-                while self.sequence not in self.acks:
-                    self.check_processes()
-                    if time.monotonic()>end: raise ContractError('native_ack_timeout','Native event callback did not complete')
-                    self.condition.wait(0.01)
-                timestamp=self.acks.pop(self.sequence)
+            submitted=time.monotonic_ns();end=time.monotonic()+2
+            timestamp=None
+            try:
+                with self.condition:
+                    while self.sequence not in self.acks:
+                        self.check_processes()
+                        if time.monotonic()>end: raise ContractError('native_ack_timeout','Native event callback did not complete')
+                        self.condition.wait(0.01)
+                    timestamp=self.acks.pop(self.sequence)
+            finally:
+                completed=time.monotonic_ns()
+                with self.condition:
+                    self.events.write(json.dumps(dict(kind='input_timing',sequence=self.sequence,
+                        monotonic_ns=completed,submission_start_ns=submission_start,submitted_ns=submitted,
+                        native_ack_ns=timestamp))+'\n')
             self.check_processes(); return timestamp
     def query(self,payload):
         self.check_processes()

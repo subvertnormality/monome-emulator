@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "Receiver timing instrumentation added. Mosaic phase candidate RT diagnostic472830e passes; max receipt7.94ms/log-write6.88ms, prior726ms stall remains unexplained. Controlled repeat639ebff failed second childbd4676f on native advance691 timeout: input-to-native ack5.13s, receipt lag19.33ms, max log-write87ms. Next add post-send timing plus independent host heartbeat to distinguish submission/native/host stall; no blind retry or timeout widening. Record failure remains open. First controlled child passed but three-repeat/M5 credit absent. Full manual/T01 and all remaining stages still required. No active runners.",
+  "next_action": "Post-send timing and independent host heartbeat implemented. Controlled repeat-e5e5966 passes all3 children/equality despite2.22s host sample gap (host-timing-02); prior WSL service timeout recovered without restart. Current-source RT d5fa255 fails one note by14.7326ms. All177 actions acked; log writes under2ms; heartbeat around failing deadline normal10.12-10.15ms, so global host pause does not explain this miss. Next profile native scheduler thread runnable delay versus Mosaic callback execution; no blind retry/threshold widening. M5 external E/D comparison still blocked by failed RT evidence, P5 incomplete. Full manual/T01 and later stages required. No active runners.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
