@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "M5 aggregator and native collectors implemented; five admission contracts pass, retained Mosaic native observation binding passes in E and three D runs. Candidate real-time clock suite (3 tests), transition and both controlled source faults pass. Broad contracts: 46 pass plus one initial import error; missing client contract passes with PYTHONPATH=src. Next resolve Mosaic opening-phase defect, exercise full external comparison verifier and collect final-source required D/E/R evidence, then focused Codex P5 follow-up. M5 not run; controlled-03 unadmitted; default unchanged. Nine Mosaic cases remain partial; full atomic manual/T01 and remaining stages required. No active runners; separate interactive web session stopped.",
+  "next_action": "Mosaic phase-preserving candidate applied on behaviour branch: current baseline reproduces4.722ms first-note shortening, candidate M-LEN-001 and multi-restart M-LEN-002 D pass. Candidate RT fails later duration by585ms during726ms gap across native events; diagnose stall before retry, do not waive. All474 baseline/candidate units pass after unit-only beat API mock extension. Source-transition/phase-edge and fresh repeated comparison evidence still required. M5 gate implemented but not run, P5 follow-up pending; controlled-03 unadmitted and default unchanged. Full manual/T01 and remaining delivery stages incomplete. No active runners.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
