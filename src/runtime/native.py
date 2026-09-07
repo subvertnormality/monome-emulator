@@ -156,13 +156,18 @@ class NativeBackend:
         if self.errors: raise ContractError(self.errors[0]['code'],self.errors[0]['message'])
     def receive(self):
         try:
+            previous_write_ns=0
             while not self.closed:
                 packet=self.controller.recv(65536)
+                received_ns=time.monotonic_ns()
                 if not packet: return
                 if len(packet)<16: raise ValueError('Short native packet')
                 kind,identifier,ns=struct.unpack('=IIQ',packet[:16]); payload=packet[16:]
-                record=dict(kind=kind,id=identifier,monotonic_ns=ns)
+                # Diagnostics only: musical assertions retain native emission time.
+                record=dict(kind=kind,id=identifier,monotonic_ns=ns,
+                    received_monotonic_ns=received_ns,previous_log_write_ns=previous_write_ns)
                 with self.condition:
+                    record['receiver_lock_wait_ns']=time.monotonic_ns()-received_ns
                     if kind==1:
                         if len(payload)!=32768: raise ValueError('Invalid native frame length')
                         self.frame=payload; self.frame_revision+=1
@@ -204,7 +209,10 @@ class NativeBackend:
                         self.grid_device.update(connected=bool(connected),rotation=rotation,intensity=intensity,device_id=identifier)
                         record.update(self.grid_device)
                     else: raise ValueError('Unknown native packet '+str(kind))
-                    self.events.write(json.dumps(record)+'\n'); self.condition.notify_all()
+                    line=json.dumps(record)+'\n';write_start=time.monotonic_ns()
+                    self.events.write(line)
+                    previous_write_ns=time.monotonic_ns()-write_start
+                    self.condition.notify_all()
         except (OSError,ValueError) as error:
             if not self.closed:
                 with self.condition:
