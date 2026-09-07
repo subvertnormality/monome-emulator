@@ -97,3 +97,15 @@ resumes into the native queue while one key callback blocks, cancels them, and
 requires a subsequent live clock to emit MIDI. It fails on the unpatched build
 with the same error observed in Mosaic stop/reload. Remove when the official
 runtime handles this cancellation race itself.
+
+`0012-scheduled-midi-input.patch` adds a bounded virtual MIDI queue on the
+existing native input thread. Absolute monotonic deadlines use `ppoll`; decoding,
+clock-message handling, and Lua event posting keep the native device path.
+Acceptance and cancellation have separate reports from actual arrivals. Queue
+access is serialized and EOF drops pending input. The real-time adapter changes
+only the bridge, its build entry and two queue files; it does not replace any
+clock, scheduler, metro, Lua or audio implementation. An optional logical-clock
+registration hook is unused in this standard runtime and only activated by the
+separately built controlled-clock overlay. Native generic queue/grid/MIDI/clock
+checks and Mosaic handoffs validate the adapter. Remove when an official native
+virtual MIDI transport supports the same scheduled arrival/cleanup contract.

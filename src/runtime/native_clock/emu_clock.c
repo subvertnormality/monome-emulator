@@ -28,6 +28,7 @@ void emu_clock_timeval(struct timeval *value) {
     value->tv_usec=(now%1000000000ULL)/1000;
 }
 void emu_clock_init(void) {
+    emu_midi_set_logical_clock(emu_clock_now);
     double duration;
     clock_internal_tempo_snapshot(&pending_beat_duration,&duration);
     next_tick_ns=duration*1000000000.L;

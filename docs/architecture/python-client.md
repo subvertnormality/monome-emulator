@@ -63,3 +63,11 @@ modulation, musical application and Codex P5 checks remain required.
 The newer opt-in candidate also provides [independent real-time MIDI input
 schedules](scheduled-midi.md). Schedule acknowledgements report `accepted`;
 native arrival records and actual callback outputs establish subsequent delivery.
+
+Native key, encoder, grid, MIDI and advance acknowledgements now additionally
+contain `native.sequence` and `native.monotonic_ns`, copied from the actual
+runtime acknowledgement. The outer timestamp remains the server response time.
+Use native timestamps for physical input timing, and emitted MIDI timestamps for
+audible onset timing; an earlier snapshot can precede the actual onset by many
+milliseconds. Controlled musical calculations still use logical time. Queue
+acceptance does not carry a fabricated application timestamp.

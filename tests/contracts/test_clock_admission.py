@@ -59,12 +59,32 @@ class AdmissionInventory(unittest.TestCase):
             self.index['review']=self.ref('modified-review.json',review)
             with self.assertRaises(ContractError):self.check()
 
+    def test_each_queue_lane_is_mandatory(self):
+        for key in ('queue-default','queue-candidate','queue-controlled'):
+            saved=self.index['generic_checks'].pop(key)
+            with self.subTest(key=key),self.assertRaisesRegex(ContractError,'Missing required'):
+                self.check()
+            self.index['generic_checks'][key]=saved
+
     def test_empty_selection_and_stale_contract_fail(self):
         with self.assertRaises(ContractError):gate.verify_m5([],'wsl')
         self.index['contract_sha256']='old'
         with self.assertRaisesRegex(ContractError,'Stale admission contract'):self.check()
 
 class NativeObservationBinding(unittest.TestCase):
+    def test_public_runtime_timestamp_is_bound_to_native_ack(self):
+        with tempfile.TemporaryDirectory() as temp:
+            native=Path(temp)
+            request=dict(session_id='session',sequence=1,action_id='key',action={'type':'key'})
+            ack=dict(request,status='applied',native=dict(sequence=7,monotonic_ns=123))
+            (native/'native-events.jsonl').write_text(json.dumps(dict(kind=4,id=7,monotonic_ns=123))+'\n')
+            def write(): (native/'actions.jsonl').write_text(json.dumps(dict(request=request,ack=ack))+'\n')
+            write();gate.native_observations(native,[],'real-time','session')
+            for changed in (dict(sequence=7,monotonic_ns=124),dict(sequence=8,monotonic_ns=123)):
+                ack['native']=changed;write()
+                with self.assertRaisesRegex(ContractError,'acknowledgement differs'):
+                    gate.native_observations(native,[],'real-time','session')
+
     def test_rejects_changed_outputs_even_with_rehashed_artifacts(self):
         with tempfile.TemporaryDirectory() as temp:
             native=Path(temp)

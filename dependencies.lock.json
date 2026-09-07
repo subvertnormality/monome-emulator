@@ -134,6 +134,10 @@
     {
       "path": "patches/norns/0011-clock-cancel-queued-resume.patch",
       "sha256": "40bb49162614d014a4b56f1189dcb9345991d0c1548a48fdf2518cdfea614499"
+    },
+    {
+      "path": "patches/norns/0012-scheduled-midi-input.patch",
+      "sha256": "fb94e9ed062d52b2dfec48a42db9f3690015d4e16116e6cfb6ef895c52230bcd"
     }
   ],
   "serialosc": {

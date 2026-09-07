@@ -102,12 +102,13 @@ class Application:
         if client_id: self.heartbeat(client_id)
         if kind in ('key','grid') and not action['state'] and client_id and self.input_owners.get(key,(None,None))[0]!=client_id:
             raise ContractError('input_owner','This input belongs to another client')
+        raw=None
         if kind=='release_all' and client_id:
             for held_key,(owner,held) in list(self.input_owners.items()):
                 if owner==client_id:
                     self.backend.query({'action':dict(held,state=0)}); self.input_owners.pop(held_key,None)
         else:
-            self.backend.query({'action':action})
+            raw=self.backend.query({'action':action})
             if kind=='release_all': self.input_owners.clear()
             elif kind=='grid_connection' and not action['connected']:
                 self.input_owners={k:v for k,v in self.input_owners.items() if k[0]!='grid'}
@@ -116,7 +117,8 @@ class Application:
                 else: self.input_owners.pop(key,None)
         self.sequence+=1; self.action_ids.add(payload['action_id'])
         ack=checked('ack',dict(schema_version=1,session_id=payload['session_id'],action_id=payload['action_id'],
-               sequence=self.sequence,status='accepted' if kind=='midi_schedule' else 'applied',monotonic_ns=time.monotonic_ns()))
+               sequence=self.sequence,status='accepted' if kind=='midi_schedule' else 'applied',monotonic_ns=time.monotonic_ns(),
+               **({'native':raw['native_ack']} if raw and 'native_ack' in raw else {})))
         return ack
 
 def serve(directory):

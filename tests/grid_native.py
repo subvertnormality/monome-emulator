@@ -35,12 +35,12 @@ class Client:
         directory=session.SESSIONS/self.sid
         cleanup=json.loads((directory/'cleanup.json').read_text())
         assert all(c['returncode']==0 for c in cleanup if c['service']!='sclang'),cleanup
-        out=ROOT/'artifacts/c03'/name; out.mkdir(parents=True,exist_ok=True)
+        out=getattr(self,'output_root',ROOT/'artifacts/c03')/name; out.mkdir(parents=True,exist_ok=True)
         write_json(out/'trace.json',self.trace); write_json(out/'observations.json',self.observations)
         for path in directory.iterdir():
             if path.suffix in ('.log','.jsonl') or path.name in ('cleanup.json','frame.bgra','native-config.json'):
                 shutil.copyfile(path,out/path.name)
-        write_json(out/'identity.json',self.info)
+        write_json(out/'identity.json',{k:v for k,v in self.info.items() if k in ('session_id','runtime_identity','application_identity','emulator_identity')})
         return out
 
 def cell_check(client,x,y,lx=None,ly=None):

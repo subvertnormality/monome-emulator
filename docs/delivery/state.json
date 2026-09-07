@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "Candidate05 queues MIDI in explicit logical/monotonic domains; generic logical11 and RT13 checks pass. Mosaic M-TIM-004 now covers both live source directions plus ignored unselected MIDI Stop; D00527347 and RT34898ce pass. Next make queued-input generic checks/repeats mandatory and source-bound in M5, and resolve how the new real-time queue enters the default-baseline installation before the final differential matrix. Keep current default unchanged until its adapter conformance passes. Pending reverse tempo-publication/other phase edges, continuous batch refill for long external-clock tests, final three-repeat matrix/Codex P5, full manual reconciliation and remaining stages stay open. No active runners.",
+  "next_action": "Default real-time queue pinned as0012, lock8b84937d7d187387; controlled overlay06 rebuilt. All three mandatory queue lanes pass, including three fresh controlled sessions; seven rehashed fault checks and seven admission contracts pass. Mosaic handoff oracle now anchors RT timing to emitted onset and native applied-control time; defaultc579bae and Db5007eb pass both directions. Next collect remaining seven generic groups, eight legacy D probe families x3 and all14 app/profile comparisons x3D+RT on the new lock, then Codex P5 follow-up and M5 index. Queue refill/endurance, further timing edges, full manual reconciliation and later stages remain required. No active runners.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -140,5 +140,27 @@
     },
     "generic_logical": "artifacts/c16/logical-midi-01/results.json",
     "generic_real_time": "artifacts/c16/scheduled-midi-05/results.json"
+  },
+  "queue_admission_evidence": {
+    "completion": "docs/delivery/completions/C16-queue-admission.md",
+    "groups": {
+      "queue-default": {
+        "path": "artifacts/c16/queue-check-0d545aab35bb4020bad08493a6dd8748/manifest.json",
+        "sha256": "ae56a59a4c77e42ab3be81df65f7f6dfe05f2cae4e677731c9650bb3034697a2",
+        "passed": true
+      },
+      "queue-controlled": {
+        "path": "artifacts/c16/queue-check-9b03928104da49918bc577e32bdf19a2/manifest.json",
+        "sha256": "040399dcca513cfdcf8d83963e8189af3b9111fec5781bec742179047a584232",
+        "passed": true
+      },
+      "queue-candidate": {
+        "path": "artifacts/c16/queue-check-1f267a510dba4a9496e492e9bcebc50b/manifest.json",
+        "sha256": "81a72bb2b01a588c17fb91720d6546cf06c5d7caccfc838880090ca95f268a51",
+        "passed": true
+      }
+    },
+    "default_lock": "8b84937d7d187387",
+    "candidate": "controlled-06"
   }
 }

@@ -44,8 +44,9 @@ class NativeBackend:
         install=read_json(config.get('experimental_install') or ROOT/'.runtime/current.json')
         from .dependencies import verify_install
         verify_install(install)
-        self.schedule_supported=any(item['path']=='matron/src/emu_midi_schedule.c'
-            for item in install.get('experimental',{}).get('files',[]))
+        self.schedule_supported=(any(item['path']=='matron/src/emu_midi_schedule.c'
+            for item in install.get('experimental',{}).get('files',[])) or
+            any(item['path']=='patches/norns/0012-scheduled-midi-input.patch' for item in install.get('patches',[])))
         self.schedule_domains=install.get('experimental',{}).get('midi_schedule_domains',
             ['monotonic'] if self.schedule_supported else [])
         if self.clock_mode!='real-time' and install.get('experimental',{}).get('status')!='experimental-unadmitted':
@@ -280,7 +281,9 @@ class NativeBackend:
                     self.events.write(json.dumps(dict(kind='input_timing',sequence=self.sequence,
                         monotonic_ns=completed,submission_start_ns=submission_start,submitted_ns=submitted,
                         native_ack_ns=timestamp))+'\n')
-            self.check_processes(); return timestamp
+            self.check_processes()
+            self.last_native_ack=dict(sequence=self.sequence,monotonic_ns=timestamp)
+            return timestamp
     def schedule_input(self,action):
         domain=action.get('time_domain','logical' if action['type']=='midi_schedule_cancel' and self.clock_mode!='real-time' else 'monotonic')
         if domain not in self.schedule_domains or (domain=='logical')!=(self.clock_mode!='real-time'):
@@ -375,6 +378,8 @@ class NativeBackend:
               held=list(self.held.values()),grid_device=dict(self.grid_device),diagnostics=dict(self.diagnostics),absent=self.absent[-64:]))
             result['state']['clock']=dict(mode=self.clock_mode,logical_ns=self.logical_ns if self.clock_mode!='real-time' else None,admitted=self.clock_mode=='real-time')
             result['state']['midi_input_schedule']=copy.deepcopy(self.input_schedule)
+            if payload.get('action',{}).get('type') in ('key','enc','grid','grid_connection','midi','advance'):
+                result['native_ack']=dict(self.last_native_ack)
         # A Windows-mounted filesystem can pause for tens of milliseconds.
         # Never hold the native event reader's condition during artifact I/O.
         # The observation's embedded bytes and digest remain the exact sampled

@@ -31,6 +31,9 @@ def phase(directory,items,source,runtime,mode,script=None,abort=False):
     return identity,config
 
 def generic_check(path,name,spec,source,candidate,default,profile):
+    if spec.get('kind')=='midi-schedule':
+        from .midi_schedule_admission import verify_schedule_check
+        return verify_schedule_check(path,name,spec,source,candidate if spec['runtime']=='candidate' else default,profile)
     record=read_json(path)
     require(record['kind']=='native-clock-check' and record['id']==name,'Wrong native check package')
     require(record['source']['digest']==source and record['profile']==profile,'Wrong source/platform check')
@@ -87,6 +90,9 @@ def native_observations(native,observations,mode,session):
         require(request['session_id']==session and request['sequence']==index,'Wrong/unordered application input')
         status='accepted' if request['action']['type']=='midi_schedule' else 'applied'
         require(all(request[k]==ack[k] for k in ('session_id','action_id','sequence')) and ack['status']==status,'Unapplied application input')
+        if 'native' in ack:
+            matches=[e for e in events if e.get('kind')==4 and e['id']==ack['native']['sequence']]
+            require(len(matches)==1 and matches[0]['monotonic_ns']==ack['native']['monotonic_ns'],'Public native acknowledgement differs from runtime trace')
     from .midi_schedule_evidence import verify_midi_schedules
     verify_midi_schedules(events,actions)
 

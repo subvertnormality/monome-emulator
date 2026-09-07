@@ -81,10 +81,13 @@ static void virtual_deinit(void *self)''')
     } else { memcpy(packet+8,data,size);emit(3,md->dev.id,packet,size+8); }''')
     replace('matron/src/emu_bridge.c','    if (size>32760)', '    if (size>(emu_clock_enabled() ? 32752 : 32760))')
     replace('matron/wscript',"        'src/emu_bridge.c',","        'src/emu_bridge.c',\n        'src/emu_clock.c',")
-    edit('matron/src/emu_bridge.c',midi_schedule)
-    replace('matron/wscript',"        'src/emu_clock.c',","        'src/emu_clock.c',\n        'src/emu_midi_schedule.c',")
+    if 'emu_midi_schedule.h' not in (args.source/'matron/src/emu_bridge.c').read_text():
+        edit('matron/src/emu_bridge.c',midi_schedule)
+        replace('matron/wscript',"        'src/emu_clock.c',","        'src/emu_clock.c',\n        'src/emu_midi_schedule.c',")
     for name in ('emu_clock.c','emu_clock.h','emu_midi_schedule.c','emu_midi_schedule.h'):
-        rel='matron/src/'+name;original[rel]='';changed[rel]=(ROOT/'src/runtime/native_clock'/name).read_text()
+        rel='matron/src/'+name;before=(args.source/rel).read_text() if (args.source/rel).exists() else ''
+        after=(ROOT/'src/runtime/native_clock'/name).read_text()
+        if before!=after:original[rel]=before;changed[rel]=after
     patches=[];files=[]
     for name,after in changed.items():
         before=original[name];assert before!=after,name

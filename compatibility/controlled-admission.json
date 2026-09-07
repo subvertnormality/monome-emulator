@@ -8,7 +8,10 @@
     "transition-candidate": {"probe": "controlled-transition", "runtime": "candidate", "phases": ["native"]},
     "realtime-clocks": {"probe": "clock-probe", "runtime": "default", "phases": ["clock-contract", "reset-anchor", "future-midi"]},
     "realtime-clocks-candidate": {"probe": "clock-probe", "runtime": "candidate", "phases": ["clock-contract", "reset-anchor", "future-midi"]},
-    "source-faults": {"probe": "controlled-midi-clock", "runtime": "candidate", "phases": ["duplicate-pulse", "unsupported-link"]}
+    "source-faults": {"probe": "controlled-midi-clock", "runtime": "candidate", "phases": ["duplicate-pulse", "unsupported-link"]},
+    "queue-default": {"kind": "midi-schedule", "runtime": "default", "mode": "real-time", "phases": ["run-1"]},
+    "queue-candidate": {"kind": "midi-schedule", "runtime": "candidate", "mode": "real-time", "phases": ["run-1"]},
+    "queue-controlled": {"kind": "midi-schedule", "runtime": "candidate", "mode": "controlled-experimental", "phases": ["run-1", "run-2", "run-3"]}
   },
   "application_contracts": ["fixtures/apps/mosaic-controlled-admission.json"]
 }

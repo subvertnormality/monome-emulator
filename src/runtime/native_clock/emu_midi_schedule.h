@@ -40,5 +40,7 @@ int emu_midi_schedule_step(struct emu_midi_schedule *queue, uint64_t now_ns,
 const char *emu_midi_schedule_cancel(struct emu_midi_schedule *queue,
     uint32_t id, uint32_t *cancelled);
 /* Bridge hooks used by controlled advancement; internally serialized. */
+/* Register only during clock initialization, before input threads start. */
+void emu_midi_set_logical_clock(uint64_t (*now_ns)(void));
 uint64_t emu_midi_controlled_deadline(void);
 int emu_midi_controlled_step(uint64_t now_ns);

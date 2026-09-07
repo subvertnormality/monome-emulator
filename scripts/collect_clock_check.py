@@ -15,6 +15,7 @@ def main():
     parser.add_argument('--install',type=Path,required=True);args=parser.parse_args()
     out=ROOT/'artifacts/c16'/('check-'+uuid.uuid4().hex);out.mkdir(parents=True)
     spec=specs[args.check];source=source_identity();candidate=read_json(args.install);default=read_json(ROOT/'.runtime/current.json')
+    if spec.get('kind')=='midi-schedule':parser.error('Use scripts/collect_midi_schedule_check.py for queued-input checks')
     record=dict(kind='native-clock-check',id=args.check,source=source,profile='wsl' if 'microsoft' in platform.release().lower() else 'linux',
         host=dict(release=platform.release(),platform=platform.platform()),passed=False,exit_code=1,phases={},failure=None)
     started=time.monotonic()
