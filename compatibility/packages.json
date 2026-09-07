@@ -1,6 +1,67 @@
 {
   "schema_version":1,
   "packages":{
+    "A06-all-pentatonic-option":{
+      "tier":"E","family":"A06","roles":["pentatonic-option"],
+      "checks":["diatonic-baseline","all-pentatonic-enabled","all-pentatonic-disabled","script-view-restored","cleanup"],
+      "command":["tests/mosaic_quantiser_options.py"]
+    },
+    "A06-mask-quantiser-options":{
+      "tier":"E","family":"A06","roles":["mask-quantiser-options"],
+      "checks":["default-snap-mask","snap-ignores-degree-rotation","snap-disabled-chromatic-mask","full-quantise-overrides-snap-off","full-quantise-degree-and-rotation","full-quantise-disabled","snap-restored","script-view-restored","cleanup"],
+      "command":["tests/mosaic_quantiser_options.py","--masks"]
+    },
+    "A04-tresillo-drum-boundary-candidate":{
+      "tier":"E","family":"A04","roles":["tresillo-drum-boundary"],
+      "checks":["drum-bank-64-step-tresillo","cleanup"],
+      "candidate_manifest":"fixtures/apps/mosaic-patches/tresillo.json",
+      "command":["tests/mosaic_tresillo.py","--candidate"]
+    },
+    "A04-tresillo-multipliers":{
+      "tier":"E","family":"A04","roles":["tresillo"],
+      "checks":["tresillo-input-setup","multiplier-8","multiplier-16","multiplier-24","multiplier-32","multiplier-40","multiplier-48","multiplier-56","multiplier-64","cleanup"],
+      "command":["tests/mosaic_tresillo.py"]
+    },
+    "A04-tresillo-drum-boundary-baseline":{
+      "tier":"E","family":"A04","roles":["tresillo-drum-boundary"],
+      "checks":["drum-bank-64-step-tresillo","cleanup"],
+      "command":["tests/mosaic_tresillo.py","--drum-boundary"]
+    },
+    "A04-note-range-controls":{
+      "tier":"E","family":"A04","roles":["note-ranges"],
+      "checks":["initial-note-range","first-up-step","second-up-step","first-down-step","second-down-step","hold-to-highest-range","highest-range-clamp","hold-to-lowest-range","lowest-range-clamp","center-restores-root-page","cleanup"],
+      "command":["tests/mosaic_editor_ranges.py"]
+    },
+    "A04-velocity-range-controls":{
+      "tier":"E","family":"A04","roles":["velocity-ranges"],
+      "checks":["velocity-127","velocity-117","velocity-107","velocity-97","velocity-87","velocity-78","velocity-68","first-velocity-range-step","second-velocity-range-step","velocity-range-step-back","velocity-58","velocity-48","velocity-39","velocity-29","velocity-19","velocity-9","velocity-0","lowest-velocity-range-clamp","hold-to-highest-velocity-range","highest-velocity-range-clamp","cleanup"],
+      "command":["tests/mosaic_editor_ranges.py","--velocity"]
+    },
+    "A04-four-step-groups":{
+      "tier":"E","family":"A04","roles":["step-groups"],
+      "checks":["shift-copies-notes-to-four-groups","shift-copies-velocities-to-four-groups","play-step-group-1","play-step-group-2","play-step-group-3","play-step-group-4","cleanup"],
+      "command":["tests/mosaic_editor_ranges.py","--groups"]
+    },
+    "A06-twelve-scale-roots":{
+      "tier":"E","family":"A06","roles":["roots"],
+      "checks":["root-0","root-1","root-2","root-3","root-4","root-5","root-6","root-7","root-8","root-9","root-10","root-11","root-upper-clamp","root-lower-clamp","cleanup"],
+      "command":["tests/mosaic_harmony_axes.py"]
+    },
+    "A06-seven-scale-degrees":{
+      "tier":"E","family":"A06","roles":["degrees"],
+      "checks":["degree-1","degree-2","degree-3","degree-4","degree-5","degree-6","degree-7","degree-upper-clamp","degree-lower-clamp","cleanup"],
+      "command":["tests/mosaic_harmony_axes.py","--degrees"]
+    },
+    "A06-seven-scale-rotations":{
+      "tier":"E","family":"A06","roles":["rotations"],
+      "checks":["rotation-0","rotation-1","rotation-2","rotation-3","rotation-4","rotation-5","rotation-6","rotation-upper-clamp","rotation-lower-clamp","cleanup"],
+      "command":["tests/mosaic_harmony_axes.py","--rotations"]
+    },
+    "A05-two-active-channels":{
+      "tier":"E","family":"A05","roles":["two-channels"],
+      "checks":["shared-pattern-independent-loops","mute-second-preserves-first","unmute-restores-paired-output","unassign-second-preserves-first","reassign-restores-second","change-first-loop-independently","restore-original-loop-pair","cleanup"],
+      "command":["tests/mosaic_two_channels.py"]
+    },
     "A06-ten-scale-choices":{
       "tier":"E","family":"A06","roles":["scales"],
       "checks":["major","harmonic-major","minor","harmonic-minor","melodic-minor","dorian","phrygian","lydian","mixolydian","locrian","upper-scale-clamp","lower-scale-clamp","cleanup"],

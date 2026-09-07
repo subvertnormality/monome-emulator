@@ -1,7 +1,8 @@
 """Shared application-fixture driver; never imported by the emulator runtime."""
 import platform,time,traceback
 from mosaic_slice import Slice
-from automation.protocol import ROOT,write_json,checked,uid
+from automation.protocol import ROOT,write_json,checked,uid,ContractError
+from automation import session
 from automation.identity import source_identity,artifact
 from automation.evidence import verify
 from automation.timeline import Timeline
@@ -9,7 +10,33 @@ from automation.timeline import Timeline
 class Workflow(Slice):
     def __init__(self,code_root=None):
         super().__init__(random_seed=42,fixture_code_root=code_root);self.checks=[];self.results=[]
+        self.log_position=0;self.log_fragment=b''
+    def check_scheduler_log(self):
+        # Mosaic catches coroutine.resume failures and prints them. This belongs
+        # to its opt-in fixture, not an application-specific runtime adapter.
+        with (session.SESSIONS/self.sid/'matron.log').open('rb') as log:
+            log.seek(self.log_position);chunk=log.read();self.log_position=log.tell()
+        lines=(self.log_fragment+chunk).split(b'\n');self.log_fragment=lines.pop()
+        for line in lines:
+            if line.startswith(b'Coroutine error:'):
+                raise ContractError('mosaic_coroutine_error',line.decode(errors='replace'))
+    def snapshot(self):
+        state=super().snapshot();self.check_scheduler_log();return state
     def passed(self,name):self.checks.append(dict(name=name,passed=True))
+    def wait(self,predicate,timeout=3):
+        # Keep the first and final witness of each distinct wait. Polling still
+        # checks every snapshot; complete inputs/MIDI remain in native-events.
+        start=len(self.observations);polls=0;end=time.monotonic()+timeout
+        try:
+            while time.monotonic()<end:
+                state=self.snapshot();polls+=1
+                if len(self.observations)>start+2:del self.observations[start+1:-1]
+                if predicate(state):return state
+                time.sleep(.03)
+            raise AssertionError('Expected native MIDI/grid observation did not arrive')
+        finally:
+            self.results.append(dict(kind='poll-retention',policy='first-and-final-per-wait',
+                                     polls=polls,retained=len(self.observations)-start))
     def led_values(self,cells,expected):
         indexes=[(y-1)*16+x-1 for x,y in cells]
         state=self.wait(lambda s:[s['grid'][i] for i in indexes]==expected)
@@ -54,6 +81,7 @@ def run_package(scenario_id,body,code_root=None):
         if c:
             try:
                 directory=c.finish(role);phases.append(dict(role=role,directory=directory.relative_to(out).as_posix(),session_id=c.sid));c.passed('cleanup')
+                c.check_scheduler_log()
             except Exception as error:failure=failure or dict(type=type(error).__name__,message=str(error),traceback=traceback.format_exc())
             checks=c.checks;results=c.results
     write_json(out/'results.json',results)

@@ -47,3 +47,12 @@ The complete release patch set must be combined and revalidated at C12.
 Patch application runs outside enclosing-repository discovery, verifies content
 changed, and checks reverse applicability before recording a new candidate.
 This prevents Git silently skipping git-format paths in nested owned copies.
+
+The opt-in `tresillo-repeat-bank-bits` candidate in
+`fixtures/apps/mosaic-patches/tresillo.json` repairs nil bit reads when a tresillo
+segment exceeds a16-bit drum bank. It repeats the source pattern at its actual
+bit length. This is an explicit candidate interpretation of repeating rhythms;
+it preserves all previously defined reads, without padding missing bits or
+changing the upstream fixture. `python3 tests/mosaic_tresillo.py --candidate`
+runs the previously failing64-step physical-input recipe and independent hit
+positions. It still needs combined release-patch validation at C12.

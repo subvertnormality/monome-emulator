@@ -218,3 +218,123 @@ repeated patterns. Tresillo variants and remaining fader boundaries remain open.
 Reproduce with `python3 tests/mosaic_scale_slots.py`, `tests/mosaic_euclidean.py`,
 `tests/mosaic_rhythm_banks.py`, and `tests/mosaic_scales.py`, sequentially in WSL.
 These results are development checkpoints; no C08 completion is claimed.
+
+Two active channels pass eight checks in
+`artifacts/c08/61cf260f8f034f86880c5f51adaa13e6/manifest.json`:
+the same pattern feeds MIDI channels1/2, channel2 is one octave higher and loops
+three steps while channel1 loops four, then two. Muting/unassigning channel2
+preserves channel1; restoring assignments and lengths restores both streams.
+The first driver assumed ascending simultaneous channel order and failed in
+`ec85f61160a44f6eb7fd0059e10d7c65`. Pinned m_clock.lua:328 constructs channel
+clocks from17 down to1; the corrected expectation retains that exact order.
+Captured MIDI is never sorted or otherwise reordered to make the comparison pass.
+
+A second asynchronous clarification asks how the user currently selects an
+independent one-step channel, given the two-distinct-key gesture in the pinned
+source. The Lower merge semantic question also remains pending. Neither question
+blocks the independent root/degree/rotation and editor-option packages.
+
+All harmony selector axes passed through seven-note musical tables:
+
+| Package | Checks | Manifest under artifacts/c08 |
+|---|---:|---|
+| A06-twelve-scale-roots | 15 | fdd2628a8af74bb38583180f9631f8c4/manifest.json |
+| A06-seven-scale-degrees | 10 | 373cdcdbedc54cc98a8b90eca27a780b/manifest.json |
+| A06-seven-scale-rotations | 10 | 893bf97056084a7d84ccd3a48fb9f0b7/manifest.json |
+
+Each axis includes its upper/lower selector clamps. Degree expectations advance
+through a diatonic interval table with octave carry; rotation lowers the highest
+N positions in a seven-note voicing by an octave. These independently specified
+pitch rules do not call Mosaic's quantiser. Commands are
+`python3 tests/mosaic_harmony_axes.py`, with `--degrees` and `--rotations` for
+the other two packages. They supplement, rather than complete, quantiser-option
+and scale-lock interaction coverage.
+
+Editor range and group packages also passed:
+
+| Package | Checks | Manifest under artifacts/c08 |
+|---|---:|---|
+| A04-note-range-controls | 11 | f2aa8a8c38db4874a01a7aac8989fd41/manifest.json |
+| A04-velocity-range-controls | 21 | c4331bd66b4d4f3e8bd72370505f6823/manifest.json |
+| A04-four-step-groups | 7 | d1aa372f9bd54a57b67a7a66712714b2/manifest.json |
+
+`tests/mosaic_editor_ranges.py` tests successive single-step range moves, both
+long-press extremes, clamps and center restoration. `--velocity` covers all14
+uniformly spaced velocity entries using floor(127*(14-index)/13), range movement
+and zero-velocity silence. This yields68 at the seventh entry; the README's
+first-page summary says67, an inaccurate bound rather than the implemented
+14-point quantisation rule. The literal table is not captured from test output.
+`--groups` shift-copies note and velocity edits, verifies all four visible groups,
+then plays ranges1–4,17–20,33–36 and49–52 to prove the edits reached each group.
+
+## Tresillo boundaries and bounded fixture observations
+
+All eight tresillo multipliers (8 through 64) passed ten checks in
+`artifacts/c08/f2889239f6294349bc12635d0002a5a6/manifest.json`.
+The expected hit positions are hand-derived from two 3m segments of pattern A
+and one 2m segment of pattern B; exact LEDs, pitches and velocities are checked.
+
+The drum-bank boundary baseline failed in
+`artifacts/c08/22731dae6de5485d95a6ff25a870664a/manifest.json`.
+Its retained matron.log reports `Coroutine error:` at drum_ops.lua:22 because
+bit32.band received nil. Banks2–5 contain 16-bit patterns, while the larger
+multipliers request up to24 bits. The scheduler catches and prints this failure,
+so the initial driver surfaced a missing-LED timeout. This is an unresolved
+Mosaic candidate-fix obligation within C08, not an excluded workflow.
+
+The successful multiplier package retained 924,907,777 bytes of observations
+against 1,315,814 bytes of native events. Repeated wait polls copied full MIDI
+history and framebuffer, causing minutes of redundant evidence verification.
+The C08 fixture driver now retains the first and final observation of each
+separate wait and records poll counts. Every poll still evaluates its predicate;
+all native inputs and MIDI remain unabridged. Distinct waits retain distinct
+witnesses. The shared C05/C07 driver and runtime clock are unchanged.
+
+The fixture also checks incremental matron output for Mosaic's caught scheduler
+errors, including after cleanup. Four focused tests pass for separate witnesses,
+timeouts, propagated predicate errors and fragmented scheduler diagnostics:
+`python3 -m unittest discover -s tests -p test_workflow_retention.py -v`.
+The full native multiplier rerun and boundary diagnostic are pending in session
+54985, logs `artifacts/c08-tresillo-retention.log` and
+`artifacts/c08-tresillo-diagnostic.log`. No C08 completion is claimed.
+
+The retention rerun passed all ten checks:
+`artifacts/c08/89a695ac0c27491f9713f4e67fcba9af/manifest.json`.
+Its observations total32,945,962 bytes, a96.4% reduction from the preceding
+924,907,777-byte bundle. The exact same rhythm/pitch/velocity assertions pass.
+The boundary diagnostic now fails explicitly with `mosaic_coroutine_error` in
+`artifacts/c08/fef9e7ab31fd435ab874c79f8029a0eb/manifest.json`, preserving the
+Mosaic source location and nil-bit argument instead of reporting only a timeout.
+
+An isolated candidate wraps rhythm-bit reads at each bank pattern's actual
+stored bit length. This extends the existing repeating-pattern interpretation
+into tresillo's larger segments, retaining every previously in-range bit.
+For bank2 pattern2 (hits1/9 in16 bits), the64-step 24/24/16 segmentation should
+emit hits1/9/17/25/33/41/49/57. That literal expectation existed in the failing
+baseline before the candidate was implemented. The candidate does not change
+Mosaic's pinned fixture or the user's checkout. Its native validation is pending.
+
+Global quantiser menu options passed through actual keys/encoders and MIDI:
+
+| Package | Checks | Manifest under artifacts/c08 |
+|---|---:|---|
+| A06-all-pentatonic-option | 5 | 6c561058344a4cf988b87ae056a99da3/manifest.json |
+| A06-mask-quantiser-options | 9 | 7c5f4ba568f84aceb93a962a50b3b4fd/manifest.json |
+
+The pentatonic test uses C/D/F/B and independently expects C/D/E/C after snapping
+to C-major pentatonic, then restoration on disabling the option. Mask tests
+exercise default snapping, raw chromatic notes with snapping off, degree and
+rotation immunity for snapped masks, full quantisation overriding snap-off,
+full degree/rotation changes and restoring both switches. Page header assertions
+verify return to the script after the native parameter menu. Commands are
+`python3 tests/mosaic_quantiser_options.py` and the same with `--masks`.
+Per-step full-mask override, random/merged pentatonic options and scale locks
+remain outstanding; these two packages do not complete the quantiser inventory.
+
+The isolated tresillo candidate passed its exact64-step LED, note, velocity,
+repaint and cleanup assertions in
+`artifacts/c08/25ffba5f465e4a0b9b18cbc87837ac05/manifest.json` (two registered
+checks). No scheduler error occurred. This closes the reproduced bank2 boundary
+for this candidate; other banks/multipliers and combined patch regressions remain
+required before the full release. Session98079 exited0 after both quantiser
+packages and the candidate completed.
