@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "Targeted matron profile M-TIM-0017d09589 passes full20 phrases/61 onsets/60 durations;99Hz userspace perf profile3f0d6e also passes. Installed perf5.4 binary works despite generic launcher kernel mismatch;641 samples, no lost samples, matron24.65% total sampled CPU including startup. Lua internals stripped: no callback/GC attribution established. Earlier RT misses retained. Next finish phase/source edge and M5 fresh comparison inventory/P5 follow-up; investigate intermittent misses with playback-only callback attribution rather than guessed timing fixes. Ten named cases remain partial manual coverage; full manual/T01 and remaining stages required. No active runners.",
+  "next_action": "Mosaic M-TIM-002 passes five96PPQN restart phase offsets in controlled d6ffb42 and real time ee322cb; D observed phase within1ns of requests. M5 application contract expanded to12 comparisons including M-TIM-001/002; all5 admission contracts pass. Next actual clock-source transitions, fresh final-source D3-repeat/E/R matrix and Codex P5 follow-up. Historical RT misses remain retained; no blanket stability claim. Eleven named cases remain partial manual coverage; full atomic manual/T01 and all later stages required. No active runners.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {

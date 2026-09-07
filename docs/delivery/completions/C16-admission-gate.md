@@ -53,3 +53,8 @@ verifier edits and are not fresh-source M5 evidence. M5 remains not run, P5 rema
 open, and controlled-03 remains explicitly experimental. Next resolve Mosaic's
 opening phase, exercise the full external comparison verifier, collect the final
 required evidence, and use the remaining focused Codex follow-up.
+
+The selected application contract now also requires M-TIM-001 (twenty phrases)
+and M-TIM-002 (five restart phases), bringing its required case/profile pairs to
+twelve. These exercise the opening-phase correction directly. Neither may be
+omitted from the final real-time/three-controlled-repeat comparison inventory.
