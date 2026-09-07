@@ -99,3 +99,35 @@ acknowledgement. It must also account for redraw completion and reject unsupport
 time sources. Zero-progress/runaway callbacks must fail a bounded advance, never
 hang or report success. Generic full-runtime probes and Codex-only P5 remain
 required; no D capability or completed C16/M5 is claimed.
+
+## First full-native experimental integration
+
+Candidate generation/build helpers now compose the clock seams, an atomic logical
+clock, early Lua wall-time binding, bounded native-event dispatch and a framebuffer
+fence. The new native advance command acknowledges only after draining its own
+consequences; it does not enqueue an acknowledgement that its drain could consume
+early. Emission packets retain wall timestamps and separately carry logical time.
+Explicit Python Session opt-in selects an isolated experimental installation.
+The verified default lock/installation is unchanged.
+
+Local candidate: the ignored `artifacts/c16/current-candidate.json` locator.
+Patch recipe/provenance: `artifacts/c16/integrated-01/`.
+First full-native probe: `artifacts/c16/f2a3c363ed8b4168a978a321370e4049/manifest.json`.
+Three fresh repeats: f67bb5774f2d4fbfb51b3a14fa09d8aa,
+253c40b5b3384c589ece602b866d0938, 66f4ca944e5f45d0aaee3ffc68d867e3
+under artifacts/c16. Each asserted the same literal MIDI sequence/logical times,
+frozen time, exact sleep boundary, strictly-after sync, util/os time coherence,
+LED changes and framebuffer propagation.
+Second generic full-native probe cf140c923294469b8e3a183a288abe69 passes cached
+wall/date binding before script init, same-time child callback quiescence,
+cancelled clock/metro silence and expected runaway work-limit failure.
+Unchanged public client probe6515534b53dd406c920879c7079f16fb passes80 emissions;
+all3 unchanged real-time clock tests pass (37.172s). Existing process-handoff
+ResourceWarnings remain the already recorded C11 obligation.
+
+Still unadmitted: P5 has not run. Other clock sources are explicitly rejected in
+this candidate; their required controlled-input coverage remains outstanding.
+Required next work includes source-change/tempo/reset fault probes, precise
+Mosaic musical timing diagnostics, complete time-source/mod audit and bounded
+Codex review. Frame-change smoke is not complete screen-semantic coverage.
+

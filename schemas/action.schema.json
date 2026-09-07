@@ -162,6 +162,24 @@
             "type"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "advance"
+            },
+            "nanoseconds": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 60000000000
+            }
+          },
+          "required": [
+            "type",
+            "nanoseconds"
+          ],
+          "additionalProperties": false
         }
       ]
     },

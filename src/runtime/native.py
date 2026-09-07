@@ -31,6 +31,7 @@ class NativeBackend:
         self.errors=[]; self.absent=[]; self.ready=False; self.sequence=0; self.acks={}
         self.frame_revision=0; self.grid_revision=0; self.frame=bytes(32768); self.grid=[0]*128
         self.saved_frame=None
+        self.clock_mode=config.get('clock_mode','real-time');self.logical_ns=0
         from devices.midi import Capture,Decoder,configuration
         self.midi_config=configuration(config.get('midi_config'))
         self.capture=Capture(self.midi_config['ports'],self.midi_config['capture_limit'])
@@ -39,9 +40,11 @@ class NativeBackend:
         self.held={}; self.condition=threading.Condition(); self.io_lock=threading.Lock()
         from devices.grid import GridInput
         self.grid_input=GridInput(); self.grid_device=dict(connected=True,rotation=0,intensity=15,serial='emu-grid-128',cols=16,rows=8)
-        install=read_json(ROOT/'.runtime/current.json')
+        install=read_json(config.get('experimental_install') or ROOT/'.runtime/current.json')
         from .dependencies import verify_install
         verify_install(install)
+        if self.clock_mode!='real-time' and install.get('experimental',{}).get('status')!='experimental-unadmitted':
+            raise ContractError('clock_mode','Controlled time requires an identified experimental candidate')
         self.native=Path(install['source'])
         self.config['runtime_identity']=install
         self.controller,self.child=socket.socketpair(socket.AF_UNIX,socket.SOCK_SEQPACKET)
@@ -118,9 +121,11 @@ class NativeBackend:
             NORNS_EMU_CRONE_PORT=str(self.ports['crone']),NORNS_EMU_MATRON_PORT=str(self.ports['matron']),
             NORNS_EMU_SC_PORT=str(self.ports['scsynth']),NORNS_EMU_MIDI_PORTS='\n'.join(self.midi_config['ports']))
         self.env.pop('NORNS_EMU_RANDOM_SEED',None)
+        self.env.pop('NORNS_EMU_CLOCK',None)
+        if self.clock_mode!='real-time':self.env.update(NORNS_EMU_CLOCK=self.clock_mode,TZ='UTC')
         if self.config.get('random_seed') is not None:self.env['NORNS_EMU_RANDOM_SEED']=str(self.config['random_seed'])
         write_json(self.directory/'native-config.json',dict(script=str(entry),mapped=str(self.mapped_entry),code_root=str(code),
-            ports=self.ports,midi=self.midi_config,jack_server=self.env['JACK_DEFAULT_SERVER'],enabled_mods=mods,runtime=str(self.native),random_seed=self.config.get('random_seed'),
+            ports=self.ports,midi=self.midi_config,jack_server=self.env['JACK_DEFAULT_SERVER'],enabled_mods=mods,runtime=str(self.native),random_seed=self.config.get('random_seed'),clock_mode=self.clock_mode,
             jack_profile=dict(driver='dummy',rate=48000,period=1024,realtime=False,clock_source='system')))
     def launch(self,name,args,bridge=False):
         logfile=open(self.directory/(name+'.log'),'w'); self.logs.append(logfile)
@@ -165,17 +170,23 @@ class NativeBackend:
                     elif kind==2:
                         if len(payload)!=128: raise ValueError('Invalid grid length')
                         self.grid=list(payload); self.grid_revision+=1; record.update(leds=self.grid)
-                    elif kind==3:
-                        if len(payload)<9: raise ValueError('Short native MIDI emission')
+                    elif kind in (3,11):
+                        offset=16 if kind==11 else 8
+                        if len(payload)<offset+1: raise ValueError('Short native MIDI emission')
+                        if (kind==11)!=(self.clock_mode!='real-time'):raise ValueError('MIDI clock mode mismatch')
                         sequence=struct.unpack('=Q',payload[:8])[0]
-                        raw=list(payload[8:]); record.update(sequence=sequence,bytes=raw)
+                        raw=list(payload[offset:]); record.update(sequence=sequence,bytes=raw)
                         # Retain the offending emission even if its capture contract fails.
                         try: item=self.capture.accept(sequence,identifier+1,ns,raw)
                         except ContractError as error:
                             self.events.write(json.dumps(record)+'\n')
                             if not self.errors: self.errors.append(dict(code=error.code,message=str(error)))
                             self.condition.notify_all(); continue
+                        if kind==11:item['logical_ns']=struct.unpack('=Q',payload[8:16])[0]
                         self.midi_count=self.capture.count; record.update(item)
+                    elif kind==12:
+                        if len(payload)!=8 or self.clock_mode=='real-time':raise ValueError('Invalid controlled time report')
+                        self.logical_ns=struct.unpack('=Q',payload)[0];record['logical_ns']=self.logical_ns
                     elif kind==4: self.acks[identifier]=ns
                     elif kind==5:
                         item=dict(code='lua_error',message=payload.decode(errors='replace')); self.errors.append(item); record.update(item)
@@ -249,6 +260,10 @@ class NativeBackend:
                     if delay<0 or delay>2: raise ContractError('midi_input_time','Scheduled MIDI input must be in the next two seconds on the backend monotonic clock')
                     time.sleep(delay)
                 self.send(7,port,action['bytes']); self.midi_inputs[port-1]=candidate
+            elif kind=='advance':
+                if self.clock_mode=='real-time':raise ContractError('unsupported','advance requires explicit experimental controlled time')
+                seconds,nanoseconds=divmod(action['nanoseconds'],1000000000)
+                self.send(8,seconds,nanoseconds)
             elif kind=='release_all':
                 for held in list(self.held.values()):
                     release=dict(held,state=0); self.query({'action':release})
@@ -266,6 +281,7 @@ class NativeBackend:
                 sha256=hashlib.sha256(frame).hexdigest(),pixels_base64=base64.b64encode(frame).decode()),grid=self.grid.copy(),midi=list(self.midi),midi_count=self.midi_count,
               midi_capture=self.capture.state(),midi_ports=self.midi_config['ports'],
               held=list(self.held.values()),grid_device=dict(self.grid_device),diagnostics=dict(self.diagnostics),absent=self.absent[-64:]))
+            result['state']['clock']=dict(mode=self.clock_mode,logical_ns=self.logical_ns if self.clock_mode!='real-time' else None,admitted=self.clock_mode=='real-time')
         # A Windows-mounted filesystem can pause for tens of milliseconds.
         # Never hold the native event reader's condition during artifact I/O.
         # The observation's embedded bytes and digest remain the exact sampled

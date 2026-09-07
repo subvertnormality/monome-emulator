@@ -33,3 +33,29 @@ The application suite owns its case selection, recipes, independent oracles,
 bounded snapshot retention and pass/fail evidence. It must bind those to the
 actual loaded identities. Startup errors include their diagnostic session ID;
 never treat a missing native bundle as successful startup or cleanup.
+
+## Experimental controlled-time candidate
+
+The default installation and real-time mode remain unchanged. To investigate
+controlled time, explicitly select an installation built by
+`scripts/prepare_controlled_runtime.py` and `scripts/build_controlled_candidate.py`:
+
+```python
+runtime = Session(script="/path/code/my-app/main.lua", code_root="/path/code",
+                  clock_mode="controlled-experimental",
+                  experimental_install="/path/candidate/installation.json",
+                  random_seed=42)
+runtime.action({"type": "advance", "nanoseconds": 125000000})
+```
+
+This is **not admitted D-mode acceptance**. The snapshot's `state.clock` reports
+its mode, logical nanoseconds and `admitted: false`. Native MIDI records retain
+wall-clock `monotonic_ns` and add `logical_ns`; experimental MIDI packets have
+native kind11. Advance reports use kind12. `advance(0)` drains same-time work.
+An advance is bounded to60 logical seconds and200000 work iterations; runaway
+callbacks fail explicitly. The native framebuffer queue is flushed before the
+advance acknowledgement. Wall time uses2024-01-01 UTC plus elapsed logical time;
+`os.time(table)` keeps native conversion semantics, and CPU profiling remains
+CPU time. The current candidate supports the internal clock; other clock sources
+and blocking micro-sleep are explicitly rejected. Additional source/cancellation,
+modulation, musical application and Codex P5 checks remain required.

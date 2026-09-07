@@ -65,6 +65,7 @@ class Application:
             action=payload['action']
             if 'at_monotonic_ns' not in action:return False
             if self.config['backend']!='native':raise ContractError('unsupported','Scheduled MIDI requires the native clock')
+            if self.config.get('clock_mode','real-time')!='real-time':raise ContractError('unsupported','Wall-time MIDI scheduling is unavailable in controlled time; advance then inject')
             delay=(action['at_monotonic_ns']-time.monotonic_ns())/1e9
             if delay<0 or delay>2:raise ContractError('midi_input_time','Scheduled MIDI input must be in the next two seconds on the backend monotonic clock')
             # Serialize input requests, but leave observation and heartbeat paths
@@ -91,6 +92,8 @@ class Application:
         if payload['action_id'] in self.action_ids: raise ContractError('duplicate_action','Action identity was already applied')
         if self.config['backend']=='contract-fixture' and payload['action']['type']=='grid_connection':
             raise ContractError('unsupported','Grid connection requires the native backend')
+        if payload['action']['type']=='advance' and (self.config['backend']!='native' or self.config.get('clock_mode','real-time')=='real-time'):
+            raise ContractError('unsupported','advance requires explicit experimental native controlled time')
         action=dict(payload['action']); client_id=payload.get('client_id'); kind=action['type']
         if scheduled:action.pop('at_monotonic_ns')
         key=(kind,action.get('n'),action.get('x'),action.get('y'))
@@ -179,7 +182,8 @@ def serve_application(directory,app):
                         self.respond(200,checked('capability',dict(schema_version=1,backend=app.config['backend'],
                           fidelity=app.backend.fidelity,supported=(['native script loading','native keys/encoders','Cairo framebuffer','grid128 LED/relative/bulk/refresh, rotation, intensity, holds and reconnect','configured native MIDI ports, byte-stream input and emission-time capture','patched v2.9.4: realtime MIDI preserves partial messages (0009); cancelled queued clock resumes are ignored (0011)'] if app.config['backend']=='native' else ['contract counter','ordered action acknowledgment']),
                           absent=['physical Crow','GPIO/SPI','network manager'] if app.config['backend']=='native' else [],
-                          unsupported=['audio engines','physical peripherals','grid tilt','MIDI isolated F7 or status-interrupted partial messages (stricter than stock v2.9.4; C10)'] if app.config['backend']=='native' else ['native norns','application workflows']))); return
+                          unsupported=(['audio engines','physical peripherals','grid tilt','MIDI isolated F7 or status-interrupted partial messages (stricter than stock v2.9.4; C10)'] +
+                            (['controlled time remains experimental and unadmitted; Codex P5 pending','controlled external clock sources, blocking micro-sleep and wall-time MIDI scheduling'] if app.config.get('clock_mode','real-time')!='real-time' else ['advance without an explicit experimental installation'])) if app.config['backend']=='native' else ['native norns','application workflows']))); return
                     if self.command=='POST' and self.path=='/fixture-fault':
                         if app.config['backend']!='contract-fixture': raise ContractError('unsupported','Fixture faults require the contract backend')
                         if payload not in ({'fault':'crash'},{'fault':'stall'}): raise ContractError('schema','Unknown fixture fault')

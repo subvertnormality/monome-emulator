@@ -28,8 +28,11 @@ def request(session_id,path,payload=None,timeout=5):
         raise ContractError(value.get('code','http_error'),value.get('message',str(error))) from error
     except (OSError,ValueError) as error: raise ContractError('session_unavailable',str(error)) from error
 
-def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None,midi_config=None,random_seed=None):
+def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None,midi_config=None,random_seed=None,clock_mode='real-time',experimental_install=None):
     if backend not in ('contract-fixture','native'): raise ContractError('unsupported_backend',backend)
+    if clock_mode not in ('real-time','controlled-experimental'):raise ContractError('clock_mode','Unknown clock mode')
+    if (clock_mode!='real-time' or experimental_install is not None) and backend!='native':raise ContractError('clock_mode','Experimental clocks require native runtime')
+    if clock_mode!='real-time' and experimental_install is None:raise ContractError('clock_mode','Unadmitted controlled mode requires an explicit experimental installation')
     if random_seed is not None and (type(random_seed)!=int or not 0<=random_seed<=2147483647):raise ContractError('random_seed','Seed must be an integer from 0 to 2147483647')
     if random_seed is not None and backend!='native':raise ContractError('random_seed','Repeatable seed requires the native Lua runtime')
     from devices.midi import configuration
@@ -45,7 +48,8 @@ def start(backend='contract-fixture',script=None,code_root=None,data=None,enable
     else: data_path=dust/'data'
     config=dict(session_id=session_id,token=uid(),backend=backend,script=str(Path(script).absolute()) if script else None,
                 code_root=str(Path(code_root).absolute()) if code_root else None,data=str(data_path),dust=str(dust),
-                enabled_mods=enabled_mods or [],data_seeds=data_seeds or [],midi_config=midi_config,random_seed=random_seed)
+                enabled_mods=enabled_mods or [],data_seeds=data_seeds or [],midi_config=midi_config,random_seed=random_seed,
+                clock_mode=clock_mode,experimental_install=str(Path(experimental_install).resolve()) if experimental_install else None)
     write_json(directory/'config.json',config)
     log=open(directory/'server.log','w')
     env=dict(os.environ,PYTHONPATH=str(ROOT/'src'))
