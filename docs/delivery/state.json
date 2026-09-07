@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "Held-source Matrix defect confirmed in both modes; isolated combined dependency patch passes real time and three exact controlled repeats for held macro and LFO. Nine Mosaic cases remain partial. Oracle font lifetime regression fixed and stress-tested. See C16-held-modulation.md. Next bounded Codex P5 clock review, M5 gate, transport-start phase, then atomic manual/T01 and remaining feature families. Default runtime unchanged; controlled time diagnostic-only. No active native runners.",
+  "next_action": "P5 Codex review returned: fix uncontrolled native wall timer and candidate full-source provenance; add pending internal/MIDI source transition and phase-boundary probes; restrict expected fault cleanup, then M5 gate and one focused follow-up. See P5-triage.md. New repeat runner phase passes three fresh processes and three sensitivity contracts. Mosaic40f0d28 pushed with held-source Matrix regression/candidate and oracle fix; nine cases remain partial. Next full atomic manual/T01 and remaining feature families after clock fixes. Default runtime unchanged; D diagnostic-only. No active runners.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -114,7 +114,7 @@
     "P2": "not_run",
     "P3": "not_run",
     "P4": "not_run",
-    "P5": "not_run",
+    "P5": "findings_open",
     "P0A1": "done"
   },
   "plan_review_evidence": "docs/delivery/reviews/P0A1-triage.md"

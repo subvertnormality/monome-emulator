@@ -1,0 +1,10 @@
+{
+  "packet_sha256": "197d9ced993ddbe10098051b9d8ee1fe4060e00e5c2288f5816af77c2b7f8e0a",
+  "finished_at": "2026-09-07T10:15:53.059069+01:00",
+  "raw_sha256": "2cbba22e03470d2fa81ad26091baf2b4adcf1f875bf1bad85f4df4873d3d43b1",
+  "engine": "codex",
+  "started_at": "2026-09-07T10:11:50.872834+01:00",
+  "status": "returned-findings-open",
+  "session_ref": "01a07b23-6fec-7440-869a-a5017f253f65",
+  "reviewed_head": "d1ba402"
+}
