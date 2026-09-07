@@ -104,6 +104,9 @@ def verify_repeat(path,current_source=True):
             if native_errors:
                 require(record['probe']=='boundaries' and result.get('expected_fault') is not None and
                         native_errors==['controlled clock work limit exceeded'],'Unexpected native error')
+                require(value.get('expected_failures')==[dict(sequence=len(value['actions']),
+                    code='lua_error',message='controlled clock work limit exceeded')],
+                    'Native runaway fault lacks matching terminal public failure')
             normalized.append(value)
         require(all(n==normalized[0] for n in normalized[1:]),'Native repeats differ')
         require(read_json(path.parent/record['normalized']['path'])==normalized,'Stored normalization differs from native evidence')

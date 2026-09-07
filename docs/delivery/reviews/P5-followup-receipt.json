@@ -1,0 +1,16 @@
+{
+  "started_at": "2026-09-07T14:18:14.614977+00:00",
+  "finished_at": "2026-09-07T14:23:42.155749+00:00",
+  "packet_sha256": "93027c6fffc8a3fb587111dda3fc32d194ed73ec12870913ef36d1fd105f0eae",
+  "engine": "codex",
+  "status": "returned-findings-fixed-awaiting-native-admission",
+  "session_ref": "01a07c3b-ef6b-7a11-b4bd-8d89fc24ebad",
+  "reviewed_head": "7642409",
+  "raw_sha256": "b162cf74575765da8da62a24fcb5daa19860d149116fe176a97772052b2811f4",
+  "user_payload_approval": true,
+  "findings": [
+    "P5-08",
+    "P5-09"
+  ],
+  "m5_passed": false
+}

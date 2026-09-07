@@ -69,4 +69,20 @@ class RepeatVerification(unittest.TestCase):
         self.write(self.root/'0/manifest.json',dict(passed=False,failure='oracle failed'));self.refresh(0)
         with self.assertRaisesRegex(ContractError,'Failed child'):self.verify()
 
+    def test_native_runaway_cannot_survive_missing_public_failure(self):
+        self.record['probe']='boundaries'
+        for i in range(3):
+            directory=self.root/str(i)
+            self.write(directory/'manifest.json',dict(passed=True,failure=None,
+                expected_fault=dict(code='lua_error',message='controlled clock work limit exceeded')))
+            config=json.loads((directory/'native/native-config.json').read_text())
+            config['script']=str(ROOT/'fixtures/probes/controlled-boundaries/controlled-boundaries.lua')
+            self.write(directory/'native/native-config.json',config)
+            with (directory/'native/native-events.jsonl').open('a') as stream:
+                stream.write(json.dumps(dict(kind=5,message='controlled clock work limit exceeded'))+'\n')
+            self.refresh(i)
+        # All artifacts and normalization remain internally hashed, reproducing
+        # the reviewer's missing-terminal-action bypass rather than hash failure.
+        with self.assertRaisesRegex(ContractError,'matching terminal public failure'):self.verify()
+
 if __name__=='__main__':unittest.main()

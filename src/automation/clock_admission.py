@@ -65,6 +65,49 @@ def generic_check(path,name,spec,source,candidate,default,profile):
             require(any(e.get('kind')==3 for e in events),'No native MIDI emission')
     return record
 
+def bind_native_actions(events,actions):
+    """Match the ordered public input stream, including implicit releases."""
+    inputs=[e for e in events if e.get('kind')=='input' and e.get('type') in (1,2,3,6,7,8,9,10,11)]
+    require(all(a['sequence']<b['sequence'] for a,b in zip(inputs,inputs[1:])),
+            'Unordered native submissions')
+    acknowledgements={}
+    for event in events:
+        if event.get('kind')==4:acknowledgements.setdefault(event['id'],[]).append(event)
+    cursor=0;held={}
+    def consume(action,ack=None):
+        nonlocal cursor
+        kind=action['type']
+        if kind=='key':typ,args=1,[action['n'],action['state']]
+        elif kind=='enc':typ,args=2,[action['n'],action['delta']]
+        elif kind=='grid':typ,args=3,[action['x']-1,action['y']-1,action['state']]
+        elif kind=='grid_connection':typ,args=6,[int(action['connected'])]
+        elif kind=='midi':typ,args=7,[action['port'],action['bytes']]
+        elif kind=='advance':typ,args=8,list(divmod(action['nanoseconds'],1000000000))
+        elif kind=='midi_schedule':typ,args=(11 if action.get('time_domain')=='logical' else 9),[action]
+        elif kind=='midi_schedule_cancel':typ,args=10,[action]
+        else:raise ContractError('controlled_evidence','Unsupported public action in native binding: '+kind)
+        require(cursor<len(inputs),'Missing native submission')
+        event=inputs[cursor];cursor+=1
+        require(event['type']==typ and event['args']==args,'Public action differs from ordered native submission')
+        if typ in (1,2,3,6,7,8):
+            matches=acknowledgements.get(event['sequence'],[])
+            require(len(matches)==1,'Missing or duplicate native acknowledgement')
+            if ack is not None:
+                require(ack.get('native')==dict(sequence=event['sequence'],monotonic_ns=matches[0]['monotonic_ns']),
+                        'Public native acknowledgement differs from corresponding input')
+        if kind in ('key','grid'):
+            key=(kind,action.get('n'),action.get('x'),action.get('y'))
+            if action['state']:held[key]=action
+            else:held.pop(key,None)
+    for entry in actions:
+        action=entry['request']['action'];kind=action['type']
+        if kind=='release_all' or (kind=='grid_connection' and not action['connected']):
+            for old in list(held.values()):
+                if kind=='release_all' or old['type']=='grid':consume(dict(old,state=0))
+        if kind!='release_all':consume(action,entry['ack'])
+    require(cursor==len(inputs),'Unmatched native submissions')
+
+
 def native_observations(native,observations,mode,session):
     """Bind client MIDI/timestamps and frame revisions to retained native output."""
     events=[json.loads(line) for line in (native/'native-events.jsonl').read_text().splitlines()]
@@ -90,9 +133,7 @@ def native_observations(native,observations,mode,session):
         require(request['session_id']==session and request['sequence']==index,'Wrong/unordered application input')
         status='accepted' if request['action']['type']=='midi_schedule' else 'applied'
         require(all(request[k]==ack[k] for k in ('session_id','action_id','sequence')) and ack['status']==status,'Unapplied application input')
-        if 'native' in ack:
-            matches=[e for e in events if e.get('kind')==4 and e['id']==ack['native']['sequence']]
-            require(len(matches)==1 and matches[0]['monotonic_ns']==ack['native']['monotonic_ns'],'Public native acknowledgement differs from runtime trace')
+    bind_native_actions(events,actions)
     from .midi_schedule_evidence import verify_midi_schedules
     verify_midi_schedules(events,actions)
 

@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "Boundary repeat normalizer fixed: expected terminal runaway advance now requires exact probe, public error, native fault and child result. Eight focused contracts and three fresh boundary sessions pass (repeat-c03ee342598641bc9ce293621fb8b09c). Previous batch71757 terminated at normalizer KeyError; native boundary oracle had passed. Source change makes earlier generic/queue evidence historical for M5. Next collect fresh ten generic groups and remaining seven probe families x3, then all14 Mosaic comparisons x3D+RT and Codex P5 follow-up/M5 index. Full manual and later release stages remain unfinished; web UI stopped. No active runners.",
+  "next_action": "P5 Codex follow-up returned; two major verifier defects fixed, reproduced faults rejected, and60 historical native segments pass stricter binding. WSL broad contracts:64 passed plus one import discovery error; isolated PYTHONPATH=src retry passed the remaining client test. No native runner active. Commit/push fixes, then run prepared artifacts/collect_m5_generic06d.py and artifacts/collect_m5_mosaic06c.py sequentially, preserving source freeze. Fresh admission evidence required; historical14 comparisons predate Mosaic manualfacbe0b. P5/M5 and full delivery remain incomplete. Web UI stopped.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -164,12 +164,82 @@
     "candidate": "controlled-06"
   },
   "latest_generic_clock_batch": {
-    "path": "artifacts/c16/m5-generic-06-batch.json",
-    "wall_default": "artifacts/c16/check-346bbb6b65294bb781623c2e9f603da7/manifest.json",
+    "index": "artifacts/c16/m5-generic-06b-index.json",
+    "passed": true,
+    "generic_groups": 10,
+    "controlled_probe_families": 8,
+    "repeats_per_family": 3,
     "exec_session": null
   },
   "latest_boundary_normalization": {
     "path": "artifacts/c16/repeat-c03ee342598641bc9ce293621fb8b09c/manifest.json",
     "failed_repeat": "artifacts/c16/repeat-e40c8df7c79d4b8086be814cdebb8d80/manifest.json"
+  },
+  "active_mosaic_comparison_batch": {
+    "path": "artifacts/c16/m5-mosaic-06b/status.json",
+    "exec_session": null,
+    "passed_comparisons": 14,
+    "tested_mosaic_revision": "06a4245",
+    "status": "passed-before-manual-clarification"
+  },
+  "manual_reconciliation_draft": {
+    "path": "artifacts/c16/manual-pattern-reconciliation-draft.json",
+    "requirements": 22,
+    "status": "draft-unimplemented",
+    "next": "Reconcile cheat sheet and code bounds, then integrate after frozen M5 runs; no coverage credit."
+  },
+  "manual_channel_reconciliation_draft": {
+    "path": "artifacts/c16/manual-channel-reconciliation-draft.json",
+    "requirements": 32,
+    "status": "draft-unimplemented",
+    "next": "Split grouped selectors into atomic rows; reconcile cheat sheet and code bounds after frozen M5 runs; preserve SEM-001/002 decisions. No coverage credit."
+  },
+  "manual_articulation_reconciliation_draft": {
+    "path": "artifacts/c16/manual-articulation-reconciliation-draft.json",
+    "requirements": 31,
+    "status": "draft-unimplemented",
+    "next": "Resolve off-parameter transmission, scale edit/application wording, and lock lifetime precedence; split grouped domains and reconcile cheat sheet after frozen M5 comparisons. No coverage credit."
+  },
+  "pending_behaviour_decisions": "artifacts/c16/pending-behaviour-decisions.json",
+  "manual_options_reconciliation_draft": {
+    "path": "artifacts/c16/manual-options-reconciliation-draft.json",
+    "requirements": 22,
+    "status": "draft-unimplemented",
+    "coverage_claim": false
+  },
+  "cheat_sheet_reconciliation_draft": {
+    "path": "artifacts/c16/cheat-sheet-reconciliation-draft.json",
+    "mapped_statements": 54,
+    "missing_draft_requirements": 0,
+    "status": "draft-unimplemented",
+    "coverage_claim": false
+  },
+  "manual_input_reconciliation_draft": {
+    "path": "artifacts/c16/manual-input-reconciliation-draft.json",
+    "requirements": 14,
+    "status": "draft-unimplemented",
+    "coverage_claim": false
+  },
+  "p5_followup_draft": "artifacts/c16/P5-followup-question-draft.md",
+  "confirmed_manual_clarifications": {
+    "mosaic_revision": "facbe0b",
+    "production_changes": false,
+    "case_collection": 13
+  },
+  "p5_submission": {
+    "status": "returned-findings-open",
+    "exec_session": null,
+    "user_payload_approval": true,
+    "raw": "artifacts/c16/P5-followup-retry-raw.json",
+    "failed_launcher_raw": "artifacts/c16/P5-followup-raw.json",
+    "diagnosis": "Initial approved attempt could not locate codex. Retry uses verified Linux PATH; codex-cli0.153.3."
+  },
+  "p5_validation": {
+    "focused_contracts": 18,
+    "retained_native_segments": 60,
+    "reproduced_faults_rejected": 3,
+    "wsl_contracts_passed": 65,
+    "wsl_import_retry": "test_clients.py with PYTHONPATH=src",
+    "historical_evidence_only": true
   }
 }

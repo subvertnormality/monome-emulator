@@ -19,10 +19,9 @@ it did not run the native tests. This is not M5 admission or full release review
 | P5-06 major | No internal-to-MIDI-to-internal test with pending callbacks | Accept, fix C16. Add independent native sync/sleep transition schedule and real-time comparison before admission. |
 | P5-07 minor | Phase probe has only two off-boundary starts | Accept, extend C16 with starts around 96PPQN boundaries and restart; preserve literal native absolute-sync expectations separately from Mosaic musical-duration expectations. |
 
-One focused follow-up remains available after substantive fixes and gate
-implementation. Do not spend it on an unchanged branch or label these findings
-resolved from source edits alone. The source-bound repeat runner added after the
-reviewed commit is additional evidence plumbing, not a disposition of P5-05.
+The focused follow-up returned on 2026-09-07 (record below); its planned budget
+is now used. Resolve reproduced findings with focused experiments. The
+source-bound repeat runner alone is not a disposition of P5-05.
 
 ## Focused fix evidence
 
@@ -46,3 +45,34 @@ see `../completions/C16-admission-gate.md`. Required native clock/fault packages
 have focused passing evidence. Full final-source collection, external comparison
 validation and the resolved follow-up receipt remain outstanding, so this does
 not close P5 or admit controlled time.
+
+## Approved focused follow-up
+
+User explicitly approved transmitting this review's repository source, delivery
+documents and test evidence. The first approved invocation failed to locate the
+Codex executable; one diagnosed PATH retry returned successfully. Session
+`01a07c3b-ef6b-7a11-b4bd-8d89fc24ebad` reviewed emulator `7642409` and the
+historical application evidence, explicitly distinguishing Mosaic `facbe0b`
+documentation changes from the tested `06a4245` tree. Raw response is retained
+in ignored `artifacts/c16/P5-followup-retry-raw.json`, SHA-256
+`b162cf74575765da8da62a24fcb5daa19860d149116fe176a97772052b2811f4`.
+
+Codex supported P5-01/02/03/06/07 within the declared boundary, accepted the
+P5-04 diagnosis/candidate distinction, and independently reverified ten generic
+groups and eight families of three controlled probes. It found two major
+P5-05 verifier defects:
+
+| ID | Finding | Fix and focused evidence |
+|---|---|---|
+| P5-08 | Removing the public terminal runaway error bypasses the strict exception checks | Native runaway faults now require the normalized terminal public failure. Dropping it from all three retained boundary children and recomputing hashes is rejected. |
+| P5-09 | A public action can borrow another native acknowledgement, or omit it | Bind every public control to the ordered native input type and arguments, require its corresponding acknowledgement, and expand implicit releases. Borrowed and missing acknowledgements from the retained handoff trace are rejected. |
+
+Eighteen focused contracts pass, including implicit grid-disconnect/button
+release ordering. All sixty native segments in the fourteen retained Mosaic
+comparisons accept the corrected input binding. These are diagnostic checks of
+historical evidence, not fresh source-bound admission. Reproduction commands:
+`python3 artifacts/reproduce_p5_followup_faults.py` and
+`python3 artifacts/audit_p5_bindings.py` (retained local helpers).
+
+Fresh native collection and the final M5 aggregate remain required before
+closing P5-05. No exhaustive Mosaic or full emulator completion is claimed.
