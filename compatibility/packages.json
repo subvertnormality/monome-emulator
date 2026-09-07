@@ -1,6 +1,23 @@
 {
   "schema_version":1,
   "packages":{
+    "mosaic-midi-fix-chord-regressions":{
+      "tier":"E","family":"A06","roles":["candidate-chords"],
+      "checks":["third-above-root","triad","octave-voice","all-four-additional-voices","upper-fourth-voice-bound","upper-bound-clamps","lower-fourth-voice-bound","lower-bound-clamps","clear-all-step-voices","cleanup"],
+      "candidate_manifest":"fixtures/apps/mosaic-patches/midi-counts.json",
+      "command":["tests/mosaic_midi_candidate_regressions.py"]
+    },
+    "A06-channel-mask-precedence":{
+      "tier":"E","family":"A06","roles":["global-masks"],
+      "checks":["channel-velocity-default","step-velocity-precedence","channel-note-default","step-note-precedence","channel-trig-off","step-trig-overrides-channel-off","clear-defaults-and-step-overrides","cleanup"],
+      "candidate_manifest":"fixtures/apps/mosaic-patches/midi-counts.json",
+      "command":["tests/mosaic_global_masks.py","--candidate"]
+    },
+    "A06-channel-mask-precedence-baseline":{
+      "tier":"E","family":"A06","roles":["global-masks"],
+      "checks":["channel-velocity-default","step-velocity-precedence","channel-note-default","step-note-precedence","channel-trig-off","step-trig-overrides-channel-off","clear-defaults-and-step-overrides","cleanup"],
+      "command":["tests/mosaic_global_masks.py"]
+    },
     "A06-adding-chords":{
       "tier":"E","family":"A06","roles":["chords"],
       "checks":["third-above-root","triad","octave-voice","all-four-additional-voices","upper-fourth-voice-bound","upper-bound-clamps","lower-fourth-voice-bound","lower-bound-clamps","clear-all-step-voices","cleanup"],

@@ -1345,7 +1345,8 @@
         "E"
       ],
       "scenario_ids": [
-        "A06-mask-removal-controls"
+        "A06-mask-removal-controls",
+        "A06-channel-mask-precedence"
       ],
       "status": "implemented",
       "oracle": {

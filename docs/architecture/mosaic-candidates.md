@@ -33,3 +33,17 @@ patch set or an unpatched/different loaded application. Diagnostic baseline case
 remain available separately. Release manifests must state the exact supported
 application revision and patch set; a candidate does not silently become the
 default fixture or an upstream change.
+
+A second opt-in candidate, `midi-counts-and-mask-clearing`, is declared in
+`fixtures/apps/mosaic-patches/midi-counts.json`. It balances repeated-pitch
+note-ons with their corresponding note-offs and makes the documented shift-K2
+clear-all action remove channel-wide mask defaults. Run its native package with
+`python3 tests/mosaic_global_masks.py --candidate`; omitting the option runs the
+unpatched failing baseline. `tests/mosaic_mask_candidate_units.py` compares the
+existing unit suite plus a clearing regression, and
+`tests/mosaic_midi_candidate_regressions.py` checks unchanged chord behavior.
+The complete release patch set must be combined and revalidated at C12.
+
+Patch application runs outside enclosing-repository discovery, verifies content
+changed, and checks reverse applicability before recording a new candidate.
+This prevents Git silently skipping git-format paths in nested owned copies.

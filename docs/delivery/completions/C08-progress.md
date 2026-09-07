@@ -130,3 +130,55 @@ modifiers remain C09 obligations; MIDI-keyboard mask entry remains C10.
 Commands: `python3 tests/mosaic_channels.py`, the same with `--mute`, and
 `python3 tests/mosaic_harmony.py`, `tests/mosaic_lengths.py`,
 `tests/mosaic_masks.py`, `tests/mosaic_chords.py`, run sequentially in WSL.
+
+## Channel defaults and isolated MIDI/mask candidate
+
+`tests/mosaic_global_masks.py` applies a channel-wide velocity80, a step override110,
+a channel-wide G3 note55, a step overrideA4 note69, channel trig-off and a step
+trig-on override. The final shift-K2 must remove all masks and restore the pattern.
+
+The unpatched baseline fails counted-note drain in
+`artifacts/c08/a9eb66b7e7ef48d3a3b41e86691dd2c1/manifest.json`: eight note-ons for
+pitch55, one note-off, outstanding count7. m_midi.lua emitted every note-on but
+collapsed note-offs until its internal count reached zero. This reproduces R08.
+The isolated 0002 patch emits every corresponding note-off and keeps bookkeeping.
+No emulator capture or expected-event rule was weakened.
+
+Candidate preparation first rejected a malformed hunk; after correcting it,
+`11bb43c7abee4cfd8b0a63e35e56afe0` still failed. Inspection proved Git had silently
+skipped the git-format patch in a copied directory below the emulator repository.
+Preparation now sets a repository-discovery ceiling for patch application,
+requires a changed application digest and verifies reverse applicability. The
+earlier memory patch used plain unified diff and its recorded candidate actually
+contains the verified memory change. Failed/incomplete copies remain preserved.
+
+With the MIDI patch actually applied, `662d17b2bd704bd28733400bf09e87b1` passed
+the first six mask checks, then failed clearing: program.clear_masks_for_channel
+removed step masks but retained channel defaults, including trig-off. The README
+instructs shift-K2 to remove all masks on the channel. The 0003 isolated patch
+clears all eight global mask defaults as well as existing step masks. The sole
+production caller is the channel's shift-K2 mask action.
+
+The explicit `midi-counts-and-mask-clearing` candidate is declared in
+`fixtures/apps/mosaic-patches/midi-counts.json`. All eight native checks pass in
+`artifacts/c08/fe3d8da9d6a34327998b23b6f43571c2/manifest.json`.
+The unchanged four-voice chord package passes ten checks in
+`artifacts/c08/a214ed9f0d2c4dc8870e546b96ef9721/manifest.json`.
+The supplementary comparison in
+`artifacts/c08-mask-unit/77a4cc5bf7fb44a384c7009498fa14d7/results.json` collects475:
+baseline474 successes/one new regression failure; candidate475 successes/zero
+failures. It checks clearing all eight defaults while preserving another channel
+and underlying pattern data. An initial reporting parser failed on LuaUnit's
+singular "1 failure"; both singular/plural forms are now parsed.
+
+Reproduction: `python3 tests/mosaic_global_masks.py` retains the failing baseline;
+add `--candidate` for the explicit candidate. Run
+`python3 tests/mosaic_mask_candidate_units.py` and
+`python3 tests/mosaic_midi_candidate_regressions.py` for supplemental regressions.
+The unit runner was first executed from an identical ignored development copy;
+the final committed runner includes the corrected singular/plural parser.
+
+This candidate remains separate from the memory candidate and the default Mosaic
+fixture. C12 must assemble and verify the complete release patch set, including
+overlap/panic/stop and combined-memory regressions. These C08 results do not close
+all R08/A18/A22 obligations or claim a complete Mosaic release.

@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "C08 remains in progress. New real-runtime routing6, muting7, harmony11, channel-range7, mask-removal8 and chord10 checks passed; see C08-progress.md for evidence. Lower merge semantic question remains pending. Channel range coverage does not yet resolve independent one-step selection or global scale range; do not mark full length row complete. Next implement channel-global mask precedence, scale slots/quantiser options and pattern algorithms. No active native processes. Latest published checkpoint44964ed; commit and push this coherent checkpoint, then continue eligible C08 work.",
+  "next_action": "C08 remains in progress; latest public checkpoint eb20fc1. New explicit MIDI/mask candidate passes8 native mask checks,10 unchanged chord checks and475 units; baseline retains7 unmatched note-ons and a separate clear-all-defaults failure. Candidate preparation now rejects no-op patch application. See C08-progress.md for exact evidence. Commit/push this checkpoint, then implement scale-slot selection/global transposition, remaining quantiser choices and pattern algorithms. Lower merge semantic answer remains pending; independent one-step channel gesture remains unresolved. C12 must combine memory and MIDI/mask candidates and verify full overlap/panic behavior. No active processes.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
