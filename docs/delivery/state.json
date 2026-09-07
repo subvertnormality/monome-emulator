@@ -2,8 +2,8 @@
   "schema_version": 1,
   "updated": "2026-09-07",
   "mode": "executing",
-  "current_card": "C16",
-  "next_action": "P5 Codex follow-up returned; two major verifier defects fixed, reproduced faults rejected, and60 historical native segments pass stricter binding. WSL broad contracts:64 passed plus one import discovery error; isolated PYTHONPATH=src retry passed the remaining client test. No native runner active. Commit/push fixes, then run prepared artifacts/collect_m5_generic06d.py and artifacts/collect_m5_mosaic06c.py sequentially, preserving source freeze. Fresh admission evidence required; historical14 comparisons predate Mosaic manualfacbe0b. P5/M5 and full delivery remain incomplete. Web UI stopped.",
+  "current_card": "C08",
+  "next_action": "M5 verified passed on85245b9/Mosaicfacbe0b; P5 resolved and C16 declared-scope complete. No native/admission runners. Publish audited completion notes; integrate prepared Mosaic inventory141 and4 new cases using artifacts/integrate_mosaic_cases.py, then run each new case through controlled and real-time lanes, isolate defects and continue exhaustive campaign. SEM-001 formula clarification remains pending. Full delivery and suite incomplete; web UI stopped.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -95,8 +95,8 @@
     },
     {
       "id": "C16",
-      "status": "in_progress",
-      "evidence": null,
+      "status": "done",
+      "evidence": "docs/delivery/completions/C16.md",
       "start_revision": "ce812e7"
     }
   ],
@@ -106,7 +106,7 @@
     "M2": "not_run",
     "M3": "not_run",
     "M4": "not_run",
-    "M5": "not_run"
+    "M5": "passed"
   },
   "reviews": {
     "P0": "done",
@@ -114,7 +114,7 @@
     "P2": "not_run",
     "P3": "not_run",
     "P4": "not_run",
-    "P5": "findings_open",
+    "P5": "done",
     "P0A1": "done"
   },
   "plan_review_evidence": "docs/delivery/reviews/P0A1-triage.md",
@@ -227,7 +227,7 @@
     "case_collection": 13
   },
   "p5_submission": {
-    "status": "returned-findings-open",
+    "status": "resolved-with-focused-fix-evidence",
     "exec_session": null,
     "user_payload_approval": true,
     "raw": "artifacts/c16/P5-followup-retry-raw.json",
@@ -241,5 +241,99 @@
     "wsl_contracts_passed": 65,
     "wsl_import_retry": "test_clients.py with PYTHONPATH=src",
     "historical_evidence_only": true
+  },
+  "active_native_collection": {
+    "exec_session": null,
+    "generic_status": "artifacts/c16/m5-generic-06d-batch.json",
+    "mosaic_status": "artifacts/c16/m5-mosaic-06c/status.json",
+    "source_revision": "85245b9",
+    "mosaic_revision": "facbe0b",
+    "status": "passed"
+  },
+  "manual_setup_reconciliation_draft": {
+    "path": "artifacts/c16/manual-setup-reconciliation-draft.json",
+    "requirements": 7,
+    "status": "draft-unimplemented",
+    "coverage_claim": false,
+    "audit": {
+      "total_draft_requirements": 128,
+      "cheat_mappings": 54,
+      "unclassified_text_lines": 167
+    }
+  },
+  "scale_selection_case_draft": {
+    "path": "artifacts/c16/scale_selection_case_draft.py",
+    "status": "syntax-checked-not-executed",
+    "requirements": [
+      "SCALE-SELECT",
+      "SCALE-EDIT"
+    ],
+    "next": "Integrate in Mosaic after M5 source freeze, then run native tests. Checks edit-only gestures, saving unused/applied scale, long-press global off, reentry, exact MIDI and grid/frame outputs."
+  },
+  "fresh_generic_evidence": {
+    "index": "artifacts/c16/m5-generic-06d-index.json",
+    "verification_exit_code": 0,
+    "completion": "docs/delivery/completions/C16-followup-generic.md"
+  },
+  "scale_lock_case_draft": {
+    "path": "artifacts/c16/scale_lock_case_draft.py",
+    "status": "syntax-checked-not-executed",
+    "requirements": [
+      "LOCK-SCALE",
+      "OPT-SCALE-LIFETIME"
+    ],
+    "limitations": "Probability failure, inactive steps and unequal rates remain separate required cases."
+  },
+  "manual_inventory_integration_draft": {
+    "path": "artifacts/c16/mosaic-manual-inventory-integration-draft.json",
+    "requirements": 141,
+    "new_unimplemented": 128,
+    "image_references": 33,
+    "status": "prepared-not-integrated",
+    "coverage_claim": false
+  },
+  "pending_merge_clarification": {
+    "id": "SEM-001",
+    "status": "asked-awaiting-user",
+    "current_formula": "2 * minimum - average",
+    "applies_to": [
+      "Lower notes",
+      "Lower velocity",
+      "Shorter length"
+    ],
+    "example": "40 and100 produce10 before downstream quantisation/bounds",
+    "recommended": "preserve implemented formula and clarify manual"
+  },
+  "trig_merge_case_draft": {
+    "path": "artifacts/c16/trig_merge_case_draft.py",
+    "status": "syntax-checked-not-executed",
+    "requirements": [
+      "MERGE-TRIG-ALL",
+      "MERGE-TRIG-SKIP",
+      "MERGE-TRIG-ONLY"
+    ],
+    "next": "Integrate after source freeze. Literal pitch/velocity and onset-spacing expectations for2/3-pattern overlaps; priority pattern1 isolates unresolved Lower modes; empty overlap must remain silent."
+  },
+  "m5_assembly_helper": "artifacts/assemble_m5_06d.py",
+  "pattern_slots_case_draft": {
+    "path": "artifacts/c16/pattern_slots_case_draft.py",
+    "status": "syntax-checked-not-executed",
+    "requirements": [
+      "PAT-SELECT",
+      "PAT-TRIG",
+      "PAT-NOTE-CELLS",
+      "CH-ASSIGN"
+    ],
+    "scope": "All16 slots; separate retained trig grids; independently assigned channel playback; outer trigs excluded by channel length. Other domains remain required."
+  },
+  "integration_helper": "artifacts/integrate_mosaic_cases.py",
+  "speed_measurement": "artifacts/measure_m5_speed.py",
+  "m5_admission": {
+    "index": "artifacts/c16/m5-admission-06d.json",
+    "sha256": "b00ddf20eb00d905cccd446862bb28d6ae68267947fe0a7d2b5ed11888b64238",
+    "result": "artifacts/c16/m5-admission-06d-result.json",
+    "tested_emulator": "85245b9",
+    "tested_mosaic": "facbe0b",
+    "full_release": false
   }
 }

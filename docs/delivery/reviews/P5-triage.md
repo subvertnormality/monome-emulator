@@ -1,4 +1,4 @@
-# P5 controlled-clock review: findings open
+# P5 controlled-clock review: findings resolved
 
 Codex-only one-shot branch review returned on 2026-09-07. Reviewed implementation
 base `ce812e7` through `d1ba402`; medium effort, 600-second limit, no convergence
@@ -76,3 +76,29 @@ historical evidence, not fresh source-bound admission. Reproduction commands:
 
 Fresh native collection and the final M5 aggregate remain required before
 closing P5-05. No exhaustive Mosaic or full emulator completion is claimed.
+
+## Final finding disposition
+
+All substantive P5 findings are resolved for emulator `85245b9` and the
+declared controlled-06 runtime boundary. This is the executor's disposition of
+the returned Codex findings, supported by focused rejection experiments and
+fresh native evidence; it is not a second Codex review of the fixes.
+
+- P5-01/02/03/06/07: fixes supported by the Codex follow-up and the complete
+  fresh generic collection in `../completions/C16-followup-generic.md`.
+- P5-04: the musical phase defect is treated as an isolated external Mosaic
+  candidate, not excused as an adapter discrepancy. Exact-time phrase/restart
+  and both-direction handoff comparisons pass without relaxing timing bounds.
+- P5-08/09: reproduced missing-public-error, borrowed-acknowledgement and
+  missing-acknowledgement faults are rejected by the fixes, with contract
+  regressions. Fresh native comparisons pass the stricter verifier.
+- P5-05: the gate is implemented and fail-closed; its required ten generic
+  groups, eight three-session probe families and fourteen application/profile
+  comparisons now pass on the final source. The separate M5 aggregate must
+  still return success before the milestone is reported passed.
+
+The completed application index is
+`artifacts/c16/m5-mosaic-06c/external-index.json`. Earlier open dispositions above
+are historical. Later exhaustive manual coverage, queue refill/endurance,
+browser release, update/rollback and native Linux acceptance remain required
+by their delivery cards; none is waived by this review disposition.

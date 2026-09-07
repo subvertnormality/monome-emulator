@@ -1,0 +1,19 @@
+{
+  "engine": "codex",
+  "status": "resolved",
+  "findings_open": [],
+  "source_digest": "ae9a9964d34aad51728704acbf0521e269617d7789eaf9475be89e18cdb1da09",
+  "candidate_sha256": "6a3babbbfd8bdc353bba9e6e76ac1f497e8df32fef1f0263fe5b300449dd9417",
+  "raw": {
+    "path": "../../../artifacts/c16/P5-followup-retry-raw.json",
+    "sha256": "b162cf74575765da8da62a24fcb5daa19860d149116fe176a97772052b2811f4"
+  },
+  "triage": {
+    "path": "P5-triage.md",
+    "sha256": "72a8dccc89c7bcc96d9e12c16176d7af2598a67fd40ee355daf959f861aea625"
+  },
+  "session_ref": "01a07c3b-ef6b-7a11-b4bd-8d89fc24ebad",
+  "reviewed_head": "7642409",
+  "fixes_head": "85245b9",
+  "disposition": "Executor resolved reproduced findings using focused experiments and fresh source-bound native validation; no additional Codex call claimed."
+}
