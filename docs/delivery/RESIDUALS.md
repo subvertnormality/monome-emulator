@@ -28,4 +28,18 @@ storage and unchanged absolute deadlines; never insert gaps or retime a new
 batch to pass the timing tests. Required before long continuous MIDI-clock
 acceptance, not waived by the short C16 probes.
 
-R15 — Stopped scale-slot highlight: fold:C12 (A19). Native failed evidence artifacts/c08/7af59ee065a04cd9a23e1404d477c631/manifest.json shows default slot1 LED2 after stopping and shift-editing slot16, whose edit-only LED4 is correct. scale_edit_page.lua's playing draw sets the fader to0 and stopped drawing does not restore it. Preserve/reproduce the active highlight assertion in the C12 display-refresh package; current scale controls package verifies selected edit-only indicators and MIDI, and earns no credit for this missing highlight. Do not waive A19.
+R15 — Stopped scale-slot highlight: candidate fixed in Mosaic c2e4376, with
+real-time and controlled M-SCALE-003 regression evidence and an explicit
+held-lock display guard. Mosaic's candidates/scale-stop-indicator.json records
+the isolated three-line patch, baseline failure and passing manifests. The
+historical native failure artifacts/c08/7af59ee065a04cd9a23e1404d477c631/manifest.json
+remains retained. C12 still owns full A19 coverage and release-tree regression;
+the focused fix does not complete the display-refresh family.
+
+R17 — Controlled-time feedback cost: fold:C13. The Mosaic M-RANGE-002 sweep
+passed in 309.63 seconds controlled versus 121.74 seconds real-time. Its driver
+polls snapshots while advancing in 10 ms increments, so logical control does not
+currently imply faster feedback. Profile transport/capture and consider bounded
+event-oriented waits; preserve complete MIDI capture, exact logical schedules,
+observable predicates and fresh-repeat validation. Do not relax timing or
+coverage to improve the measurement. Run IDs are recorded in delivery state.

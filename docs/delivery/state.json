@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "M5 verified passed on85245b9/Mosaicfacbe0b; P5 resolved and C16 declared-scope complete. No native/admission runners. Publish audited completion notes; integrate prepared Mosaic inventory141 and4 new cases using artifacts/integrate_mosaic_cases.py, then run each new case through controlled and real-time lanes, isolate defects and continue exhaustive campaign. SEM-001 formula clarification remains pending. Full delivery and suite incomplete; web UI stopped.",
+  "next_action": "21 Mosaic cases: adjacent/full range sweep and mute gestures passed RT/D; mute and long-hold each pass3freshD repeats. Audit/push test-only slice, then continue C08 remaining channel/harmony/undo domains. Range sweep3D repeats and full manual campaign remain incomplete; SEM-001 pending.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -335,5 +335,205 @@
     "tested_emulator": "85245b9",
     "tested_mosaic": "facbe0b",
     "full_release": false
+  },
+  "active_behaviour_test": {
+    "exec_session": null,
+    "sequence": [
+      "M-MUTE-001 three fresh controlled repeats",
+      "M-RANGE-001 three fresh controlled repeats"
+    ],
+    "status": "passed",
+    "candidate": "long-hold-release plus scale-stop-indicator"
+  },
+  "unit_validation": {
+    "artifact": "artifacts/c16/scale-indicator-units-isolated.json",
+    "passed": 474,
+    "failed": 0,
+    "direct_worktree_failure": "artifacts/c16/scale-indicator-units.log",
+    "reason": "Legacy unit harness imports ../../../mosaic; isolated snapshot used to test actual candidate."
+  },
+  "scale_candidate_validation": {
+    "full_scale_real": "0f590285325a4ef2a8591997d4b9e154",
+    "full_scale_controlled": "60a7b5cfdd8a47909430998064fe1cb2",
+    "guard_real": "b5ce86cb62a545c3bc645f44c5f0a8a5",
+    "guard_controlled": "156277b2886a434d9fb03d7989de544e",
+    "units": 474
+  },
+  "new_controlled_passes": {
+    "M-SCALE-002": "b91e8b52567745178d349514d5dbc521",
+    "M-MERGE-001": "b9beef67de444d83b47688e702d021da",
+    "M-PAT-002": "851f9678c61e4911a2bb5ee2d3d01105"
+  },
+  "pending_one_step_clarification": {
+    "id": "SEM-002",
+    "status": "resolved-user-preserve-unsupported",
+    "current": "Channel range uses two distinct held grid steps; channel-step long press does nothing.",
+    "recommended": "User decision: no standalone long-press action; preserve held-step combinations."
+  },
+  "latest_mosaic_partial_evidence": {
+    "M-SCALE-001": [
+      {
+        "run_id": "60a7b5cfdd8a47909430998064fe1cb2",
+        "case": "M-SCALE-001",
+        "mode": "controlled-experimental",
+        "manifest_sha256": "7d4fc5ecef9fa5cd31e244255026c17cfad61f44a85d41a6fb46d3d79a9a85db",
+        "manual_sha256": "be76f940e737a495750528ba2ed7b373d306f487c8e01fcf8b7b6520cbdb5fe9",
+        "source_bound_to_retained_run": true
+      },
+      {
+        "run_id": "10e9502c68664029b61aacd92979db2a",
+        "case": "M-SCALE-001",
+        "mode": "real-time",
+        "manifest_sha256": "0b779170547b3559e09901cc3cbe9ef792a226afde0e466da4eb995af1b555e7",
+        "manual_sha256": "fab8458e41f38324012e496a88c4f320f4c1345653b2b9bfacc7500b67e972eb",
+        "source_bound_to_retained_run": true
+      }
+    ],
+    "M-SCALE-002": [
+      {
+        "run_id": "b91e8b52567745178d349514d5dbc521",
+        "case": "M-SCALE-002",
+        "mode": "controlled-experimental",
+        "manifest_sha256": "13b5aefe80305976fe0b53710ddf81dc9d3ba00c4f46fe93f058f425873478cb",
+        "manual_sha256": "be76f940e737a495750528ba2ed7b373d306f487c8e01fcf8b7b6520cbdb5fe9",
+        "source_bound_to_retained_run": true
+      },
+      {
+        "run_id": "e1bb2bd30b874d5c8d1a832a4198d1af",
+        "case": "M-SCALE-002",
+        "mode": "real-time",
+        "manifest_sha256": "cc73d4181f5d0f1ae6f538cd53468a9a27c634ae5892f76019cd138c3e823f07",
+        "manual_sha256": "be76f940e737a495750528ba2ed7b373d306f487c8e01fcf8b7b6520cbdb5fe9",
+        "source_bound_to_retained_run": true
+      }
+    ],
+    "M-SCALE-003": [
+      {
+        "run_id": "156277b2886a434d9fb03d7989de544e",
+        "case": "M-SCALE-003",
+        "mode": "controlled-experimental",
+        "manifest_sha256": "104cceed7cd136d78096a5f59b3dc05707bf16ef89fc500da017b9d2a8baa41d",
+        "manual_sha256": "be76f940e737a495750528ba2ed7b373d306f487c8e01fcf8b7b6520cbdb5fe9",
+        "source_bound_to_retained_run": true
+      },
+      {
+        "run_id": "d1f19072e10e407cab0e780a4b9dfa7a",
+        "case": "M-SCALE-003",
+        "mode": "real-time",
+        "manifest_sha256": "3f68ab8116d15ceabd54df5b8274cd4a484cb929b94014cedecb88fe068d9ef3",
+        "manual_sha256": "fab8458e41f38324012e496a88c4f320f4c1345653b2b9bfacc7500b67e972eb",
+        "source_bound_to_retained_run": true
+      }
+    ],
+    "M-MERGE-001": [
+      {
+        "run_id": "b9beef67de444d83b47688e702d021da",
+        "case": "M-MERGE-001",
+        "mode": "controlled-experimental",
+        "manifest_sha256": "6a8337bf788f1552334d5f5b8a88ad94eeaeef5b394cd4b967a596afbb23f5ea",
+        "manual_sha256": "be76f940e737a495750528ba2ed7b373d306f487c8e01fcf8b7b6520cbdb5fe9",
+        "source_bound_to_retained_run": true
+      },
+      {
+        "run_id": "049520b89c744cc680f6fdbdf0d6a224",
+        "case": "M-MERGE-001",
+        "mode": "real-time",
+        "manifest_sha256": "3d9e84aa71b45f5c331aa75d70256a1dce18e2683af7ba3b3ec5326db03c1c01",
+        "manual_sha256": "be76f940e737a495750528ba2ed7b373d306f487c8e01fcf8b7b6520cbdb5fe9",
+        "source_bound_to_retained_run": true
+      }
+    ],
+    "M-PAT-002": [
+      {
+        "run_id": "851f9678c61e4911a2bb5ee2d3d01105",
+        "case": "M-PAT-002",
+        "mode": "controlled-experimental",
+        "manifest_sha256": "4936c57b1520ccdd4b73a4bc87ee349f9eb75e24419f63dccca60838108f9fd0",
+        "manual_sha256": "be76f940e737a495750528ba2ed7b373d306f487c8e01fcf8b7b6520cbdb5fe9",
+        "source_bound_to_retained_run": true
+      },
+      {
+        "run_id": "a732a75532e040ae9d775d8d8636f6d0",
+        "case": "M-PAT-002",
+        "mode": "real-time",
+        "manifest_sha256": "cd9ea80522a088b4b08db210882927633647884bdd0e8f44ecbbbcf4d0f9ac7e",
+        "manual_sha256": "be76f940e737a495750528ba2ed7b373d306f487c8e01fcf8b7b6520cbdb5fe9",
+        "source_bound_to_retained_run": true
+      }
+    ],
+    "M-RANGE-001": [
+      {
+        "run_id": "bd0092b463f94990bd95d58bd84898d5",
+        "case": "M-RANGE-001",
+        "mode": "controlled-experimental",
+        "manifest_sha256": "1835864db3b52ade927484aa38f230d4ff335da660d9afd953e040e80c4a05a5",
+        "manual_sha256": "fab8458e41f38324012e496a88c4f320f4c1345653b2b9bfacc7500b67e972eb",
+        "source_bound_to_retained_run": true
+      },
+      {
+        "run_id": "c58aefe8dcf5479185f4c0cfa47437a9",
+        "case": "M-RANGE-001",
+        "mode": "real-time",
+        "manifest_sha256": "68aa3827577cb311e3714f11921402c7bad0784937d23f6861546f80ac54b8d9",
+        "manual_sha256": "fab8458e41f38324012e496a88c4f320f4c1345653b2b9bfacc7500b67e972eb",
+        "source_bound_to_retained_run": true
+      }
+    ],
+    "M-RANGE-002": [
+      {
+        "run_id": "0343326b5aef47b2a9dca5a3ffed9c35",
+        "manifest_sha256": "2a1d238d3c6c5a02694be48c6b2d87cbefdd24cf94bd7690faeb62ea06dfff59",
+        "mode": "controlled-experimental",
+        "wall_elapsed_seconds": 309.6325905129779
+      },
+      {
+        "run_id": "3c6b6a78cc6c4b1e8d6765c64f68f844",
+        "manifest_sha256": "3a1d46bc5de8d593f8bb4daba2c859f4ab4e53096db18bc4d2036e820f6e5953",
+        "mode": "real-time",
+        "wall_elapsed_seconds": 121.73645625705831
+      }
+    ],
+    "M-MUTE-001": [
+      {
+        "run_id": "abfb0785085e4a62a4aa99a084c1c23f",
+        "manifest_sha256": "9cc418f47b3aaeb43fa9761ec2ea9473457562aa1568bec34dd17fd4455f781a",
+        "mode": "real-time",
+        "wall_elapsed_seconds": 26.400461626937613
+      },
+      {
+        "run_id": "62846575086945968e20f3c07f277c9c",
+        "manifest_sha256": "816bb0d849596e0a3128c8a1bc9d5a5a8f666e4937d50443a4047bbb7824f7c6",
+        "mode": "controlled-experimental",
+        "wall_elapsed_seconds": 26.12522134091705
+      },
+      {
+        "run_id": "3f9696260a014e8a9ada18791da1ffa6",
+        "manifest_sha256": "aed3d41b5a506d89db2bb9087197fdf200febb4cac4864ebe26f7842141e8a3e",
+        "mode": "controlled-experimental",
+        "wall_elapsed_seconds": 25.980053765000775
+      },
+      {
+        "run_id": "350e757a56d94ac7a6c6d8cca34faa4f",
+        "manifest_sha256": "67b0bf0935502ccb58da1bd444444a906174e68647ed435bd50e827b5d3b0193",
+        "mode": "controlled-experimental",
+        "wall_elapsed_seconds": 26.65843121893704
+      }
+    ]
+  },
+  "fresh_mosaic_controlled_repeats": {
+    "M-MUTE-001": {
+      "run_id": "repeat-07c2b2dc192a47849d71e75018d7d81a",
+      "manifest_sha256": "378e80d0cb2b5f67925f95dc50f6d500b0d5836a06744f12a231a29de692f314",
+      "normalized_sha256": "82db21a877e1f1c447096399a04495244b774bffc4a75bc6d8994a72e9bf6161",
+      "fresh_processes": 3,
+      "passed": true
+    },
+    "M-RANGE-001": {
+      "run_id": "repeat-b0b0110c40004c3daeb5efa8a2d5759f",
+      "manifest_sha256": "b3c90d5861731f8247af84534f03a3b38623892b2d833ee0691bf0ec27de1e55",
+      "normalized_sha256": "871f8d813efdd5d819899821a822ca25562788f29391f48ace0d662774589adb",
+      "fresh_processes": 3,
+      "passed": true
+    }
   }
 }
