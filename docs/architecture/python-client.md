@@ -59,3 +59,7 @@ advance acknowledgement. Wall time uses2024-01-01 UTC plus elapsed logical time;
 CPU time. The current candidate supports the internal clock; other clock sources
 and blocking micro-sleep are explicitly rejected. Additional source/cancellation,
 modulation, musical application and Codex P5 checks remain required.
+
+The newer opt-in candidate also provides [independent real-time MIDI input
+schedules](scheduled-midi.md). Schedule acknowledgements report `accepted`;
+native arrival records and actual callback outputs establish subsequent delivery.

@@ -4,6 +4,7 @@ from pathlib import Path
 from prepare_clock_step import transform as scheduler
 from prepare_internal_clock_step import transform as internal,transform_header as internal_header
 from prepare_metro_step import transform as metro,transform_header as metro_header
+from prepare_midi_schedule import transform as midi_schedule
 ROOT=Path(__file__).resolve().parents[1]
 
 def main():
@@ -80,7 +81,9 @@ static void virtual_deinit(void *self)''')
     } else { memcpy(packet+8,data,size);emit(3,md->dev.id,packet,size+8); }''')
     replace('matron/src/emu_bridge.c','    if (size>32760)', '    if (size>(emu_clock_enabled() ? 32752 : 32760))')
     replace('matron/wscript',"        'src/emu_bridge.c',","        'src/emu_bridge.c',\n        'src/emu_clock.c',")
-    for name in ('emu_clock.c','emu_clock.h'):
+    edit('matron/src/emu_bridge.c',midi_schedule)
+    replace('matron/wscript',"        'src/emu_clock.c',","        'src/emu_clock.c',\n        'src/emu_midi_schedule.c',")
+    for name in ('emu_clock.c','emu_clock.h','emu_midi_schedule.c','emu_midi_schedule.h'):
         rel='matron/src/'+name;original[rel]='';changed[rel]=(ROOT/'src/runtime/native_clock'/name).read_text()
     patches=[];files=[]
     for name,after in changed.items():

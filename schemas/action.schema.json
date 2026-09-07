@@ -180,6 +180,79 @@
             "nanoseconds"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "midi_schedule"
+            },
+            "schedule_id": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "events": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "port": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16
+                  },
+                  "at_monotonic_ns": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 18446744073709551615
+                  },
+                  "bytes": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 255
+                    },
+                    "minItems": 1,
+                    "maxItems": 4096
+                  }
+                },
+                "required": [
+                  "port",
+                  "at_monotonic_ns",
+                  "bytes"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 512
+            }
+          },
+          "required": [
+            "type",
+            "schedule_id",
+            "events"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "midi_schedule_cancel"
+            },
+            "schedule_id": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "type",
+            "schedule_id"
+          ],
+          "additionalProperties": false
         }
       ]
     },

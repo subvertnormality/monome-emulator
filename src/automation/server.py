@@ -95,6 +95,8 @@ class Application:
         if payload['action']['type']=='advance' and (self.config['backend']!='native' or self.config.get('clock_mode','real-time')=='real-time'):
             raise ContractError('unsupported','advance requires explicit experimental native controlled time')
         action=dict(payload['action']); client_id=payload.get('client_id'); kind=action['type']
+        if kind in ('midi_schedule','midi_schedule_cancel') and (self.config['backend']!='native' or client_id):
+            raise ContractError('unsupported','MIDI schedules require a native automation session without browser ownership')
         if scheduled:action.pop('at_monotonic_ns')
         key=(kind,action.get('n'),action.get('x'),action.get('y'))
         if client_id: self.heartbeat(client_id)
@@ -114,7 +116,7 @@ class Application:
                 else: self.input_owners.pop(key,None)
         self.sequence+=1; self.action_ids.add(payload['action_id'])
         ack=checked('ack',dict(schema_version=1,session_id=payload['session_id'],action_id=payload['action_id'],
-               sequence=self.sequence,status='applied',monotonic_ns=time.monotonic_ns()))
+               sequence=self.sequence,status='accepted' if kind=='midi_schedule' else 'applied',monotonic_ns=time.monotonic_ns()))
         return ack
 
 def serve(directory):

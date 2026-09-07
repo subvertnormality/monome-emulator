@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "M-TIM-004 controlled939d8ae pending-note internal90 to MIDI100 handoff passes remaining-tick deadline and exact notes. RT24c9a48 fails before source selection: continuous25ms pulse deadline passes during synchronous grid/snapshot calls. Next implement bounded independently scheduled generic native MIDI input, inspect physical MIDI thread seam, preserve clock decode/Lua delivery, retain intended/actual times and cancellation cleanup; see C16-live-handoff.md. Do not retime pulses or waive failed RT case. M5 requires14 comparisons; all5 gate contracts pass. Then reverse live handoff/final3-repeat matrix/P5/full manual and remaining stages. Thirteen named Mosaic cases remain partial. No active runners.",
+  "next_action": "Independent real-time MIDI scheduling implemented in explicit controlled-04 candidate; generic scheduled-midi-02 passes13 checks (40 exact echoes, arrivals during150ms Lua callback, cancellation/close). Five C queue contracts and54 total contracts passed across discovery plus corrected client import invocation. Next integrate queued events into Mosaic M-TIM-004 and its trace/evidence verifier, run against04 without retiming UI gaps; add controlled-domain schedule support as needed and reverse live handoff. Keep default install unchanged; M5 final14 comparisons/three repeats/P5 and full manual campaign remain open. No active runners.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -117,5 +117,11 @@
     "P5": "findings_open",
     "P0A1": "done"
   },
-  "plan_review_evidence": "docs/delivery/reviews/P0A1-triage.md"
+  "plan_review_evidence": "docs/delivery/reviews/P0A1-triage.md",
+  "independent_midi_evidence": {
+    "path": "artifacts/c16/scheduled-midi-02/results.json",
+    "sha256": "7f1bcc1f2533fd24cb8f2d24d5b4174cf3d7e99d19103494f1412b110e5f2e65",
+    "passed": true,
+    "completion": "docs/delivery/completions/C16-independent-midi.md"
+  }
 }

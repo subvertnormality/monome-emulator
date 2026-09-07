@@ -22,7 +22,10 @@
       "maximum": 2147483647
     },
     "status": {
-      "const": "applied"
+      "enum": [
+        "applied",
+        "accepted"
+      ]
     },
     "monotonic_ns": {
       "type": "integer",
