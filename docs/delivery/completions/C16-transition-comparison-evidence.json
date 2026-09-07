@@ -1,0 +1,19 @@
+{
+  "default_real_time": {
+    "path": "artifacts/c16/544fdee451fb4b76bc84ba9b0bff5cc0/manifest.json",
+    "sha256": "b07213af7789cd5cb0ff58553d03744555deea1f1a270a28da8939409169ecb3",
+    "passed": true,
+    "max_error_ms": 4.099768000000115
+  },
+  "candidate_real_time": {
+    "path": "artifacts/c16/1f431a2d9705409991009b4f5472ca04/manifest.json",
+    "sha256": "b07213af7789cd5cb0ff58553d03744555deea1f1a270a28da8939409169ecb3",
+    "passed": true,
+    "max_error_ms": 3.7244639999998164
+  },
+  "controlled_repeats": {
+    "path": "artifacts/c16/repeat-2b4f31033ef14b8f922e543a83508ee1/manifest.json",
+    "sha256": "309b1adf6c3fec61041572a6826d304f1d2cf61ad589007c404511dbaff79eaf",
+    "passed": true
+  }
+}

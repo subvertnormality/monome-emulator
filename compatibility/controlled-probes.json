@@ -1,0 +1,10 @@
+{
+  "clock": "controlled-clock/controlled-clock.lua",
+  "boundaries": "controlled-boundaries/controlled-boundaries.lua",
+  "phase": "controlled-phase/controlled-phase.lua",
+  "phase_boundary": "controlled-phase-boundary/controlled-phase-boundary.lua",
+  "midi": "controlled-midi-clock/controlled-midi-clock.lua",
+  "tempo": "clock-probe/clock-probe.lua",
+  "wall_timer": "controlled-wall-timer/controlled-wall-timer.lua",
+  "transition": "controlled-transition/controlled-transition.lua"
+}

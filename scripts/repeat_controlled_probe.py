@@ -16,36 +16,12 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'src'))
 from automation.identity import artifact,source_identity
 from runtime.dependencies import verify_install
+from automation.controlled_evidence import normalize,verify_repeat
 
 PROBES={name:f'tests/controlled_{name}_native.py' for name in
         ('clock','boundaries','phase','phase_boundary','midi','tempo','wall_timer','transition')}
 
 def read(path):return json.loads(path.read_text())
-
-def normalize(directory):
-    """Discard only run IDs, wall times and drawing revision counters.
-
-    Preserve input order, port, raw MIDI bytes, logical nanoseconds, full grid,
-    framebuffer digest, clock and outstanding notes at every observation.
-    """
-    actions=[json.loads(line) for line in (directory/'native/actions.jsonl').read_text().splitlines()]
-    requests=[]
-    for index,entry in enumerate(actions,1):
-        request,ack=entry['request'],entry['ack']
-        assert request['sequence']==index
-        assert all(request[key]==ack[key] for key in ('session_id','action_id','sequence'))
-        assert ack['status']=='applied'
-        requests.append(request['action'])
-    observations=read(directory/'observations.json')
-    assert observations,'No observations'
-    states=[]
-    for observation in observations:
-        assert not observation['errors'],observation['errors']
-        state=observation['state']
-        states.append(dict(midi=[{k:m[k] for k in ('port','bytes','logical_ns')} for m in state['midi']],
-            grid=state['grid'],frame=state['frame']['sha256'],clock=state['clock'],
-            outstanding=state['midi_capture']['outstanding']))
-    return dict(actions=requests,observations=states)
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
@@ -57,7 +33,9 @@ def main():
     installation_sha=hashlib.sha256(install.read_bytes()).hexdigest()
     installation=read(install)
     default_sha=hashlib.sha256((ROOT/'.runtime/current.json').read_bytes()).hexdigest()
-    record=dict(schema_version=1,probe=args.probe,source=source,installation_sha256=installation_sha,
+    (out/'installation.json').write_bytes(install.read_bytes())
+    record=dict(kind='controlled-repeat',schema_version=1,installation=artifact(out/'installation.json',out),
+        default_installation_sha256=default_sha,probe=args.probe,source=source,installation_sha256=installation_sha,
         passed=False,status='experimental-not-admitted',runs=[],failure=None)
     normalized=[]
     try:
@@ -95,5 +73,6 @@ def main():
         (out/'manifest.json').write_text(json.dumps(record,indent=2)+'\n')
         print(out/'manifest.json',flush=True)
     if not record['passed']:raise SystemExit(1)
+    verify_repeat(out/'manifest.json')
 
 if __name__=='__main__':main()

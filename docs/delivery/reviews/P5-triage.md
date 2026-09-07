@@ -35,6 +35,8 @@ cleanup passes both native fault cases. P5-07's boundary/restart probe passes
 three repeats. These findings have focused fix evidence, pending the final
 admission regression set and the remaining Codex follow-up.
 
-P5-06 now has three passing controlled source-transition repeats; its real-time
-comparison remains open. P5-04's Mosaic musical-policy investigation and P5-05's
-admission gate remain open. No finding is waived and P5 is not complete.
+P5-06 now also has a shared-probe controlled/real-time comparison, including
+three identical controlled repetitions and passing10ms timing bounds on both
+real-time binaries. See `../completions/C16-transition-comparison.md` and its
+evidence JSON. P5-04's Mosaic musical-policy investigation and P5-05's admission
+gate remain open. No finding is waived and P5 is not complete.

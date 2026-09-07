@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "Candidate integrated-03 reconstructed from pinned Git objects fixes wall timer; default unchanged. New wall-timer/source-transition/phase-boundary probes each pass three exact repeats; wall timer also passes default and candidate real time. P5-01/02/03/07 have focused evidence; P5-06 still needs real-time transition comparison. Next that comparison, M5 admission gate with source-bound D and affected E/R evidence, then one focused Codex follow-up. Keep opening-phase Mosaic issue and all atomic manual/T01/full workflow obligations active. Nine Mosaic cases remain partial; no active runners.",
+  "next_action": "P5-06 shared source-transition probe now passes default/candidate real time (max4.100/3.725ms) and three exact controlled repeats. Repeat verifier independently checks source/runtime identities, hashes, distinct sessions, raw MIDI and normalized equality; seven sensitivity/rejection contracts pass. Next implement complete M5 aggregator (repeat verification is only a prerequisite), refresh final-tree D and affected E/R/application evidence, resolve opening-phase Mosaic issue, then focused Codex follow-up. Full atomic manual/T01 and remaining feature families remain required; nine Mosaic cases are partial. Default unchanged, controlled-03 unadmitted. No active runners.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {

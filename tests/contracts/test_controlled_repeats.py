@@ -8,6 +8,7 @@ import unittest
 
 spec=importlib.util.spec_from_file_location('repeat_probe',Path(__file__).resolve().parents[2]/'scripts/repeat_controlled_probe.py')
 probe=importlib.util.module_from_spec(spec);spec.loader.exec_module(probe)
+from automation.protocol import ContractError
 
 class RepeatEvidence(unittest.TestCase):
     def setUp(self):
@@ -43,8 +44,8 @@ class RepeatEvidence(unittest.TestCase):
 
     def test_errors_and_wrong_ack_cannot_supply_repeat_evidence(self):
         changed=copy.deepcopy(self.observation);changed['errors']=['Lua failed']
-        with self.assertRaises(AssertionError):self.value(changed)
+        with self.assertRaises(ContractError):self.value(changed)
         action=copy.deepcopy(self.action);action['ack']['action_id']='another-action'
-        with self.assertRaises(AssertionError):self.value(action=action)
+        with self.assertRaises(ContractError):self.value(action=action)
 
 if __name__=='__main__':unittest.main()

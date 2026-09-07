@@ -16,6 +16,9 @@ def replay_input(path):
 
 def verify(path,current_source=True):
     path=Path(path).resolve()
+    if read_json(path).get('kind')=='controlled-repeat':
+        from .controlled_evidence import verify_repeat
+        return verify_repeat(path,current_source)
     if read_json(path).get('kind')=='browser-package': return verify_browser(path,current_source)
     if read_json(path).get('kind')=='native-package': return verify_package(path,current_source)
     manifest=checked('manifest',read_json(path))

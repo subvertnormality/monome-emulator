@@ -15,19 +15,23 @@ def main():
         def pulse():runtime.action(dict(type='midi',port=1,bytes=[248]))
         def key(n):
             for z in (1,0):runtime.action(dict(type='key',n=n,state=z))
-        pulse()
-        for _ in range(48):advance(25000000);pulse()
-        # At1.2s internal beat2.4 and MIDI beat2,100BPM. Switching reschedules
-        # pending quarter-beat sync from1.25s to1.35s; whole-beat sync to1.8s.
-        key(2);key(3)
-        for _ in range(8):advance(25000000);pulse()
+        # Use the real-time comparison's reset and50BPM input schedule. Native
+        # reset publishes beat0 on the first24PPQN tick,20.833334ms after boot.
+        runtime.action(dict(type='enc',n=3,delta=2));advance(20833334)
+        anchor=20833334
+        for _ in range(49):advance(50000000);pulse()
+        # At2.45s relative to reset, internal beat4.9 and MIDI beat2,50BPM.
+        # Pending quarter-beat sync moves from2.5s to2.75s after selection.
+        key(2)
+        for _ in range(8):advance(50000000);pulse()
         observations.append(runtime.observe())
-        # At1.4s internal beat2.8: both remaining syncs move to beat3/1.5s.
-        # Absolute .4-second sleep is unchanged by either source selection.
-        key(3);advance(200000001);observations.append(runtime.observe())
-        expected=[([176,40,1],1200000000),([176,30,1],1350000001),
-                  ([176,40,0],1400000000),([176,10,1],1500000001),
-                  ([176,30,2],1500000001),([176,20,1],1600000001)]
+        # At2.85s internal beat5.7: remaining syncs move to beat5.75/6.
+        # Absolute .6-second sleep is unchanged by either source selection.
+        key(3);advance(200000002);observations.append(runtime.observe())
+        expected=[([176,50,1],anchor),([176,41,1],anchor+2450000000),
+                  ([176,40,1],anchor+2450000000),([176,30,1],anchor+2750000001),
+                  ([176,40,0],anchor+2850000000),([176,30,2],anchor+2875000001),
+                  ([176,10,1],anchor+3000000001),([176,20,1],anchor+3050000001)]
         state=observations[-1]['state'];actual=[(m['bytes'],m['logical_ns']) for m in state['midi']]
         assert [b for b,_ in actual]==[b for b,_ in expected],dict(expected=expected,actual=actual)
         assert all(abs(got[1]-want[1])<=1 for got,want in zip(actual,expected)),dict(expected=expected,actual=actual)
