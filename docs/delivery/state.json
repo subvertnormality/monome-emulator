@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "M-TIM-001 controlled046a98f passes all61 onsets/60 durations across20 phrases; RT e3d81b fails initial phrase before long stage. Ten Mosaic cases remain partial manual coverage. Thread sampler2 ownership/filter/PID-reuse contracts pass; wait counters unavailable. Main matron CPU burst36.5ms near late onset; all-service sampling overhead13-39ms prevents attribution. Next use matron-only/per-thread sampler then identify expensive callback or scheduler delay, no blind retries or widened bounds. M5/P5, phase/source edges, full manual/T01 and remaining release stages incomplete. No active runners.",
+  "next_action": "Targeted matron profile M-TIM-0017d09589 passes full20 phrases/61 onsets/60 durations;99Hz userspace perf profile3f0d6e also passes. Installed perf5.4 binary works despite generic launcher kernel mismatch;641 samples, no lost samples, matron24.65% total sampled CPU including startup. Lua internals stripped: no callback/GC attribution established. Earlier RT misses retained. Next finish phase/source edge and M5 fresh comparison inventory/P5 follow-up; investigate intermittent misses with playback-only callback attribution rather than guessed timing fixes. Ten named cases remain partial manual coverage; full manual/T01 and remaining stages required. No active runners.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
