@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "C07 passed: a7cc140 implementation, C07-evidence.json binds 32 contracts, 3 native clocks, 1 frame-I/O regression, 8 native scenarios and six-check Mosaic failed-case replay. Publish completion, then C08: promote artifacts/c08_editing_draft.py to tests/mosaic_editing.py, register A04-pattern-editor package, run it. Expand all 33 C08 software sections and their options, independent expected MIDI/LED/frame assertions. README Lower merge descriptions disagree with lib/pattern.lua's symmetric extrapolation; diagnose with real-input regression before choosing an oracle or fix. Never waive unresolved cases. Timing suites run isolated.",
+  "next_action": "C08 checkpoint: 3 of34 software sections implemented (basic editing, trig merge, memory). See C08-progress.md for exact evidence. Isolated memory candidate passed9 native checks,476 units,7 unchanged editing/merge checks; baseline retains2 unit failures and missing-note runtime failure. Patch evidence rejection3/3; full contracts32/32 zero skips (89.705s). Lower velocity expected10/actual87 semantic question remains pending; continue independent cases. Next promote artifacts/c08_channels_draft.py to tests/mosaic_channels.py, register routing and mute packages, run sequentially. Then channel lengths/boundaries, remaining pattern algorithm/note/velocity options, masks/chords/scales/quantiser and value merges. C08 remains incomplete. No active native processes. Publish coherent checkpoint. C07 published d11c8f9.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -55,7 +55,8 @@
     {
       "id": "C08",
       "status": "in_progress",
-      "evidence": null
+      "evidence": null,
+      "start_revision": "d11c8f9"
     },
     {
       "id": "C09",

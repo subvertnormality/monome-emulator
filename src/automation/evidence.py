@@ -111,6 +111,15 @@ def verify_package(path,current_source=True):
     names=[a['path'] for a in manifest['artifacts']]
     if len(set(names))!=len(names): raise ContractError('artifact_inventory','Duplicated package artifact')
     if 'results.json' not in names or (path.parent/'failure.json').exists():raise ContractError('package_results','Missing results or retained failure')
+    candidate=None
+    if spec.get('candidate_manifest'):
+        if 'candidate.json' not in names:raise ContractError('candidate_evidence','Required application patch identity is missing')
+        candidate=read_json(path.parent/'candidate.json')
+        if current_source:
+            definition=ROOT/spec['candidate_manifest'];declared=read_json(definition)
+            if (candidate.get('manifest_sha256')!=artifact(definition,ROOT)['sha256'] or
+                candidate.get('base_revision')!=declared['base_revision'] or candidate.get('patch_set')!=declared['name']):
+                raise ContractError('candidate_identity','Application patch set differs from declared compatibility target')
     for record in manifest['artifacts']:verify_artifact(record,path.parent)
     from .identity import application_identity
     from runtime.dependencies import verify_install
@@ -120,6 +129,8 @@ def verify_package(path,current_source=True):
         if manifest['tier']=='B':needed.add('browser.png')
         if not {prefix+n for n in needed}.issubset(names):raise ContractError('package_artifacts','Required phase evidence missing')
         directory=path.parent/phase['directory']; identity=read_json(directory/'identity.json')
+        if candidate and identity['application_identity']['digest']!=candidate['application']['digest']:
+            raise ContractError('candidate_application','Runtime did not load the declared patched application')
         if identity['session_id']!=phase['session_id'] or identity['emulator_identity']['digest']!=manifest['source']['digest']:
             raise ContractError('package_identity','Phase belongs to another source/session')
         cleanup=read_json(directory/'cleanup.json')

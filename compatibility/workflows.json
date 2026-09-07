@@ -934,7 +934,7 @@
       "scenario_ids": [
         "A04-pattern-editor"
       ],
-      "status": "not_implemented",
+      "status": "implemented",
       "oracle": {
         "type": "documented rule plus independently authored event/frame fixture",
         "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L372",
@@ -1405,7 +1405,7 @@
       "scenario_ids": [
         "A05-trig-merge-modes"
       ],
-      "status": "not_implemented",
+      "status": "implemented",
       "oracle": {
         "type": "documented rule plus independently authored event/frame fixture",
         "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L624",
@@ -1579,7 +1579,7 @@
       "scenario_ids": [
         "A15-memory-undo-and-redo"
       ],
-      "status": "not_implemented",
+      "status": "implemented",
       "oracle": {
         "type": "documented rule plus independently authored event/frame fixture",
         "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L690",

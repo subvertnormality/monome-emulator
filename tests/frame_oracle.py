@@ -26,7 +26,7 @@ def header(text):
         bind(ca,'cairo_set_font_face',[ptr,ptr])(context,fontface)
         bind(ca,'cairo_set_font_size',[ptr,double])(context,8)
         # Six channel tabs (pages.lua); Masks is tab 1, Device Config tab 5.
-        selected={'Ch. 1 Note Masks':1,'Ch. 1 Device Config':5}[text]
+        selected={'Ch. 1 Note Masks':1,'Ch. 1 Memory':3,'Ch. 1 Device Config':5}[text]
         for tab in range(1,7):
             level=(10 if tab==selected else 1)/15
             bind(ca,'cairo_set_source_rgb',[ptr,double,double,double])(context,level,level,level)

@@ -1,6 +1,23 @@
 {
   "schema_version":1,
   "packages":{
+    "mosaic-memory-fix-regressions":{
+      "tier":"E","family":"A05","roles":["candidate-regression"],
+      "checks":["two-pattern-assignment","skip-exclusive-steps","only-intersection","all-union","mode-cycle-restores-skip","empty-assignment-silence","cleanup"],
+      "candidate_manifest":"fixtures/apps/mosaic-patches/manifest.json",
+      "command":["tests/mosaic_candidate_regressions.py"]
+    },
+    "A15-memory-undo-and-redo":{
+      "tier":"E","family":"A15","roles":["memory"],
+      "checks":["baseline-pattern","two-mask-edits","undo-one","redo-one","undo-all","redo-all","undo-and-forget","redo-and-forget","cleanup"],
+      "candidate_manifest":"fixtures/apps/mosaic-patches/manifest.json",
+      "command":["tests/mosaic_memory.py","--candidate"]
+    },
+    "A15-memory-undo-and-redo-baseline":{
+      "tier":"E","family":"A15","roles":["memory"],
+      "checks":["baseline-pattern","two-mask-edits","undo-one","redo-one","undo-all","redo-all","undo-and-forget","redo-and-forget","cleanup"],
+      "command":["tests/mosaic_memory.py"]
+    },
     "mosaic-four-step-api":{
       "tier":"E","family":"A01","roles":["fresh","autosave"],
       "checks":["fresh-bootstrap","four-step-playback-and-live-edit","save-dialog","native-autosave","fresh-cleanup","autosave-bootstrap","file-dialog-load-and-playback","reload-cleanup"],
@@ -10,6 +27,21 @@
       "tier":"B","family":"A01","roles":["fresh","autosave"],
       "checks":["fresh-bootstrap","four-step-playback-and-live-edit","save-dialog","native-autosave","fresh-cleanup","autosave-bootstrap","file-dialog-load-and-playback","reload-cleanup"],
       "command":["tests/mosaic_slice.py","--browser"]
+    },
+    "A05-trig-merge-modes":{
+      "tier":"E","family":"A05","roles":["merging"],
+      "checks":["two-pattern-assignment","skip-exclusive-steps","only-intersection","all-union","mode-cycle-restores-skip","empty-assignment-silence","cleanup"],
+      "command":["tests/mosaic_merging.py"]
+    },
+    "A05-lower-doc-baseline":{
+      "tier":"E","family":"A05","roles":["lower-baseline"],
+      "checks":["two-pattern-assignment","lower-matches-documented-formula","cleanup"],
+      "command":["tests/mosaic_merging.py","--lower-baseline"]
+    },
+    "A04-pattern-editor":{
+      "tier":"E","family":"A04","roles":["editing"],
+      "checks":["create-pattern-and-play","remove-and-restore-trig","edit-note-through-grid","edit-velocity-through-grid","page-cycle-retains-edits","wrong-pitch-fault-rejected","cleanup"],
+      "command":["tests/mosaic_editing.py"]
     },
     "A07-sequencer-start-and-stop":{
       "tier":"E","family":"A07","roles":["transport"],
