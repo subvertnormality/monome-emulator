@@ -182,3 +182,39 @@ This candidate remains separate from the memory candidate and the default Mosaic
 fixture. C12 must assemble and verify the complete release patch set, including
 overlap/panic/stop and combined-memory regressions. These C08 results do not close
 all R08/A18/A22 obligations or claim a complete Mosaic release.
+
+## Scale slots, complete scale choices and rhythm controls
+
+| Package | Checks | Manifest under artifacts/c08 |
+|---|---:|---|
+| A06-scale-slot-controls | 13 | b68a36fc5c2c48c9ae76021db1a88ee4/manifest.json |
+| A04-euclidean-paint-controls | 8 | b2e8d41ce9ca47a39a2a4fd0f2a05543/manifest.json |
+| A04-rhythm-bank-controls | 11 | a64ab28e58334f508c1f96dde84eaa82/manifest.json |
+| A06-ten-scale-choices | 13 | 996ec9dc738544fcbb08fd1a34629eaf/manifest.json |
+
+Scale slots cover first/last selection, shift/long edit without applying,
+retention, global semitone increments/decrements, center, endpoints and addition
+to a per-scale transpose. The separate scale-choice package plays all seven
+degrees of all ten scales against independent interval tables in scales.json,
+including upper/lower selector clamps. Full quantiser-option/scale-lock coverage
+remains outstanding.
+
+The initial scale-slot run `7af59ee065a04cd9a23e1404d477c631` exposed R15:
+after stop, the active-slot highlight disappears while edit-only LED4 is correct.
+The scale-controls package tests the edit-only indicator and MIDI behavior;
+the stopped active highlight is a separate mandatory C12/A19 obligation. Its
+minimal executable diagnostic is `tests/mosaic_scale_slots.py --highlight-baseline`:
+`artifacts/c08/87f94249f664467bbd473ed4e16986f6/manifest.json` fails the expected
+slot1 LED15 assertion with actual2. No highlight acceptance was waived.
+
+Euclidean controls use the independent 3-in-8 table {1,4,7}, shifted {2,5,8},
+and XOR with entered steps {1,2,3,4}. Preview leaves MIDI unchanged; cancel,
+shift, left/center reset, repaint undo and a dense fill are verified. The bank
+package decodes selected immutable rhythm data into literal step sets; it never
+calls Mosaic's algorithm to generate expectations. All five drum banks and
+all four numeric masks are exercised, including empty output and full 64-cell
+repeated patterns. Tresillo variants and remaining fader boundaries remain open.
+
+Reproduce with `python3 tests/mosaic_scale_slots.py`, `tests/mosaic_euclidean.py`,
+`tests/mosaic_rhythm_banks.py`, and `tests/mosaic_scales.py`, sequentially in WSL.
+These results are development checkpoints; no C08 completion is claimed.

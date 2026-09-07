@@ -1,6 +1,31 @@
 {
   "schema_version":1,
   "packages":{
+    "A06-ten-scale-choices":{
+      "tier":"E","family":"A06","roles":["scales"],
+      "checks":["major","harmonic-major","minor","harmonic-minor","melodic-minor","dorian","phrygian","lydian","mixolydian","locrian","upper-scale-clamp","lower-scale-clamp","cleanup"],
+      "command":["tests/mosaic_scales.py"]
+    },
+    "A04-rhythm-bank-controls":{
+      "tier":"E","family":"A04","roles":["rhythm-banks"],
+      "checks":["empty-pattern","drum-bank-1","drum-bank-2","drum-bank-3","drum-bank-4","drum-bank-5","numeric-mask-1","numeric-mask-2","numeric-mask-3","numeric-mask-4","cleanup"],
+      "command":["tests/mosaic_rhythm_banks.py"]
+    },
+    "A04-euclidean-paint-controls":{
+      "tier":"E","family":"A04","roles":["euclidean"],
+      "checks":["eight-step-loop-baseline","preview-does-not-paint","cancel-retains-pattern","shifted-paint-xor","repaint-restores-original","left-and-center-reset","dense-fill-boundary","cleanup"],
+      "command":["tests/mosaic_euclidean.py"]
+    },
+    "A19-stopped-scale-highlight-baseline":{
+      "tier":"E","family":"A19","roles":["stopped-highlight"],
+      "checks":["play-and-stop","edit-only-indicator","stopped-active-highlight","cleanup"],
+      "command":["tests/mosaic_scale_slots.py","--highlight-baseline"]
+    },
+    "A06-scale-slot-controls":{
+      "tier":"E","family":"A06","roles":["scale-slots"],
+      "checks":["initial-c-major","shift-edit-does-not-apply","activate-last-slot","hold-edit-does-not-apply","restore-first-slot","slot-edits-retained","global-transpose-increments","global-transpose-decrements","per-scale-transpose","global-upper-bound-adds-to-scale","global-lower-bound-adds-to-scale","global-center-restores-scale-offset","cleanup"],
+      "command":["tests/mosaic_scale_slots.py"]
+    },
     "mosaic-midi-fix-chord-regressions":{
       "tier":"E","family":"A06","roles":["candidate-chords"],
       "checks":["third-above-root","triad","octave-voice","all-four-additional-voices","upper-fourth-voice-bound","upper-bound-clamps","lower-fourth-voice-bound","lower-bound-clamps","clear-all-step-voices","cleanup"],

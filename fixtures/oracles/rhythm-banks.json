@@ -1,0 +1,10 @@
+{
+  "basis": "Literal selected pattern data from Mosaic 160d1ea lib/helpers/drum_ops_tables.lua, decoded by bit position; no drum_ops function or captured output supplies expectations.",
+  "drum_pattern_2": {
+    "1": [3,16], "2": [1,9], "3": [5,13],
+    "4": [1,3,5,7,9,11,13,15], "5": []
+  },
+  "numeric_prime_1_factor_1": {
+    "1": [5,13], "2": [1], "3": [9], "4": [1,5,9,13]
+  }
+}

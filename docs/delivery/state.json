@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "C08 remains in progress; latest public checkpoint eb20fc1. New explicit MIDI/mask candidate passes8 native mask checks,10 unchanged chord checks and475 units; baseline retains7 unmatched note-ons and a separate clear-all-defaults failure. Candidate preparation now rejects no-op patch application. See C08-progress.md for exact evidence. Commit/push this checkpoint, then implement scale-slot selection/global transposition, remaining quantiser choices and pattern algorithms. Lower merge semantic answer remains pending; independent one-step channel gesture remains unresolved. C12 must combine memory and MIDI/mask candidates and verify full overlap/panic behavior. No active processes.",
+  "next_action": "C08 remains in progress; latest public ec5ad13. Four further native packages passed45 checks: scale slots13, Euclidean8, five drum/four numeric banks11, all ten scales13. See C08-progress.md. R15 stopped active-scale highlight has a retained executable failing baseline owned by C12/A19. No active processes. Commit/push this checkpoint, then continue two active channels/independent lengths, remaining root-degree-rotation bounds, note/velocity editor ranges, tresillo and quantiser options. Lower merge semantic answer pending; independent one-step channel selection unresolved. C12 must combine and verify memory plus MIDI/mask candidates; no C08 completion claimed.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
