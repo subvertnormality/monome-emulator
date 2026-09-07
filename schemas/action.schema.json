@@ -253,6 +253,65 @@
             "schedule_id"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "midi_schedule"
+            },
+            "schedule_id": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "events": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "port": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 16
+                  },
+                  "bytes": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 255
+                    },
+                    "minItems": 1,
+                    "maxItems": 4096
+                  },
+                  "at_logical_ns": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 18446744073709551615
+                  }
+                },
+                "required": [
+                  "port",
+                  "at_logical_ns",
+                  "bytes"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 512
+            },
+            "time_domain": {
+              "const": "logical"
+            }
+          },
+          "required": [
+            "type",
+            "schedule_id",
+            "events",
+            "time_domain"
+          ],
+          "additionalProperties": false
         }
       ]
     },

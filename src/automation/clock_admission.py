@@ -85,7 +85,10 @@ def native_observations(native,observations,mode,session):
     for index,entry in enumerate(actions,1):
         request,ack=entry['request'],entry['ack']
         require(request['session_id']==session and request['sequence']==index,'Wrong/unordered application input')
-        require(all(request[k]==ack[k] for k in ('session_id','action_id','sequence')) and ack['status']=='applied','Unapplied application input')
+        status='accepted' if request['action']['type']=='midi_schedule' else 'applied'
+        require(all(request[k]==ack[k] for k in ('session_id','action_id','sequence')) and ack['status']==status,'Unapplied application input')
+    from .midi_schedule_evidence import verify_midi_schedules
+    verify_midi_schedules(events,actions)
 
 def external_case(path,case,profile,source,runtime,mode):
     record=read_json(path)

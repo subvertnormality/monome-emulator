@@ -46,6 +46,8 @@ class NativeBackend:
         verify_install(install)
         self.schedule_supported=any(item['path']=='matron/src/emu_midi_schedule.c'
             for item in install.get('experimental',{}).get('files',[]))
+        self.schedule_domains=install.get('experimental',{}).get('midi_schedule_domains',
+            ['monotonic'] if self.schedule_supported else [])
         if self.clock_mode!='real-time' and install.get('experimental',{}).get('status')!='experimental-unadmitted':
             raise ContractError('clock_mode','Controlled time requires an identified experimental candidate')
         self.native=Path(install['source'])
@@ -208,16 +210,18 @@ class NativeBackend:
                             if kind==15:self.input_schedule['cancelled']=count
                         self.schedule_responses[identifier]=response
                         record.update(response)
-                    elif kind==14:
+                    elif kind in (14,17):
                         if len(payload)<25:raise ValueError('Short scheduled MIDI delivery')
+                        domain='logical' if kind==17 else 'monotonic'
+                        if (kind==17)!=(self.clock_mode!='real-time'):raise ValueError('Scheduled MIDI clock domain mismatch')
                         index,port,intended,actual=struct.unpack('=IIQQ',payload[:24])
                         schedule=self.input_schedule; data=list(payload[24:])
                         if schedule is None or schedule['schedule_id']!=identifier or index!=len(schedule['delivered']) or index>=len(schedule['events']):
                             raise ValueError('Scheduled MIDI delivery order/identity mismatch')
-                        if schedule['events'][index]!=dict(port=port,at_monotonic_ns=intended,bytes=data):
+                        if schedule['events'][index]!=dict(port=port,bytes=data,**{'at_'+domain+'_ns':intended}):
                             raise ValueError('Scheduled MIDI input differs from accepted event')
                         self.midi_inputs[port-1].feed(data)
-                        delivery=dict(index=index,port=port,bytes=data,intended_monotonic_ns=intended,actual_monotonic_ns=actual)
+                        delivery=dict(index=index,port=port,bytes=data,**{'intended_'+domain+'_ns':intended,'actual_'+domain+'_ns':actual})
                         schedule['delivered'].append(delivery);record.update(delivery)
                         if len(schedule['delivered'])==len(schedule['events']):schedule['status']='completed'
                     elif kind==4: self.acks[identifier]=ns
@@ -278,14 +282,15 @@ class NativeBackend:
                         native_ack_ns=timestamp))+'\n')
             self.check_processes(); return timestamp
     def schedule_input(self,action):
-        if not self.schedule_supported or self.clock_mode!='real-time':
-            raise ContractError('unsupported','Independent MIDI scheduling requires the real-time experimental input-queue candidate')
+        domain=action.get('time_domain','logical' if action['type']=='midi_schedule_cancel' and self.clock_mode!='real-time' else 'monotonic')
+        if domain not in self.schedule_domains or (domain=='logical')!=(self.clock_mode!='real-time'):
+            raise ContractError('unsupported','MIDI scheduling requires an experimental candidate supporting the selected session time domain')
         with self.io_lock:
             self.check_processes()
-            kind=9 if action['type']=='midi_schedule' else 10
+            kind=(11 if domain=='logical' else 9) if action['type']=='midi_schedule' else 10
             with self.condition:
                 previous=self.input_schedule
-                if kind==9:
+                if kind in (9,11):
                     if previous and previous['status'] in ('submitting','accepted'):
                         raise ContractError('schedule_busy','A MIDI schedule is still active')
                     candidates=copy.deepcopy(self.midi_inputs)
@@ -296,8 +301,8 @@ class NativeBackend:
                         events=copy.deepcopy(action['events']),delivered=[],cancelled=0)
                 self.sequence+=1; sequence=self.sequence
                 self.events.write(json.dumps(dict(kind='input',sequence=sequence,type=kind,args=[action],monotonic_ns=time.monotonic_ns()))+'\n')
-            if kind==9:
-                records=b''.join(struct.pack('=QII',e['at_monotonic_ns'],e['port'],len(e['bytes']))+bytes(e['bytes']) for e in action['events'])
+            if kind in (9,11):
+                records=b''.join(struct.pack('=QII',e['at_'+domain+'_ns'],e['port'],len(e['bytes']))+bytes(e['bytes']) for e in action['events'])
                 packet=struct.pack('=4I',sequence,kind,action['schedule_id'],len(action['events']))+records
             else:packet=struct.pack('=6I',sequence,kind,action['schedule_id'],0,0,0)
             if len(packet)>65536:
@@ -312,7 +317,7 @@ class NativeBackend:
                     self.condition.wait(.01)
                 response=self.schedule_responses.pop(sequence)
                 if 'error' in response:
-                    if kind==9:self.input_schedule=previous
+                    if kind in (9,11):self.input_schedule=previous
                     raise ContractError(response['error'],'Native MIDI schedule rejected: '+response['error'])
             return response
     def query(self,payload):

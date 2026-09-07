@@ -21,4 +21,11 @@
 No identified in-scope defect may be put here as `later` if it prevents a required
 acceptance row from passing.
 
+R16 — Continuous scheduled MIDI refill: fold:C10/C12. The current one-batch
+512-event queue suffices for short handoffs but cannot sustain longer external
+clock endurance without a refill/extension mechanism. Add one with bounded
+storage and unchanged absolute deadlines; never insert gaps or retime a new
+batch to pass the timing tests. Required before long continuous MIDI-clock
+acceptance, not waived by the short C16 probes.
+
 R15 — Stopped scale-slot highlight: fold:C12 (A19). Native failed evidence artifacts/c08/7af59ee065a04cd9a23e1404d477c631/manifest.json shows default slot1 LED2 after stopping and shift-editing slot16, whose edit-only LED4 is correct. scale_edit_page.lua's playing draw sets the fader to0 and stopped drawing does not restore it. Preserve/reproduce the active highlight assertion in the C12 display-refresh package; current scale controls package verifies selected edit-only indicators and MIDI, and earns no credit for this missing highlight. Do not waive A19.

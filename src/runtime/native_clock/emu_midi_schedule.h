@@ -2,9 +2,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/* Owned exclusively by the native input thread, like the virtual MIDI decoder.
- * Deadlines are CLOCK_MONOTONIC nanoseconds. Controlled time is not accepted by
- * this interface. The bridge polls the next deadline without waiting for Lua.
+/* Caller serializes queue access. Deadlines use the explicitly selected native
+ * CLOCK_MONOTONIC or logical nanosecond domain; no conversion is performed here.
+ * The real-time bridge polls without waiting for Lua. Controlled advancement
+ * supplies logical deadlines and delivers due input before servicing timers.
  */
 #define EMU_MIDI_SCHEDULE_EVENTS 512
 #define EMU_MIDI_SCHEDULE_BYTES 32768
@@ -38,3 +39,6 @@ int emu_midi_schedule_step(struct emu_midi_schedule *queue, uint64_t now_ns,
  */
 const char *emu_midi_schedule_cancel(struct emu_midi_schedule *queue,
     uint32_t id, uint32_t *cancelled);
+/* Bridge hooks used by controlled advancement; internally serialized. */
+uint64_t emu_midi_controlled_deadline(void);
+int emu_midi_controlled_step(uint64_t now_ns);

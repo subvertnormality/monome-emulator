@@ -1,5 +1,6 @@
 /* Experimental native clock driver. No script or musical implementation here. */
 #include "emu_clock.h"
+#include "emu_midi_schedule.h"
 #include "clock.h"
 #include "clocks/clock_internal.h"
 #include "clocks/clock_scheduler.h"
@@ -49,6 +50,7 @@ const char *emu_clock_advance(uint64_t delta) {
     for (;;) {
         if (++work>200000) { failure="controlled clock work limit exceeded";break; }
         now=emu_clock_now();
+        if (emu_midi_controlled_step(now)) continue;
         if (now>=deadline(next_tick_ns,0,0)) {
             clock_internal_publish_tick(&ticks,pending_beat_duration);
             double duration;
@@ -64,6 +66,7 @@ const char *emu_clock_advance(uint64_t delta) {
         double sleep_due,sync_due;
         clock_scheduler_pending(&sleep_due,&sync_due);
         uint64_t next=deadline(next_tick_ns,0,now);
+        uint64_t midi=emu_midi_controlled_deadline();if(midi && midi<next)next=midi;
         uint64_t metro=metros_pending();if(metro<next)next=metro;
         uint64_t sleep=deadline((long double)sleep_due*1000000000.L,0,now);if(sleep<next)next=sleep;
         double beat=clock_get_beats(),tempo=clock_get_tempo();
