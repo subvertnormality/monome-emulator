@@ -1,0 +1,12 @@
+{
+  "schema_version":1,"id":"native-beat-replay","backend":"native","tier":"I","family":"G03",
+  "script":"fixtures/probes/midi-probe/midi-probe.lua","code_root":"fixtures/probes","deadline_ms":60000,
+  "steps":[
+    {"assertion":{"path":"state.ready","equals":true}},
+    {"anchor":"session-beat"},
+    {"action":{"type":"midi","port":1,"bytes":[176,71,1]},"at_beat":{"anchor":"session-beat","beats":0.25,"timeout_ms":3000}},
+    {"wait_beats":{"anchor":"session-beat","beats":0.5,"timeout_ms":3000}},
+    {"assertion":{"path":"state.midi_count","equals":1}},
+    {"assertion":{"path":"state.midi.0.bytes","equals":[176,71,1]}}
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "schema_version":1,"id":"native-capture-cost","backend":"native","tier":"I","family":"G03",
+  "script":"fixtures/probes/capture-cost/capture-cost.lua","code_root":"fixtures/probes","deadline_ms":60000,
+  "steps":[
+    {"action":{"type":"key","n":2,"state":1}},
+    {"action":{"type":"key","n":2,"state":0}},
+    {"wait":{"path":"state.midi_count","equals":1000},"timeout_ms":3000},
+    {"assertion":{"path":"state.midi.0.bytes","equals":[176,75,1]}},
+    {"assertion":{"path":"state.midi.999.bytes","equals":[176,75,104]}},
+    {"assertion":{"path":"state.midi_capture.dropped","equals":0}}
+  ]
+}

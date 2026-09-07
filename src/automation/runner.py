@@ -13,18 +13,26 @@ def lookup(observation,path):
         except (KeyError,IndexError,ValueError,TypeError): raise ContractError('observation_path','Missing observation '+path)
     return value
 
-def run(path,backend=None):
+def run(path,backend=None,replay_of=None):
     scenario=checked('scenario',read_json(path))
     if backend is not None and backend!=scenario['backend']: raise ContractError('backend_mismatch','Scenario requires '+scenario['backend'])
     if scenario['backend']=='contract-fixture' and scenario['tier'] not in ('U','F'):
         raise ContractError('false_fidelity','A contract fixture is only U/F evidence')
-    if not any('assertion' in s or 'wait' in s for s in scenario['steps']): raise ContractError('no_assertions','Scenario must assert an observation')
+    if not any('assertion' in s or 'wait' in s or 'wait_beats' in s for s in scenario['steps']): raise ContractError('no_assertions','Scenario must assert an observation')
     if scenario['backend']!='contract-fixture' and any('fixture_fault' in s for s in scenario['steps']):
         raise ContractError('fixture_fault','Fixture faults cannot be used as native test evidence')
     run_id=uid(); out=ROOT/'artifacts/runs'/run_id; out.mkdir(parents=True)
     write_json(out/'scenario.json',scenario)
+    if replay_of is not None:write_json(out/'replay.json',replay_of)
     identity=source_identity(); started=time.monotonic_ns(); deadline=time.monotonic()+scenario['deadline_ms']/1000
     info=None; results=[]; trace=[]; observations=[]; error=None; sequence=0
+    from .timeline import Timeline
+    def observe():
+        value=checked('observation',session.request(info['session_id'],'/snapshot',timeout=max(.01,min(5,deadline-time.monotonic()))))
+        observations.append(value)
+        if value['errors']:raise ContractError('runtime_errors','Backend reported errors')
+        return value
+    timeline=Timeline(observe,deadline)
     index=0; kind='startup'
     try:
         options={}
@@ -35,11 +43,13 @@ def run(path,backend=None):
         elif 'script' in scenario:
             options=dict(script=ROOT/scenario['script'],code_root=ROOT/scenario['code_root'] if 'code_root' in scenario else None)
         if 'midi_config' in scenario: options['midi_config']=scenario['midi_config']
+        if 'random_seed' in scenario:options['random_seed']=scenario['random_seed']
         info=session.start(scenario['backend'],**options)
         for index,step in enumerate(scenario['steps']):
-            kind=next(key for key in ('action','assertion','wait','fixture_fault') if key in step)
+            kind=next(key for key in ('action','assertion','wait','fixture_fault','anchor','wait_beats') if key in step)
             if time.monotonic()>=deadline: raise ContractError('scenario_timeout','Scenario deadline expired')
             if kind=='action':
+                if 'at_beat' in step:timeline.wait(step['at_beat'],'at_beat')
                 sequence+=1
                 action=checked('action',dict(schema_version=1,session_id=info['session_id'],action_id=uid(),sequence=sequence,action=step['action']))
                 ack=session.request(info['session_id'],'/action',action,timeout=max(0.01,min(5,deadline-time.monotonic())))
@@ -61,6 +71,8 @@ def run(path,backend=None):
             elif kind=='fixture_fault':
                 session.request(info['session_id'],'/fixture-fault',{'fault':step[kind]})
                 raise ContractError('fault_not_triggered','Requested fixture fault did not fail')
+            elif kind=='anchor':timeline.anchor(step[kind])
+            elif kind=='wait_beats':timeline.wait(step[kind])
             results.append(dict(index=index,kind=kind,passed=True,detail='Applied and acknowledged' if kind=='action' else 'Observable assertion passed'))
         if time.monotonic()>deadline: raise ContractError('scenario_timeout','Scenario finished after its deadline')
         if identity['digest']!=source_identity()['digest']: raise ContractError('source_changed','Source changed during run')
@@ -80,6 +92,7 @@ def run(path,backend=None):
             except ContractError as failure:
                 error=error or failure.as_dict()
     write_json(out/'trace.json',trace); write_json(out/'observations.json',observations)
+    write_json(out/'timeline.json',timeline.events)
     write_json(out/'failure.json',error)
     if info:
         directory=session.SESSIONS/info['session_id']

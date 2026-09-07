@@ -33,7 +33,9 @@ observation=obj(dict(schema_version=const(1),session_id=string(),backend=string(
  state=dict(type='object'),errors=array(obj(dict(code=string(),message=string())))))
 save('observation',observation)
 expectation=obj(dict(path=string(),equals={}))
-step={'oneOf':[obj(dict(action=action)),obj(dict(assertion=expectation)),
+beat_wait=obj(dict(anchor=string(),beats=dict(type='number',minimum=0,maximum=10000),timeout_ms=integer(1,60000)))
+step={'oneOf':[obj(dict(action=action,at_beat=beat_wait),['action']),obj(dict(assertion=expectation)),
+ obj(dict(anchor=string())),obj(dict(wait_beats=beat_wait)),
  obj(dict(wait=expectation,timeout_ms=integer(1,60000))),obj(dict(fixture_fault=string(enum=['crash','stall'])))]}
 scenario_fields=dict(schema_version=const(1),id=string(),backend=string(enum=['contract-fixture','native']),
  tier=string(enum=['U','I','E','B','R','F','D']),family=string(),
@@ -41,6 +43,7 @@ scenario_fields=dict(schema_version=const(1),id=string(),backend=string(enum=['c
 required=list(scenario_fields)
 scenario_fields.update(script=string(),code_root=string(),fixture=string(),fixture_profile=string())
 scenario_fields['midi_config']=obj(dict(ports=array(string(),1,16),capture_limit=integer(1,1000000)),['ports'])
+scenario_fields['random_seed']=integer(0,2147483647)
 save('scenario',obj(scenario_fields,required))
 artifact=obj(dict(path=string(),sha256=string(),size=integer(0,10**12)))
 identity=obj(dict(revision=string(),digest=string(),files=array(artifact,1)))
@@ -60,8 +63,12 @@ browser_fields=dict(schema_version=const(1),kind=const('browser-package'),run_id
  checks=array(obj(dict(name=string(),passed=dict(type='boolean'),detail=string()),['name','passed']),1),artifacts=array(artifact,1))
 save('browser-run',obj(browser_fields))
 package_fields=dict(schema_version=const(1),kind=const('native-package'),run_id=string(),scenario_id=string(),
- backend=const('native'),fidelity=const('native-norns'),tier=string(enum=['E','B']),family=const('A01'),clock_mode=const('real-time'),
+ backend=const('native'),fidelity=const('native-norns'),tier=string(enum=['E','B']),family=string(),clock_mode=const('real-time'),
  source=identity,platform=dict(type='object'),collected=integer(),passed=dict(type='boolean'),exit_code=integer(0,255),
  checks=array(obj(dict(name=string(),passed=dict(type='boolean')))),phases=array(obj(dict(role=string(),directory=string(),session_id=string()))),
  artifacts=array(artifact),error={'oneOf':[dict(type='null'),dict(type='object')]})
 save('package-run',obj(package_fields))
+seconds=dict(type='number')
+timing_fields=dict(pitch=integer(0,127),intent_seconds=seconds,rounded_pulse=integer(),expected_seconds=seconds,actual_seconds=seconds,error_ms=seconds)
+duration_fields=dict(pitch=integer(0,127),intent_seconds=seconds,dispatch_pulses=integer(),expected_seconds=seconds,actual_seconds=seconds,error_ms=seconds)
+save('timing-report',obj(dict(session_id=string(),timing=array(obj(timing_fields),1),note_durations=array(obj(duration_fields),1)),['session_id','timing']))

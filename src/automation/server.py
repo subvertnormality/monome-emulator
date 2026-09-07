@@ -40,7 +40,7 @@ class Application:
             from runtime.native import NativeBackend
             self.backend=NativeBackend(directory,self.config)
         else: self.backend=FixtureBackend(directory)
-        self.sequence=0; self.action_ids=set(); self.lock=threading.Lock(); self.errors=[]
+        self.sequence=0; self.action_ids=set(); self.lock=threading.Lock(); self.action_lock=threading.Lock(); self.errors=[]
         self.clients={}; self.input_owners={}; self.client_timeout=2.5
     def heartbeat(self,client_id):
         if not isinstance(client_id,str) or not 1<=len(client_id)<=64 or any(c not in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_' for c in client_id):
@@ -59,24 +59,40 @@ class Application:
         return checked('observation',dict(schema_version=1,session_id=self.config['session_id'],
           backend=self.config['backend'],fidelity=self.backend.fidelity,monotonic_ns=time.monotonic_ns(),
           frame_revision=raw['frame_revision'],grid_revision=raw['grid_revision'],state=raw['state'],errors=self.errors))
-    def action(self,payload):
+    def wait_schedule(self,payload):
+        try:
+            checked('action',payload)
+            action=payload['action']
+            if 'at_monotonic_ns' not in action:return False
+            if self.config['backend']!='native':raise ContractError('unsupported','Scheduled MIDI requires the native clock')
+            delay=(action['at_monotonic_ns']-time.monotonic_ns())/1e9
+            if delay<0 or delay>2:raise ContractError('midi_input_time','Scheduled MIDI input must be in the next two seconds on the backend monotonic clock')
+            # Serialize input requests, but leave observation and heartbeat paths
+            # available throughout an intentional future-input delay.
+            time.sleep(delay)
+            return True
+        except ContractError as error:
+            with open(self.directory/'actions.jsonl','a') as stream:stream.write(json.dumps(dict(request=payload,error=error.as_dict()))+'\n')
+            raise
+    def action(self,payload,scheduled=False):
         record=dict(request=payload)
         try:
-            record['ack']=self.apply_action(payload)
+            record['ack']=self.apply_action(payload,scheduled)
             return record['ack']
         except ContractError as error:
             record['error']=error.as_dict()
             raise
         finally:
             with open(self.directory/'actions.jsonl','a') as stream: stream.write(json.dumps(record)+'\n')
-    def apply_action(self,payload):
+    def apply_action(self,payload,scheduled=False):
         checked('action',payload)
         if payload['session_id']!=self.config['session_id']: raise ContractError('session_mismatch','Action targets another session')
         if payload['sequence']!=self.sequence+1: raise ContractError('sequence','Expected action sequence '+str(self.sequence+1))
         if payload['action_id'] in self.action_ids: raise ContractError('duplicate_action','Action identity was already applied')
         if self.config['backend']=='contract-fixture' and payload['action']['type']=='grid_connection':
             raise ContractError('unsupported','Grid connection requires the native backend')
-        action=payload['action']; client_id=payload.get('client_id'); kind=action['type']
+        action=dict(payload['action']); client_id=payload.get('client_id'); kind=action['type']
+        if scheduled:action.pop('at_monotonic_ns')
         key=(kind,action.get('n'),action.get('x'),action.get('y'))
         if client_id: self.heartbeat(client_id)
         if kind in ('key','grid') and not action['state'] and client_id and self.input_owners.get(key,(None,None))[0]!=client_id:
@@ -143,6 +159,11 @@ def serve_application(directory,app):
                     size=int(self.headers.get('Content-Length','0'))
                     if size<1 or size>MAX_BODY: raise ContractError('body_size','Invalid request body length')
                     payload=json.loads(self.rfile.read(size))
+                if self.command=='POST' and self.path=='/action':
+                    with app.action_lock:
+                        scheduled=app.wait_schedule(payload)
+                        with app.lock:self.respond(200,app.action(payload,scheduled))
+                    return
                 with app.lock:
                     if self.command=='POST' and self.path in ('/client/heartbeat','/client/disconnect'):
                         if not isinstance(payload,dict) or set(payload)!={'client_id'}: raise ContractError('client_id','Expected a client_id')
@@ -159,7 +180,6 @@ def serve_application(directory,app):
                           fidelity=app.backend.fidelity,supported=(['native script loading','native keys/encoders','Cairo framebuffer','grid128 LED/relative/bulk/refresh, rotation, intensity, holds and reconnect','configured native MIDI ports, byte-stream input and emission-time capture','patched v2.9.4: realtime MIDI preserves partial messages (0009); cancelled queued clock resumes are ignored (0011)'] if app.config['backend']=='native' else ['contract counter','ordered action acknowledgment']),
                           absent=['physical Crow','GPIO/SPI','network manager'] if app.config['backend']=='native' else [],
                           unsupported=['audio engines','physical peripherals','grid tilt','MIDI isolated F7 or status-interrupted partial messages (stricter than stock v2.9.4; C10)'] if app.config['backend']=='native' else ['native norns','application workflows']))); return
-                    if self.command=='POST' and self.path=='/action': self.respond(200,app.action(payload)); return
                     if self.command=='POST' and self.path=='/fixture-fault':
                         if app.config['backend']!='contract-fixture': raise ContractError('unsupported','Fixture faults require the contract backend')
                         if payload not in ({'fault':'crash'},{'fault':'stall'}): raise ContractError('schema','Unknown fixture fault')

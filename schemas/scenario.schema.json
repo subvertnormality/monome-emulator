@@ -194,6 +194,32 @@
                     "additionalProperties": false
                   }
                 ]
+              },
+              "at_beat": {
+                "type": "object",
+                "properties": {
+                  "anchor": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  "beats": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "timeout_ms": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 60000
+                  }
+                },
+                "required": [
+                  "anchor",
+                  "beats",
+                  "timeout_ms"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
@@ -223,6 +249,55 @@
             },
             "required": [
               "assertion"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "anchor": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              }
+            },
+            "required": [
+              "anchor"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "wait_beats": {
+                "type": "object",
+                "properties": {
+                  "anchor": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  "beats": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "timeout_ms": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 60000
+                  }
+                },
+                "required": [
+                  "anchor",
+                  "beats",
+                  "timeout_ms"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "wait_beats"
             ],
             "additionalProperties": false
           },
@@ -323,6 +398,11 @@
         "ports"
       ],
       "additionalProperties": false
+    },
+    "random_seed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
     }
   },
   "required": [

@@ -19,8 +19,8 @@ def normalized(actions):
     return result
 
 class Slice(Client):
-    def __init__(self,data_seed=None,browser=False):
-        super().__init__(mosaic=True,data_seed=data_seed);self.output_root=ROOT/'artifacts/c06'
+    def __init__(self,data_seed=None,browser=False,random_seed=None):
+        super().__init__(mosaic=True,data_seed=data_seed,random_seed=random_seed);self.output_root=ROOT/'artifacts/c06'
         self.browser=None;self.recipe=[];self.success=False
         if browser:
             from browser_client import Browser

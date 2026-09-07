@@ -1,6 +1,23 @@
 -- Host profile applied after native startup installs its core/menu functions.
 -- Preserve script loading, drawing, params and clocks. No musical logic lives here.
 local report = _norns.emu_report
+-- Opt-in native PRNG seed policy, including scripts that reseed from os.time.
+-- The PRNG algorithm and every native clock/time source remain unchanged.
+local seed=tonumber(os.getenv('NORNS_EMU_RANDOM_SEED'))
+if seed then
+  local randomseed=math.randomseed
+  math.randomseed=function(requested)
+    print('emulator random seed override: requested='..tostring(requested)..' applied='..tostring(seed))
+    return randomseed(seed)
+  end
+  math.randomseed(seed)
+end
+local clock_epoch=0
+local native_clock_start=_norns.clock.start
+_norns.clock.start=function(...)
+  clock_epoch=clock_epoch+1
+  return native_clock_start(...)
+end
 local native_grid_led = _norns.grid_set_led
 _norns.grid_set_led = function(device, x, y, level, relative)
   local ok, err = pcall(native_grid_led, device, x, y, level, relative)
@@ -85,6 +102,6 @@ _norns.emu_observe=function()
     end
     i=i+(params:t(i)==params.tGROUP and params:get(i)+1 or 1)
   end
-  report(8,string.format('%s\t%.9f\t%.6f\t%d\t%d\t%d\t%d\t%d\t%d\t%s',norns.state.name,
-    clock.get_beats(),clock.get_tempo(),#params.params,#enabled,loaded,threads,metros,norns.menu.status() and 1 or 0,table.concat(roots,'\n')))
+  report(8,string.format('%s\t%.9f\t%.6f\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s',norns.state.name,
+    clock.get_beats(),clock.get_tempo(),#params.params,#enabled,loaded,threads,metros,norns.menu.status() and 1 or 0,clock_epoch,table.concat(roots,'\n')))
 end

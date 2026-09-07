@@ -3,6 +3,17 @@ from pathlib import Path
 from .identity import artifact,source_identity,verify_artifact
 from .protocol import ROOT,ContractError,checked,read_json
 
+def replay_input(path):
+    """Validate retained inputs, without treating old/failed results as acceptance."""
+    path=Path(path).resolve();record=read_json(path)
+    checked('package-run' if record.get('kind')=='native-package' else 'manifest',record)
+    for item in record['artifacts']:verify_artifact(item,path.parent)
+    if record.get('kind')=='native-package':
+        spec=read_json(ROOT/'compatibility/packages.json')['packages'].get(record['scenario_id'])
+        if not spec or any(record[k]!=spec[k] for k in ('tier','family')):raise ContractError('package_inventory','Unknown or mismatched replay package')
+    else:verify_artifact(record['scenario'],path.parent)
+    return record
+
 def verify(path,current_source=True):
     path=Path(path).resolve()
     if read_json(path).get('kind')=='browser-package': return verify_browser(path,current_source)
@@ -14,7 +25,7 @@ def verify(path,current_source=True):
         raise ContractError('result_order','Missing, duplicated or unordered result indices')
     if not manifest['passed'] or manifest['exit_code']!=0 or manifest['error'] is not None or not all(r['passed'] for r in manifest['results']):
         raise ContractError('failed_run','Manifest records a failed run')
-    if not any(r['kind'] in ('assertion','wait') for r in manifest['results']):
+    if not any(r['kind'] in ('assertion','wait','wait_beats') for r in manifest['results']):
         raise ContractError('no_assertions','Run contains no observable assertions')
     if manifest['finished_ns']<manifest['started_ns']: raise ContractError('time_order','Invalid run timestamps')
     if current_source and manifest['source']['digest']!=source_identity()['digest']:
@@ -29,8 +40,13 @@ def verify(path,current_source=True):
         if manifest[key]!=scenario[key]: raise ContractError('scenario_identity','Scenario and manifest disagree on '+key)
     if scenario['id']!=manifest['scenario_id'] or len(scenario['steps'])!=manifest['collected']:
         raise ContractError('scenario_identity','Scenario identity/count changed')
-    kinds=[next(k for k in ('action','assertion','wait','fixture_fault') if k in step) for step in scenario['steps']]
+    kinds=[next(k for k in ('action','assertion','wait','fixture_fault','anchor','wait_beats') if k in step) for step in scenario['steps']]
     if [r['kind'] for r in manifest['results']]!=kinds: raise ContractError('result_kind','Results do not match scenario steps')
+    timeline_kinds=[('at_beat' if 'at_beat' in step else kind) for step,kind in zip(scenario['steps'],kinds) if kind in ('anchor','wait_beats') or 'at_beat' in step]
+    if timeline_kinds:
+        if 'timeline.json' not in names:raise ContractError('timeline_artifact','Beat recipe lacks native clock evidence')
+        timeline=read_json(path.parent/'timeline.json')
+        if [e['kind'] for e in timeline]!=timeline_kinds:raise ContractError('timeline_inventory','Beat observations do not match recipe')
     trace=read_json(path.parent/'trace.json'); observations=read_json(path.parent/'observations.json')
     if not isinstance(trace,list) or len(trace)!=kinds.count('action'): raise ContractError('trace_inventory','Missing action trace')
     for index,item in enumerate(trace,1):
@@ -82,16 +98,16 @@ def verify_browser(path,current_source=True):
 
 def verify_package(path,current_source=True):
     path=Path(path).resolve(); manifest=checked('package-run',read_json(path))
-    required=['fresh-bootstrap','four-step-playback-and-live-edit','save-dialog','native-autosave','fresh-cleanup',
-              'autosave-bootstrap','file-dialog-load-and-playback','reload-cleanup']
-    if manifest['scenario_id'] not in ('mosaic-four-step-api','mosaic-four-step-browser'):
+    spec=read_json(ROOT/'compatibility/packages.json')['packages'].get(manifest['scenario_id'])
+    if spec is None:
         raise ContractError('package_inventory','Unknown procedural package')
-    if manifest['tier']!=('B' if manifest['scenario_id'].endswith('browser') else 'E'):
+    required=spec['checks']
+    if manifest['tier']!=spec['tier'] or manifest['family']!=spec['family']:
         raise ContractError('package_tier','Browser/API package tier mismatch')
     if not manifest['passed'] or manifest['exit_code'] or manifest['error'] or manifest['collected']!=len(required) or [c['name'] for c in manifest['checks']]!=required or not all(c['passed'] for c in manifest['checks']):
         raise ContractError('failed_package','Incomplete or failed Mosaic slice')
-    if [p['role'] for p in manifest['phases']]!=['fresh','autosave'] or len({p['session_id'] for p in manifest['phases']})!=2:
-        raise ContractError('package_phases','Slice requires two fresh native processes')
+    if [p['role'] for p in manifest['phases']]!=spec['roles'] or len({p['session_id'] for p in manifest['phases']})!=len(spec['roles']):
+        raise ContractError('package_phases','Package lacks its required distinct native phases')
     names=[a['path'] for a in manifest['artifacts']]
     if len(set(names))!=len(names): raise ContractError('artifact_inventory','Duplicated package artifact')
     if 'results.json' not in names or (path.parent/'failure.json').exists():raise ContractError('package_results','Missing results or retained failure')

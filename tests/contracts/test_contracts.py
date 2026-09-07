@@ -159,6 +159,18 @@ class Contracts(unittest.TestCase):
         self.assertEqual(result.returncode,1); self.assertFalse(json.loads(result.stdout)['passed'])
         result=subprocess.run([sys.executable,str(ROOT/'dev/emu'),'test','--suite','missing','--require-all'],capture_output=True,text=True)
         self.assertEqual(result.returncode,1); self.assertIn('unknown_suite',result.stderr)
+    def test_cli_replays_failed_old_source_as_new_execution(self):
+        path,old=self.run_recipe(self.recipe([dict(assertion=dict(path='state.counter',equals=9))]))
+        old['source']['digest']='prior-source';write_json(path,old)
+        result=subprocess.run([sys.executable,str(ROOT/'dev/emu'),'replay',str(path)],capture_output=True,text=True)
+        self.assertEqual(result.returncode,1,result.stderr)
+        value=json.loads(result.stdout);fresh=Path(value['manifest'])
+        self.assertNotEqual(fresh,path);self.assertFalse(value['passed'])
+        self.assertEqual(json.loads((fresh.parent/'replay.json').read_text())['source_digest'],'prior-source')
+        self.assertNotEqual(json.loads(fresh.read_text())['source']['digest'],'prior-source')
+        (path.parent/'scenario.json').write_text('{}')
+        result=subprocess.run([sys.executable,str(ROOT/'dev/emu'),'replay',str(path)],capture_output=True,text=True)
+        self.assertEqual(result.returncode,1);self.assertNotIn('"manifest"',result.stdout)
     def test_empty_collection_is_not_success(self):
         from automation.cli import main
         with mock.patch('unittest.defaultTestLoader.discover',return_value=unittest.TestSuite()):

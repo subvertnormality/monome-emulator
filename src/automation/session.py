@@ -28,8 +28,10 @@ def request(session_id,path,payload=None,timeout=5):
         raise ContractError(value.get('code','http_error'),value.get('message',str(error))) from error
     except (OSError,ValueError) as error: raise ContractError('session_unavailable',str(error)) from error
 
-def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None,midi_config=None):
+def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None,midi_config=None,random_seed=None):
     if backend not in ('contract-fixture','native'): raise ContractError('unsupported_backend',backend)
+    if random_seed is not None and (type(random_seed)!=int or not 0<=random_seed<=2147483647):raise ContractError('random_seed','Seed must be an integer from 0 to 2147483647')
+    if random_seed is not None and backend!='native':raise ContractError('random_seed','Repeatable seed requires the native Lua runtime')
     from devices.midi import configuration
     midi_config=configuration(midi_config)
     session_id=uid(); directory=SESSIONS/session_id
@@ -43,7 +45,7 @@ def start(backend='contract-fixture',script=None,code_root=None,data=None,enable
     else: data_path=dust/'data'
     config=dict(session_id=session_id,token=uid(),backend=backend,script=str(Path(script).absolute()) if script else None,
                 code_root=str(Path(code_root).absolute()) if code_root else None,data=str(data_path),dust=str(dust),
-                enabled_mods=enabled_mods or [],data_seeds=data_seeds or [],midi_config=midi_config)
+                enabled_mods=enabled_mods or [],data_seeds=data_seeds or [],midi_config=midi_config,random_seed=random_seed)
     write_json(directory/'config.json',config)
     log=open(directory/'server.log','w')
     env=dict(os.environ,PYTHONPATH=str(ROOT/'src'))

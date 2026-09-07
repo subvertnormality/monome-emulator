@@ -1,0 +1,20 @@
+{
+  "schema_version":1,
+  "packages":{
+    "mosaic-four-step-api":{
+      "tier":"E","family":"A01","roles":["fresh","autosave"],
+      "checks":["fresh-bootstrap","four-step-playback-and-live-edit","save-dialog","native-autosave","fresh-cleanup","autosave-bootstrap","file-dialog-load-and-playback","reload-cleanup"],
+      "command":["tests/mosaic_slice.py"]
+    },
+    "mosaic-four-step-browser":{
+      "tier":"B","family":"A01","roles":["fresh","autosave"],
+      "checks":["fresh-bootstrap","four-step-playback-and-live-edit","save-dialog","native-autosave","fresh-cleanup","autosave-bootstrap","file-dialog-load-and-playback","reload-cleanup"],
+      "command":["tests/mosaic_slice.py","--browser"]
+    },
+    "A07-sequencer-start-and-stop":{
+      "tier":"E","family":"A07","roles":["transport"],
+      "checks":["tempo-and-pattern-setup","swing-playback","fractional-note-durations","stop-and-silence","restart-playback","cleanup"],
+      "command":["tests/mosaic_timing.py"]
+    }
+  }
+}

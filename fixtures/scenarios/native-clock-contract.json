@@ -1,0 +1,15 @@
+{
+  "schema_version":1,"id":"native-clock-contract","backend":"native","tier":"I","family":"G03",
+  "script":"fixtures/probes/clock-probe/clock-probe.lua","code_root":"fixtures/probes","deadline_ms":60000,
+  "steps":[
+    {"action":{"type":"key","n":2,"state":1}},
+    {"action":{"type":"key","n":2,"state":0}},
+    {"wait":{"path":"state.midi_count","equals":23},"timeout_ms":4000},
+    {"assertion":{"path":"state.midi.22.bytes","equals":[176,46,1]}},
+    {"assertion":{"path":"state.midi_capture.outstanding","equals":[]}},
+    {"action":{"type":"key","n":3,"state":1}},
+    {"action":{"type":"key","n":3,"state":0}},
+    {"wait":{"path":"state.midi_count","equals":24},"timeout_ms":1000},
+    {"assertion":{"path":"state.midi.23.bytes","equals":[176,11,1]}}
+  ]
+}

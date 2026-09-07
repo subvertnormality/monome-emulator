@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "timing-report",
+  "type": "object",
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "timing": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pitch": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 127
+          },
+          "intent_seconds": {
+            "type": "number"
+          },
+          "rounded_pulse": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "expected_seconds": {
+            "type": "number"
+          },
+          "actual_seconds": {
+            "type": "number"
+          },
+          "error_ms": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "pitch",
+          "intent_seconds",
+          "rounded_pulse",
+          "expected_seconds",
+          "actual_seconds",
+          "error_ms"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 10000
+    },
+    "note_durations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pitch": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 127
+          },
+          "intent_seconds": {
+            "type": "number"
+          },
+          "dispatch_pulses": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "expected_seconds": {
+            "type": "number"
+          },
+          "actual_seconds": {
+            "type": "number"
+          },
+          "error_ms": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "pitch",
+          "intent_seconds",
+          "dispatch_pulses",
+          "expected_seconds",
+          "actual_seconds",
+          "error_ms"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 10000
+    }
+  },
+  "required": [
+    "session_id",
+    "timing"
+  ],
+  "additionalProperties": false
+}

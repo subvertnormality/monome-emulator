@@ -5,6 +5,7 @@ from pathlib import Path
 import platform
 import shutil
 import sys
+import subprocess
 from . import evidence,runner,session
 from .protocol import ContractError,ROOT,read_json,uid
 
@@ -16,6 +17,7 @@ def main(argv=None):
     start.add_argument('--script'); start.add_argument('--code-root'); start.add_argument('--data'); start.add_argument('--profile',default='wsl')
     start.add_argument('--fixture'); start.add_argument('--fixture-profile',default='base-midi')
     start.add_argument('--midi-config',help='JSON with ordered virtual port names and optional capture_limit')
+    start.add_argument('--random-seed',type=int,help='Opt-in repeatable native Lua seed, including script reseeding')
     fetch=commands.add_parser('fetch'); fetch.add_argument('--locked',action='store_true',required=True)
     commands.add_parser('build')
     fixtures=commands.add_parser('fixtures'); fixture_commands=fixtures.add_subparsers(dest='fixture_command',required=True)
@@ -51,8 +53,8 @@ def main(argv=None):
                 if args.script or args.code_root: raise ContractError('fixture_inputs','Choose either a fixture or external script inputs')
                 import app_fixtures
                 options=app_fixtures.launch_options(args.fixture,args.fixture_profile)
-                result=session.start(args.backend,data=args.data,midi_config=midi_config,**options)
-            else: result=session.start(args.backend,args.script,args.code_root,args.data,midi_config=midi_config)
+                result=session.start(args.backend,data=args.data,midi_config=midi_config,random_seed=args.random_seed,**options)
+            else: result=session.start(args.backend,args.script,args.code_root,args.data,midi_config=midi_config,random_seed=args.random_seed)
         elif args.command=='snapshot': result=session.request(args.session_id,'/snapshot')
         elif args.command=='capabilities': result=session.request(args.session_id,'/capabilities')
         elif args.command=='stop': result=session.stop(args.session_id)
@@ -63,9 +65,16 @@ def main(argv=None):
         elif args.command=='verify-evidence':
             value=evidence.verify(args.manifest); result=dict(passed=True,run_id=value['run_id'],fidelity=value['fidelity'])
         elif args.command in ('run','replay'):
-            path=args.scenario if args.command=='run' else str(Path(args.manifest).resolve().parent/'scenario.json')
-            if args.command=='replay': evidence.verify(args.manifest)
-            manifest,value=runner.run(path); print(json.dumps(dict(manifest=str(manifest),passed=value['passed'],error=value['error'])))
+            replay_of=None
+            if args.command=='replay':
+                original=evidence.replay_input(args.manifest)
+                replay_of=dict(manifest=str(Path(args.manifest).resolve()),run_id=original['run_id'],source_digest=original['source']['digest'],prior_passed=original['passed'],execution='current-source')
+            if replay_of and original.get('kind')=='native-package':
+                command=read_json(ROOT/'compatibility/packages.json')['packages'][original['scenario_id']]['command']
+                print(json.dumps(dict(replay_of=replay_of,package=original['scenario_id'])),flush=True)
+                return subprocess.call([sys.executable,*command],cwd=ROOT)
+            path=args.scenario if args.command=='run' else str(Path(args.manifest).resolve().parent/original['scenario']['path'])
+            manifest,value=runner.run(path,replay_of=replay_of); print(json.dumps(dict(manifest=str(manifest),passed=value['passed'],error=value['error'])))
             return value['exit_code']
         elif args.command=='release-check': result=evidence.release_check(args.manifests,args.milestone,args.profile)
         elif args.command=='test':

@@ -116,8 +116,11 @@ class NativeBackend:
             LD_LIBRARY_PATH=str(ROOT/'.runtime/prefix/lib'),JACK_DEFAULT_SERVER='emu-'+self.config['session_id'][:16],
             NORNS_EMU_CRONE_PORT=str(self.ports['crone']),NORNS_EMU_MATRON_PORT=str(self.ports['matron']),
             NORNS_EMU_SC_PORT=str(self.ports['scsynth']),NORNS_EMU_MIDI_PORTS='\n'.join(self.midi_config['ports']))
+        self.env.pop('NORNS_EMU_RANDOM_SEED',None)
+        if self.config.get('random_seed') is not None:self.env['NORNS_EMU_RANDOM_SEED']=str(self.config['random_seed'])
         write_json(self.directory/'native-config.json',dict(script=str(entry),mapped=str(self.mapped_entry),code_root=str(code),
-            ports=self.ports,midi=self.midi_config,jack_server=self.env['JACK_DEFAULT_SERVER'],enabled_mods=mods,runtime=str(self.native)))
+            ports=self.ports,midi=self.midi_config,jack_server=self.env['JACK_DEFAULT_SERVER'],enabled_mods=mods,runtime=str(self.native),random_seed=self.config.get('random_seed'),
+            jack_profile=dict(driver='dummy',rate=48000,period=1024,realtime=False,clock_source='system')))
     def launch(self,name,args,bridge=False):
         logfile=open(self.directory/(name+'.log'),'w'); self.logs.append(logfile)
         env=dict(self.env)
@@ -133,7 +136,7 @@ class NativeBackend:
             time.sleep(0.05)
         raise ContractError('service_timeout',name+' did not reach '+marker+'; inspect '+str(self.directory/(name+'.log')))
     def launch_services(self):
-        self.launch('jack',['jackd','--name',self.env['JACK_DEFAULT_SERVER'],'--no-realtime','-d','dummy','-r','48000','-p','128'])
+        self.launch('jack',['jackd','--name',self.env['JACK_DEFAULT_SERVER'],'--no-realtime','-d','dummy','-r','48000','-p','1024'])
         time.sleep(0.5); self.check_processes()
         self.launch('crone',[str(self.native/'build/crone/crone')])
         self.wait_log('crone','entering main loop',10)
@@ -179,9 +182,9 @@ class NativeBackend:
                     elif kind==7:
                         value=payload.decode(errors='replace'); self.absent.append(value); record['absence']=value
                     elif kind==8:
-                        name,beats,tempo,count,mods,loaded,threads,metros,menu,roots=payload.decode().split('\t',9)
+                        name,beats,tempo,count,mods,loaded,threads,metros,menu,epoch,roots=payload.decode().split('\t',10)
                         self.diagnostics=dict(script=name,beats=float(beats),tempo=float(tempo),params=int(count),enabled_mods=int(mods),
-                                              loaded_mods=int(loaded),clock_threads=int(threads),running_metros=int(metros),menu_mode=bool(int(menu)),
+                                              loaded_mods=int(loaded),clock_threads=int(threads),running_metros=int(metros),menu_mode=bool(int(menu)),clock_epoch=int(epoch),monotonic_ns=ns,
                                               parameter_roots=[dict(index=int(row.split('\t')[0]),id=row.split('\t')[1],name=row.split('\t')[2]) for row in roots.splitlines()])
                     elif kind==9:
                         if len(payload)!=3: raise ValueError('Invalid grid metadata')

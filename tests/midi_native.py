@@ -9,11 +9,11 @@ from devices.midi import Capture
 import app_fixtures
 
 class Client:
-    def __init__(self,mosaic=False,limit=1000000,data_seed=None):
+    def __init__(self,mosaic=False,limit=1000000,data_seed=None,random_seed=None):
         options=app_fixtures.launch_options('mosaic','base-midi') if mosaic else dict(script=ROOT/'fixtures/probes/midi-probe/midi-probe.lua',code_root=ROOT/'fixtures/probes')
         if mosaic:options['data_seeds']=[dict(source=str(ROOT/'fixtures/apps/mosaic-config/minimal'),destination='mosaic/config',format='json-files')]
         if data_seed:options['data_seeds']=[dict(source=str(data_seed),destination='mosaic')]
-        self.info=session.start('native',midi_config=dict(ports=['Emulator MIDI','Second MIDI','Norns2sinfonion'],capture_limit=limit),**options)
+        self.info=session.start('native',midi_config=dict(ports=['Emulator MIDI','Second MIDI','Norns2sinfonion'],capture_limit=limit),random_seed=random_seed,**options)
         self.sid=self.info['session_id'];self.seq=0;self.observations=[]
     def action(self,**body):
         value=session.request(self.sid,'/action',dict(schema_version=1,session_id=self.sid,action_id=uid(),sequence=self.seq+1,action=body))
