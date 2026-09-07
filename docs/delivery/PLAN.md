@@ -53,7 +53,7 @@ The runtime, browser, and test harness share one event path. Browser inputs and
 scenario inputs become the same ordered device events. The browser renders actual
 framebuffer and grid state. The harness captures actual MIDI emission and obtains
 read-only diagnostic state. Real-time operation is primary. Deterministic time is
-a later explicitly tested runtime adapter (C16), not a replacement sequencer or
+an explicitly tested runtime adapter (C16, brought forward by D18), not a replacement sequencer or
 a prerequisite for WSL/Linux workflow acceptance.
 
 Owned packages:
@@ -86,7 +86,7 @@ before proving Mosaic can boot through the native runtime.
 | V04 | Existing Ubuntu 20.04 WSL can host the chosen runtime | Proven for native startup and script services | C00/C02 builds and runtime packages; no distro change |
 | V05 | Virtual grid can connect through real native norns event handling | Attachment proven | C00/C02 native input/LED evidence; C03 full conformance remains |
 | V06 | Headless/no-audio startup preserves supported control behaviour | Startup and generic controls proven | C02 both Mosaic profiles, real services and explicit absent-device handling; later full workflows remain |
-| V07 | Deterministic time can cover all supported Mosaic time sources faithfully | Unverified | C16 dual-mode probes; does not gate M0–M4 |
+| V07 | Deterministic time can cover all supported Mosaic time sources faithfully | Unverified | C16 dual-mode probes; required for the Mosaic musical-timing campaign (D18) |
 | V08 | All documented software workflows have executable independent oracles | Unverified | C00 inventory; C08–C12 implement and audit |
 | V09 | LLMs can diagnose and repair a Mosaic regression from the tool outputs | Unverified | C13 blind, isolated repair exercise |
 | V10 | WSL and native Linux pass the same workflow contract | Unverified | C14 WSL; C15 native host evidence separately |
@@ -121,7 +121,7 @@ system or automatically create Codex tasks to run it.
 | C13 | Prove autonomous LLM Mosaic iteration and usable diagnostics | C12 | M3 WSL release |
 | C14 | Package WSL2 release and verified official-dependency update workflow | C13 | M3 + P3 review |
 | C15 | Deliver native Linux parity with the same automated suite | C14 | M4 + P4 review |
-| C16 | Add deterministic time as a subsequent feedback-speed enhancement | C15 | M5 faster verification |
+| C16 | Controlled time for musical correctness and feedback speed | C07 plus external-suite client | M5 controlled-time admission; required by Mosaic campaign |
 
 M0: actual native runtime and generic script boot work without Mosaic installed.
 M1: usable virtual device environment demonstrates a real Mosaic edit/play/save.
@@ -129,7 +129,7 @@ M2: complete software workflow suite, not just mocks, detects seeded defects.
 M3: LLM iteration, independent runtime installation and official-dependency update
 acceptance pass on the existing WSL profile.
 M4: native Linux acceptance passes independently.
-M5: controlled-time verification accelerates the already-working real-time suite.
+M5: controlled-time verification checks exact musical schedules alongside real-time scheduling accuracy (D18).
 
 ## C00 — Empirical foundation and scope inventory
 
@@ -676,11 +676,11 @@ Linux; semantic outputs match and timing passes independently; P4 findings close
 the exact execution prerequisite and leave M4 incomplete. WSL M3 remains usable.
 **Refs:** A24; V10.
 
-## C16 — Deterministic time after usable real-time releases
+## C16 — Controlled time for musical correctness
 
-**Depends:** C15. **Goal:** Speed iteration with reproducible controlled time while
+**Depends:** C07 and the generic external-suite client. **Goal:** Verify exact musical timing and speed iteration with reproducible controlled time while
 preserving all existing real-time acceptance. **Inputs:** C07 time inventory and
-clock contracts, working M3/M4 releases, independent scenario oracles.
+clock contracts, working native real-time lane, independent scenario oracles. D18 authorises this card before platform releases; the Mosaic campaign requires its admitted timing capabilities.
 
 **Procedure:**
 1. Prove control of native clock/metro scheduling and relevant util/time/os.time
@@ -702,9 +702,9 @@ clock contracts, working M3/M4 releases, independent scenario oracles.
 **Done when:** Supported D scenarios pass independent oracles and three-repeat
 determinism, unchanged E/R regressions pass, P5 is complete, and documentation
 states supported D scope. **Outputs:** Clock adapter, D scenarios, speed comparison,
-M5 manifest and C16 completion. **On fail:** Keep M3/M4 working and labelled
+M5 manifest and C16 completion. **On fail:** Keep the native runtime working and labelled
 real-time; leave C16/M5 incomplete with a precise unsupported source/probe. Do not
-delay or revoke the already-passing real-time release because acceleration failed.
+claim the Mosaic timing campaign complete while required controlled-time capabilities are missing. Continue independent real-time work.
 **Refs:** V07; D tier; central determinism contract.
 
 ## Completion and handoff

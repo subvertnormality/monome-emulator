@@ -85,7 +85,7 @@ Required checkpoints:
 | P2 | C12 complete MIDI workflow and failure-verification package | 1 critique + 1 focused follow-up |
 | P3 | C14 WSL release candidate, generic/app separation, official-dependency update/rollback, false-green gates and LLM workflow | 1 critique + 1 focused follow-up |
 | P4 | C15 Linux portability diff and platform-specific evidence only | 1 critique + 1 focused follow-up |
-| P5 | C16 controlled-clock adapter, after real-time releases | 1 critique + 1 focused follow-up |
+| P5 | C16 controlled-clock adapter, before admitting D to the Mosaic timing campaign (D18) | 1 critique + 1 focused follow-up |
 
 Prefer an available cross-vendor Paranoia engine for the initial critique. One
 engine is sufficient; leave model selection to that engine. Pass explicit stakes,

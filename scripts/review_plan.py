@@ -27,11 +27,14 @@ async def main():
     parser.add_argument("--question-file", help="Use a focused Paranoia query instead of another critique")
     parser.add_argument("--triage-file", default="docs/delivery/reviews/P0-triage.md")
     parser.add_argument("--base-ref", help="Run the bounded C06 branch review from this committed implementation base")
+    parser.add_argument("--plan-file", action="append", help="Review these repo-relative files instead of the original emulator packet")
+    parser.add_argument("--context-file", help="Repo-relative file describing current review context")
     args = parser.parse_args()
     repo = Path(args.repo).resolve()
     paths = ["docs/delivery/PLAN.md", "docs/delivery/ACCEPTANCE.md",
              "docs/delivery/RUNBOOK.md", "docs/delivery/DECISIONS.md",
              "docs/delivery/UPSTREAM.md"]
+    if args.plan_file:paths=args.plan_file
     packet = "\n\n".join(f"# FILE: {p}\n\n{(repo / p).read_text()}" for p in paths)
     output = repo / args.output
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -44,6 +47,7 @@ async def main():
         "focus": "Find only substantive in-scope delivery gaps, dependency cycles, untestable acceptance, circular oracles, false-green escape routes, unsupported runtime assumptions, or disproportionate governance. Check whether a fresh execution agent can deliver end to end. Cite document and section/line. Limit to the most consequential findings; no speculative hardening or unlimited review machinery.",
     }
     tool_name = "critique_plan"
+    if args.context_file:request['context']=(repo/args.context_file).read_text()
     if args.base_ref:
         tool_name="critique_branch"
         request=dict(repo_path=str(repo),base_ref=args.base_ref,head_ref='HEAD',include_uncommitted=False,

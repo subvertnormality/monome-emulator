@@ -22,3 +22,13 @@
 | D17 | Use dummy JACK's 1024-frame period at 48 kHz on the WSL host, retaining native frame time and scheduling | C07's isolated 128/512/1024 native probes measured -362.3/-4.2/-0.7 ms drift over ten seconds. The 128-frame profile suffered xruns. The corrected profile passes actual Mosaic swing and fractional lengths without changing timing thresholds. C12 still must pass ten-minute endurance. JACK 1.9.12 rejects its advertised long clock-source option; the system clock is already its default. |
 
 Execution is authorized. No recurring jobs have been created.
+
+D18 — User amendment, 2026-09-07: create the Mosaic checkout and dedicated
+codex/behaviour-validation worktree/branch; push that branch. Mosaic owns a
+complete manual-driven behaviour suite, including every function, edge cases and
+potential failure modes, to find/fix bugs before a later refactor. Tests use
+user-like inputs and user-perceived MIDI/grid/screen outputs. Bring controlled
+time forward as needed for musical timing; retain real-time scheduling evidence.
+This supersedes D09's defer-C16-until-after-releases scheduling, not its mandatory
+real-time evidence. The emulator remains general purpose. Mosaic canonical plan:
+/home/andy/projects/mosaic-behaviour-tests/docs/testing/BEHAVIOUR_PLAN.md.

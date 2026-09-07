@@ -91,7 +91,7 @@ Mosaic revision plus patch set it supports. Publishing upstream is a separate ac
 | B | Browser renderer and control wiring | Actual browser, actual backend, same event path as E |
 | R | Timing, transport, reload, process restart and endurance | Real wall-clock runtime; never virtual-clock-only |
 | F | Verify test sensitivity to selected realistic defects | Disposable injected faults; expected acceptance failure |
-| D | Later C16 feedback-speed enhancement | Explicit controlled-clock backend, cross-checked against real-time lane |
+| D | C16 controlled-time musical correctness and feedback | Explicit controlled-clock backend, cross-checked against real-time lane |
 
 Every required software-workflow scenario must run in real-time E; R is the
 timing/endurance subset of real-runtime acceptance. Every A01–A22 family needs at
@@ -127,7 +127,7 @@ verification then acquires the app fixture separately. Missing fixture access
 blocks an app compatibility claim, not ordinary generic script use.
 
 `D` supplements `E/R`; it cannot stand in for them and does not gate M0–M4.
-C16 adds M5 after usable releases. Virtual time must include
+D18 brings C16/M5 forward for the Mosaic behaviour and musical-timing campaign. Virtual time must include
 every time source used by the supported path, including monotonic reads, clock
 sync/sleep, metro and relevant Lua time/random calls, or fail with an unsupported
 mode error. `math.randomseed(os.time())` at Mosaic startup must be accounted for.
@@ -188,7 +188,7 @@ candidates must not silently select easier profiles.
 | Short startup timeout | Ready within 60 seconds after dependencies are built; errors retain logs; one explicit cold-start build is separate |
 | Endurance | 10 minutes real-time mixing editing/playback/transport; no lost required events, outstanding notes after drain, unhandled errors, or growing active clock/session counts |
 | Recovery | 10 load/reload/reset cycles; no orphan processes, held keys, ports, or notes after cleanup |
-| Regression on C14 | All mandatory U/I/E/B/R/F selections once on the release tree; repeat timing lane only after a diagnosed environmental failure; D is a later M5 gate |
+| Regression on C14 | All mandatory U/I/E/B/R/F selections once on the release tree; repeat timing lane only after a diagnosed environmental failure; D is separately admitted by M5 and required for the Mosaic timing campaign |
 | Routine feedback | Target focused smoke under 60 seconds, targeted workflow under 3 minutes; record slowness but don't hide functional failures |
 
 Tempo/swing/strum comparisons must separate intentional musical offset from
