@@ -78,3 +78,13 @@ captured native MIDI emissions. The incremental time is a conservative combined
 Lua/native emission/capture cost, not an isolated hardware transport benchmark.
 Event count, ordering endpoints and drop detection are checked independently.
 Native scheduling error and observation latency are reported alongside that cost.
+
+Snapshot artifact writes must not hold the native event-reader condition. On the
+WSL-mounted workspace, 1,000 framebuffer writes measured p99 16.1 ms / maximum
+38.0 ms; the same temporary Linux storage probe measured p99 0.70 ms. The backend
+copies observation state under its lock, writes the convenience frame file after
+releasing it, and skips unchanged frames. An injected blocked write must leave
+actual native MIDI capture running. Embedded frame bytes/digest identify the
+sampled frame even when the renderer updates during disk I/O. C07's retained
+13.8 ms note-release failure motivated this check; disk contention is a proven
+reader-stall risk, not a conclusive attribution of every scheduling outlier.

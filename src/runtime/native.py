@@ -30,6 +30,7 @@ class NativeBackend:
         self.processes=[]; self.logs=[]; self.closed=False
         self.errors=[]; self.absent=[]; self.ready=False; self.sequence=0; self.acks={}
         self.frame_revision=0; self.grid_revision=0; self.frame=bytes(32768); self.grid=[0]*128
+        self.saved_frame=None
         from devices.midi import Capture,Decoder,configuration
         self.midi_config=configuration(config.get('midi_config'))
         self.capture=Capture(self.midi_config['ports'],self.midi_config['capture_limit'])
@@ -259,12 +260,19 @@ class NativeBackend:
         with self.condition:
             frame=self.frame; revision=self.frame_revision
             # A current lossless raw frame is always available to machine clients.
-            frame_path=self.directory/'frame.bgra'; frame_path.write_bytes(frame)
-            return dict(frame_revision=revision,grid_revision=self.grid_revision,state=dict(
+            frame_path=self.directory/'frame.bgra'
+            result=dict(frame_revision=revision,grid_revision=self.grid_revision,state=dict(
               ready=self.ready,script=self.app_name,frame=dict(path=str(frame_path),width=128,height=64,format='BGRA8',
                 sha256=hashlib.sha256(frame).hexdigest(),pixels_base64=base64.b64encode(frame).decode()),grid=self.grid.copy(),midi=list(self.midi),midi_count=self.midi_count,
               midi_capture=self.capture.state(),midi_ports=self.midi_config['ports'],
               held=list(self.held.values()),grid_device=dict(self.grid_device),diagnostics=dict(self.diagnostics),absent=self.absent[-64:]))
+        # A Windows-mounted filesystem can pause for tens of milliseconds.
+        # Never hold the native event reader's condition during artifact I/O.
+        # The observation's embedded bytes and digest remain the exact sampled
+        # frame; the file is a convenience copy, refreshed only when it changes.
+        if frame!=self.saved_frame:
+            frame_path.write_bytes(frame); self.saved_frame=frame
+        return result
     def close(self):
         if self.closed: return
         cleanup=[]
