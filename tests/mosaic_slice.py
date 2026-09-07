@@ -68,9 +68,9 @@ class Slice(Client):
         self.action(type='grid',x=4,y=4,state=0)
         self.action(type='grid',x=1,y=4,state=0)
         self.wait(lambda s:s['grid'][16]==15)
-    def screen_header(self,text):
+    def screen_header(self,text,**layout):
         from frame_oracle import header,matches
-        expected=header(text)
+        expected=header(text,**layout)
         # Await the named stable page, retaining every intervening observation.
         self.wait(lambda state:matches(state,expected))
         assert not matches(dict(frame=dict(pixels_base64='AAAA'*8192)),expected),'Blank-frame fault escaped the content oracle'

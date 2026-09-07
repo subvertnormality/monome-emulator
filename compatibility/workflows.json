@@ -734,7 +734,7 @@
       "scenario_ids": [
         "A06-harmony-design"
       ],
-      "status": "not_implemented",
+      "status": "implemented",
       "oracle": {
         "type": "documented rule plus independently authored event/frame fixture",
         "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L336",
@@ -1318,7 +1318,7 @@
       "scenario_ids": [
         "A06-adding-chords"
       ],
-      "status": "not_implemented",
+      "status": "implemented",
       "oracle": {
         "type": "documented rule plus independently authored event/frame fixture",
         "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L593",
@@ -1345,9 +1345,9 @@
         "E"
       ],
       "scenario_ids": [
-        "A06-removing-masks"
+        "A06-mask-removal-controls"
       ],
-      "status": "not_implemented",
+      "status": "implemented",
       "oracle": {
         "type": "documented rule plus independently authored event/frame fixture",
         "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L599",
@@ -1637,7 +1637,7 @@
       "scenario_ids": [
         "A05-muting-channels"
       ],
-      "status": "not_implemented",
+      "status": "implemented",
       "oracle": {
         "type": "documented rule plus independently authored event/frame fixture",
         "source": "https://github.com/subvertnormality/mosaic/blob/160d1ea7506773e65f298094e11d005dcb568dff/README.md#L730",

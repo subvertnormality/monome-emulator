@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "C08 checkpoint: 3 of34 software sections implemented (basic editing, trig merge, memory). See C08-progress.md for exact evidence. Isolated memory candidate passed9 native checks,476 units,7 unchanged editing/merge checks; baseline retains2 unit failures and missing-note runtime failure. Patch evidence rejection3/3; full contracts32/32 zero skips (89.705s). Lower velocity expected10/actual87 semantic question remains pending; continue independent cases. Next promote artifacts/c08_channels_draft.py to tests/mosaic_channels.py, register routing and mute packages, run sequentially. Then channel lengths/boundaries, remaining pattern algorithm/note/velocity options, masks/chords/scales/quantiser and value merges. C08 remains incomplete. No active native processes. Publish coherent checkpoint. C07 published d11c8f9.",
+  "next_action": "C08 remains in progress. New real-runtime routing6, muting7, harmony11, channel-range7, mask-removal8 and chord10 checks passed; see C08-progress.md for evidence. Lower merge semantic question remains pending. Channel range coverage does not yet resolve independent one-step selection or global scale range; do not mark full length row complete. Next implement channel-global mask precedence, scale slots/quantiser options and pattern algorithms. No active native processes. Latest published checkpoint44964ed; commit and push this coherent checkpoint, then continue eligible C08 work.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {

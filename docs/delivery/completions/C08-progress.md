@@ -85,3 +85,48 @@ Mosaic revision plus patch set, including any additional confirmed defects.
 
 K1 shift gestures also now wait beyond
 official menu.lua's 250 ms script-key hold threshold; a short tap opens the menu.
+
+## Subsequent real-runtime coverage
+
+All cases below use unmodified pinned Mosaic, fresh sessions, actual key/grid/
+encoder inputs, exact MIDI comparisons, retained input traces and cleanup checks.
+These are development evidence; the final C08 suite must bind the final tree.
+
+| Package | Checks | Manifest under artifacts/c08 |
+|---|---:|---|
+| A05-channel-routing | 6 | 3397401b233245e587e70cdbc00a4211/manifest.json |
+| A05-muting-channels | 7 | 8db8b4bc54be4640913edcf7d9f9448d/manifest.json |
+| A06-harmony-design | 11 | b37d1eee4055433fb37578517f49d21d/manifest.json |
+| A05-channel-range-boundaries | 7 | 64eace8ce8d84cd5b4a3674b6f6925e2/manifest.json |
+| A06-mask-removal-controls | 8 | 6fee53ee515d4c468f417a2a1c3f0191/manifest.json |
+| A06-adding-chords | 10 | 4067dae184e3460ebfc8be55a0832146/manifest.json |
+
+Routing covers MIDI channel/port selection, cancellation and restoration. The
+first driver incorrectly assumed cancellation retained field focus; failed run
+`a2d7693dbc8243488c67c77cbe52c10e` led to explicit navigation from the native
+device selector. Muting covers both documented gestures and channel isolation.
+
+Harmony uses literal pitch tables in fixtures/oracles/harmony.json for major,
+minor, root E, degree II, rotation, +/-12 semitone limits and cancel/restore.
+The independent framebuffer header renderer accepts the scale page's three-tab
+layout. This does not close every scale editor/quantiser option.
+
+Channel ranges cover offset two-step and three-step loops, another channel's
+independent range across a row boundary, 64 steps and restoration. The 64-step
+case emits four notes then sixty silent steps: expected gap 10.166666667 seconds,
+actual 10.167554873, with a fixed 50 ms bound on native emission timestamps.
+The driver permits an explicit longer observation deadline for this real-time
+loop. The documented independent one-step gesture remains unresolved: the pinned
+dual-press handler consumes two distinct held keys; short/long channel handlers
+do not set a one-step range. The separate global length fader can clamp to one
+but does not prove independent channel selection. Full Channel Length stays open.
+
+Mask controls verify trig suppression/restoration, independent note overrides,
+single-step removal, whole-channel clearing and repeated empty-step clearing.
+Chords verify one through four additional voices, fourth-voice +/-14 diatonic
+degree bounds (MIDI36/84 from C60), clamp behavior and removal. Articulation
+modifiers remain C09 obligations; MIDI-keyboard mask entry remains C10.
+
+Commands: `python3 tests/mosaic_channels.py`, the same with `--mute`, and
+`python3 tests/mosaic_harmony.py`, `tests/mosaic_lengths.py`,
+`tests/mosaic_masks.py`, `tests/mosaic_chords.py`, run sequentially in WSL.

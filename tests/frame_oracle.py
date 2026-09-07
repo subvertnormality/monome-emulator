@@ -7,7 +7,7 @@ Use the shared font/rasterizer as a rendering primitive, not Mosaic draw code.
 import base64,ctypes as C
 from automation.protocol import ROOT,read_json
 
-def header(text):
+def header(text,selected=None,tabs=6):
     ft=C.CDLL('libfreetype.so.6'); ca=C.CDLL('libcairo.so.2')
     def bind(lib,name,args,result=None):
         f=getattr(lib,name);f.argtypes=args;f.restype=result;return f
@@ -26,8 +26,8 @@ def header(text):
         bind(ca,'cairo_set_font_face',[ptr,ptr])(context,fontface)
         bind(ca,'cairo_set_font_size',[ptr,double])(context,8)
         # Six channel tabs (pages.lua); Masks is tab 1, Device Config tab 5.
-        selected={'Ch. 1 Note Masks':1,'Ch. 1 Memory':3,'Ch. 1 Device Config':5}[text]
-        for tab in range(1,7):
+        if selected is None:selected={'Ch. 1 Note Masks':1,'Ch. 1 Memory':3,'Ch. 1 Device Config':5}[text]
+        for tab in range(1,tabs+1):
             level=(10 if tab==selected else 1)/15
             bind(ca,'cairo_set_source_rgb',[ptr,double,double,double])(context,level,level,level)
             bind(ca,'cairo_move_to',[ptr,double,double])(context,(tab-1)*10,1)

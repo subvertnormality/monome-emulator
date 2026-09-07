@@ -1,6 +1,36 @@
 {
   "schema_version":1,
   "packages":{
+    "A06-adding-chords":{
+      "tier":"E","family":"A06","roles":["chords"],
+      "checks":["third-above-root","triad","octave-voice","all-four-additional-voices","upper-fourth-voice-bound","upper-bound-clamps","lower-fourth-voice-bound","lower-bound-clamps","clear-all-step-voices","cleanup"],
+      "command":["tests/mosaic_chords.py"]
+    },
+    "A06-mask-removal-controls":{
+      "tier":"E","family":"A06","roles":["masks"],
+      "checks":["underlying-pattern","step-trig-mask-silences","step-trig-mask-restores","independent-step-note-masks","remove-one-preserves-other","clear-channel-restores-pattern","clear-empty-step-is-idempotent","cleanup"],
+      "command":["tests/mosaic_masks.py"]
+    },
+    "A05-channel-range-boundaries":{
+      "tier":"E","family":"A05","roles":["ranges"],
+      "checks":["four-step-baseline","offset-two-step-loop","three-step-wrap","independent-channel-range","sixty-four-step-wrap","restore-four-step-range","cleanup"],
+      "command":["tests/mosaic_lengths.py"]
+    },
+    "A06-harmony-design":{
+      "tier":"E","family":"A06","roles":["harmony"],
+      "checks":["major-diatonic-degrees","root-and-minor-scale","second-scale-degree","rotation-lowers-seventh","transpose-plus-twelve","upper-transpose-bound","transpose-minus-twelve","lower-transpose-bound","cancel-scale-change","restore-major-harmony","cleanup"],
+      "command":["tests/mosaic_harmony.py"]
+    },
+    "A05-channel-routing":{
+      "tier":"E","family":"A05","roles":["routing"],
+      "checks":["default-routing","midi-channel-two","second-midi-port","routing-cancel","routing-restored","cleanup"],
+      "command":["tests/mosaic_channels.py"]
+    },
+    "A05-muting-channels":{
+      "tier":"E","family":"A05","roles":["muting"],
+      "checks":["unmuted-pattern","shift-mute-silence","shift-unmute-restores","hold-mute-silence","hold-unmute-restores","other-channel-isolation","cleanup"],
+      "command":["tests/mosaic_channels.py","--mute"]
+    },
     "mosaic-memory-fix-regressions":{
       "tier":"E","family":"A05","roles":["candidate-regression"],
       "checks":["two-pattern-assignment","skip-exclusive-steps","only-intersection","all-union","mode-cycle-restores-skip","empty-assignment-silence","cleanup"],

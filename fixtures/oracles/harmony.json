@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "rule": "Pattern degrees 0,1,2,6; major/minor diatonic intervals; degree II advances one scale position; r1 lowers the seventh position one octave; transposition adds semitones.",
+  "references": ["Mosaic pinned README Adding Notes / Scale Editor / Transposition", "Pinned quantiser rotation contract: lower seventh position for r1"],
+  "velocities": [127,117,107,97],
+  "pitches": {
+    "c_major": [60,62,64,71],
+    "e_minor": [64,66,67,74],
+    "e_minor_degree_two": [66,67,69,76],
+    "e_minor_degree_two_rotation_one": [66,67,69,64],
+    "transpose_plus_twelve": [78,79,81,76],
+    "transpose_minus_twelve": [54,55,57,52]
+  }
+}

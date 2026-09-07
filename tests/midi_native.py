@@ -31,8 +31,8 @@ class Client:
         for _ in range(abs(steps)):
             time.sleep(.05);self.action(type='enc',n=n,delta=2 if steps>0 else -2)
         time.sleep(.15)
-    def wait(self,predicate):
-        end=time.monotonic()+3
+    def wait(self,predicate,timeout=3):
+        end=time.monotonic()+timeout
         while time.monotonic()<end:
             state=self.snapshot()
             if predicate(state):return state

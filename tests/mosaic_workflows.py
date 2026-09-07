@@ -14,15 +14,16 @@ class Workflow(Slice):
         indexes=[(y-1)*16+x-1 for x,y in cells]
         state=self.wait(lambda s:[s['grid'][i] for i in indexes]==expected)
         self.results.append(dict(kind='grid',cells=cells,expected=expected,actual=[state['grid'][i] for i in indexes]))
-    def playback(self,expected,cycles=2):
+    def playback(self,expected,cycles=2,timeout=3):
         before=self.snapshot()['midi_count'];self.tap(1,8)
         def notes(s):return [m for m in s['midi'] if m['index']>before and 144<=m['bytes'][0]<=159 and m['bytes'][2]>0]
-        state=self.wait(lambda s:len(notes(s))>=len(expected)*cycles)
+        state=self.wait(lambda s:len(notes(s))>=len(expected)*cycles,timeout=timeout)
         actual=[(m['port'],m['bytes']) for m in notes(state)]
         wanted=[expected[i%len(expected)] for i in range(len(actual))]
         assert actual==wanted,dict(expected=wanted,actual=actual)
         self.tap(1,8);self.wait(lambda s:s['midi_capture']['outstanding']==[])
         self.results.append(dict(kind='midi',expected=wanted,actual=actual))
+        return notes(state)
     def hold_tap(self,held,tapped):
         self.action(type='grid',x=held[0],y=held[1],state=1)
         try:self.tap(*tapped)
