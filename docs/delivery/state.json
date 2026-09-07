@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "M-CHANNEL-001 RT/D passed across16 MIDI channels/twoports and cumulative mute/unmute.22 cases total. Audit/push this test-only slice, then remaining C08 channel/harmony/undo and required fresh repeats. Full campaign/emulator release incomplete; SEM-001 pending.",
+  "next_action": "Memory navigation RT/D and3freshD repeats passed;23 cases. Audit/push test-only slice. Continue C08 remaining memory/harmony/channel domains; SEM-007 shiftedhistory andSEM-001 merge formula pending. Full scope incomplete.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -339,7 +339,7 @@
   "active_behaviour_test": {
     "exec_session": null,
     "sequence": [
-      "M-CHANNEL-001 real-time"
+      "M-MEMORY-001 three fresh controlled repeats"
     ],
     "status": "passed",
     "candidate": "long-hold-release plus scale-stop-indicator"
@@ -531,6 +531,20 @@
         "mode": "real-time",
         "wall_elapsed_seconds": 133.0062819039449
       }
+    ],
+    "M-MEMORY-001": [
+      {
+        "run_id": "da1dc47bffc44d24a673d5670fc59209",
+        "manifest_sha256": "da97e4352347935490211f16131f368b64837c686b144fe65d495f8fbb6a9c15",
+        "case": "M-MEMORY-001",
+        "mode": "controlled-experimental"
+      },
+      {
+        "run_id": "363d0991c0e04d26aa8d648baa850953",
+        "manifest_sha256": "a254bfed7e8414bbeaf3dd5970f803c591aa6170cec57c5aaf006e748a05a24a",
+        "case": "M-MEMORY-001",
+        "mode": "real-time"
+      }
     ]
   },
   "fresh_mosaic_controlled_repeats": {
@@ -547,6 +561,13 @@
       "normalized_sha256": "871f8d813efdd5d819899821a822ca25562788f29391f48ace0d662774589adb",
       "fresh_processes": 3,
       "passed": true
+    },
+    "M-MEMORY-001": {
+      "run_id": "repeat-a58f11c8476747bea57bc96a09641e6a",
+      "manifest_sha256": "789b200702fcf8c444c996154eec080fbff9dcb8e549f6e7aadb32d8dc05846c",
+      "fresh_processes": 3,
+      "passed": true,
+      "normalized_sha256": "2ed0d03bebe96c12030e5f972fee2940125a82640ba2f843973e0954f350ff8e"
     }
   }
 }
