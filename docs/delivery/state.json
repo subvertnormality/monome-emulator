@@ -3,7 +3,7 @@
   "updated": "2026-09-07",
   "mode": "executing",
   "current_card": "C16",
-  "next_action": "ACTIVE terminal24475: Mosaic M-TIM-001 controlled run executing61 onsets/60 durations over20 phrases. Poll same handle; do not restart due to observation delay. New Mosaic cases.py/manual-inventory edits must remain frozen until run ends. Thread sampler implemented and2 ownership/filter/PID-reuse contracts pass; default wait counters unavailable(kernel schedstats0). Profile957e0a M-LEN001 RT passes; longer profilee3d81b M-TIM001 fails initial phrase with23.5ms short note. Main matron CPU burst36.5ms near late onset; all-service sampler overhead13-39ms means no precise attribution. Sampler now supports matron-only/per-thread timestamps: use narrowed profile next. Record controlled result in both repos and push Mosaic test changes after terminal. M5/P5/full manual/T01 and later delivery stages incomplete.",
+  "next_action": "M-TIM-001 controlled046a98f passes all61 onsets/60 durations across20 phrases; RT e3d81b fails initial phrase before long stage. Ten Mosaic cases remain partial manual coverage. Thread sampler2 ownership/filter/PID-reuse contracts pass; wait counters unavailable. Main matron CPU burst36.5ms near late onset; all-service sampling overhead13-39ms prevents attribution. Next use matron-only/per-thread sampler then identify expensive callback or scheduler delay, no blind retries or widened bounds. M5/P5, phase/source edges, full manual/T01 and remaining release stages incomplete. No active runners.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
