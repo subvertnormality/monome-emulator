@@ -56,3 +56,12 @@ it preserves all previously defined reads, without padding missing bits or
 changing the upstream fixture. `python3 tests/mosaic_tresillo.py --candidate`
 runs the previously failing64-step physical-input recipe and independent hit
 positions. It still needs combined release-patch validation at C12.
+
+The `pattern-length-cutoff` candidate in
+`fixtures/apps/mosaic-patches/pattern-lengths.json` makes a source pattern's
+note duration stop at its next trig, matching the documented rule and grid
+length display. Effective lengths are computed without changing stored edits,
+then supplied to existing merge modes; explicit channel/step length masks still
+override the merged result. `python3 tests/mosaic_pattern_lengths.py --candidate`
+runs the failing collision and unchanged duration-control packages. Wrap,
+merge/mask interactions and the combined patch set remain release obligations.

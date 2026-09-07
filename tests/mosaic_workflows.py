@@ -42,6 +42,8 @@ class Workflow(Slice):
         state=self.wait(lambda s:[s['grid'][i] for i in indexes]==expected)
         self.results.append(dict(kind='grid',cells=cells,expected=expected,actual=[state['grid'][i] for i in indexes]))
     def playback(self,expected,cycles=2,timeout=3):
+        if not expected or type(cycles) is not int or cycles<1:
+            raise ValueError('Playback needs expected notes and positive integer cycles; use a timed silence assertion for rests')
         before=self.snapshot()['midi_count'];self.tap(1,8)
         def notes(s):return [m for m in s['midi'] if m['index']>before and 144<=m['bytes'][0]<=159 and m['bytes'][2]>0]
         state=self.wait(lambda s:len(notes(s))>=len(expected)*cycles,timeout=timeout)

@@ -1,6 +1,29 @@
 {
   "schema_version":1,
   "packages":{
+    "A04-pattern-length-cutoff-candidate":{
+      "tier":"E","family":"A04","roles":["length-collision"],
+      "checks":["next-trig-ends-preceding-note","cleanup"],
+      "candidate_manifest":"fixtures/apps/mosaic-patches/pattern-lengths.json",
+      "command":["tests/mosaic_pattern_lengths.py","--candidate"]
+    },
+    "A04-pattern-length-cutoff-regressions":{
+      "tier":"E","family":"A04","roles":["pattern-lengths"],
+      "checks":["single-step-note-durations","extend-note-through-held-range","long-press-restores-one-step","empty-step-cannot-acquire-length","cleanup"],
+      "candidate_manifest":"fixtures/apps/mosaic-patches/pattern-lengths.json",
+      "command":["tests/mosaic_pattern_lengths.py","--candidate"]
+    },
+    "A04-pattern-length-controls":{
+      "tier":"E","family":"A04","roles":["pattern-lengths"],
+      "checks":["single-step-note-durations","extend-note-through-held-range","long-press-restores-one-step","empty-step-cannot-acquire-length","cleanup"],
+      "command":["tests/mosaic_pattern_lengths.py"]
+    },
+    "A04-pattern-length-collision-baseline":{
+      "tier":"E","family":"A04","roles":["length-collision"],
+      "checks":["next-trig-ends-preceding-note","cleanup"],
+      "command":["tests/mosaic_pattern_lengths.py","--collision-baseline"]
+    },
+    "A04-sixteen-pattern-slots":{"roles":["pattern-slots"],"tier":"E","checks":["slot-1-baseline","slot-2-independent-edit","slot-3-independent-edit","slot-4-independent-edit","slot-5-independent-edit","slot-6-independent-edit","slot-7-independent-edit","slot-8-independent-edit","slot-9-independent-edit","slot-10-independent-edit","slot-11-independent-edit","slot-12-independent-edit","slot-13-independent-edit","slot-14-independent-edit","slot-15-independent-edit","slot-16-independent-edit","first-slot-preserved","note-shift-selects-pattern","note-hold-selects-pattern","velocity-shift-selects-pattern","velocity-hold-selects-pattern","script-page-retained","cleanup"],"command":["tests/mosaic_pattern_slots.py"],"family":"A04"},
     "A06-all-pentatonic-option":{
       "tier":"E","family":"A06","roles":["pentatonic-option"],
       "checks":["diatonic-baseline","all-pentatonic-enabled","all-pentatonic-disabled","script-view-restored","cleanup"],

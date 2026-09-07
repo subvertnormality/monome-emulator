@@ -28,6 +28,11 @@ class RetentionTests(unittest.TestCase):
         c=self.driver()
         with self.assertRaises(ZeroDivisionError):c.wait(lambda s:1/0)
         self.assertEqual(len(c.observations),1)
+    def test_empty_playback_cannot_pass_without_waiting(self):
+        c=self.driver()
+        for expected,cycles in [([],2),([(1,[144,60,100])],0),([(1,[144,60,100])],.5)]:
+            with self.assertRaises(ValueError):c.playback(expected,cycles=cycles)
+        self.assertEqual(c.observations,[])
     def test_fragmented_scheduler_error(self):
         c=Workflow.__new__(Workflow);c.sid='probe';c.log_position=0;c.log_fragment=b''
         with tempfile.TemporaryDirectory() as directory,patch('mosaic_workflows.session.SESSIONS',Path(directory)):

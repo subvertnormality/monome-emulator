@@ -338,3 +338,72 @@ checks). No scheduler error occurred. This closes the reproduced bank2 boundary
 for this candidate; other banks/multipliers and combined patch regressions remain
 required before the full release. Session98079 exited0 after both quantiser
 packages and the candidate completed.
+
+The next slot-selection package initially failed in
+`artifacts/c08/d47de10132254412a266ff2b817da294/manifest.json` because the test
+expected an unassigned button to be dark. Pinned controls/button.lua specifies
+off=2 and on=15. The driver was corrected to that explicit rendering contract;
+no runtime or Mosaic behavior changed. The hold-selection edit was also made
+nonvacuous (C to G) before rerunning. Active session18739 is running
+`tests/mosaic_pattern_slots.py`, log `artifacts/c08-pattern-slots-corrected.log`.
+
+All23 pattern-slot checks passed in
+`artifacts/c08/9d0bbb8425784ce7ab1389df9319ad91/manifest.json`.
+Every slot is edited and independently assigned through the native grid path.
+Returning to slot1 preserves its original four-note pattern. Note and velocity
+editors both pass shift-selection and long-selection with nonvacuous MIDI edits.
+The source-contract correction above is retained alongside the successful run.
+
+Active session60913 now runs `tests/mosaic_pattern_lengths.py`, then its
+`--collision-baseline` case. Logs are `artifacts/c08-pattern-lengths.log` and
+`artifacts/c08-pattern-length-collision.log`. These compare visible length LEDs
+and actual MIDI note-off timestamps against one/three-step durations at90 BPM,
+long-press reset, empty-step rejection and the documented next-trig cutoff.
+
+The five ordinary length-control checks passed:
+`artifacts/c08/2b35d14dd2994307b30380914de1ae1d/manifest.json`.
+The maximum absolute measured duration error was2.952 ms against the existing
+10 ms focused bound. The documented next-trig cutoff baseline failed in
+`artifacts/c08/b5dd3ad8de1a4edbb5b45bb4378b2433/manifest.json`: the grid ends
+C at the next trig, but C's MIDI duration is0.664371 seconds instead of the
+expected2/6=0.333333 seconds. Other note durations differ by less than0.4 ms.
+This is semantic duration disagreement, not scheduler jitter.
+
+An isolated `pattern-length-cutoff` candidate computes each source pattern's
+lengths up to its next trig before merging. Stored editor lengths remain intact,
+and subsequent channel/step length masks keep their explicit precedence.
+Native collision and unchanged length-control regressions are active in
+session72673, log `artifacts/c08-pattern-length-candidate.log`. Combined patch,
+wrap, merge and mask interactions remain obligations before release.
+
+The isolated length candidate passed the collision package (two checks) in
+`artifacts/c08/608ad456e4be471888cc611c1cc4c41f/manifest.json` and the unchanged
+length-control package (five checks) in
+`artifacts/c08/e569af26224c47909cd8fe4cce1397b5/manifest.json`.
+The unchanged474-test upstream suite also passes on both baseline and candidate:
+`artifacts/c08-patch-unit/5b65014afc3841a49e8343fd3ce8b8d1/results.json`.
+Reproduce with `python3 tests/mosaic_patch_units.py fixtures/apps/mosaic-patches/pattern-lengths.json`.
+These unit tests remain supplementary to the actual-input duration evidence.
+
+The playback helper now rejects an empty note expectation or nonpositive/noninteger
+cycle count before any input. Silence must use an explicit timed assertion;
+it cannot earn a pass from waiting for zero events. All five focused fixture
+retention/error/empty-playback contracts pass. This is a guard against future
+vacuous tests; existing intentional silence workflows already use timed waits.
+
+The tresillo candidate also passes all474 unchanged upstream tests on both
+baseline and candidate:
+`artifacts/c08-patch-unit/47036efed0274bf0a472fa0eb49cd93c/results.json`.
+Reproduce with `python3 tests/mosaic_patch_units.py fixtures/apps/mosaic-patches/tresillo.json`.
+The shell wrapper combining the two runs exited1 because its status-variable
+expression was malformed across the Windows/WSL shell boundary. Each underlying
+Lua test subprocess recorded exit0. `python3 artifacts/verify_patch_unit_results.py`
+then exited0 after checking both result sets, exact474 counts and retained log
+SHA256 values. No failed test was converted into a passing result.
+
+This checkpoint remains C08 development evidence. Full pattern wrap, remaining
+merge/quantiser/mask variants, Note Dashboard assertions and the final owned
+inventory reconciliation/package run remain. The known Lower formula and
+independent one-step-channel questions remain pending. Combined candidate patches
+and their interactions still require C12 acceptance; no manual/hardware gate is
+introduced and the default Mosaic fixture remains the pinned unmodified source.
