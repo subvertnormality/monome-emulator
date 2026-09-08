@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "current_card": "broader-script-scope",
-  "status": "queued_after_completed_tranche1",
+  "current_card": "A02/A03/P03 integration and broader-tranche review",
+  "status": "in_progress",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
   "completed": [
@@ -11,7 +11,7 @@
     "tranche1 committed, reviewed and merged to main"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "Tranche1 merged to main at 4b7ab6b; final docs-only progress commit follows. Main post-merge generic native test passed artifacts/audio/generic-20260908-175139/report.json. All test/review processes terminal, own worktree retained. Next read recorded evidence and define concrete broader-script/cheat codes 2 acceptance before implementing eligible missing features. Keep Mosaic optional, preserve concurrent main state.json, use worktree. Desktop/Maiden/Docker and architecture references remain queued AFTER broader scripts. Do not repeat completed tranche1 suites absent a relevant change.",
+  "next_action": "Stage2 acceptance closure progressed: unchanged cheat codes --arc passed7checks200640 (actual440/880 source-window PCM movement), composed generic services11pass200815, sequence/WAV7pass200944, composed persistence5pass201053. Top-level22 unit + separate contracts68 tests pass (216.797sec); Popen warnings checked sampled PIDsexited, no nativecleanupwaiver. Candidate evidence index docs/delivery/completions/A02-A03-P03-candidate.md and branchspec reviews/A02-A03-P03-spec.json ready. Next commit snapshot and run one Paranoia Codex medium600sec branch review from f301e76 with explicit audio/local-tool stakes using scripts/review_plan.py; max1focusedfollowup. Resolve substantive findings before admission/merge. All acceptancehandles terminal (47796/78150/60220/36661/52200); no new owned build/audio live, old demo untouched. Main remainsf301e76 with other-task state edit preserved. Stage3 desktop/Maiden/Docker remains queued.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",
@@ -156,5 +156,40 @@
     "status": "merged_opt_in_subset",
     "completion": "docs/delivery/completions/A01-tranche1.md",
     "merged_implementation": "4b7ab6b"
+  },
+  "broader_tranche": {
+    "status": "in_progress",
+    "review": "pending",
+    "softcut_services": "artifacts/audio/softcut-services-20260908-181251/report.json",
+    "softcut_sequence": "artifacts/audio/softcut-sequence-20260908-180555/report.json",
+    "softcut_errors": "artifacts/audio/softcut-file-errors-20260908-180918/report.json",
+    "crow_presence": "artifacts/crow/presence-20260908-181736/report.json",
+    "no_crow_boot": "artifacts/audio/cheat-codes-boot-20260908-181816/report.json",
+    "file_import": "artifacts/audio/file-import-20260908-182459/report.json",
+    "sampler_baseline": "artifacts/audio/cheat-codes-sampler-20260908-183016/report.json",
+    "bounds_baseline": "artifacts/audio/read-bounds-20260908-183540/report.json",
+    "bounds_candidate": "artifacts/audio/read-bounds-20260908-184048/report.json",
+    "completion_notes": [
+      "docs/delivery/completions/A02.md",
+      "docs/delivery/completions/A03-prerequisites.md",
+      "docs/delivery/completions/A03-read-bounds.md",
+      "docs/delivery/completions/A03-sampler-controls.md",
+      "docs/delivery/completions/A03-persistence-progress.md",
+      "docs/delivery/completions/P03-progress.md"
+    ],
+    "sampler_candidate": ".runtime/sampler-tools-01/installation.json",
+    "sampler_playback": "artifacts/audio/cheat-codes-sampler-20260908-184824/report.json",
+    "sampler_scope": "Unchanged external app, no Crow: file picker, pad/loop, loop-end editing, pitch rates, asymmetric reverse, actual live recording and repeated retained playback after input disconnect. Source identity and cleanup pass. Persistence/arc/review remain; not full A03 admission.",
+    "sampler_rates": "artifacts/audio/cheat-codes-sampler-20260908-185127/report.json",
+    "sampler_reverse": "artifacts/audio/cheat-codes-sampler-20260908-185546/report.json",
+    "sampler_live_recording": "artifacts/audio/cheat-codes-record-20260908-185756/report.json",
+    "audio_directory": "artifacts/audio/file-import-20260908-191416/report.json",
+    "collection_save_timeout": "artifacts/audio/cheat-codes-record-20260908-190758/report.json",
+    "input_timeout": "artifacts/audio/slow-input-20260908-191822/report.json",
+    "persistence_capture_failures": [
+      "artifacts/audio/cheat-codes-record-20260908-192015/report.json",
+      "artifacts/audio/cheat-codes-record-20260908-192326/report.json"
+    ],
+    "arc_status": "native patch generated and C compile-check passed; public/runtime/browser integration pending"
   }
 }

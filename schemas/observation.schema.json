@@ -37,7 +37,11 @@
       "maximum": 2147483647
     },
     "state": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "arc": {"type":"array","minItems":4,"maxItems":4,"items":{"type":"array","minItems":64,"maxItems":64,"items":{"type":"integer","minimum":0,"maximum":15}}},
+        "arc_device": {"type":"object","properties":{"available":{"type":"boolean"},"enabled":{"type":"boolean"},"connected":{"type":"boolean"},"intensity":{"type":"integer","minimum":0,"maximum":15},"rings":{"const":4},"serial":{"const":"emu-arc-4"},"device_id":{"type":"integer","minimum":0}},"required":["available","enabled","connected","intensity","rings","serial"],"additionalProperties":false}
+      }
     },
     "errors": {
       "type": "array",

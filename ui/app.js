@@ -43,6 +43,26 @@ for(let y=1;y<=8;y++)for(let x=1;x<=16;x++){
   bindHold(button,button.id,{type:'grid',x,y});$('#grid').append(button);
 }
 const encoderKeys={q:[1,-1],w:[1,1],a:[2,-1],s:[2,1],z:[3,-1],x:[3,1]};
+for(let n=1;n<=4;n++){
+  const ring=document.createElement('div');ring.className='arc-ring';ring.id='arc-ring-'+n;
+  ring.innerHTML=`<svg viewBox="0 0 100 100" tabindex="0" role="group" aria-label="Arc ring ${n}"></svg><div><button class="arc-minus" aria-label="Turn arc ${n} down">−</button><button class="arc-key" id="arc-key-${n}" aria-label="Arc ${n} virtual key" aria-pressed="false">${n}</button><button class="arc-plus" aria-label="Turn arc ${n} up">+</button></div>`;
+  const svg=ring.querySelector('svg');
+  for(let i=0;i<64;i++){
+    const led=document.createElementNS('http://www.w3.org/2000/svg','circle'),angle=i*2*Math.PI/64;
+    led.setAttribute('cx',String(50+42*Math.sin(angle)));led.setAttribute('cy',String(50-42*Math.cos(angle)));led.setAttribute('r','1.7');led.dataset.level='0';svg.append(led);
+  }
+  const turn=delta=>{if(ready&&lastObservation?.state.arc_device?.connected)action({type:'arc_delta',n,delta});};
+  ring.querySelector('.arc-minus').onclick=()=>turn(-1);ring.querySelector('.arc-plus').onclick=()=>turn(1);
+  svg.addEventListener('wheel',e=>{e.preventDefault();turn(e.deltaY<0?1:-1);},{passive:false});
+  svg.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();turn(e.key==='ArrowUp'?1:-1);}});
+  bindHold(ring.querySelector('.arc-key'),'arc-key-'+n,{type:'arc_key',n});$('#arc-rings').append(ring);
+}
+$('#arc-connect').onclick=()=>{
+  if(lastObservation?.state.arc_device?.enabled){
+    for(const id of held.keys())if(id.startsWith('arc-key-'))held.delete(id);
+    action({type:'arc_connection',connected:!lastObservation.state.arc_device.connected});
+  }
+};
 window.addEventListener('keydown',event=>{
   if(event.ctrlKey||event.metaKey||event.altKey||event.target.matches('input,textarea'))return;
   if(['1','2','3'].includes(event.key)){event.preventDefault();transition('key-'+event.key,{type:'key',n:Number(event.key)},true);}
@@ -71,8 +91,19 @@ function paint(observation){
     const channels=[32+Math.round(211*amount),35+Math.round(218*amount),27+Math.round(169*amount)];
     button.style.backgroundColor=`rgb(${channels.join(',')})`;button.dataset.level=String(level);button.disabled=!state.grid_device.connected;
   });
-  for(const button of document.querySelectorAll('.key,.cell'))button.setAttribute('aria-pressed','false');
-  for(const input of state.held){const id=input.type==='key'?'key-'+input.n:`grid-${input.x}-${input.y}`;$('#'+id)?.setAttribute('aria-pressed','true');}
+  const arc=state.arc_device;
+  $('#arc-section').hidden=!arc?.enabled;
+  if(arc?.enabled){
+    $('#arc-connect').textContent=arc.connected?'Disconnect arc':'Connect arc';
+    for(let n=1;n<=4;n++){
+      const ring=$('#arc-ring-'+n);
+      ring.querySelectorAll('button').forEach(button=>button.disabled=!arc.connected);
+      ring.querySelectorAll('circle').forEach((led,i)=>{const level=state.arc[n-1][i];led.dataset.level=String(level);led.setAttribute('fill',`rgb(${Math.round(30+225*level/15*arc.intensity/15)},${Math.round(30+215*level/15*arc.intensity/15)},30)`);});
+    }
+    if(!arc.connected)for(const id of held.keys())if(id.startsWith('arc-key-'))held.delete(id);
+  }
+  for(const button of document.querySelectorAll('.key,.cell,.arc-key'))button.setAttribute('aria-pressed','false');
+  for(const input of state.held){const id=input.type==='key'?'key-'+input.n:input.type==='arc_key'?'arc-key-'+input.n:`grid-${input.x}-${input.y}`;$('#'+id)?.setAttribute('aria-pressed','true');}
   $('#held').textContent=state.held.length?`${state.held.length} held input${state.held.length===1?'':'s'}`:'No held inputs';
   $('#connect').textContent=state.grid_device.connected?'Disconnect grid':'Connect grid';
   $('#script').textContent=state.script;$('#status').textContent='Ready · native norns';lastObservation=observation;

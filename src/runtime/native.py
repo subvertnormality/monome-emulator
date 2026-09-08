@@ -32,6 +32,7 @@ class NativeBackend:
         self.crow_capture=None
         self.errors=[]; self.absent=[]; self.ready=False; self.sequence=0; self.acks={}
         self.sc_log_offset=0; self.sc_log_partial=b''
+        self.crone_log_offset=0; self.crone_log_partial=b''
         self.schedule_responses={}; self.input_schedule=None
         self.frame_revision=0; self.grid_revision=0; self.frame=bytes(32768); self.grid=[0]*128
         self.saved_frame=None
@@ -47,6 +48,12 @@ class NativeBackend:
         install=read_json(config.get('experimental_install') or ROOT/'.runtime/current.json')
         from .dependencies import verify_install
         verify_install(install)
+        from devices.arc import ArcInput
+        self.arc_input=ArcInput(config.get('arc_enabled',False))
+        self.arc_available=install.get('experimental',{}).get('arc',{}).get('profile')=='virtual-arc4'
+        if self.arc_input.enabled and not self.arc_available:raise ContractError('unsupported','Selected runtime has no identified virtual arc support')
+        self.arc=[[0]*64 for _ in range(4)]
+        self.arc_device=dict(available=self.arc_available,enabled=self.arc_input.enabled,connected=self.arc_input.enabled,intensity=15,rings=4,serial='emu-arc-4')
         self.schedule_supported=(any(item['path']=='matron/src/emu_midi_schedule.c'
             for item in install.get('experimental',{}).get('files',[])) or
             any(item['path']=='patches/norns/0012-scheduled-midi-input.patch' for item in install.get('patches',[])))
@@ -87,6 +94,8 @@ class NativeBackend:
         self.alias.symlink_to(self.directory,target_is_directory=True)
         runtime_dust=self.alias/'dust'
         for folder in ('code','data','audio/tape'): (dust/folder).mkdir(parents=True,exist_ok=True)
+        from .audio_files import import_files
+        self.config['audio_identity']=import_files(dust/'audio',self.config.get('audio_files',[]),self.config.get('audio_directory'))
         # Preserve each declared code-directory name and sibling include dependency.
         # Only link directories, never touch, reset or overwrite the selected tree.
         for item in code.iterdir():
@@ -153,6 +162,8 @@ class NativeBackend:
             NORNS_EMU_CRONE_PORT=str(self.ports['crone']),NORNS_EMU_MATRON_PORT=str(self.ports['matron']),
             NORNS_EMU_SC_PORT=str(self.ports['scsynth']),NORNS_EMU_MIDI_PORTS='\n'.join(self.midi_config['ports']))
         self.env.pop('NORNS_EMU_RANDOM_SEED',None)
+        self.env.pop('NORNS_EMU_ARC',None)
+        if self.arc_input.enabled:self.env['NORNS_EMU_ARC']='1'
         self.env.pop('NORNS_EMU_CROW_PATH',None)
         self.env.pop('NORNS_EMU_CROW_TRACE',None)
         self.env.pop('NORNS_EMU_CROW_II_TRACE',None)
@@ -165,7 +176,7 @@ class NativeBackend:
         if self.clock_mode!='real-time':self.env.update(NORNS_EMU_CLOCK=self.clock_mode,TZ='UTC')
         if self.config.get('random_seed') is not None:self.env['NORNS_EMU_RANDOM_SEED']=str(self.config['random_seed'])
         write_json(self.directory/'native-config.json',dict(script=str(entry),mapped=str(self.mapped_entry),code_root=str(code),
-            ports=self.ports,midi=self.midi_config,jack_server=self.env['JACK_DEFAULT_SERVER'],enabled_mods=mods,runtime=str(self.native),random_seed=self.config.get('random_seed'),clock_mode=self.clock_mode,
+            ports=self.ports,midi=self.midi_config,jack_server=self.env['JACK_DEFAULT_SERVER'],enabled_mods=mods,runtime=str(self.native),random_seed=self.config.get('random_seed'),clock_mode=self.clock_mode,crow_enabled=self.config.get('crow_enabled',True),
             jack_profile=dict(driver='dummy',rate=48000,period=1024,realtime=False,clock_source='system')))
     def launch(self,name,args,bridge=False):
         logfile=open(self.directory/(name+'.log'),'w'); self.logs.append(logfile)
@@ -192,6 +203,7 @@ class NativeBackend:
         self.launch('matron',['stdbuf','-oL','-eL',str(self.native/'build/matron/matron'),
             '-l',str(self.ports['matron']),'-c',str(self.ports['crone']),'-e',str(self.ports['sclang']),'-o',str(self.ports['remote'])],bridge=True)
     def launch_crow(self):
+        if not self.config.get('crow_enabled',True):return
         install=self.config['runtime_identity']
         binary=install['binaries'].get('crow_host')
         if not binary:return
@@ -233,6 +245,22 @@ class NativeBackend:
                 message=line.decode('utf-8',errors='replace').strip()
                 if message.startswith(('ERROR:', 'FAILURE IN SERVER', "warning: didn't find engine:")):
                     if not self.errors:self.errors.append(dict(code='audio_engine_error',message=message+'; '+str(path)))
+        # Pinned BufDiskWorker reports failed asynchronous file IO to stderr
+        # while keeping crone alive. A successful OSC send is not a sample load.
+        path=self.directory/'crone.log'
+        if path.exists():
+            with path.open('rb') as log:
+                log.seek(self.crone_log_offset);chunk=log.read();self.crone_log_offset=log.tell()
+            lines=(self.crone_log_partial+chunk).split(b'\n');self.crone_log_partial=lines.pop()
+            for line in lines:
+                message=line.decode('utf-8',errors='replace').strip()
+                if message.startswith(('readBufferMono(): empty / missing file:',
+                    'SoftCutClient::readBufferStereo(): empty / missing file:',
+                    'SoftCutClient::readBufferStereo(): not enough channels in source; aborting',
+                    'error seeking to frame:', 'BufDiskWorker::writeBufferMono(): cannot open sndfile',
+                    'BufDiskWorker::writeBufferMono(): write aborted',
+                    'BufDiskWorker::writeBufferStereo(): write aborted', 'ERROR: cannot open sndfile')):
+                    if not self.errors:self.errors.append(dict(code='audio_io_error',message=message+'; '+str(path)))
         if self.errors: raise ContractError(self.errors[0]['code'],self.errors[0]['message'])
     def receive(self):
         try:
@@ -315,6 +343,14 @@ class NativeBackend:
                         connected,rotation,intensity=payload
                         self.grid_device.update(connected=bool(connected),rotation=rotation,intensity=intensity,device_id=identifier)
                         record.update(self.grid_device)
+                    elif kind==18:
+                        if not self.arc_input.enabled or len(payload)!=256 or any(v>15 for v in payload):raise ValueError('Invalid arc LED packet')
+                        self.arc=[list(payload[i:i+64]) for i in range(0,256,64)]
+                        record['leds']=self.arc
+                    elif kind==19:
+                        if not self.arc_input.enabled or len(payload)!=2 or payload[0]>1 or payload[1]>15:raise ValueError('Invalid arc metadata')
+                        self.arc_device.update(connected=bool(payload[0]),intensity=payload[1],device_id=identifier)
+                        record.update(self.arc_device)
                     else: raise ValueError('Unknown native packet '+str(kind))
                     line=json.dumps(record)+'\n';write_start=time.monotonic_ns()
                     self.events.write(line)
@@ -340,7 +376,7 @@ class NativeBackend:
                 self.events.write(json.dumps(dict(kind='input',sequence=self.sequence,type=kind,args=list(args),monotonic_ns=time.monotonic_ns()))+'\n')
             submission_start=time.monotonic_ns()
             self.controller.send(packet)
-            submitted=time.monotonic_ns();end=time.monotonic()+2
+            submitted=time.monotonic_ns();end=time.monotonic()+self.config.get('input_timeout',2)
             timestamp=None
             try:
                 with self.condition:
@@ -406,6 +442,15 @@ class NativeBackend:
                 if bool(action['state'])==(key in self.held): raise ContractError('duplicate_key_transition','Norns key already has requested state')
                 self.send(1,action['n'],action['state'])
             elif kind=='enc': self.send(2,action['n'],action['delta'])
+            elif kind in ('arc_delta','arc_key','arc_connection'):
+                self.arc_input.validate(action)
+                if kind=='arc_connection':
+                    if not action['connected']:
+                        for held in list(self.arc_input.held.values()):self.query({'action':dict(held,state=0)})
+                    self.send(14,int(action['connected']))
+                elif kind=='arc_delta':self.send(12,action['n']-1,action['delta'])
+                else:self.send(13,action['n']-1,action['state'])
+                self.arc_input.applied(action)
             elif kind=='grid':
                 self.grid_input.validate(action)
                 self.send(3,action['x']-1,action['y']-1,action['state'])
@@ -436,7 +481,7 @@ class NativeBackend:
             elif kind=='release_all':
                 for held in list(self.held.values()):
                     release=dict(held,state=0); self.query({'action':release})
-            if kind in ('key','grid'):
+            if kind in ('key','grid','arc_key'):
                 key=(kind,action.get('n'),action.get('x'),action.get('y'))
                 if action['state']: self.held[key]=action
                 else: self.held.pop(key,None)
@@ -450,9 +495,10 @@ class NativeBackend:
                 sha256=hashlib.sha256(frame).hexdigest(),pixels_base64=base64.b64encode(frame).decode()),grid=self.grid.copy(),midi=list(self.midi),midi_count=self.midi_count,
               midi_capture=self.capture.state(),midi_ports=self.midi_config['ports'],
               held=list(self.held.values()),grid_device=dict(self.grid_device),diagnostics=dict(self.diagnostics),absent=self.absent[-64:]))
+            result['state'].update(arc=[ring.copy() for ring in self.arc],arc_device=dict(self.arc_device))
             result['state']['clock']=dict(mode=self.clock_mode,logical_ns=self.logical_ns if self.clock_mode!='real-time' else None,admitted=self.clock_mode=='real-time')
             result['state']['midi_input_schedule']=copy.deepcopy(self.input_schedule)
-            if payload.get('action',{}).get('type') in ('key','enc','grid','grid_connection','midi','advance'):
+            if payload.get('action',{}).get('type') in ('key','enc','grid','grid_connection','midi','advance','arc_delta','arc_key','arc_connection'):
                 result['native_ack']=dict(self.last_native_ack)
         # A Windows-mounted filesystem can pause for tens of milliseconds.
         # Never hold the native event reader's condition during artifact I/O.

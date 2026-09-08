@@ -1,0 +1,22 @@
+--- a/crone/src/BufDiskWorker.cpp
++++ b/crone/src/BufDiskWorker.cpp
+@@ -347,6 +347,9 @@
+         frDur = maxDurSrc > maxDurDst ? maxDurDst : maxDurSrc;
+     } else {
+         frDur = secToFrame(dur);
++        // Explicit lengths obey the same source/destination bounds as read-to-end.
++        clamp(frDur, static_cast<size_t>(file.frames()) - frSrc);
++        clamp(frDur, bufFrames - frDst);
+     }
+ 
+     auto numSrcChan = file.channels();
+@@ -411,6 +414,9 @@
+         frDur = maxDurSrc > maxDurDst ? maxDurDst : maxDurSrc;
+     } else {
+         frDur = secToFrame(dur);
++        // Explicit lengths obey the same source/destination bounds as read-to-end.
++        clamp(frDur, static_cast<size_t>(file.frames()) - frSrc);
++        clamp(frDur, bufFrames - frDst);
+     }
+ 
+     auto numSrcChan = file.channels();

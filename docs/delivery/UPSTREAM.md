@@ -126,3 +126,8 @@ scripts against the declared norns API surface; it is not a promise that every
 script works before its audio/softcut/arc/Crow or other dependencies are supported.
 Standalone grid applications for Max, Ableton or other hosts need those hosts;
 they are not made runnable as norns scripts by this utility.
+
+The experimental audio candidate also carries a locally authored softcut
+explicit-read bounds patch. Its official base, inspected upstream revision,
+regression evidence and removal condition are recorded in
+`completions/A03-read-bounds.md`. It is not an admitted default runtime change.

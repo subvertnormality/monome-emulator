@@ -16,8 +16,9 @@ def metadata(session_id):
         raise ContractError('session_id','Invalid session identity')
     return read_json(SESSIONS/session_id/'session.json')
 
-def request(session_id,path,payload=None,timeout=5):
+def request(session_id,path,payload=None,timeout=None):
     info=metadata(session_id)
+    if timeout is None:timeout=max(5,info.get('input_timeout',2)+3) if path=='/action' else 5
     req=urllib.request.Request('http://127.0.0.1:'+str(info['port'])+path,
         data=json.dumps(payload).encode() if payload is not None else None,
         headers={'Content-Type':'application/json','Authorization':'Bearer '+info['token']})
@@ -28,7 +29,18 @@ def request(session_id,path,payload=None,timeout=5):
         raise ContractError(value.get('code','http_error'),value.get('message',str(error))) from error
     except (OSError,ValueError) as error: raise ContractError('session_unavailable',str(error)) from error
 
-def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None,midi_config=None,random_seed=None,clock_mode='real-time',experimental_install=None):
+def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None,midi_config=None,random_seed=None,clock_mode='real-time',experimental_install=None,crow_enabled=True,audio_files=None,audio_directory=None,input_timeout=2,arc_enabled=False):
+    if type(arc_enabled)!=bool:raise ContractError('arc_config','arc_enabled must be boolean')
+    if arc_enabled and backend!='native':raise ContractError('unsupported','Arc requires native runtime')
+    if type(input_timeout) not in (int,float) or not .1<=input_timeout<=30:
+        raise ContractError('input_timeout','input_timeout must be between 0.1 and 30 seconds')
+    if backend!='native' and input_timeout!=2:raise ContractError('unsupported','Input timeout configuration requires native runtime')
+    if type(crow_enabled)!=bool:raise ContractError('crow_config','crow_enabled must be boolean')
+    if audio_files is not None and (not isinstance(audio_files,list) or any(not isinstance(p,(str,os.PathLike)) for p in audio_files)):
+        raise ContractError('audio_files','audio_files must be a list of paths')
+    if audio_directory is not None and not isinstance(audio_directory,(str,os.PathLike)):
+        raise ContractError('audio_directory','audio_directory must be a path')
+    if (audio_files or audio_directory is not None) and backend!='native':raise ContractError('unsupported','Audio imports require a native session')
     if backend not in ('contract-fixture','native'): raise ContractError('unsupported_backend',backend)
     if clock_mode not in ('real-time','controlled-experimental'):raise ContractError('clock_mode','Unknown clock mode')
     if (clock_mode!='real-time' or experimental_install is not None) and backend!='native':raise ContractError('clock_mode','Experimental clocks require native runtime')
@@ -48,7 +60,11 @@ def start(backend='contract-fixture',script=None,code_root=None,data=None,enable
     else: data_path=dust/'data'
     config=dict(session_id=session_id,token=uid(),backend=backend,script=str(Path(script).absolute()) if script else None,
                 code_root=str(Path(code_root).absolute()) if code_root else None,data=str(data_path),dust=str(dust),
-                enabled_mods=enabled_mods or [],data_seeds=data_seeds or [],midi_config=midi_config,random_seed=random_seed,
+                enabled_mods=enabled_mods or [],data_seeds=data_seeds or [],midi_config=midi_config,random_seed=random_seed,crow_enabled=crow_enabled,
+                audio_files=[str(Path(p).resolve()) for p in audio_files or []],
+                audio_directory=str(Path(audio_directory).resolve()) if audio_directory is not None else None,
+                input_timeout=input_timeout,
+                arc_enabled=arc_enabled,
                 clock_mode=clock_mode,experimental_install=str(Path(experimental_install).resolve()) if experimental_install else None)
     write_json(directory/'config.json',config)
     log=open(directory/'server.log','w')

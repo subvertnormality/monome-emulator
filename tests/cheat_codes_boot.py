@@ -8,6 +8,7 @@ from automation.protocol import write_json
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--install',type=Path,required=True)
+    parser.add_argument('--no-crow',action='store_true')
     args=parser.parse_args()
     code=ROOT/'.runtime/fixtures/cheat-codes-2/code'; app=code/'cheat_codes_2'
     lock=json.loads((ROOT/'fixtures/apps/cheat-codes-2.lock.json').read_text())
@@ -24,7 +25,7 @@ def main():
         version_limitation='Launcher writes synthetic host update 260906. This does not establish official OS release compatibility. Runtime is pinned official norns v2.9.4, commit dated 2026-01-02. No fixture version guard was edited.')
     sid=None
     try:
-        info=session.start('native',app/'cheat_codes_2.lua',code,experimental_install=args.install)
+        info=session.start('native',app/'cheat_codes_2.lua',code,experimental_install=args.install,crow_enabled=not args.no_crow)
         sid=info['session_id'];report['session_id']=sid
         time.sleep(3)
         initial=session.request(sid,'/snapshot');report['initial']=initial

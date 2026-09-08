@@ -136,6 +136,8 @@ class Application:
         if payload['action_id'] in self.action_ids: raise ContractError('duplicate_action','Action identity was already applied')
         if self.config['backend']=='contract-fixture' and payload['action']['type']=='grid_connection':
             raise ContractError('unsupported','Grid connection requires the native backend')
+        if payload['action']['type'].startswith('arc_') and self.config['backend']!='native':
+            raise ContractError('unsupported','Arc requires the native backend')
         if payload['action']['type']=='advance' and (self.config['backend']!='native' or self.config.get('clock_mode','real-time')=='real-time'):
             raise ContractError('unsupported','advance requires explicit experimental native controlled time')
         action=dict(payload['action']); client_id=payload.get('client_id'); kind=action['type']
@@ -144,7 +146,7 @@ class Application:
         if scheduled:action.pop('at_monotonic_ns')
         key=(kind,action.get('n'),action.get('x'),action.get('y'))
         if client_id: self.heartbeat(client_id)
-        if kind in ('key','grid') and not action['state'] and client_id and self.input_owners.get(key,(None,None))[0]!=client_id:
+        if kind in ('key','grid','arc_key') and not action['state'] and client_id and self.input_owners.get(key,(None,None))[0]!=client_id:
             raise ContractError('input_owner','This input belongs to another client')
         raw=None
         if kind=='release_all' and client_id:
@@ -156,7 +158,9 @@ class Application:
             if kind=='release_all': self.input_owners.clear()
             elif kind=='grid_connection' and not action['connected']:
                 self.input_owners={k:v for k,v in self.input_owners.items() if k[0]!='grid'}
-            elif kind in ('key','grid'):
+            elif kind=='arc_connection' and not action['connected']:
+                self.input_owners={k:v for k,v in self.input_owners.items() if k[0]!='arc_key'}
+            elif kind in ('key','grid','arc_key'):
                 if action['state']: self.input_owners[key]=(client_id,dict(action))
                 else: self.input_owners.pop(key,None)
         self.sequence+=1; self.action_ids.add(payload['action_id'])
@@ -218,7 +222,7 @@ def serve_application(directory,app):
                 with app.lock:
                     if self.command=='POST' and self.path=='/crow/ii/read':
                         profile=app.config.get('runtime_identity',{}).get('experimental',{}).get('crow',{})
-                        if profile.get('manifest',{}).get('ii_protocol')!=1:raise ContractError('unsupported','Selected runtime has no Crow ii trace')
+                        if not app.config.get('crow_enabled',True) or profile.get('manifest',{}).get('ii_protocol')!=1:raise ContractError('unsupported','Session has no enabled Crow ii trace')
                         if not isinstance(payload,dict) or set(payload)!={'cursor'}:raise ContractError('crow_ii_request','Expected cursor')
                         from runtime.crow_ii import read_trace
                         app.backend.check_processes()
@@ -260,12 +264,15 @@ def serve_application(directory,app):
                     if self.command=='GET' and self.path=='/capabilities':
                         identity=app.config.get('runtime_identity',{});experimental=identity.get('experimental',{});binaries=identity.get('binaries',{})
                         extra_supported=[];extra_limits=[]
+                        if app.config.get('arc_enabled',False):
+                            extra_supported.append('experimental virtual arc4: relative encoders, virtual encoder keys, 4x64 LED output and reconnect')
+                            extra_limits.append('physical arc timing and model-specific hardware behavior are not certified')
                         if experimental.get('status')=='audio-feasibility-only':
                             extra_supported.append('experimental real-time official norns/JACK/SuperCollider audio; selected engine and n.b. fixture coverage')
                             extra_limits.append('physical speaker output, arbitrary engine compatibility and DSP synchronization to controlled Lua time are not certified')
                         if 'audio_monitor' in binaries:extra_supported.append('experimental opt-in browser PCM monitoring with explicit stream-gap errors')
                         if 'audio_capture' in binaries:extra_supported.append('experimental bounded JACK WAV capture and session-data WAV injection')
-                        crow_profile=experimental.get('crow',{}).get('manifest',{})
+                        crow_profile=experimental.get('crow',{}).get('manifest',{}) if app.config.get('crow_enabled',True) else {}
                         if crow_profile:
                             extra_supported.append('experimental virtual Crow serial, four ASL/CASL CV outputs and bounded CV capture')
                             extra_limits.append('full Crow firmware reset/upload, blocking native Lua calls, unsupported input modes, electrical behavior and downstream ii synthesis')
@@ -276,7 +283,7 @@ def serve_application(directory,app):
                         audio_limit='arbitrary engine compatibility (selected audio build is experimental)' if app.config.get('runtime_identity',{}).get('experimental',{}).get('status')=='audio-feasibility-only' else 'audio engines'
                         self.respond(200,checked('capability',dict(schema_version=1,backend=app.config['backend'],
                           fidelity=app.backend.fidelity,supported=(['native script loading','native keys/encoders','Cairo framebuffer','grid128 LED/relative/bulk/refresh, rotation, intensity, holds and reconnect','configured native MIDI ports, byte-stream input and emission-time capture','patched v2.9.4: realtime MIDI preserves partial messages (0009); cancelled queued clock resumes are ignored (0011)']+extra_supported if app.config['backend']=='native' else ['contract counter','ordered action acknowledgment']),
-                          absent=['physical Crow','GPIO/SPI','network manager'] if app.config['backend']=='native' else [],
+                          absent=(['physical Crow','GPIO/SPI','network manager']+(['virtual Crow (disabled for session)'] if not app.config.get('crow_enabled',True) else [])+(['virtual arc (disabled for session)'] if not app.config.get('arc_enabled',False) else [])) if app.config['backend']=='native' else [],
                           unsupported=([audio_limit,'physical peripherals','grid tilt','MIDI isolated F7 or status-interrupted partial messages (stricter than stock v2.9.4; C10)'] + extra_limits +
                             (['controlled time remains experimental and unadmitted; Codex P5 pending','controlled Link/Crow clocks, blocking micro-sleep and wall-time MIDI scheduling; injected MIDI is candidate-dependent and unadmitted'] if app.config.get('clock_mode','real-time')!='real-time' else ['advance without an explicit experimental installation'])) if app.config['backend']=='native' else ['native norns','application workflows']))); return
                     if self.command=='POST' and self.path=='/fixture-fault':

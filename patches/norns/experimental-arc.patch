@@ -1,0 +1,140 @@
+--- a/matron/src/emu_bridge.h
++++ b/matron/src/emu_bridge.h
+@@ -13,6 +13,9 @@
+ void emu_frame(cairo_surface_t *surface);
+ void emu_grid_refresh(struct dev_monome *md);
+ int emu_grid_init(struct dev_monome *md);
++int emu_arc_init(struct dev_monome *md);
++void emu_arc_refresh(struct dev_monome *md);
++void emu_arc_intensity(int value);
+ void emu_grid_rotation(int value);
+ void emu_grid_intensity(int value);
+ int emu_grid_rows(void);
+--- a/matron/src/emu_bridge.c
++++ b/matron/src/emu_bridge.c
+@@ -97,6 +97,42 @@
+ static struct event_custom_ops connection_ops={.type_name="emu_grid_connection",.weave=change_connection,.free=release_ack};
+ 
+ static void virtual_deinit(void *self) { (void)self; }
++static struct dev_monome *arc_device;
++static atomic_int arc_connected=1, arc_intensity=15;
++static void arc_metadata(void) {
++    uint8_t state[2]={arc_connected,arc_intensity};
++    emit(19,arc_device->dev.id,state,sizeof(state));
++}
++void emu_arc_intensity(int value) { arc_intensity=value; arc_metadata(); }
++int emu_arc_init(struct dev_monome *md) {
++    arc_device=md;
++    md->rows=0; md->cols=0; md->quads=4;
++    md->type=DEVICE_MONOME_TYPE_ARC;
++    memset(md->data,0,sizeof(md->data));
++    memset(md->dirty,0,sizeof(md->dirty));
++    md->dev.name=strdup("monome arc 4 emulator");
++    md->dev.serial=strdup("emu-arc-4");
++    md->dev.start=NULL; md->dev.deinit=virtual_deinit;
++    return 0;
++}
++void emu_arc_refresh(struct dev_monome *md) {
++    uint8_t leds[256];
++    for (int ring=0;ring<4;ring++) for (int led=0;led<64;led++)
++        leds[ring*64+led]=arc_connected ? (md->data[ring][led]&15) : 0;
++    emit(18,md->dev.id,leds,sizeof(leds));
++    memset(md->dirty,0,sizeof(md->dirty));
++}
++static void change_arc_connection(lua_State *l,void *value,void *context) {
++    (void)l; (void)context;
++    arc_connected=*(int *)value;
++    if (arc_connected) {
++        memset(arc_device->data,0,sizeof(arc_device->data));
++        w_handle_monome_add(arc_device);
++    } else w_handle_monome_remove(arc_device->dev.id);
++    arc_metadata(); emu_arc_refresh(arc_device);
++}
++static struct event_custom_ops arc_connection_ops={.type_name="emu_arc_connection",.weave=change_arc_connection,.free=release_ack};
++
+ void emu_midi_init(struct dev_midi *md) {
+     if (midi_count>=16) abort();
+     midi_devices[midi_count++] = md;
+@@ -154,6 +190,10 @@
+     if (!midi_count) abort();
+     dev_list_add(DEV_TYPE_MONOME, "emu:grid128", NULL, NULL);
+     grid_metadata();
++    if (getenv("NORNS_EMU_ARC")) {
++        dev_list_add(DEV_TYPE_MONOME,"emu:arc4",NULL,NULL);
++        arc_metadata();
++    }
+     const char *crow_path=getenv("NORNS_EMU_CROW_PATH");
+     if(crow_path) dev_list_add(DEV_TYPE_CROW,crow_path,"Virtual Crow",NULL);
+ }
+@@ -280,6 +320,21 @@
+             { int *connected=malloc(sizeof(int)); if (!connected) abort();
+               *connected=args[1]; ev=event_custom_new(&connection_ops,connected,NULL); }
+             break;
++        case 12:
++            if (!arc_device || !arc_connected || args[1]<0 || args[1]>3 || args[2]<-127 || args[2]>127) goto invalid;
++            ev=event_data_new(EVENT_ARC_ENCODER_DELTA);
++            ev->arc_encoder_delta.id=arc_device->dev.id;
++            ev->arc_encoder_delta.number=args[1]; ev->arc_encoder_delta.delta=args[2]; break;
++        case 13:
++            if (!arc_device || !arc_connected || args[1]<0 || args[1]>3 || args[2]<0 || args[2]>1) goto invalid;
++            ev=event_data_new(EVENT_ARC_ENCODER_KEY);
++            ev->arc_encoder_key.id=arc_device->dev.id;
++            ev->arc_encoder_key.number=args[1]; ev->arc_encoder_key.state=args[2]; break;
++        case 14:
++            if (!arc_device || args[1]<0 || args[1]>1) goto invalid;
++            { int *connected=malloc(sizeof(int)); if (!connected) abort();
++              *connected=args[1]; ev=event_custom_new(&arc_connection_ops,connected,NULL); }
++            break;
+         case 5:
+             ev=event_data_new(EVENT_EXEC_CODE_LINE);
+             ev->exec_code_line.line=strdup("_norns.emu_observe()"); break;
+--- a/matron/src/device/device_monome.c
++++ b/matron/src/device/device_monome.c
+@@ -44,6 +44,7 @@
+     monome_t *m;
+ 
+     if (strcmp(md->dev.path, "emu:grid128") == 0 && emu_enabled()) return emu_grid_init(md);
++    if (strcmp(md->dev.path, "emu:arc4") == 0 && emu_enabled()) return emu_arc_init(md);
+     m = monome_open(md->dev.path);
+ 
+     if (!m) {
+@@ -174,7 +175,11 @@
+ 
+ // transmit all dirty quads
+ void dev_monome_refresh(struct dev_monome *md) {
+-    if (emu_enabled() && md->m == NULL) { emu_grid_refresh(md); return; }
++    if (emu_enabled() && md->m == NULL) {
++        if (md->type == DEVICE_MONOME_TYPE_ARC) emu_arc_refresh(md);
++        else emu_grid_refresh(md);
++        return;
++    }
+     if (md->m == NULL) {
+         return;
+     }
+@@ -193,7 +198,11 @@
+ 
+ // intensity
+ void dev_monome_intensity(struct dev_monome *md, uint8_t i) {
+-    if (md->m == NULL) { emu_grid_intensity(i > 15 ? 15 : i); return; }
++    if (md->m == NULL) {
++        if (md->type == DEVICE_MONOME_TYPE_ARC) emu_arc_intensity(i > 15 ? 15 : i);
++        else emu_grid_intensity(i > 15 ? 15 : i);
++        return;
++    }
+     if (i > 15)
+         i = 15;
+     if (md->type == DEVICE_MONOME_TYPE_ARC)
+@@ -262,11 +271,11 @@
+ }
+ 
+ int dev_monome_grid_rows(struct dev_monome *md) {
+-    return md->m == NULL ? emu_grid_rows() : monome_get_rows(md->m);
++    return md->m == NULL ? (md->type == DEVICE_MONOME_TYPE_ARC ? 0 : emu_grid_rows()) : monome_get_rows(md->m);
+ }
+ 
+ int dev_monome_grid_cols(struct dev_monome *md) {
+-    return md->m == NULL ? emu_grid_cols() : monome_get_cols(md->m);
++    return md->m == NULL ? (md->type == DEVICE_MONOME_TYPE_ARC ? 0 : emu_grid_cols()) : monome_get_cols(md->m);
+ }
+ 
+ void *dev_monome_start(void *md) {

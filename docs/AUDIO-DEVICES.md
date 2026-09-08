@@ -62,3 +62,57 @@ per output and 4,096 callbacks or 0.5 seconds per dispatch batch. Exceeding a bo
 fails explicitly, including a self-triggering chain of instant actions. Ordinary
 instant actions deliver their completion callback; asynchronous input/output
 callbacks service the ii queue without requiring a new serial command.
+
+The broader-script candidate also surfaces crone's reported asynchronous sample
+file read/write errors as `audio_io_error`, with the original diagnostic and log
+path. Missing samples, stereo/mono mismatches and failed output writes must not
+appear as successful operations simply because their OSC commands were sent.
+
+Use `--no-crow` to leave virtual Crow disconnected for a session (Python:
+`crow_enabled=False`). This is useful for sampler scripts that probe optional ii
+modules at startup. It does not add ii read/module emulation; Crow-enabled cheat
+codes 2 currently encounters that explicit unsupported boundary.
+
+Import samples with repeatable `--audio-file /path/to/sample.wav` (Python:
+`audio_files=[...]`). Imports are copied into the isolated session audio folder,
+where the script's normal file picker can select them. Originals are not modified;
+missing files and duplicate basenames fail. Imported hashes/sizes are included
+in session identity and exports. The default audio directory is still empty.
+
+In the experimental sampler candidate, unchanged cheat codes 2 has automated
+coverage for sample loading, pad playback, looping, rate/reverse changes and live
+recording. Use its loops menu to select Sample, hold K1 and press K3 to open the
+audio picker, then choose an imported sample. Bank A pad 2 is grid `(1,7)`;
+`(3,4)` toggles looping for the selected pad. Pads initially play short one-shot
+slices, so enable looping for sustained playback. Hold K1 and turn E1 in the
+loops overview to select rate, then use E2 to change it. Live buffer 1 recording
+is toggled at `(16,7)` when that buffer is focused. Automated input injection
+uses session-data WAV files; this is not physical microphone/device support.
+Collection save and fresh-session restoration also have automated coverage;
+broader-tranche review remains pending. See
+[sampler evidence](delivery/completions/A03-sampler-controls.md).
+
+`--audio-directory /path/to/audio` (Python: `audio_directory=...`) imports a
+directory tree into fresh session audio while preserving relative paths. This
+supports scripts that save recordings in subdirectories. Imports reject conflicts
+and symlink entries, preserve original files, and record copied-byte identities.
+This copies audio files only; it does not automatically load an app's collection.
+
+For scripts with slow synchronous file operations, use `--input-timeout 10`
+(Python: `input_timeout=10`). The default is two seconds; the allowed range is
+0.1–30 seconds. This waits longer for the actual native callback to finish and
+keeps explicit timeout errors. It does not change musical timing tolerances or
+make a slow save instantaneous. Session identities record the chosen deadline.
+
+The experimental arc candidate supports one optional virtual four-ring arc.
+Build with `scripts/build_audio_candidate.py --arc`, then launch that candidate
+with `--arc` (Python: `arc_enabled=True`). Each browser ring offers +/− buttons,
+mouse-wheel turning and Up/Down keys when focused. The numbered button is a
+virtual encoder key; this is a profile capability, not a claim that every physical
+arc has keys. LED levels and intensity come from the script's official arc API.
+Disconnect/reconnect uses the real native device callbacks and releases held
+keys. Automation uses `arc_delta`, `arc_key` and `arc_connection`; observations
+include four arrays of 64 LEDs and arc device metadata. Arc is absent by default.
+Native and Windows Chromium checks have passed; broader-tranche admission and
+cheat codes arc workflow coverage remain pending. No physical USB support is
+implied. See [arc evidence](delivery/completions/P03-progress.md).

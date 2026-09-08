@@ -23,6 +23,9 @@
     },
     "action": {
       "oneOf": [
+        {"type":"object","properties":{"type":{"const":"arc_delta"},"n":{"type":"integer","minimum":1,"maximum":4},"delta":{"type":"integer","minimum":-127,"maximum":127}},"required":["type","n","delta"],"additionalProperties":false},
+        {"type":"object","properties":{"type":{"const":"arc_key"},"n":{"type":"integer","minimum":1,"maximum":4},"state":{"type":"integer","minimum":0,"maximum":1}},"required":["type","n","state"],"additionalProperties":false},
+        {"type":"object","properties":{"type":{"const":"arc_connection"},"connected":{"type":"boolean"}},"required":["type","connected"],"additionalProperties":false},
         {
           "type": "object",
           "properties": {

@@ -10,6 +10,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--crow-build', type=Path, help='Opt-in identified Crow host build')
+    parser.add_argument('--arc',action='store_true',help='Include experimental virtual arc native transport')
     args = parser.parse_args()
     out = args.output.resolve(); out.mkdir(parents=True, exist_ok=False)
     base = json.loads((ROOT / '.runtime/current.json').read_text()); verify_install(base)
@@ -44,6 +45,15 @@ def main():
     from prepare_engine_ready import apply_engine_ready
     engine_ready_patch=apply_engine_ready(source)
     patch+=engine_ready_patch
+    from softcut_read_patch import apply as apply_softcut_bounds
+    softcut_read_patch=apply_softcut_bounds(source)
+    patch+=softcut_read_patch
+    arc_patch=None
+    if args.arc:
+        from arc_native_patch import apply as apply_arc
+        arc_patch=apply_arc(source);patch+=arc_patch
+        (out/'arc-runtime.patch').write_text(arc_patch)
+    (out / 'softcut-read-bounds.patch').write_text(softcut_read_patch)
     (out / 'engine-ready.patch').write_text(engine_ready_patch)
     (out / 'default-server.patch').write_text(default_server_patch)
     (out / 'audio-runtime.patch').write_text(patch)
@@ -67,12 +77,14 @@ def main():
         experimental=dict(status='audio-feasibility-only', patch_sha256=hashlib.sha256(patch.encode()).hexdigest(),
                           default_server_patch_sha256=hashlib.sha256(default_server_patch.encode()).hexdigest(),
                           engine_ready_patch_sha256=hashlib.sha256(engine_ready_patch.encode()).hexdigest(),
+                          softcut_read_patch_sha256=hashlib.sha256(softcut_read_patch.encode()).hexdigest(),
                           engine_sources='Pinned official sc/engines copied unchanged into sc/core/engines'),
         build_inputs_sha256=hashlib.sha256((out/'build-inputs.json').read_bytes()).hexdigest())
     if crow_manifest:
         crow_source=Path(crow_manifest['source'])
         install['experimental']['crow']=dict(source=str(crow_source),manifest=crow_manifest,
             lua_files=crow_lua_identity)
+    if arc_patch:install['experimental']['arc']=dict(profile='virtual-arc4',patch_sha256=hashlib.sha256(arc_patch.encode()).hexdigest())
     (out/'installation.json').write_text(json.dumps(install, indent=2)+'\n')
     verify_install(install); print(out/'installation.json', flush=True)
 
