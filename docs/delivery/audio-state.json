@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "current_card": "A01",
-  "status": "in_progress",
+  "current_card": "tranche1-integration",
+  "status": "admitted_pending_merge",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
   "completed": [
@@ -9,7 +9,7 @@
     "experimental browser monitoring"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "Fresh combined candidate native audio/Mosaic/CV/input/ii/clock/generic/browser regressions passed; see A01-tranche1-candidate.md. Preparing committed snapshot and bounded Paranoia branch review; stable full contract rerun needed. Merge tranche1 only after substantive findings resolved; main state.json belongs to concurrent work. Tranche2/3 remain queued.",
+  "next_action": "Tranche1 reviewed and admitted; commit admission records, fast-forward main preserving concurrent docs/delivery/state.json, verify ancestry and state-file preservation, then record merge. Only after main contains tranche1 may broader script/cheat codes 2 work begin. Desktop/Maiden/Docker stays after broader scripts. Final candidate .runtime/tranche1-final/installation.json in audio-monitor worktree; all processes terminal.",
   "evidence": "docs/delivery/completions/A00.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",
@@ -33,7 +33,7 @@
     "completion": "docs/delivery/completions/A01-external-engine.md",
     "status": "four-native-checks-passed",
     "evidence": "artifacts/audio/external-engine-20260908-140736/report.json",
-    "residual": "matron SIGSEGV in earlier failed negative run 140607; final run clean, investigation pending"
+    "residual": "Historical cleanup SIGSEGV unlocalized, not reproduced in fresh same-path negative 173449; strict exit checks retained. Capture native stack on recurrence; focused review treats as retained risk, not current blocker."
   },
   "nb_player": {
     "completion": "docs/delivery/completions/A01-nb-player.md",
@@ -149,9 +149,9 @@
     "status": "native-pass"
   },
   "tranche1_candidate": {
-    "install": ".runtime/tranche1-tools-01/installation.json",
-    "build": ".runtime/tranche1-01/installation.json",
-    "status": "combined-regressions-passed-review-pending",
-    "completion": "docs/delivery/completions/A01-tranche1-candidate.md"
+    "install": ".runtime/tranche1-final/installation.json",
+    "build": ".runtime/tranche1-02/installation.json",
+    "status": "admitted",
+    "completion": "docs/delivery/completions/A01-tranche1.md"
   }
 }

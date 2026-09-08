@@ -1,0 +1,45 @@
+{
+  "started_at": "2026-09-08T16:46:55.237871+00:00",
+  "packet_sha256": "67d4f96b462d42e12f11433d3d742a91d2c5a5a6e531c4decd991c74310c68ce",
+  "files": [
+    "docs/delivery/AUDIO.md",
+    "docs/AUDIO-DEVICES.md"
+  ],
+  "tool": "query",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor",
+    "engine": "codex",
+    "question": "Review only the four accepted major findings from Codex session 01a081de-87db-7723-b4dd-0382f7977dbc and their fixes in docs/delivery/reviews/A01-triage.md. Read src/devices/crow_host/main.c, src/devices/crow_ii_host/main.c, scripts/crow_source.py, scripts/build_crow_host.py, scripts/build_audio_candidate.py, scripts/prepare_crow_runtime.py, src/runtime/dependencies.py and the cited callback/identity regression tests. Determine whether substantive blockers remain in diagnostic classification, persistent bounded completion dispatch, asynchronous ii flushing or immutable Crow Lua identity at composition. The old-host failures and new-host/native passes are retained. Tests are not proof of untested hardware. Stakes remain a trusted single-user local audio/Crow testing tool; no finance, hostile users, hardware certification or queued Maiden/Docker requirements. Also assess the retained non-reproduced historical teardown crash honestly; current same-path negative cleanup passes with strict exit checks. Do not edit files. This is the single focused follow-up allowed by the local runbook; give concrete remaining major findings or state the four fixes resolved. Do not claim whole-product certification.\n",
+    "files": [
+      {
+        "path": "docs/delivery/AUDIO.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/AUDIO-DEVICES.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/reviews/A01-triage.md",
+        "reason": "Findings and fixes"
+      }
+    ],
+    "web_search": false,
+    "effort": "medium"
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "The four accepted major findings are resolved by `f66bb22`; I found no remaining substantive blocker in those fixes.\n\n- **Diagnostics:** `src/devices/crow_ii_host/main.c:20\u201336` classifies pinned error formats, including newline-stripped `puts`, while preserving ordinary diagnostics. Retained results show redundant release failing on host-15 and passing on host-16; ii overflow and unsupported-operation negatives still pass.\n- **Completion dispatch:** `src/devices/crow_host/main.c:19\u201335,51\u201364` retains pending completions, clears them on reset, and explicitly fails bounded runaway dispatch. `tests/crow_callbacks.py:27\u201330` requires exact instant output and runaway failure; `tests/crow_callbacks_native.py:24\u201325` requires exactly one native callback.\n- **Asynchronous ii:** `src/devices/crow_host/main.c:75\u201380,92` services callbacks and ii independently of new serial input. The retained host result records **41 packets before EOF**, versus the old host\u2019s overflow; native evidence records **49 packets** and successful stream stopping.\n- **Lua identity:** `scripts/crow_source.py:10\u201322` binds recursive Lua hashes to Git HEAD at build time. Both composition scripts verify and carry those hashes; `src/runtime/dependencies.py:28\u201338` checks them at launch. `tests/crow_source_identity.py:33\u201337` requires both actual composition CLIs to reject modified Lua, and the retained report passes.\n\nThe historical teardown crash remains **unexplained, not fixed**: `.runtime/sessions/c4c5800c411a4128a8090d019aee078f/cleanup.json:5` records matron `-11` after its shutdown message. The fresh same-path negative test records matron `0` in `artifacts/audio/external-engine-20260908-173449/cleanup.json:5`; `src/runtime/native.py:509\u2013510` rejects unexpected exits. This supports retaining a non-reproduced risk with stack capture on recurrence, rather than declaring a current blocker.\n\n**CONFIDENCE: High** for this focused disposition. I inspected code, history and retained evidence without rerunning tests; a reproducible recurrence or contrary regression would change the answer. This does not certify hardware or the whole product.\n\n---\n_paranoia-local \u00b7 engine=codex \u00b7 session_ref=`01a081ea-72e9-7521-ac5e-9ac599a96703` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "status": "returned",
+  "finished_at": "2026-09-08T16:48:30.904795+00:00"
+}
