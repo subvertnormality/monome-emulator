@@ -1,0 +1,190 @@
+{
+  "host": {
+    "docker_windows_client": "20.10.17",
+    "go": "not found in login PATH",
+    "pulse_server": "unix:/mnt/wslg/PulseServer",
+    "sink_format": "s16le stereo44100",
+    "docker_server": "unavailable named pipe",
+    "wsl_docker": "integration unavailable",
+    "sink": "RDPSink",
+    "os": "Ubuntu20.04 WSL2 on Windows amd64",
+    "monitor": "RDPSink.monitor"
+  },
+  "reference_forks": {
+    "maiden": "ce4471e25a45c87040817c0619f3596fa43060aa",
+    "norns": "8e72d2015e1a966c023834a24e6a6fbe998e2ce4"
+  },
+  "inspected_at": "2026-09-08",
+  "status": "source and read-only host inspection, not feature acceptance",
+  "references": [
+    {
+      "license": "GPL-3.0; proposed separate pinned official runtime component retaining its licence",
+      "files": [
+        {
+          "sha256": "e57f1c320b8cf8798a7d2ff83a6f9e06a33a03585f6e065fea97f1d86db84052",
+          "path": "LICENSE"
+        },
+        {
+          "sha256": "2b6741f876996922235bc9c981db4087a0811fe70e603fffadd1b0da9a675a7c",
+          "path": "README.md"
+        },
+        {
+          "sha256": "ced13892c93805a855cb466e42de265dd6845051c041eec074a5356d33ed36f3",
+          "path": "Makefile"
+        },
+        {
+          "sha256": "b046f565d64258533ced088ef211fa9f2d8d9008cc96983333c9d42ced438cfa",
+          "path": "go.mod"
+        },
+        {
+          "sha256": "dc5d6fa5bccd21df397b2e9af0949ce7ca9a80552bd0c1cbbc74d651bb2777b6",
+          "path": "go.sum"
+        },
+        {
+          "sha256": "d83fa20a90fc4e91de06688433451e402ef6f447c86a72568219e685588214d2",
+          "path": "maiden.yaml"
+        },
+        {
+          "sha256": "61c9918bcce3d53470f6bd198e9403d11054f2784feb4aeb95620a3ad67292b2",
+          "path": "cmd/server.go"
+        },
+        {
+          "sha256": "01f99dc36809148a00eeda7316efb7a1570a88b474f2e1dc34b2d3675bae4362",
+          "path": "web/package.json"
+        },
+        {
+          "sha256": "4b67b14a9c6942db43554b37ac256d25c3783791c20a9d1dbcc5c4b7b309b075",
+          "path": "web/src/api.js"
+        },
+        {
+          "sha256": "60f194c680a53a6c7db3d3316fd641b120802f803659aef1fddb5a32b9d3eb4c",
+          "path": "web/src/model/repl-actions.js"
+        },
+        {
+          "sha256": "bf08c35b2cd5bf3991b123715540b5b4f71036ec61cf3c27dd962b78d27b42a2",
+          "path": "web/src/model/repl-reducers.js"
+        },
+        {
+          "sha256": "c17a91504f773f13aaa0e083fd61a3d3284d07a3bbbea95c8547302a2d59c28f",
+          "path": "web/public/repl-endpoints.json"
+        },
+        {
+          "sha256": "1f6051d0dedb989b317e00b02277c0a223995e9b6a425723eeada3d0d082fec3",
+          "path": "tool/go/run.sh"
+        }
+      ],
+      "commit": "2e64f7d59284962ac68055dd556e3fd8515462f8",
+      "name": "maiden",
+      "url": "https://github.com/monome/maiden"
+    },
+    {
+      "license": "GPL-3.0; architecture reference only, no copied implementation",
+      "files": [
+        {
+          "sha256": "867c6723a98cb7b1169a781a5a5f985b0db336117521abf1ddce7f2b9cec48e2",
+          "path": "README.md"
+        },
+        {
+          "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+          "path": "LICENSE"
+        },
+        {
+          "sha256": "a3b926d751f369e808785f330e7adb043811433cdefb63f9343923053b13d628",
+          "path": "norns-dev/Dockerfile"
+        },
+        {
+          "sha256": "2bf7e8ebfecae07b1aecaf1d4f9ed6895a1c54419bbdf4b6a5f8b8d0c285e20e",
+          "path": "norns-dev/install.sh"
+        },
+        {
+          "sha256": "ef9b59ec3067fae87f5b433b58e631467ed1fdc3135f627d48053adab0696d65",
+          "path": "norns-dev/install-lib.sh"
+        },
+        {
+          "sha256": "bc1dcf68bf6eb89c8139f65bd0c232dd7c6a0fdfc994deade4bf6714206d18a3",
+          "path": "norns-test-dummy/Dockerfile"
+        },
+        {
+          "sha256": "06f78c12cdd74eed23ef903148be85edb86776521aba4405a9b0762354e9ca17",
+          "path": "norns-test-dummy/norns.yaml"
+        },
+        {
+          "sha256": "270f31837187d5f1b6194d4104add2023c7da1eab4fa5b0cc3b6a3f3ee4c749b",
+          "path": "norns-test-dummy/README.md"
+        },
+        {
+          "sha256": "88db34a5cbd08eec5cc9e64deb9f011c7fa01b4bd783e8ebdb1be17fe2c80d25",
+          "path": "norns-test-dummy/jackdrc"
+        }
+      ],
+      "commit": "a13ad4c2038184e093e9b1cbab234c7df23c059d",
+      "name": "winder",
+      "url": "https://github.com/winder/norns-dev"
+    },
+    {
+      "license": "No repository licence file found; no code copying authorized",
+      "files": [
+        {
+          "sha256": "e0ddd7fdc97b87ec1804b331a2f4efcfd626d7510fff1fdbc6ba20f9e74ff728",
+          "path": "README.md"
+        },
+        {
+          "sha256": "f8816306048da319d272c0834306034359905758cfc258d06a32642f5806d927",
+          "path": "Dockerfile"
+        },
+        {
+          "sha256": "63893901fcf8bff7a4b78e3c41a30a4e0985e4846aa7130c62ee5e171048e937",
+          "path": "start_norns.sh"
+        },
+        {
+          "sha256": "3ac08620d3ce7f7b06f3fcc70f9750fc2d3673a0ebe7f844832e2e626dcd4744",
+          "path": "norns.yaml"
+        },
+        {
+          "sha256": "e4b26aa912946c32315ebbc69c8a64879a53514d2c9fbfcafa6408bda26de450",
+          "path": "run_docker.sh"
+        },
+        {
+          "sha256": "d73a8d17d60a1dde54e78828d1772932544c486aa25b6d23658407347695a4e1",
+          "path": "restart_matron.sh"
+        },
+        {
+          "sha256": "5458d06d3221c023d08d41b1897c3a3a991ba9c29dd5b2ea94a122e0a1ea1af6",
+          "path": "restart_sclang.sh"
+        },
+        {
+          "sha256": "8044f1af25dc59d865196a6cbd6aeedb984853101d240ff78a541ff6d9ebd1dc",
+          "path": "jackdrc"
+        },
+        {
+          "sha256": "60b81f5d1cd6e40623b5ec5ab1f018eca3d326b07ce3ede2e0a1c3e8668a5053",
+          "path": "darkice.cfg"
+        },
+        {
+          "sha256": "c71fb013caa59b329cc5aebe900da0fe988c0a344c4bc80c109fc19d6c50cfb8",
+          "path": "icecast.xml"
+        },
+        {
+          "sha256": "839d271277b17deb39c23c889db8d08625bbbb7f1e8397c680a9eb2c476e1f52",
+          "path": "Caddyfile"
+        },
+        {
+          "sha256": "52eb9300abe5fd62fb3c0e5be7cfcd3d259ead7b6a276cc61e4535f0a25fdce0",
+          "path": "oled-server.go"
+        },
+        {
+          "sha256": "b876043a4b2e3896b6f05f3a007dd8de31dfbe3e336440e6fa663f637ff8c5d0",
+          "path": "repl-endpoints.json"
+        },
+        {
+          "sha256": "15d2909fead3c44a19cdc919d0502449be83d911f7e9233cc55e8e88a1aa4ed9",
+          "path": "static/js/norns.js"
+        }
+      ],
+      "commit": "701f641b9285136c562892d9941452419ed131ef",
+      "name": "schollz",
+      "url": "https://github.com/schollz/norns-desktop"
+    }
+  ],
+  "schema_version": 1
+}

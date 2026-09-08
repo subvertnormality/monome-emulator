@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "current_card": "H00 reference architecture audit",
+  "current_card": "H01 direct desktop audio",
   "status": "in_progress",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
@@ -15,7 +15,7 @@
     "Stage2 reviewed, admitted and merged to main with post-merge native checks"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "Stage2 complete and merged main4c9cb8b. Postmerge main arc_native8checks pass artifacts/arc/native-20260908-205002/report.json (MAINartifactroot), clean shutdown andcrossworktreecandidatepath verified. Mainstatehash14f3157de699e4d3fa946b3215a82ecc8be0be09333f816983ce9186adabb990 unchanged, defaultinstall/userdemo/otherworktrees preserved. Stage2finalguardnative4casespass204420, reviewclosed viaexactfollowuprecommendedfix+nativeproof; 2plannedreviewcallscomplete. Allreview/testhandles terminal including18434; no newowned audio/buildlive. Next H00perDESKTOP.md: audit winder/norns-dev andschollz/norns-desktop pinnedcommits/licences/Docker/startup/audio/Maiden/streaming/runtimechanges; inspectofficialupstreamfixes, recordexistingcapability,gap,smallestcompatibleimplementation andautomatedchecks BEFOREH01/H02/H03/H04features. Prioritydesktopaudio thenofficialMaiden thenbrowserimprovements; optionalDockerpreservesWSL andperhostproof. H00planreviewandlateradmissionreview boundedCodexmedium600s each+max1followup perDESKTOP. Continueinthisworktree, noMosaiccoredependency, preserveconcurrentmainstate. BrowserPCMreadblockingduringlongnativecallbacks isknownH03gap. Worktreeprogressdocsfinalcommit followsmainintegration, noimplementationchanges.",
+  "next_action": "H00 audit and plan review complete. reviews/H00-raw.json session 01a082a3-24aa-7e70-bfa8-ecf302ccb123 and focused followup H00-followup.json session 01a082a7-0418-7c10-b993-582bea8e4b2b close all three findings at contract level. Both review handles terminal. Implement H01 owned JACK-to-Pulse output with explicit sink/server and generic actual sink-capture/lifecycle/failure tests. Test, review, commit and merge H01 before H02 Maiden and H03 browser improvements. H02 owns symlink directory navigation patch, owned dataset reopen and explicit REPL failure/restart recovery; H04 reuses persistence. Preserve main state and live demo; reference source copied nowhere. H01 feature implementation and desktop boundary acceptance still pending.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",

@@ -5,6 +5,14 @@ scope. Implementation is authorized after concrete card preparation and the
 local review checkpoints. WSL Ubuntu 20.04 remains the primary working path.
 This queue supplements the active Mosaic audio/device and broader script goal.
 
+Stage 1 and stage 2 are now reviewed and merged through `1ec7174`. H00 source
+inspection, concrete architecture choices, dependency findings and automated
+acceptance are recorded in [H00.md](completions/H00.md), with immutable file
+identities in [references/H00.json](references/H00.json). That contract refines
+the cards below; the bounded H00 plan review and focused follow-up are complete
+with all three findings closed at contract level. H01 implementation is next;
+test, review, commit and merge desktop audio before H02 and H03.
+
 ## Ownership and existing evidence
 
 Worktree inspection: main at 319e3a0 owns the Mosaic campaign; audio-monitor at
@@ -45,12 +53,11 @@ at admission using the same budget; no mandatory human/hardware certification.
 ## Source and licensing boundary
 
 References: https://github.com/winder/norns-dev and
-https://github.com/schollz/norns-desktop. Initial README inspection confirms these
-need deeper source inspection; inspected source commits are pending H00, not
-invented from a web page. Winder declares GPL-3.0: architectural ideas may inform
+https://github.com/schollz/norns-desktop. H00 records the inspected source commits
+and file inventory. Winder declares GPL-3.0: architectural ideas may inform
 independent integration, but no source is copied into this MIT project without
-an explicit compatible licensing decision and attribution. Inspect Schollz's
-licence too. Keep official monome runtime pins. Any required borrowed runtime
+an explicit compatible licensing decision and attribution. No repository licence
+was found for Schollz's reference, so no source is copied. Keep official monome runtime pins. Any required borrowed runtime
 change is an explicit patch with official base, rationale and removal condition.
 
 Deliver working eligible features, automated evidence, user instructions,
