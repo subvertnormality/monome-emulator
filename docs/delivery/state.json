@@ -5096,11 +5096,10 @@
     }
   },
   "active_execution_checkpoint": {
-    "status": "terminal",
-    "native_session": 87534,
-    "review_session": 73222,
-    "artifact": "artifacts/c16/panic-live-note-candidate.json",
-    "next_action": "Publish scoped panic/navigation checkpoint after diff checks; continue remaining panic/manual domains.",
+    "status": "terminal-reviewed",
+    "native_session": 95523,
+    "review_session": 69035,
+    "next_action": "Publish interaction tests/manual clarification; implement R18 native MIDI hot-plug in isolated D/R runtime candidates with generic probes before Mosaic acceptance.",
     "full_campaign_complete": false
   },
   "panic_validation": {
@@ -5157,5 +5156,23 @@
         "passed": true
       }
     ]
+  },
+  "panic_published_checkpoint": {
+    "mosaic": "7cdb79ab86152175fbe5e64ebec4d8b76401e17f",
+    "emulator": "870ee56b94ea775734099959d898e8fe428fd5de",
+    "pushes_verified": true,
+    "review": "01a080df-d7d3-7040-b34d-70c1ec8eedc8",
+    "unit_tests": 482,
+    "full_campaign_complete": false
+  },
+  "panic_interactions": {
+    "native_passes": 12,
+    "validation": "Mosaic docs/testing/panic-interaction-validation.json",
+    "runtime_gap": "R18: docs/architecture/midi-hotplug.md",
+    "status": "reviewed-scoped-interactions-validated",
+    "reviewed_pending_passes": 8,
+    "overlap_passes": 4,
+    "review": "01a080f4-f7fd-7b00-b1ed-73d95c9d081e",
+    "manual_clarification": "Panic sends Note Off sweeps; transport and scheduled voices continue."
   }
 }
