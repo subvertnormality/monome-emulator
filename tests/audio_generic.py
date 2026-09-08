@@ -1,5 +1,5 @@
 """Combined audio candidate preserves generic native input/services without app fixtures."""
-import argparse, shutil, sys, time
+import argparse, json, shutil, sys, time
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'src'))
 from automation.client import Session
@@ -7,7 +7,12 @@ from automation.identity import source_identity
 from automation.protocol import write_json
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--install',type=Path,required=True);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--install',type=Path,required=True)
+    p.add_argument('--require-external-prefix',action='store_true');a=p.parse_args()
+    if a.require_external_prefix:
+        installed=json.loads(a.install.read_text())
+        assert Path(installed['prefix']).resolve()!=(ROOT/'.runtime/prefix').resolve()
+        assert not (ROOT/'.runtime/prefix/lib/libmonome.so.1').exists(), 'Local library would mask the external-prefix regression'
     out=ROOT/'artifacts/audio'/time.strftime('generic-%Y%m%d-%H%M%S');out.mkdir(parents=True)
     code=out/'code'
     for name in ('probe-a','probe-b','probe-support'):

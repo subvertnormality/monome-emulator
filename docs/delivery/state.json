@@ -5233,5 +5233,48 @@
     "receipt": "docs/delivery/completions/C05-hotplug-progress.json",
     "implementation_revision": "ae203883c0c2910d914609e1091df9e844a8ed00",
     "mosaic_revision": "b9d04eabc137f7eac653e7580151950ab2250f49"
+  },
+  "behaviour_audio_crow_composition": {
+    "status": "built-generic-and-hotplug-passed-more-native-probes-pending",
+    "worktree": "/home/andy/projects/monome-emulator-behaviour-audio-crow",
+    "branch": "codex/behaviour-audio-crow",
+    "merge_revision": "4d893bbe7ab91abbddaa24dec6d2843cb6bbcdbe",
+    "installation": "/home/andy/projects/monome-emulator-behaviour-audio-crow/.runtime/combined-audio-crow-tools-01/installation.json",
+    "implementation_dirty_sha256": "c63485917bbc4dd3c39907da9427ea952ab9dc883a017bcad45cb1c4acc05309",
+    "contract_tests": {
+      "midi_connection": 10,
+      "audio_oracle": 5,
+      "crow_trace": "Standalone pagination/partial append/cursor/oversized-record assertions; not unittest collection"
+    },
+    "evidence": [
+      {
+        "path": "artifacts/audio/generic-20260908-182838/report.json",
+        "sha256": "cf3ff076b72b19bf54cd732e13404b42e7d5a7623840e6fab6206d3951852965",
+        "passed": true
+      },
+      {
+        "path": "artifacts/hotplug/runs/0267761f608b43eaa209236c3f288e98/result.json",
+        "sha256": "262af3ae25aa6c6073f60a0f5eb86c2f842c43a7adca35cbb3788b0e85139361",
+        "passed": true
+      }
+    ],
+    "failed_baselines": [
+      "artifacts/audio/generic-20260908-182445/report.json",
+      "artifacts/hotplug/runs/dba1978a74f84a1a9e8cb64ec113e6ec/result.json"
+    ],
+    "fixes": [
+      "Launcher now uses verified installation prefix for libmonome lookup, with native absent-local-library regression.",
+      "MIDI-only cleanup test now permits intentional Crow SIGTERM per existing lifecycle contract; sclang tightened to0/-15, other services remain0."
+    ],
+    "native_processes_active": false,
+    "default_runtime_promoted": false,
+    "full_campaign_complete": false,
+    "next_action": "Run combined native audio capture, Crow input/callback/ii probes; then add pinned optional nb-audio/crow-jf profiles to Mosaic public Driver, strict capability/identity checks and first XA-001 current-worktree smoke. Preserve pending slide defects and original MIDI campaign. Review scoped launcher/integration change before publication/admission."
+  },
+  "screen_worker_validation": {
+    "status": "scoped-regressions-and-review-complete",
+    "receipt": "/home/andy/projects/monome-emulator-behaviour-audio-crow/docs/delivery/completions/screen-worker-progress.json",
+    "full_campaign_complete": false,
+    "review": "01a082af-b7d1-70e2-b7fc-814dd8c5cc91"
   }
 }

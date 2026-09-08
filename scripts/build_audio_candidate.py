@@ -10,6 +10,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--crow-build', type=Path, help='Opt-in identified Crow host build')
+    parser.add_argument('--sdl-ownership',action='store_true',help='Opt-in proven SDL private-data double-free correction')
+    parser.add_argument('--screen-worker-shutdown',action='store_true',help='Opt-in joined native screen-worker teardown')
     args = parser.parse_args()
     out = args.output.resolve(); out.mkdir(parents=True, exist_ok=False)
     base = json.loads((ROOT / '.runtime/current.json').read_text()); verify_install(base)
@@ -23,6 +25,22 @@ def main():
     path.write_text(after)
     patch = ''.join(difflib.unified_diff(before.splitlines(True), after.splitlines(True),
                  fromfile='a/matron/src/weaver.c', tofile='b/matron/src/weaver.c'))
+    sdl_patch=''
+    if args.sdl_ownership:
+        sdl_path=ROOT/'patches/norns/experimental-sdl-ownership.patch'
+        sdl_patch=sdl_path.read_text()
+        command(['git','apply','--check',str(sdl_path)],source)
+        command(['git','apply',str(sdl_path)],source)
+        patch+=sdl_patch
+        (out/'sdl-ownership.patch').write_text(sdl_patch)
+    worker_patch=''
+    if args.screen_worker_shutdown:
+        worker_path=ROOT/'patches/norns/experimental-screen-worker-shutdown.patch'
+        worker_patch=worker_path.read_bytes().decode()
+        command(['git','apply','--check',str(worker_path)],source)
+        command(['git','apply',str(worker_path)],source)
+        patch+=worker_patch
+        (out/'screen-worker-shutdown.patch').write_bytes(worker_patch.encode())
     crow_manifest=None
     if args.crow_build:
         crow_build=args.crow_build.resolve();crow_manifest=json.loads((crow_build/'manifest.json').read_text())
@@ -69,6 +87,8 @@ def main():
                           engine_ready_patch_sha256=hashlib.sha256(engine_ready_patch.encode()).hexdigest(),
                           engine_sources='Pinned official sc/engines copied unchanged into sc/core/engines'),
         build_inputs_sha256=hashlib.sha256((out/'build-inputs.json').read_bytes()).hexdigest())
+    if sdl_patch:install['experimental']['sdl_ownership_patch_sha256']=hashlib.sha256(sdl_patch.encode()).hexdigest()
+    if worker_patch:install['experimental']['screen_worker_patch_sha256']=hashlib.sha256(worker_patch.encode()).hexdigest()
     if crow_manifest:
         crow_source=Path(crow_manifest['source'])
         install['experimental']['crow']=dict(source=str(crow_source),manifest=crow_manifest,

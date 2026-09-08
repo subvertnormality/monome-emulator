@@ -152,7 +152,7 @@ class NativeBackend:
         self.ports=dict(zip(['matron','crone','sclang','scsynth','remote'],ports))
         self.env=dict(os.environ,HOME=str(self.alias),SDL_VIDEODRIVER='dummy',QT_QPA_PLATFORM='offscreen',
             QTWEBENGINE_DISABLE_SANDBOX='1',QTWEBENGINE_CHROMIUM_FLAGS='--disable-gpu',
-            LD_LIBRARY_PATH=str(ROOT/'.runtime/prefix/lib'),JACK_DEFAULT_SERVER='emu-'+self.config['session_id'][:16],
+            LD_LIBRARY_PATH=str(Path(self.config['runtime_identity']['prefix'])/'lib'),JACK_DEFAULT_SERVER='emu-'+self.config['session_id'][:16],
             NORNS_EMU_CRONE_PORT=str(self.ports['crone']),NORNS_EMU_MATRON_PORT=str(self.ports['matron']),
             NORNS_EMU_SC_PORT=str(self.ports['scsynth']),NORNS_EMU_MIDI_PORTS='\n'.join(self.midi_config['ports']))
         self.env.pop('NORNS_EMU_RANDOM_SEED',None)

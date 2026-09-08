@@ -1,0 +1,96 @@
+--- a/matron/src/screen_events.c
++++ b/matron/src/screen_events.c
+@@ -1,4 +1,5 @@
+ #include <assert.h>
++#include <stdbool.h>
+ #include <pthread.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+@@ -25,6 +26,8 @@
+ static void handle_screen_event(struct screen_event_data *ev);
+ 
+ static pthread_t screen_event_thread;
++static bool screen_events_running = true;
++static bool screen_event_thread_started;
+ static pthread_mutex_t screen_q_lock;
+ static pthread_cond_t screen_q_nonempty;
+ 
+@@ -34,9 +37,25 @@
+ 
+ void screen_events_init() {
+     pthread_cond_init(&screen_q_nonempty, NULL);
++    screen_events_running = true;
+     if (pthread_create(&screen_event_thread, NULL, screen_event_loop, 0)) {
++        screen_events_running = false;
+         fprintf(stderr, "SCREEN: error creating thread\n");
++    } else {
++        screen_event_thread_started = true;
+     }
++}
++
++void screen_events_deinit(void) {
++    if (!screen_event_thread_started) return;
++    pthread_mutex_lock(&screen_q_lock);
++    screen_events_running = false;
++    pthread_cond_signal(&screen_q_nonempty);
++    pthread_mutex_unlock(&screen_q_lock);
++    /* Finish queued work before the display and result storage are destroyed. */
++    pthread_join(screen_event_thread, NULL);
++    screen_event_thread_started = false;
++    pthread_cond_destroy(&screen_q_nonempty);
+ }
+ 
+ void screen_event_data_init(struct screen_event_data *ev) {
+@@ -60,6 +79,11 @@
+ // call from any thread; locks Q (blocking)
+ void screen_event_data_push(struct screen_event_data *src) {
+     pthread_mutex_lock(&screen_q_lock);
++    if (!screen_events_running) {
++        screen_event_data_free(src);
++        pthread_mutex_unlock(&screen_q_lock);
++        return;
++    }
+     struct screen_event_data *dst = &(screen_q[screen_q_wr]);
+     screen_event_data_move(dst, src);
+     screen_q_wr = (screen_q_wr + 1) & SCREEN_Q_MASK;
+@@ -86,14 +110,19 @@
+     screen_event_data_init(&ev);
+     while (1) {
+         pthread_mutex_lock(&screen_q_lock);
+-        while (screen_q_rd == screen_q_wr) {
++        while (screen_q_rd == screen_q_wr && screen_events_running) {
+             pthread_cond_wait(&screen_q_nonempty, &screen_q_lock);
++        }
++        if (screen_q_rd == screen_q_wr && !screen_events_running) {
++            pthread_mutex_unlock(&screen_q_lock);
++            break;
+         }
+         assert(screen_q_rd != screen_q_wr);
+         screen_event_data_pop(&ev);
+         pthread_mutex_unlock(&screen_q_lock);
+         handle_screen_event(&ev);
+     }
++    return NULL;
+ }
+ 
+ void handle_screen_event(struct screen_event_data *ev) {
+--- a/matron/src/screen_events.h
++++ b/matron/src/screen_events.h
+@@ -2,6 +2,7 @@
+ #define _SCREEN_EVENTS_H_
+ 
+ extern void screen_events_init();
++extern void screen_events_deinit(void);
+ 
+ extern void screen_event_update(void);
+ extern void screen_event_save(void);
+--- a/matron/src/main.c
++++ b/matron/src/main.c
+@@ -45,6 +45,7 @@
+     osc_deinit();
+     o_deinit();
+     w_deinit();
++    screen_events_deinit();
+ 
+     config_deinit();
+     i2c_deinit();

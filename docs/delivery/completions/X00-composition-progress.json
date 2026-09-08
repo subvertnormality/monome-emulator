@@ -1,0 +1,90 @@
+{
+  "status": "scoped-regressions-and-review-complete",
+  "worktree": "/home/andy/projects/monome-emulator-behaviour-audio-crow",
+  "branch": "codex/behaviour-audio-crow",
+  "merge_revision": "4d893bbe7ab91abbddaa24dec6d2843cb6bbcdbe",
+  "installation": "/home/andy/projects/monome-emulator-behaviour-audio-crow/.runtime/combined-audio-crow-tools-01/installation.json",
+  "implementation_dirty_sha256": "c63485917bbc4dd3c39907da9427ea952ab9dc883a017bcad45cb1c4acc05309",
+  "contract_tests": {
+    "midi_connection": 10,
+    "audio_oracle": 5,
+    "crow_trace": "Standalone pagination/partial append/cursor/oversized-record assertions; not unittest collection"
+  },
+  "evidence": [
+    {
+      "path": "artifacts/audio/generic-20260908-182838/report.json",
+      "sha256": "cf3ff076b72b19bf54cd732e13404b42e7d5a7623840e6fab6206d3951852965",
+      "passed": true
+    },
+    {
+      "path": "artifacts/hotplug/runs/0267761f608b43eaa209236c3f288e98/result.json",
+      "sha256": "262af3ae25aa6c6073f60a0f5eb86c2f842c43a7adca35cbb3788b0e85139361",
+      "passed": true
+    }
+  ],
+  "failed_baselines": [
+    "artifacts/audio/generic-20260908-182445/report.json",
+    "artifacts/hotplug/runs/dba1978a74f84a1a9e8cb64ec113e6ec/result.json"
+  ],
+  "fixes": [
+    "Launcher now uses verified installation prefix for libmonome lookup, with native absent-local-library regression.",
+    "MIDI-only cleanup test now permits intentional Crow SIGTERM per existing lifecycle contract; sclang tightened to0/-15, other services remain0."
+  ],
+  "native_processes_active": false,
+  "default_runtime_promoted": false,
+  "full_campaign_complete": false,
+  "next_action": "Publish scoped integration checkpoint, then continue incomplete X00 and Mosaic timing/interaction campaign.",
+  "additional_native": [
+    {
+      "path": "artifacts/audio/capture-api-20260908-183506/report.json",
+      "sha256": "6f6775e550dd5422443cd5faf2d39ac65e29129c7fd1b6c6de95888cfbb32a99",
+      "passed": true
+    },
+    {
+      "path": "artifacts/crow/input-api-20260908-183543/report.json",
+      "sha256": "bc630a4af462700bd0a8bbfe774618c3e46fa902a88555b225e1b5725542dab1",
+      "passed": true
+    },
+    {
+      "path": "artifacts/crow/callbacks-native-20260908-183554/report.json",
+      "sha256": "cede1f81c8bcbcfd91715eaa9baa6c8addfb3de139fac723ffbe3ff05a39bc4c",
+      "passed": true
+    },
+    {
+      "path": "artifacts/crow/ii-native-20260908-183601/report.json",
+      "sha256": "2670be04f4ea18f38f9d2ec03d2ac836926272e1463d890dbe9090b4fd4989e8",
+      "passed": true
+    }
+  ],
+  "mosaic_cases": [
+    {
+      "case": "M-PATCH-001",
+      "run_id": "d884e2661a6246dcac92b9154a4207dd",
+      "profile": "mixed-outputs",
+      "sha256": "12eb839bd3dbdf9d77bcfad18775a860a8b7f5b3bd1443f4c58394304cd071ea",
+      "passed": true
+    },
+    {
+      "case": "M-XA-001-JF",
+      "run_id": "1bbe2296effd4b3b9d3207250370070b",
+      "profile": "crow-jf",
+      "sha256": "239ec3c35baf6d4b21e46ea5205ee5e9e5599c51f53f509f32a16ef172360030",
+      "passed": true
+    }
+  ],
+  "mosaic_shutdown_failure": {
+    "run_id": "e0900d9817944dc7a355eae1661b0868",
+    "case": "M-XA-004-JF-OVERLAP",
+    "passed": false,
+    "manifest_sha256": "4fb25735eb6229310be460753def657f732ce420fb584d3510e156872b148068",
+    "failure": {
+      "type": "ContractError",
+      "message": "Unexpected native shutdown exits: [{\"service\": \"matron\", \"pid\": 19251, \"returncode\": -11, \"seconds\": 1.064410229679197}]",
+      "traceback": "Traceback (most recent call last):\n  File \"/home/andy/projects/monome-emulator-behaviour-audio-crow/src/automation/session.py\", line 25, in request\n    with urllib.request.urlopen(req,timeout=timeout) as response: return json.load(response)\n  File \"/usr/lib/python3.8/urllib/request.py\", line 222, in urlopen\n    return opener.open(url, data, timeout)\n  File \"/usr/lib/python3.8/urllib/request.py\", line 531, in open\n    response = meth(req, response)\n  File \"/usr/lib/python3.8/urllib/request.py\", line 640, in http_response\n    response = self.parent.error(\n  File \"/usr/lib/python3.8/urllib/request.py\", line 569, in error\n    return self._call_chain(*args)\n  File \"/usr/lib/python3.8/urllib/request.py\", line 502, in _call_chain\n    result = func(*args)\n  File \"/usr/lib/python3.8/urllib/request.py\", line 649, in http_error_default\n    raise HTTPError(req.full_url, code, msg, hdrs, fp)\nurllib.error.HTTPError: HTTP Error 400: Bad Request\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"tests/behaviour/run.py\", line 53, in main\n    try:c=Driver(out,clock_mode=args.clock_mode,experimental_install=args.experimental_install,profile=args.profile,mod_code_root=args.mod_code_root,mod_patches=args.mod_patches);CASES[name]['run'](c)\n  File \"/home/andy/projects/mosaic-behaviour-tests/tests/behaviour/output_cases.py\", line 209, in jf_same_voice_overlap\n    c.finish()\n  File \"/home/andy/projects/mosaic-behaviour-tests/tests/behaviour/driver.py\", line 137, in finish\n    self.runtime.close(self.out/'native')\n  File \"/home/andy/projects/monome-emulator-behaviour-audio-crow/src/automation/client.py\", line 53, in close\n    return session.stop(self.id)\n  File \"/home/andy/projects/monome-emulator-behaviour-audio-crow/src/automation/session.py\", line 89, in stop\n    result=request(session_id,'/stop',{},timeout=15)\n  File \"/home/andy/projects/monome-emulator-behaviour-audio-crow/src/automation/session.py\", line 28, in request\n    raise ContractError(value.get('code','http_error'),value.get('message',str(error))) from error\nautomation.protocol.ContractError: Unexpected native shutdown exits: [{\"service\": \"matron\", \"pid\": 19251, \"returncode\": -11, \"seconds\": 1.064410229679197}]\n"
+    }
+  },
+  "review": "01a08270-4401-77f0-9af2-6ac01e7bd3bc",
+  "sdl_native_validation": "artifacts/behaviour-expansion/sdl-native-validation.json",
+  "screen_worker_validation": "docs/delivery/completions/screen-worker-progress.json",
+  "review_followup": "01a082af-b7d1-70e2-b7fc-814dd8c5cc91"
+}

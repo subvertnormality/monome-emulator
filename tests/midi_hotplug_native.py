@@ -109,7 +109,10 @@ def main():
                     transitions=[e for e in events if e.get('kind')==18 and deliveries[0]['monotonic_ns']<e['monotonic_ns']<deliveries[1]['monotonic_ns']]
                     assert [(e['port'],e['connected']) for e in transitions]==[(1,False),(1,True)],'Reconnect did not bisect the accepted MIDI message'
 
-            cleanup=json.loads((out/'native/cleanup.json').read_text());assert all(x['returncode']==0 for x in cleanup if x['service']!='sclang')
+            cleanup=json.loads((out/'native/cleanup.json').read_text())
+            # Optional Crow and sclang are deliberately terminated by the owner.
+            # Keep native clients/JACK strict, and reject crashes or forced kills.
+            assert all(x['returncode'] in ((0,-15) if x['service'] in ('sclang','crow') else (0,)) for x in cleanup),cleanup
         except Exception as error:failure=dict(type=type(error).__name__,message=str(error),traceback=traceback.format_exc())
     result.update(status='failed' if failure else 'passed',failure=failure,artifacts=[dict(path=p.relative_to(out).as_posix(),sha256=hashlib.sha256(p.read_bytes()).hexdigest()) for p in sorted(out.rglob('*')) if p.is_file()])
     (out/'result.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(dict(status=result['status'],result=str(out/'result.json'),failure=failure)));return int(bool(failure))

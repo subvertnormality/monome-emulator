@@ -122,3 +122,25 @@ separate forced concurrent-send regression cover the boundary. Test-only pauses
 are absent from this patch. Remove when upstream provides equivalent virtual MIDI
 connection lifecycle and ordered observation hooks. This does not replace clocks,
 musical logic, or any application API, and does not certify full controlled time.
+
+
+`experimental-sdl-ownership.patch` removes the SDL surface callback's second
+ownership of private display data. `io_create` allocates io->data and
+`io_destroy_all` frees it after the device destructor; the SDL callback must only
+release its surfaces/window. A generic actual-source AddressSanitizer probe
+reproduces both frees without Mosaic. The optional build_audio_candidate.py
+--sdl-ownership overlay records its patch hash and reconstructed build inputs;
+the default lock/install is not promoted. Native cleanup regression and Codex
+review are required before promotion. Remove when official norns adopts equivalent
+single-owner teardown. Screen worker teardown remains a separate investigation,
+not a property established by this private-data fix.
+
+
+`experimental-screen-worker-shutdown.patch` closes the native screen queue to new
+work, wakes its worker, drains existing events and joins before IO/result storage
+is freed. A test-only SDL paint barrier independently demonstrates destruction
+during an active paint on the prior candidate. The optional build overlay records
+its bytes and reconstructed inputs; it does not promote the default lock/runtime.
+It changes shutdown ownership only, not musical scheduling. Remove when official
+norns supplies equivalent joined screen teardown. This is separate from the
+private-data double-free correction and does not certify all other native workers.
