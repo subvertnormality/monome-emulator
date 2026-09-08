@@ -84,10 +84,12 @@ def main():
                     native_path=Path(status['output'].replace('/mnt/c/','C:/'))
                     shutil.copyfile(native_path,out/(name+'-jack.wav'))
             if hz:
-                rate,channels=read_wav(path);measured=[metrics(c,rate,hz) for c in channels]
+                from desktop_assertions import signal
+                measured=signal(path,hz,minimum_rms=.0005)
                 # Windows endpoint gain is independent of the norns engine level.
                 # Require meaningful signal plus frequency purity, not a fixed host volume.
                 assert all(.0005<m['rms']<.3 and m['tone_energy_fraction']>.85 for m in measured),measured
+                report.setdefault('upstream_boundaries',{})[name]={boundary:signal(out/(name+'-'+boundary+'.wav'),hz) for boundary in ('jack','sink')}
             else:measured=silence(path)
             report['checks'].append(dict(name=name,passed=True,capture=capture_info,metrics=measured))
         report['passed']=True

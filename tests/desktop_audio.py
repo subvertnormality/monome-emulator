@@ -7,6 +7,7 @@ from automation import session
 from automation.identity import source_identity
 from automation.protocol import write_json
 from audio_feasibility import tone,silence
+from desktop_assertions import signal
 
 def capture(out,server,sink,index,seconds=2):
     frames=int(seconds*48000);data=bytearray()
@@ -52,7 +53,7 @@ def main():
     def check(client,name,hz=None):
         sink,index=stream_index(client);assert sink==a.sink,(sink,a.sink)
         path=out/(name+'.wav');capture(path,a.server,a.sink,index)
-        result=tone(path,hz) if hz else silence(path)
+        result=signal(path,hz) if hz else silence(path)
         client.observe();report['checks'].append(dict(name=name,passed=True,metrics=result))
     def close(client,name):
         client.close(out/name);clients.remove(client)

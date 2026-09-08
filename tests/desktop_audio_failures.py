@@ -8,6 +8,7 @@ from automation.identity import source_identity
 from automation.protocol import write_json,ContractError
 from desktop_audio import key,stream_index,capture
 from audio_feasibility import tone,read_wav,metrics
+from desktop_assertions import exits
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--install',type=Path,required=True)
@@ -26,8 +27,9 @@ def main():
         def start(sink,route=server):
             c=Session(script=code/'desktop-tone/desktop-tone.lua',code_root=code,experimental_install=a.install,
                 crow_enabled=False,startup_chime=False,desktop_audio=dict(server=route,sink=sink));clients.append(c);return c
-        def reaped(directory):
+        def reaped(directory,desktop_exit):
             rows=json.loads((directory/'cleanup.json').read_text());assert rows
+            exits(rows,desktop_exit)
             for row in rows:assert not Path('/proc/'+str(row['pid'])).exists(),row
             return rows
         try:
@@ -45,7 +47,7 @@ def main():
                 directory=created.pop();dest=out/name;dest.mkdir()
                 for path in directory.iterdir():
                     if path.suffix=='.log' or path.name in ('cleanup.json','cleanup-error.json'):shutil.copyfile(path,dest/path.name)
-                rows=reaped(dest)
+                rows=reaped(dest,2)
                 assert any(r['service']=='desktop-audio' and r['returncode']!=0 for r in rows),rows
                 report['checks'].append(dict(name=name,passed=True))
             c=start('emu_selected');key(c,2);sink,index=stream_index(c)
@@ -82,7 +84,7 @@ def main():
             assert 'emu-desktop-'+c.id not in pactl('list','sink-inputs'),'silently rerouted to fallback'
             try:c.close(out/'sink-loss')
             except ContractError as error:assert error.code=='cleanup_failed',str(error)
-            clients.remove(c);reaped(out/'sink-loss')
+            clients.remove(c);reaped(out/'sink-loss',1)
             assert 'desktop audio failed:' in (out/'sink-loss/desktop-audio.log').read_text()
             report['checks'].append(dict(name='selected-sink-loss-explicit-no-fallback-and-reaped',passed=True))
             report['passed']=True
@@ -95,5 +97,7 @@ def main():
             try:proc.wait(timeout=5)
             except subprocess.TimeoutExpired:proc.kill();proc.wait(timeout=2)
             report['private_server_exit']=proc.returncode
+            if proc.returncode!=0 or report.get('cleanup_errors'):report['passed']=False
             write_json(out/'report.json',report);print(out,flush=True)
+    assert report['passed'],report
 if __name__=='__main__':main()

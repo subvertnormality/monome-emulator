@@ -34,7 +34,9 @@ static int process(jack_nframes_t frames, void *arg) {
     float *left=jack_port_get_buffer(ports[0],frames);
     float *right=jack_port_get_buffer(ports[1],frames);
     for(unsigned i=0;i<frames;i++) {
-        if(!isfinite(left[i]) || !isfinite(right[i])) atomic_fetch_add(&faults,1);
+        if(!isfinite(left[i]) || !isfinite(right[i])) {
+            atomic_fetch_add(&faults,1); return 0;
+        }
         scratch[2*i]=left[i]; scratch[2*i+1]=right[i];
     }
     jack_ringbuffer_write(ring,(const char*)scratch,bytes);

@@ -1,0 +1,93 @@
+[
+  {
+    "path": "artifacts/audio/startup-chime-20260908-215318/report.json",
+    "sha256": "9dd090aedb8130359938a025c6a61ffccf8fa6adc6c84b3895c9ef81af917f58",
+    "passed": true,
+    "checks": 3,
+    "error": null
+  },
+  {
+    "path": "artifacts/audio/desktop-20260908-215629/report.json",
+    "sha256": "bae4ebcb71b233c4eb3f06d0eb3e65c4eae194ec05532300469710ee60bdc669",
+    "passed": true,
+    "checks": 10,
+    "error": null
+  },
+  {
+    "path": "artifacts/audio/desktop-failures-20260908-221516/report.json",
+    "sha256": "5bce337eb2ada0b5f79f7b48b74846e0c6706d5508f0b833fc498130d3ada4ea",
+    "passed": true,
+    "checks": 3,
+    "error": null
+  },
+  {
+    "path": "artifacts/audio/windows-desktop-20260908-220118/report.json",
+    "sha256": "4162d5c2e2d3fbcb7542910d669845b6ade49c1e67973713c2b43e3a2cdcfe56",
+    "passed": true,
+    "checks": 4,
+    "error": null
+  },
+  {
+    "path": "artifacts/audio/windows-desktop-20260908-221650/report.json",
+    "sha256": "2da6e11308d57fcd8d64987dfa4bbeadc11a7054be6e02811132db293c6001b7",
+    "passed": false,
+    "checks": 1,
+    "error": "AssertionError([{'rms': 0.14139363732909768, 'tone_amplitude': 0.16596769348736953, 'frequency': 440, 'tone_energy_fraction': 0.6889019082613953}, {'rms': 0.14139363732909768, 'tone_amplitude': 0.16596769348736953, 'frequency': 440, 'tone_energy_fraction': 0.6889019082613953}])"
+  },
+  {
+    "path": "artifacts/audio/windows-desktop-20260908-222105/report.json",
+    "sha256": "7297293aab04ef508e3a1910e32ba4e92b35aca40af497938216f518c9b98b88",
+    "passed": true,
+    "checks": 4,
+    "error": null
+  },
+  {
+    "path": "artifacts/audio/windows-desktop-20260908-222225/report.json",
+    "sha256": "af7dc815315ed02384e3160dcd37af7deaaff27badf1944719e6c86b3a512063",
+    "passed": true,
+    "checks": 4,
+    "error": null
+  },
+  {
+    "path": "artifacts/audio/windows-desktop-20260908-222255/report.json",
+    "sha256": "a1222886059e76e28f7b4d4cc5bf27ea4d1047c9d53c0781c57044eb6ffeb8ca",
+    "passed": true,
+    "checks": 4,
+    "error": null
+  },
+  {
+    "path": "artifacts/audio/windows-desktop-20260908-222325/report.json",
+    "sha256": "489f1372da235e6752f2583ee011ee46ddfc1e7ed3465c443eaa37a939ed6836",
+    "passed": true,
+    "checks": 4,
+    "error": null
+  },
+  {
+    "path": "artifacts/audio/windows-desktop-20260908-223232/report.json",
+    "sha256": "e261a797d5b2b46a22bef2a3d01d0363deaf0b8d71ac84adfe2885f9eac7e64f",
+    "passed": true,
+    "checks": 4,
+    "error": null
+  },
+  {
+    "path": "artifacts/audio/desktop-20260908-223330/report.json",
+    "sha256": "8ed292451d4ad8c3cbcbf17d08f773918494cdec48f9cd9b76ece77de560ea79",
+    "passed": false,
+    "checks": 0,
+    "error": "ContractError('desktop-audio exited 1; /mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor/.runtime/sessions/8dea7e9f3ebf44b3b6e37a33ef1f67a2/desktop-audio.log')"
+  },
+  {
+    "path": "artifacts/audio/desktop-20260908-223421/report.json",
+    "sha256": "f3e8a9044255cc0c1e608e9b37b1db27479652ababee8074b4d95df46969d323",
+    "passed": true,
+    "checks": 10,
+    "error": null
+  },
+  {
+    "path": "artifacts/audio/desktop-failures-20260908-223531/report.json",
+    "sha256": "301286ffc55eb99b5b8e00090bb463eba7dae0ce385569405d1699de68155c12",
+    "passed": true,
+    "checks": 3,
+    "error": null
+  }
+]

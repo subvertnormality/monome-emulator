@@ -1,0 +1,10 @@
+Follow up only on H01 review session01a082eb-1578-7722-a282-0505faf28671.
+Inspect H01-triage.md and the fixed desktop_assertions.py, desktop_audio_failures.py,
+windows_desktop_audio.py and jack_desktop.c. Are the two major acceptance gaps
+closed: exact expected exits for every service plus private daemon, and bounded
+stereo continuity through the tail with tests rejecting short dropouts? Confirm
+the nonfinite block fix and checked saved boundary recordings. Use the recorded
+native post-fix evidence; do not claim you ran tests. Retained Windows dropout and
+one explicit JACK startup xrun are disclosed limitations, not silently waived.
+No new whole-branch review, no hardware gate. Identify remaining substantive
+issues with these fixes, or confirm closure with scoped residuals.
