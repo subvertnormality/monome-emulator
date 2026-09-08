@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "fixture": "nb-audio",
+  "install_by_default": false,
+  "sources": {
+    "nb": {
+      "url": "https://github.com/sixolet/nb.git",
+      "commit": "503be3ae9a7f4368a8bc35d6081795e0a130cadf",
+      "submodules": []
+    },
+    "doubledecker": {
+      "url": "https://github.com/sixolet/doubledecker.git",
+      "commit": "8729b9ceee71d2b07067e89fbef5d8b98d6a0c89",
+      "submodules": [],
+      "license_status": "Source retained as opt-in dependency; no redistribution claim"
+    }
+  },
+  "status": "integration-in-progress",
+  "notes": [
+    "Generic engine class discovery has native PCM evidence; this n.b. mod does not yet have a passing integration profile.",
+    "Unchanged mod sends OSC to localhost:57120 and uses Server.default. Session port isolation must preserve these generic norns endpoint semantics before this player can work.",
+    "Working acquisition is in the audio worktree .runtime/nb-player/code/doubledecker; do not modify upstream source to make acceptance pass."
+  ]
+}

@@ -99,6 +99,10 @@ other hosts, such as Max or Ableton, need those hosts.
 
 ## Automate checks
 
+Opt-in audio and virtual Crow setup is described in
+[experimental audio/devices](docs/AUDIO-DEVICES.md), with the tested boundaries
+and explicit limitations. These candidate builds preserve the default runtime.
+
 The CLI and browser send inputs through the same native runtime path. Run a
 bundled generic scenario with assertions and automatic session cleanup:
 

@@ -1,5 +1,11 @@
 # General-purpose monome emulator: staged autonomous delivery plan
 
+Audio/device expansion authorized 2026-09-08 is recorded in [AUDIO.md](AUDIO.md).
+Desktop audio, official Maiden and optional Docker distribution are authorized
+in [DESKTOP.md](DESKTOP.md), with independent host/platform acceptance gates.
+Its dedicated worktree prioritizes Mosaic-relevant platform features; the existing
+Mosaic MIDI behaviour campaign and release gates below continue independently.
+
 You are an execution agent. When implementation is authorized, execute the cards
 below in graph order using [RUNBOOK.md](RUNBOOK.md); resume from `state.json`.
 Read [ACCEPTANCE.md](ACCEPTANCE.md) before making runtime or test-design choices.

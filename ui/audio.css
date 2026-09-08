@@ -1,0 +1,5 @@
+.audio-controls:not([hidden]){display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:18px;padding:14px 18px;border:1px solid #424941;border-radius:8px;background:#222623}
+.audio-controls label{display:flex;align-items:center;gap:8px;font-size:12px}
+#audio-volume{width:110px;accent-color:#a5c887}
+#audio-status{font-size:12px;color:#a5b6a0}
+#audio-status[data-error=true]{color:#ffd9c8}

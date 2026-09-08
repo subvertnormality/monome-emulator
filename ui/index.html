@@ -1,11 +1,16 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Monome emulator</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<title>Monome emulator</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/audio.css"><script src="/app.js" defer></script><script src="/audio.js" defer></script></head>
 <body><main>
 <header><div><p class="eyebrow">MONOME EMULATOR</p><h1 id="script">Connecting</h1></div><span id="status" role="status">Waiting for runtime</span></header>
 <section class="instrument" aria-label="Norns controls">
 <div class="display"><canvas id="screen" width="128" height="64" aria-label="Native norns screen"></canvas></div>
 <div id="encoders" class="encoders"></div><div id="keys" class="keys"></div>
+</section>
+<section id="audio-controls" class="audio-controls" aria-label="Audio monitoring" hidden>
+<button id="listen" aria-pressed="false">Listen</button>
+<label for="audio-volume">Volume <input id="audio-volume" type="range" min="0" max="1" step="0.01" value="0.25"></label>
+<span id="audio-status" role="status">Audio off</span>
 </section>
 <section class="grid-section"><div class="section-title"><h2>Grid 128</h2><button id="connect" title="Disconnect or reconnect the virtual grid">Disconnect grid</button></div><div id="grid" aria-label="Virtual grid"></div></section>
 <footer><span id="held">No held inputs</span><button id="release" title="Release all keys and grid buttons held by this browser">Release held inputs</button></footer>

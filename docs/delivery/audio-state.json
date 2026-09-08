@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "current_card": "A01",
+  "status": "in_progress",
+  "worktree": ".runtime/worktrees/audio-monitor",
+  "branch": "codex/audio-monitor",
+  "completed": [
+    "A00 audio feasibility",
+    "experimental browser monitoring"
+  ],
+  "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
+  "next_action": "Fresh combined candidate native audio/Mosaic/CV/input/ii/clock/generic/browser regressions passed; see A01-tranche1-candidate.md. Preparing committed snapshot and bounded Paranoia branch review; stable full contract rerun needed. Merge tranche1 only after substantive findings resolved; main state.json belongs to concurrent work. Tranche2/3 remain queued.",
+  "evidence": "docs/delivery/completions/A00.md",
+  "interactive_demo_metadata": "artifacts/audio/browser-session.json",
+  "contract": "docs/delivery/AUDIO.md",
+  "default_runtime_promoted": false,
+  "continuous_audio": {
+    "status": "scoped-tests-passed",
+    "limitations": "120sec sampled rendered-window pass, not every sample or physical speaker capture; original click source not independently localized; arbitrary-duration drift unproven.",
+    "evidence": "artifacts/audio/browser-086edd1ca1ec43e29ff1bf3814a967e2/report.json",
+    "rates": [
+      44100,
+      48000,
+      96000
+    ],
+    "renderer_contracts": 6,
+    "browser_checks": 8,
+    "completion": "docs/delivery/completions/A01-browser-endurance.md"
+  },
+  "external_engine": {
+    "startup_error_tests": 3,
+    "default_smoke": "passed serially after concurrent JACK registry exhaustion",
+    "completion": "docs/delivery/completions/A01-external-engine.md",
+    "status": "four-native-checks-passed",
+    "evidence": "artifacts/audio/external-engine-20260908-140736/report.json",
+    "residual": "matron SIGSEGV in earlier failed negative run 140607; final run clean, investigation pending"
+  },
+  "nb_player": {
+    "completion": "docs/delivery/completions/A01-nb-player.md",
+    "limitation": "Pinned DoubleDecker inherits empty nb stop_all; no claim that this method works",
+    "checks": [
+      "note",
+      "release",
+      "velocity",
+      "pitch-bend",
+      "polyphony",
+      "note-off sweeps"
+    ],
+    "source_exclusions": "artifacts/audio/external-engine-20260908-142029/report.json: five generic checks passed with deliberately invalid excluded SC class",
+    "evidence": "artifacts/audio/nb-player-20260908-165033/report.json",
+    "candidate": ".runtime/audio-mod-01/installation.json",
+    "status": "eleven-native-checks-passed"
+  },
+  "capture_api": {
+    "candidate": ".runtime/audio-api-01/installation.json",
+    "evidence": "artifacts/audio/capture-api-20260908-142826/report.json",
+    "status": "ten-native-checks-passed",
+    "completion": "docs/delivery/completions/A01-capture-api.md"
+  },
+  "crow": {
+    "build": ".runtime/crow-host-10",
+    "card": "P02",
+    "status": "native-clock-following-scoped-checks-passed",
+    "checks": "five firmware CV assertions; seven host serial checks; four identity checks; native voltage, pulse, 2000 ordered callback/file/raw-byte agreement, explicit Lua failure and earlier normal teardown",
+    "supported_device_exposed": false,
+    "evidence": "artifacts/crow/core-20260908-145110/report.json",
+    "completion": "docs/delivery/completions/P02-clock.md",
+    "candidate": ".runtime/crow-norns-06/installation.json",
+    "native_evidence": [
+      "artifacts/crow/native-20260908-145126/report.json",
+      "artifacts/crow/native-20260908-145233/report.json",
+      "artifacts/crow/native-20260908-145354/report.json",
+      "artifacts/crow/native-20260908-151404/report.json",
+      "artifacts/crow/native-20260908-152725/report.json"
+    ],
+    "serial_evidence": "artifacts/crow/serial-20260908-145720/report.json",
+    "identity_evidence": "artifacts/crow/identity-20260908-145938/report.json",
+    "capture_evidence": "artifacts/crow/capture-api-20260908-152622/report.json",
+    "input_core": {
+      "build": ".runtime/crow-host-09",
+      "native_injection": false,
+      "evidence": "artifacts/crow/input-core-20260908-153606/report.json",
+      "completion": "docs/delivery/completions/P02-input-core.md"
+    },
+    "input_api": {
+      "evidence": "artifacts/crow/input-api-20260908-154223/report.json",
+      "capture_regression": "artifacts/crow/capture-api-20260908-154434/report.json",
+      "native_injection": true
+    },
+    "clock": {
+      "evidence": "artifacts/crow/clock-native-20260908-155615/report.json",
+      "regression": "artifacts/crow/native-20260908-155826/report.json",
+      "framing": "artifacts/crow/clock-frames-20260908-155248/report.json"
+    },
+    "ii_core": {
+      "build": ".runtime/crow-ii-host-02",
+      "evidence": "artifacts/crow/ii-core-20260908-161203/report.json",
+      "completion": "docs/delivery/completions/P02-ii-core.md",
+      "native_integration": false,
+      "downstream_synthesis": false,
+      "checks": 7
+    },
+    "ii_native": {
+      "build": ".runtime/crow-host-14",
+      "candidate": ".runtime/crow-ii-native-04/installation.json",
+      "evidence": "artifacts/crow/ii-native-20260908-163347/report.json",
+      "cv_regression": "artifacts/crow/native-20260908-161819/report.json",
+      "completion": "docs/delivery/completions/P02-ii-native.md",
+      "status": "scoped_pass_remaining_acceptance_pending",
+      "isolation": "artifacts/crow/ii-isolation-20260908-162958/report.json"
+    },
+    "serial_lifecycle": {
+      "build": ".runtime/crow-host-15",
+      "evidence": "artifacts/crow/serial-20260908-171423/report.json",
+      "status": "host_tests_passed_native_pending"
+    },
+    "mosaic_jf": {
+      "evidence": "artifacts/crow/mosaic-jf-20260908-165705/report.json",
+      "completion": "docs/delivery/completions/P02-mosaic-jf.md",
+      "status": "scoped-native-pass"
+    }
+  },
+  "desktop_queue": {
+    "contract": "docs/delivery/DESKTOP.md",
+    "status": "queued_after_mosaic_and_broader_scripts",
+    "order": [
+      "Mosaic reliable audio/devices and clicks",
+      "broader scripts including cheat codes 2",
+      "H00-H05 desktop audio Maiden browser extensions and optional Docker"
+    ],
+    "reference_commits": "pending H00"
+  },
+  "merge_gate": "User instruction: finish and verify tranche 1 (Mosaic reliable audio/devices including clicks), commit and merge it before starting tranche 2 broader scripts or tranche 3 desktop/Maiden/Docker. Merge authorization provided; inspect main concurrent changes and preserve them. Do not treat current scoped probes as full tranche completion.",
+  "mosaic_audio": {
+    "status": "scoped_native_audio_passed",
+    "evidence": "artifacts/audio/mosaic-20260908-164814/report.json",
+    "completion": "docs/delivery/completions/A01-mosaic-audio.md",
+    "candidate": ".runtime/mosaic-audio-01/installation.json"
+  },
+  "engine_readiness": {
+    "candidate": ".runtime/audio-ready-01/installation.json",
+    "evidence": "artifacts/audio/init-20260908-170722/report.json",
+    "completion": "docs/delivery/completions/A01-engine-ready.md",
+    "status": "three-native-restarts-passed"
+  },
+  "osc_isolation": {
+    "evidence": "artifacts/audio/osc-isolation-20260908-171112/report.json",
+    "completion": "docs/delivery/completions/A01-osc-isolation.md",
+    "status": "native-pass"
+  },
+  "tranche1_candidate": {
+    "install": ".runtime/tranche1-tools-01/installation.json",
+    "build": ".runtime/tranche1-01/installation.json",
+    "status": "combined-regressions-passed-review-pending",
+    "completion": "docs/delivery/completions/A01-tranche1-candidate.md"
+  }
+}

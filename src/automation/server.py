@@ -42,12 +42,56 @@ class Application:
         else: self.backend=FixtureBackend(directory)
         self.sequence=0; self.action_ids=set(); self.lock=threading.Lock(); self.action_lock=threading.Lock(); self.errors=[]
         self.clients={}; self.input_owners={}; self.client_timeout=2.5
+        self.audio_monitor=None
+        self.audio_captures={}
+    def close(self):
+        for capture in self.audio_captures.values():capture.cancel()
+        if self.audio_monitor:
+            self.audio_monitor.close(); self.audio_monitor=None
+        self.backend.close()
+    def capture_request(self,path,payload):
+        if self.config['backend']!='native':raise ContractError('unsupported','Capture requires native audio')
+        if not isinstance(payload,dict):raise ContractError('audio_request','Expected capture request object')
+        if path=='/audio/capture/start':
+            if set(payload)-{'seconds','input'} or 'seconds' not in payload:raise ContractError('audio_request','Expected seconds and optional session-data input')
+            self.backend.check_processes()
+            if any(c.status()['status']=='capturing' for c in self.audio_captures.values()):raise ContractError('audio_busy','One capture/injection job may run per session')
+            if len(self.audio_captures)>=8:raise ContractError('audio_limit','At most eight capture jobs per session')
+            from runtime.audio_capture import AudioCapture
+            capture=AudioCapture(self.backend,payload['seconds'],payload.get('input'))
+            self.audio_captures[capture.id]=capture
+            return capture.status()
+        if set(payload)!={'job_id'} or not isinstance(payload['job_id'],str):raise ContractError('audio_request','Expected job_id')
+        capture=self.audio_captures.get(payload['job_id'])
+        if capture is None:raise ContractError('audio_job','Unknown capture job')
+        if path.endswith('/cancel'):return capture.cancel()
+        self.backend.check_processes()
+        return capture.status()
+    def audio_request(self,path,payload):
+        required={'client_id','after'} if path=='/audio/read' else {'client_id'}
+        if not isinstance(payload,dict) or set(payload)!=required: raise ContractError('audio_request','Invalid audio request')
+        owner=payload['client_id']; self.heartbeat(owner)
+        if self.audio_monitor and self.audio_monitor.owner!=owner:raise ContractError('audio_owner','Audio is already monitored by another browser')
+        if path=='/audio/start':
+            if not self.audio_monitor:
+                if self.config['backend']!='native':raise ContractError('unsupported','Audio requires the native experimental runtime')
+                from runtime.audio_monitor import AudioMonitor
+                self.audio_monitor=AudioMonitor(self.backend,owner)
+            self.audio_monitor.check()
+            return dict(status='ready',rate=self.audio_monitor.rate)
+        if path=='/audio/stop':
+            if self.audio_monitor:self.audio_monitor.close();self.audio_monitor=None
+            return dict(status='stopped')
+        if not self.audio_monitor:raise ContractError('audio_stopped','Click Listen to start audio')
+        return self.audio_monitor.read(payload['after'])
     def heartbeat(self,client_id):
         if not isinstance(client_id,str) or not 1<=len(client_id)<=64 or any(c not in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_' for c in client_id):
             raise ContractError('client_id','Invalid browser client identity')
         if client_id not in self.clients and len(self.clients)>=8: raise ContractError('client_limit','At most eight browser clients per session')
         self.clients[client_id]=time.monotonic()
     def release_client(self,client_id):
+        if self.audio_monitor and self.audio_monitor.owner==client_id:
+            self.audio_monitor.close();self.audio_monitor=None
         self.action(dict(schema_version=1,session_id=self.config['session_id'],action_id=uid(),sequence=self.sequence+1,
                          client_id=client_id,action=dict(type='release_all')))
         self.clients.pop(client_id,None)
@@ -124,7 +168,7 @@ class Application:
 def serve(directory):
     app=Application(directory)
     try: serve_application(directory,app)
-    finally: app.backend.close()
+    finally: app.close()
 
 def serve_application(directory,app):
     from .identity import source_identity
@@ -146,7 +190,7 @@ def serve_application(directory,app):
             self.send_response(status); self.send_header('Content-Type','application/json')
             self.send_header('Content-Length',str(len(data))); self.end_headers(); self.wfile.write(data)
         def asset(self):
-            assets={'/':('index.html','text/html'),'/app.js':('app.js','text/javascript'),'/style.css':('style.css','text/css')}
+            assets={'/':('index.html','text/html'),'/app.js':('app.js','text/javascript'),'/style.css':('style.css','text/css'),'/audio.js':('audio.js','text/javascript'),'/audio-stream.js':('audio-stream.js','text/javascript'),'/audio.css':('audio.css','text/css')}
             if self.command!='GET' or self.path not in assets: return False
             name,kind=assets[self.path]; data=(ROOT/'ui'/name).read_bytes()
             self.send_response(200); self.send_header('Content-Type',kind+'; charset=utf-8')
@@ -172,6 +216,37 @@ def serve_application(directory,app):
                         with app.lock:self.respond(200,app.action(payload,scheduled))
                     return
                 with app.lock:
+                    if self.command=='POST' and self.path=='/crow/ii/read':
+                        profile=app.config.get('runtime_identity',{}).get('experimental',{}).get('crow',{})
+                        if profile.get('manifest',{}).get('ii_protocol')!=1:raise ContractError('unsupported','Selected runtime has no Crow ii trace')
+                        if not isinstance(payload,dict) or set(payload)!={'cursor'}:raise ContractError('crow_ii_request','Expected cursor')
+                        from runtime.crow_ii import read_trace
+                        app.backend.check_processes()
+                        self.respond(200,read_trace(app.backend.directory/'crow-ii.jsonl',payload['cursor']));return
+                    if self.command=='POST' and self.path=='/crow/input':
+                        capture=getattr(app.backend,'crow_capture',None)
+                        profile=app.config.get('runtime_identity',{}).get('experimental',{}).get('crow',{})
+                        if capture is None or profile.get('manifest',{}).get('input_protocol')!=1:raise ContractError('unsupported','Selected runtime has no Crow input profile')
+                        if not isinstance(payload,dict) or set(payload)!={'channel','volts'}:raise ContractError('crow_input_request','Expected channel and volts')
+                        app.backend.check_processes();self.respond(200,capture.inject(payload['channel'],payload['volts']));return
+                    if self.command=='POST' and self.path in ('/crow/capture/start','/crow/capture/status','/crow/capture/cancel'):
+                        capture=getattr(app.backend,'crow_capture',None)
+                        if capture is None:raise ContractError('unsupported','Selected runtime has no Crow CV capture profile')
+                        required={'seconds'} if self.path.endswith('/start') else {'job_id'}
+                        if not isinstance(payload,dict) or set(payload)!=required:raise ContractError('crow_capture_request','Invalid CV capture request')
+                        app.backend.check_processes()
+                        if self.path.endswith('/start'):result=capture.start(payload['seconds'])
+                        elif self.path.endswith('/cancel'):result=capture.cancel(payload['job_id'])
+                        else:result=capture.status(payload['job_id'])
+                        self.respond(200,result);return
+                    if self.command=='POST' and self.path in ('/audio/capture/start','/audio/capture/status','/audio/capture/cancel'):
+                        self.respond(200,app.capture_request(self.path,payload));return
+                    if self.command=='POST' and self.path in ('/audio/start','/audio/read','/audio/stop'):
+                        self.respond(200,app.audio_request(self.path,payload));return
+                    if self.command=='GET' and self.path=='/audio/status':
+                        enabled=app.config['backend']=='native' and app.config.get('clock_mode','real-time')=='real-time' and 'audio_monitor' in app.config.get('runtime_identity',{}).get('binaries',{})
+                        capture_enabled=app.config['backend']=='native' and app.config.get('clock_mode','real-time')=='real-time' and 'audio_capture' in app.config.get('runtime_identity',{}).get('binaries',{})
+                        self.respond(200,dict(available=enabled,capture_available=capture_enabled,experimental=True));return
                     if self.command=='POST' and self.path in ('/client/heartbeat','/client/disconnect'):
                         if not isinstance(payload,dict) or set(payload)!={'client_id'}: raise ContractError('client_id','Expected a client_id')
                         app.heartbeat(payload['client_id'])
@@ -183,10 +258,26 @@ def serve_application(directory,app):
                                              backend=app.config['backend'],fidelity=app.backend.fidelity)); return
                     if self.command=='GET' and self.path=='/snapshot': self.respond(200,app.snapshot()); return
                     if self.command=='GET' and self.path=='/capabilities':
+                        identity=app.config.get('runtime_identity',{});experimental=identity.get('experimental',{});binaries=identity.get('binaries',{})
+                        extra_supported=[];extra_limits=[]
+                        if experimental.get('status')=='audio-feasibility-only':
+                            extra_supported.append('experimental real-time official norns/JACK/SuperCollider audio; selected engine and n.b. fixture coverage')
+                            extra_limits.append('physical speaker output, arbitrary engine compatibility and DSP synchronization to controlled Lua time are not certified')
+                        if 'audio_monitor' in binaries:extra_supported.append('experimental opt-in browser PCM monitoring with explicit stream-gap errors')
+                        if 'audio_capture' in binaries:extra_supported.append('experimental bounded JACK WAV capture and session-data WAV injection')
+                        crow_profile=experimental.get('crow',{}).get('manifest',{})
+                        if crow_profile:
+                            extra_supported.append('experimental virtual Crow serial, four ASL/CASL CV outputs and bounded CV capture')
+                            extra_limits.append('full Crow firmware reset/upload, blocking native Lua calls, unsupported input modes, electrical behavior and downstream ii synthesis')
+                        if crow_profile.get('input_protocol')==1:extra_supported.append('experimental Crow voltage injection, change/stream callbacks and real-time input-1 clock following')
+                        if crow_profile.get('ii_protocol')==1:
+                            extra_supported.append('experimental Just Friends ii write encoding and bounded timestamped packet trace')
+                            extra_limits.append('ii module reads, follower callbacks and unconfigured module addresses')
+                        audio_limit='arbitrary engine compatibility (selected audio build is experimental)' if app.config.get('runtime_identity',{}).get('experimental',{}).get('status')=='audio-feasibility-only' else 'audio engines'
                         self.respond(200,checked('capability',dict(schema_version=1,backend=app.config['backend'],
-                          fidelity=app.backend.fidelity,supported=(['native script loading','native keys/encoders','Cairo framebuffer','grid128 LED/relative/bulk/refresh, rotation, intensity, holds and reconnect','configured native MIDI ports, byte-stream input and emission-time capture','patched v2.9.4: realtime MIDI preserves partial messages (0009); cancelled queued clock resumes are ignored (0011)'] if app.config['backend']=='native' else ['contract counter','ordered action acknowledgment']),
+                          fidelity=app.backend.fidelity,supported=(['native script loading','native keys/encoders','Cairo framebuffer','grid128 LED/relative/bulk/refresh, rotation, intensity, holds and reconnect','configured native MIDI ports, byte-stream input and emission-time capture','patched v2.9.4: realtime MIDI preserves partial messages (0009); cancelled queued clock resumes are ignored (0011)']+extra_supported if app.config['backend']=='native' else ['contract counter','ordered action acknowledgment']),
                           absent=['physical Crow','GPIO/SPI','network manager'] if app.config['backend']=='native' else [],
-                          unsupported=(['audio engines','physical peripherals','grid tilt','MIDI isolated F7 or status-interrupted partial messages (stricter than stock v2.9.4; C10)'] +
+                          unsupported=([audio_limit,'physical peripherals','grid tilt','MIDI isolated F7 or status-interrupted partial messages (stricter than stock v2.9.4; C10)'] + extra_limits +
                             (['controlled time remains experimental and unadmitted; Codex P5 pending','controlled Link/Crow clocks, blocking micro-sleep and wall-time MIDI scheduling; injected MIDI is candidate-dependent and unadmitted'] if app.config.get('clock_mode','real-time')!='real-time' else ['advance without an explicit experimental installation'])) if app.config['backend']=='native' else ['native norns','application workflows']))); return
                     if self.command=='POST' and self.path=='/fixture-fault':
                         if app.config['backend']!='contract-fixture': raise ContractError('unsupported','Fixture faults require the contract backend')
@@ -195,7 +286,7 @@ def serve_application(directory,app):
                     if self.command=='POST' and self.path=='/stop':
                         watchdog_stop.set()
                         try:
-                            app.backend.close()
+                            app.close()
                             self.respond(200,dict(status='stopped',session_id=app.config['session_id']))
                         finally: threading.Thread(target=self.server.shutdown,daemon=True).start()
                         return
@@ -213,7 +304,7 @@ def serve_application(directory,app):
     try: server.serve_forever(poll_interval=0.05)
     finally:
         watchdog_stop.set(); watchdog_thread.join(timeout=1)
-        server.server_close(); app.backend.close()
+        server.server_close(); app.close()
         write_json(directory/'stopped.json',dict(session_id=app.config['session_id'],monotonic_ns=time.monotonic_ns()))
 
 if __name__=='__main__':

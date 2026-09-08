@@ -5,6 +5,8 @@ from pathlib import Path
 import subprocess
 from .protocol import ROOT, ContractError
 
+APPLICATION_EXCLUDED_DIRS={'.git','node_modules','__pycache__','test_artefacts'}
+
 def artifact(path,base):
     path=Path(path).resolve(); base=Path(base).resolve()
     try: relative=path.relative_to(base)
@@ -35,7 +37,7 @@ def application_identity(code_root):
         real=Path(current).resolve()
         if real in seen: dirs[:]=[]; continue
         seen.add(real)
-        dirs[:]=[d for d in dirs if d not in ('.git','node_modules','__pycache__','test_artefacts')]
+        dirs[:]=[d for d in dirs if d not in APPLICATION_EXCLUDED_DIRS]
         for name in sorted(names):
             p=Path(current)/name
             if not p.is_file() or name.endswith('.pyc'): continue

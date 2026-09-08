@@ -22,6 +22,26 @@ class Session:
         if value['errors']:raise ContractError('runtime_errors',str(value['errors']))
         return value
     def capabilities(self):return session.request(self.id,'/capabilities')
+    def capture_start(self,seconds,*,input=None):
+        """Start a finite WAV capture, optionally injecting a session-data WAV."""
+        payload=dict(seconds=seconds)
+        if input is not None:payload['input']=input
+        return session.request(self.id,'/audio/capture/start',payload)
+    def capture_status(self,job_id):
+        return session.request(self.id,'/audio/capture/status',dict(job_id=job_id))
+    def capture_cancel(self,job_id):
+        return session.request(self.id,'/audio/capture/cancel',dict(job_id=job_id))
+    def crow_capture_start(self,seconds):
+        return session.request(self.id,'/crow/capture/start',dict(seconds=seconds))
+    def crow_input(self,channel,volts):
+        return session.request(self.id,'/crow/input',dict(channel=channel,volts=volts))
+    def crow_ii_read(self,cursor=0):
+        """Read up to 256 wire packets; pass returned byte cursor for the next page."""
+        return session.request(self.id,'/crow/ii/read',dict(cursor=cursor))
+    def crow_capture_status(self,job_id):
+        return session.request(self.id,'/crow/capture/status',dict(job_id=job_id))
+    def crow_capture_cancel(self,job_id):
+        return session.request(self.id,'/crow/capture/cancel',dict(job_id=job_id))
     def close(self,artifact_directory):
         """Stop owned processes and export diagnostic evidence, even on failure.
 
@@ -38,5 +58,9 @@ class Session:
                 if path.suffix in ('.log','.jsonl') or path.name in (
                     'cleanup.json','cleanup-error.json','native-config.json','frame.bgra','stopped.json'):
                     shutil.copyfile(path,directory/path.name)
+            if (source/'audio-captures').exists():
+                shutil.copytree(source/'audio-captures',directory/'audio-captures')
+            if (source/'crow-captures').exists():
+                shutil.copytree(source/'crow-captures',directory/'crow-captures')
             write_json(directory/'identity.json',{k:v for k,v in self.info.items() if k in (
                 'session_id','runtime_identity','application_identity','emulator_identity')})
