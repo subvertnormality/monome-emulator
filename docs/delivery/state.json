@@ -3,7 +3,7 @@
   "updated": "2026-09-08",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "Audit, commit and push completed chord matrix and candidate0043 dashboard checkpoint. All native/review processes terminal. Then expand remaining dashboard and navigation/manual workflows, controlled admission and emulator release. No refactor.",
+  "next_action": "All current native/review processes terminal: matrix56912 Dpass Rfailed live-tail retention. Preserve failure081cb06ca7a4497da59c2c2a55d8ed55. Its native export has61813contiguous MIDI events, no native errors. Replace panic live MidiWindow data assertions with post-close full native-export validation using identified input and recorded after/cursor windows; keep existing live-tail loss detector unchanged for other cases. Follow established fractional c.finish()/offline assertion/results-finally pattern. Partition every native NoteOn/Off into panic or melody windows, reject extra outside events; panic exact2048offs perport or selected-button silence; melody note_pairs and literal4note phrase checks. Add missing/extra/wrong-port/outside-window fault contracts, then fresh M-PANIC003 D/R and focused Codex follow-up for capture gate+0046. After that add active-note test: quiet playing pattern, startpanic, wait until sweep passedpitch24, press MIDI24 while sweepstillactive, waitcompletion, Stop mustemit explicit NoteOff; finallyreleasekeyboard forcleanup. Do not claim new ownership bug withoutnativeproof: current note_off already sends fallback releases even withmissingcounts. Record/publish candidates0044/45/46 and navigation evidence whenvalidated; continue full manual/emulator scope.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -4981,35 +4981,6 @@
     ],
     "limitations": "Historical candidate-native passes are individually source-bound, not relabelled final-tree passes. Arp zero/signed spacing, rest and selected interactions only. D remains experimental; D20 absolute real-time mapping, full campaign, strum shape/rest combinations and emulator release stages remain incomplete."
   },
-  "active_execution_checkpoint": {
-    "status": "running",
-    "session_id": 78341,
-    "artifact": "artifacts/c16/fractional-deadline-native-validation.json",
-    "runner": "artifacts/run_fractional_deadline_validation.py",
-    "case": "M-TIME-004",
-    "modes": [
-      "controlled-experimental",
-      "real-time"
-    ],
-    "mutation_rule": "No Mosaic or Linux execution checkout edits until native runner is terminal",
-    "source_work": "New uncommitted fractional_deadlines.py, fractional_deadline_contract.py, fractional_lattice_contract.lua, cases.py and Mosaic state.",
-    "completed_checks": {
-      "actual_lattice_positions": 700,
-      "oracle_unit_groups": 3,
-      "generic_native_input_origin_modes": 4
-    },
-    "prior_startup_trace": {
-      "status": "finished-diagnostic-pass",
-      "session_id": 15378,
-      "artifact": "artifacts/c16/startup-configuration-trace.json",
-      "note": "Did not reproduce timeout; no sendto syscall over50ms. Not acceptance evidence."
-    },
-    "remaining_matrix_cases": [
-      197,
-      256
-    ],
-    "full_campaign_complete": false
-  },
   "chord_shape_validation": {
     "file": "docs/testing/chord-shape-validation.json",
     "matrix_passes": 256,
@@ -5061,7 +5032,130 @@
   "navigation_preparation": {
     "scope": "All36six-page source/destination transitions, repeated pattern cycles, exact menu LEDs and unchanged4noteMIDI melody after every pair",
     "remaining": "Held-input combinations across navigation",
-    "status": "prepared-not-installed",
-    "installer": "artifacts/install_navigation_matrix.py"
+    "status": "installed-native-validation-running",
+    "installer": "artifacts/install_navigation_matrix.py",
+    "session_id": 73627,
+    "artifact": "artifacts/c16/navigation-matrix-native.json"
+  },
+  "dashboard_published_checkpoint": {
+    "units": 482,
+    "native_candidate_passes": 24,
+    "expanded_native_passes": 16,
+    "chord_matrix_passes": 256,
+    "emulator": "1bdb03903e88d75931f3f20b75004c0f43b25da0",
+    "limitations": "Scoped dashboard fix; full manual and release incomplete",
+    "pushes_verified": true,
+    "mosaic": "02bd9456bf5013a24fcbada7812628b45dee5e34"
+  },
+  "navigation_validation": {
+    "file": "docs/testing/navigation-validation.json",
+    "pairs_per_lane": 36,
+    "lanes": [
+      "controlled-experimental",
+      "real-time"
+    ],
+    "limitations": "NAV-PAGES partial: held-input combinations and cancellation behavior remain pending. Controlled admission, full manual and emulator release remain incomplete."
+  },
+  "panic_candidates": {
+    "unit_tests": 482,
+    "native_artifact": "artifacts/c16/panic-candidate-native.json",
+    "native_session": 70329,
+    "candidates": [
+      "0044",
+      "0045",
+      "0046"
+    ],
+    "scheduler_scenarios": 4,
+    "review_session": 38314,
+    "scope": "Non-selected navigation range and independent per-port panic jobs; stopped-state native6144offs; broader panic domains pending",
+    "status": "hold-matrix-D-passed-R-live-tail-gap",
+    "baselines": [
+      "1e63ddf3385b45e88ffea29fde655207",
+      "13099fdf86ae490e92c941bf633d84c6"
+    ],
+    "review_artifact": "artifacts/c16/panic-candidate-review.json",
+    "native_status": "terminal-all4passed",
+    "scheduler_accounting": {
+      "review": "01a080b4-5813-7d92-ac3e-58df57b1dbbb",
+      "baseline": "artifacts/c16/scheduler-accounting-baseline.json",
+      "candidate": "0046",
+      "contracts": 5,
+      "result": "Retained inactive coroutine was decremented twice: reported4/actual7 on repeat with4background jobs. One active-flag guard fixes it.",
+      "full_units": "artifacts/c16/panic-accounting-full-units.json",
+      "unit_tests": 482
+    },
+    "hold_matrix": {
+      "complete_native_sequence": true,
+      "controlled": "7c68f30f36004b2ab92988674374c4f1",
+      "real_time_failed": "081cb06ca7a4497da59c2c2a55d8ed55",
+      "status": "terminal",
+      "failure": "MIDI snapshot retention gap during source=scale/button5 second hold",
+      "artifact": "artifacts/c16/panic-hold-matrix-native.json",
+      "native_errors": 0,
+      "native_export_events": 61813
+    }
+  },
+  "active_execution_checkpoint": {
+    "status": "terminal",
+    "native_session": 87534,
+    "review_session": 73222,
+    "artifact": "artifacts/c16/panic-live-note-candidate.json",
+    "next_action": "Publish scoped panic/navigation checkpoint after diff checks; continue remaining panic/manual domains.",
+    "full_campaign_complete": false
+  },
+  "panic_validation": {
+    "unit_tests": 482,
+    "native_artifact": "artifacts/c16/panic-candidate-native.json",
+    "native_session": 70329,
+    "candidates": [
+      "0044",
+      "0045",
+      "0046"
+    ],
+    "scheduler_scenarios": 4,
+    "review_session": 38314,
+    "scope": "Non-selected navigation range and independent per-port panic jobs; stopped-state native6144offs; broader panic domains pending",
+    "status": "scoped-regressions-validated",
+    "baselines": [
+      "1e63ddf3385b45e88ffea29fde655207",
+      "13099fdf86ae490e92c941bf633d84c6"
+    ],
+    "review_artifact": "artifacts/c16/panic-candidate-review.json",
+    "native_status": "terminal-all4passed",
+    "scheduler_accounting": {
+      "review": "01a080b4-5813-7d92-ac3e-58df57b1dbbb",
+      "baseline": "artifacts/c16/scheduler-accounting-baseline.json",
+      "candidate": "0046",
+      "contracts": 5,
+      "result": "Retained inactive coroutine was decremented twice: reported4/actual7 on repeat with4background jobs. One active-flag guard fixes it.",
+      "full_units": "artifacts/c16/panic-accounting-full-units.json",
+      "unit_tests": 482
+    },
+    "hold_matrix": {
+      "complete_native_sequence": true,
+      "controlled": "7c68f30f36004b2ab92988674374c4f1",
+      "real_time_failed": "081cb06ca7a4497da59c2c2a55d8ed55",
+      "status": "terminal",
+      "failure": "MIDI snapshot retention gap during source=scale/button5 second hold",
+      "artifact": "artifacts/c16/panic-hold-matrix-native.json",
+      "native_errors": 0,
+      "native_export_events": 61813
+    },
+    "validation": "Mosaic docs/testing/panic-validation.json",
+    "live_note_candidate": "0047",
+    "native_live_note_runs": [
+      {
+        "run_id": "3ac6ae608e474649ad1703b0bfe410b5",
+        "clock_mode": "controlled-experimental",
+        "manifest_sha256": "1a4432503a7d97eafc91aa7ebbc222101338bc0826d98f46b8f15605b5e4c6f6",
+        "passed": true
+      },
+      {
+        "run_id": "de0e722d78834386b2c7689400ea75af",
+        "clock_mode": "real-time",
+        "manifest_sha256": "d3801dc299642271ed3dc0f9c500a512e8e4d85d1972229e54d9babfbecd5a4b",
+        "passed": true
+      }
+    ]
   }
 }
