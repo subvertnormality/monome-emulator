@@ -3,7 +3,7 @@
   "updated": "2026-09-08",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "Publish reviewed codex/midi-hotplug branch, integrate into main preserving unrelated state/audio work and update default runtime record to new locked installation. Runtime locked01 and controlled-locked01 native lifecycle pass; both Codex findings closed. Next Mosaic native panic hotplug cases then full manual/emulator obligations. No active processes. See completions/C05-midi-hotplug.md and C05-hotplug-progress.json.",
+  "next_action": "Hotplug implementation and Mosaic stopped-panic integration are published: emulator codex/midi-hotplug ae203883; Mosaic codex/behaviour-validation b9d04ea. Work directly on authorised branches: automatic review rejected main merge/runtime activation, neither ran. No active native/build/review processes. Next audit manual requirements/domain gaps using artifacts/hotplug/next-coverage-audit.json (141 requirements,431 registered cases; statuses incomplete). Start CH-PATCH-SENTINEL/CH-PATCH-RECALL: inspect current manual, parameter routing and existing cases before adding user-input bounds/sentinel and load/play persistence tests. Continue controlled-time repeatability/admission and full emulator stages; no refactor, no routine routing questions.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -5096,9 +5096,9 @@
     }
   },
   "active_execution_checkpoint": {
-    "status": "terminal-candidate-in-progress",
-    "native_session": 83547,
-    "next_action": "Continue in isolated /home/andy/projects/monome-emulator-midi-hotplug branch codex/midi-hotplug. Add drop-evidence fault tests, held-note/reconnect/parser-fragment probes, broader conformance and Codex review before default promotion/Mosaic hot-plug testing.",
+    "status": "terminal-published",
+    "native_processes_active": false,
+    "next_action": "Hotplug implementation and Mosaic stopped-panic integration are published: emulator codex/midi-hotplug ae203883; Mosaic codex/behaviour-validation b9d04ea. Work directly on authorised branches: automatic review rejected main merge/runtime activation, neither ran. No active native/build/review processes. Next audit manual requirements/domain gaps using artifacts/hotplug/next-coverage-audit.json (141 requirements,431 registered cases; statuses incomplete). Start CH-PATCH-SENTINEL/CH-PATCH-RECALL: inspect current manual, parameter routing and existing cases before adding user-input bounds/sentinel and load/play persistence tests. Continue controlled-time repeatability/admission and full emulator stages; no refactor, no routine routing questions.",
     "full_campaign_complete": false
   },
   "panic_validation": {
@@ -5229,7 +5229,9 @@
   "midi_hotplug_checkpoint": {
     "worktree": "/home/andy/projects/monome-emulator-midi-hotplug",
     "branch": "codex/midi-hotplug",
-    "status": "reviewed-locked-runtime-validated-integration-pending",
-    "receipt": "docs/delivery/completions/C05-hotplug-progress.json"
+    "status": "published-mosaic-integration-validated",
+    "receipt": "docs/delivery/completions/C05-hotplug-progress.json",
+    "implementation_revision": "ae203883c0c2910d914609e1091df9e844a8ed00",
+    "mosaic_revision": "b9d04eabc137f7eac653e7580151950ab2250f49"
   }
 }

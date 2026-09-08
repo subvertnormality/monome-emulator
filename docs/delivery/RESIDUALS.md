@@ -36,12 +36,17 @@ historical native failure artifacts/c08/7af59ee065a04cd9a23e1404d477c631/manifes
 remains retained. C12 still owns full A19 coverage and release-tree regression;
 the focused fix does not complete the display-refresh family.
 
-R18 — Native virtual MIDI hot-plug: fold:C05/C10/C16. The public runtime action
-path has no MIDI connection change, so Mosaic panic hot-reconnect behavior cannot
-yet earn native acceptance. Implement the official device lifecycle adapter and
-generic conformance described in `docs/architecture/midi-hotplug.md`, then run
-Mosaic disconnect/reconnect scenarios. A Lua disconnected-port spy is insufficient.
-Required before closing PANIC-GESTURE and the release device-lifecycle claim.
+R18 — Native virtual MIDI hot-plug: implemented and scoped validation passed on
+published branch `codex/midi-hotplug` (runtime/test implementation ae203883).
+Locked patch0013 provides native lifecycle, ordered input/output boundaries and
+explicit scheduled drops. Generic D/R probes, parser/race baseline fixes and Codex
+follow-up passed. Mosaic b9d04ea adds four stopped-panic removal/reconnect scenarios
+with eight canonical D/R passes and four existing musical regression passes;
+its oracle finding is fixed and reviewed. Evidence: C05-hotplug-progress.json and
+Mosaic docs/testing/hotplug-validation.json. These do not close all PANIC-GESTURE,
+controlled-time admission or release lifecycle requirements. Automatic approval
+review rejected main fast-forward/runtime activation; neither ran. Continue using
+the authorised published feature branch directly; do not bypass that rejection.
 
 R17 — Controlled-time feedback cost: fold:C13. The Mosaic M-RANGE-002 sweep
 passed in 309.63 seconds controlled versus 121.74 seconds real-time. Its driver

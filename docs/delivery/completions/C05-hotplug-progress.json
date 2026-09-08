@@ -1,5 +1,5 @@
 {
-  "status": "reviewed-locked-runtime-validated-integration-pending",
+  "status": "published-with-mosaic-stopped-panic-integration-validated",
   "worktree": "/home/andy/projects/monome-emulator-midi-hotplug",
   "branch": "codex/midi-hotplug",
   "base_revision": "319e3a077685db5d4f40027c3aa9bb53a6a18622",
@@ -9,9 +9,9 @@
   "existing_schedule_contract_tests": 5,
   "behavior": "Official Lua add/remove callbacks and stable virtual slots; disconnected retained sends suppressed; other port continues; scheduled events dropped at disconnected deadlines with explicit evidence; reconnect permits later events; legacy runtime rejects new action.",
   "remaining": [
-    "Publish/integrate reviewed emulator branch and update installation consumers deliberately",
-    "Mosaic native panic hot-plug cases",
-    "Remaining full emulator/manual campaign and controlled-time admission"
+    "Remaining manual domains and interaction campaign",
+    "Controlled-time repeatability/admission and full emulator release gates",
+    "Main integration requires separate authorisation; do not retry or bypass"
   ],
   "failures_preserved": [
     "cce1e11a4aed48379954a51cb5d40b07",
@@ -214,5 +214,25 @@
       "result_sha256": "838450fa70f0194c00748b40b51a7dd96367b0967a428a0ce3a456bf891728f4"
     }
   ],
-  "default_scope": "Only hot-plug worktree .runtime/current.json activated; main and other worktrees untouched"
+  "default_scope": "Only hot-plug worktree .runtime/current.json activated; main and other worktrees untouched",
+  "publication": {
+    "emulator_branch": "codex/midi-hotplug",
+    "implementation_revision": "ae203883c0c2910d914609e1091df9e844a8ed00",
+    "mosaic_branch": "codex/behaviour-validation",
+    "mosaic_revision": "b9d04eabc137f7eac653e7580151950ab2250f49",
+    "remote_verified": true
+  },
+  "mosaic_validation": {
+    "canonical_hotplug_passes": 8,
+    "existing_musical_regression_passes": 4,
+    "oracle_groups": 7,
+    "review": "01a08158-f66a-7f31-82f0-96988d1ea9d5",
+    "production_source_changed": false,
+    "evidence": "/home/andy/projects/mosaic-behaviour-tests/docs/testing/hotplug-validation.json"
+  },
+  "main_integration": {
+    "status": "not-executed-auto-review-rejected",
+    "reason": "Reviewer recognised feature-branch authorisation, not protected/default main merge or runtime activation",
+    "alternative": "Mosaic directly uses published feature branch and validated branch runtime"
+  }
 }

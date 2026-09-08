@@ -3,9 +3,10 @@
 Status: implemented by locked patch 0013 and validated in the hot-plug delivery
 worktree. Real-time and controlled native lifecycle/fragment/held-note tests pass;
 the two Codex findings have native baseline/fix evidence and a closed follow-up.
-See `../delivery/completions/C05-hotplug-progress.json`. Main checkout integration
-and Mosaic panic hot-plug acceptance remain; full controlled-time admission is
-separate. The following contract remains the implementation/acceptance reference.
+See `../delivery/completions/C05-hotplug-progress.json`. Mosaic stopped-panic hot-plug cases now pass in both lanes (b9d04ea). Main
+checkout integration/activation was rejected by automatic approval review and did
+not run; consumers use the authorised feature branch. Full controlled-time
+admission and broader lifecycle coverage remain separate. The following contract remains the implementation/acceptance reference.
 
 Add a generic `midi_connection` action with a configured port and a boolean
 connection state. Serialize it through the same native device-event queue as
