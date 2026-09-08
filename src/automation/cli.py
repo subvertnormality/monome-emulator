@@ -24,6 +24,9 @@ def main(argv=None):
     start.add_argument('--audio-directory',help='Copy an audio directory tree into this isolated session, preserving relative paths')
     start.add_argument('--input-timeout',type=float,default=2,help='Native input completion deadline in seconds (0.1–30, default 2)')
     start.add_argument('--arc',action='store_true',help='Enable virtual arc on an identified experimental arc runtime')
+    start.add_argument('--no-startup-chime',action='store_true',help='Disable the official boot chime on an identified experimental candidate')
+    start.add_argument('--desktop-audio-server',help='Explicit PulseAudio server, e.g. unix:/mnt/wslg/PulseServer')
+    start.add_argument('--desktop-audio-sink',help='Direct desktop output sink, e.g. RDPSink; requires desktop audio candidate')
     fetch=commands.add_parser('fetch'); fetch.add_argument('--locked',action='store_true',required=True)
     commands.add_parser('build')
     fixtures=commands.add_parser('fixtures'); fixture_commands=fixtures.add_subparsers(dest='fixture_command',required=True)
@@ -54,13 +57,15 @@ def main(argv=None):
             import app_fixtures
             result=app_fixtures.fetch(args.name)
         elif args.command=='start':
+            if bool(args.desktop_audio_server)!=bool(args.desktop_audio_sink):raise ContractError('desktop_audio','Specify both desktop audio server and sink')
+            desktop_audio=dict(server=args.desktop_audio_server,sink=args.desktop_audio_sink) if args.desktop_audio_sink else None
             midi_config=read_json(args.midi_config) if args.midi_config else None
             if args.fixture:
                 if args.script or args.code_root: raise ContractError('fixture_inputs','Choose either a fixture or external script inputs')
                 import app_fixtures
                 options=app_fixtures.launch_options(args.fixture,args.fixture_profile)
-                result=session.start(args.backend,data=args.data,midi_config=midi_config,random_seed=args.random_seed,experimental_install=args.experimental_install,crow_enabled=not args.no_crow,audio_files=args.audio_file,audio_directory=args.audio_directory,input_timeout=args.input_timeout,arc_enabled=args.arc,**options)
-            else: result=session.start(args.backend,args.script,args.code_root,args.data,midi_config=midi_config,random_seed=args.random_seed,experimental_install=args.experimental_install,crow_enabled=not args.no_crow,audio_files=args.audio_file,audio_directory=args.audio_directory,input_timeout=args.input_timeout,arc_enabled=args.arc)
+                result=session.start(args.backend,data=args.data,midi_config=midi_config,random_seed=args.random_seed,experimental_install=args.experimental_install,crow_enabled=not args.no_crow,audio_files=args.audio_file,audio_directory=args.audio_directory,input_timeout=args.input_timeout,arc_enabled=args.arc,desktop_audio=desktop_audio,startup_chime=not args.no_startup_chime,**options)
+            else: result=session.start(args.backend,args.script,args.code_root,args.data,midi_config=midi_config,random_seed=args.random_seed,experimental_install=args.experimental_install,crow_enabled=not args.no_crow,audio_files=args.audio_file,audio_directory=args.audio_directory,input_timeout=args.input_timeout,arc_enabled=args.arc,desktop_audio=desktop_audio,startup_chime=not args.no_startup_chime)
         elif args.command=='snapshot': result=session.request(args.session_id,'/snapshot')
         elif args.command=='capabilities': result=session.request(args.session_id,'/capabilities')
         elif args.command=='stop': result=session.stop(args.session_id)

@@ -29,7 +29,14 @@ def request(session_id,path,payload=None,timeout=None):
         raise ContractError(value.get('code','http_error'),value.get('message',str(error))) from error
     except (OSError,ValueError) as error: raise ContractError('session_unavailable',str(error)) from error
 
-def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None,midi_config=None,random_seed=None,clock_mode='real-time',experimental_install=None,crow_enabled=True,audio_files=None,audio_directory=None,input_timeout=2,arc_enabled=False):
+def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None,midi_config=None,random_seed=None,clock_mode='real-time',experimental_install=None,crow_enabled=True,audio_files=None,audio_directory=None,input_timeout=2,arc_enabled=False,desktop_audio=None,startup_chime=True):
+    if type(startup_chime)!=bool:raise ContractError('startup_chime','startup_chime must be boolean')
+    if not startup_chime and backend!='native':raise ContractError('unsupported','Startup chime control requires native runtime')
+    if desktop_audio is not None:
+        if not isinstance(desktop_audio,dict) or set(desktop_audio)!={'server','sink'} or any(
+            not isinstance(v,str) or not v or len(v)>1024 or any(ord(c)<32 for c in v) for v in desktop_audio.values()):
+            raise ContractError('desktop_audio','Expected explicit nonempty desktop audio server and sink')
+        if backend!='native' or clock_mode!='real-time':raise ContractError('unsupported','Desktop audio requires native real-time runtime')
     if type(arc_enabled)!=bool:raise ContractError('arc_config','arc_enabled must be boolean')
     if arc_enabled and backend!='native':raise ContractError('unsupported','Arc requires native runtime')
     if type(input_timeout) not in (int,float) or not .1<=input_timeout<=30:
@@ -64,7 +71,7 @@ def start(backend='contract-fixture',script=None,code_root=None,data=None,enable
                 audio_files=[str(Path(p).resolve()) for p in audio_files or []],
                 audio_directory=str(Path(audio_directory).resolve()) if audio_directory is not None else None,
                 input_timeout=input_timeout,
-                arc_enabled=arc_enabled,
+                arc_enabled=arc_enabled,desktop_audio=desktop_audio,startup_chime=startup_chime,
                 clock_mode=clock_mode,experimental_install=str(Path(experimental_install).resolve()) if experimental_install else None)
     write_json(directory/'config.json',config)
     log=open(directory/'server.log','w')

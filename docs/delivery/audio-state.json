@@ -15,7 +15,7 @@
     "Stage2 reviewed, admitted and merged to main with post-merge native checks"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "H00 audit and plan review complete. reviews/H00-raw.json session 01a082a3-24aa-7e70-bfa8-ecf302ccb123 and focused followup H00-followup.json session 01a082a7-0418-7c10-b993-582bea8e4b2b close all three findings at contract level. Both review handles terminal. Implement H01 owned JACK-to-Pulse output with explicit sink/server and generic actual sink-capture/lifecycle/failure tests. Test, review, commit and merge H01 before H02 Maiden and H03 browser improvements. H02 owns symlink directory navigation patch, owned dataset reopen and explicit REPL failure/restart recovery; H04 reuses persistence. Preserve main state and live demo; reference source copied nowhere. H01 feature implementation and desktop boundary acceptance still pending.",
+  "next_action": "Resumed after explicit Continue. H01 source unmerged; all runners terminal. Three restart trials222225/222255/222325 verified reports passed4each. Earlier paired222105pass; retained Windows25sample dropout221650 unresolved and disclosed H01.md. Next commit candidate and bounded H01 integration review from97ab62b, resolve findings before merge. H02/H03 not started. Otherworktrees/main heads unchanged.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",

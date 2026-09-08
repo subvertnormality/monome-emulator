@@ -45,6 +45,9 @@ def main():
     from prepare_engine_ready import apply_engine_ready
     engine_ready_patch=apply_engine_ready(source)
     patch+=engine_ready_patch
+    from startup_chime_patch import apply as apply_startup_chime
+    startup_chime_patch=apply_startup_chime(source)
+    patch+=startup_chime_patch
     from softcut_read_patch import apply as apply_softcut_bounds
     softcut_read_patch=apply_softcut_bounds(source)
     patch+=softcut_read_patch
@@ -55,6 +58,7 @@ def main():
         (out/'arc-runtime.patch').write_text(arc_patch)
     (out / 'softcut-read-bounds.patch').write_text(softcut_read_patch)
     (out / 'engine-ready.patch').write_text(engine_ready_patch)
+    (out / 'startup-chime.patch').write_text(startup_chime_patch)
     (out / 'default-server.patch').write_text(default_server_patch)
     (out / 'audio-runtime.patch').write_text(patch)
     # The existing launcher includes sc/core recursively. Keep official engine
@@ -77,6 +81,7 @@ def main():
         experimental=dict(status='audio-feasibility-only', patch_sha256=hashlib.sha256(patch.encode()).hexdigest(),
                           default_server_patch_sha256=hashlib.sha256(default_server_patch.encode()).hexdigest(),
                           engine_ready_patch_sha256=hashlib.sha256(engine_ready_patch.encode()).hexdigest(),
+                          startup_chime_control=True,startup_chime_patch_sha256=hashlib.sha256(startup_chime_patch.encode()).hexdigest(),
                           softcut_read_patch_sha256=hashlib.sha256(softcut_read_patch.encode()).hexdigest(),
                           engine_sources='Pinned official sc/engines copied unchanged into sc/core/engines'),
         build_inputs_sha256=hashlib.sha256((out/'build-inputs.json').read_bytes()).hexdigest())

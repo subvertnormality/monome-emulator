@@ -63,6 +63,8 @@ class NativeBackend:
             raise ContractError('clock_mode','Controlled time requires an identified experimental candidate')
         self.native=Path(install['source'])
         self.config['runtime_identity']=install
+        if not config.get('startup_chime',True) and not install.get('experimental',{}).get('startup_chime_control'):
+            raise ContractError('unsupported','Selected runtime cannot disable the official startup chime')
         self.controller,self.child=socket.socketpair(socket.AF_UNIX,socket.SOCK_SEQPACKET)
         self.events=open(self.directory/'native-events.jsonl','w',buffering=1)
         try:
@@ -70,6 +72,7 @@ class NativeBackend:
             self.reader=threading.Thread(target=self.receive,daemon=True); self.reader.start()
             self.launch_services()
             self.await_ready()
+            self.launch_desktop_audio()
         except Exception as startup_error:
             try:
                 self.close()
@@ -162,6 +165,8 @@ class NativeBackend:
             NORNS_EMU_CRONE_PORT=str(self.ports['crone']),NORNS_EMU_MATRON_PORT=str(self.ports['matron']),
             NORNS_EMU_SC_PORT=str(self.ports['scsynth']),NORNS_EMU_MIDI_PORTS='\n'.join(self.midi_config['ports']))
         self.env.pop('NORNS_EMU_RANDOM_SEED',None)
+        self.env.pop('NORNS_EMU_STARTUP_CHIME',None)
+        if not self.config.get('startup_chime',True):self.env['NORNS_EMU_STARTUP_CHIME']='0'
         self.env.pop('NORNS_EMU_ARC',None)
         if self.arc_input.enabled:self.env['NORNS_EMU_ARC']='1'
         self.env.pop('NORNS_EMU_CROW_PATH',None)
@@ -202,6 +207,15 @@ class NativeBackend:
         self.launch_crow()
         self.launch('matron',['stdbuf','-oL','-eL',str(self.native/'build/matron/matron'),
             '-l',str(self.ports['matron']),'-c',str(self.ports['crone']),'-e',str(self.ports['sclang']),'-o',str(self.ports['remote'])],bridge=True)
+    def launch_desktop_audio(self):
+        route=self.config.get('desktop_audio')
+        if route is None:return
+        helper=self.config['runtime_identity']['binaries'].get('desktop_audio')
+        if not helper or self.clock_mode!='real-time':
+            raise ContractError('unsupported','Desktop output requires an identified desktop audio candidate in real time')
+        self.launch('desktop-audio',[helper['path'],self.env['JACK_DEFAULT_SERVER'],route['server'],route['sink'],
+            'emu-desktop-'+self.config['session_id']])
+        self.wait_log('desktop-audio','desktop audio ready:',5)
     def launch_crow(self):
         if not self.config.get('crow_enabled',True):return
         install=self.config['runtime_identity']

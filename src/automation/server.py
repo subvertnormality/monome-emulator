@@ -294,6 +294,8 @@ def serve_application(directory,app):
                             extra_limits.append('physical speaker output, arbitrary engine compatibility and DSP synchronization to controlled Lua time are not certified')
                         if 'audio_monitor' in binaries:extra_supported.append('experimental opt-in browser PCM monitoring with explicit stream-gap errors')
                         if 'audio_capture' in binaries:extra_supported.append('experimental bounded JACK WAV capture and session-data WAV injection')
+                        if 'desktop_audio' in binaries:extra_supported.append('experimental opt-in session-owned JACK to explicit PulseAudio desktop sink')
+                        if experimental.get('startup_chime_control'):extra_supported.append('experimental explicit opt-out of the official startup chime; default retained')
                         crow_profile=experimental.get('crow',{}).get('manifest',{}) if app.config.get('crow_enabled',True) else {}
                         if crow_profile:
                             extra_supported.append('experimental virtual Crow serial, four ASL/CASL CV outputs and bounded CV capture')

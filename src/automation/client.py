@@ -7,10 +7,10 @@ from .protocol import ContractError,uid,write_json
 class Session:
     """Own one native session. Call close even when an assertion fails."""
     def __init__(self,*,script,code_root,data=None,data_seeds=None,midi_config=None,
-                 enabled_mods=None,random_seed=None,clock_mode='real-time',experimental_install=None,crow_enabled=True,audio_files=None,audio_directory=None,input_timeout=2,arc_enabled=False):
+                 enabled_mods=None,random_seed=None,clock_mode='real-time',experimental_install=None,crow_enabled=True,audio_files=None,audio_directory=None,input_timeout=2,arc_enabled=False,desktop_audio=None,startup_chime=True):
         self.info=session.start('native',script=script,code_root=code_root,data=data,
             data_seeds=data_seeds,midi_config=midi_config,enabled_mods=enabled_mods,
-            random_seed=random_seed,clock_mode=clock_mode,experimental_install=experimental_install,crow_enabled=crow_enabled,audio_files=audio_files,audio_directory=audio_directory,input_timeout=input_timeout,arc_enabled=arc_enabled)
+            random_seed=random_seed,clock_mode=clock_mode,experimental_install=experimental_install,crow_enabled=crow_enabled,audio_files=audio_files,audio_directory=audio_directory,input_timeout=input_timeout,arc_enabled=arc_enabled,desktop_audio=desktop_audio,startup_chime=startup_chime)
         self.id=self.info['session_id'];self.sequence=0
     def action(self,action):
         response=session.request(self.id,'/action',dict(schema_version=1,
@@ -63,4 +63,4 @@ class Session:
             if (source/'crow-captures').exists():
                 shutil.copytree(source/'crow-captures',directory/'crow-captures')
             write_json(directory/'identity.json',{k:v for k,v in self.info.items() if k in (
-                'session_id','runtime_identity','application_identity','emulator_identity','audio_identity','crow_enabled','input_timeout','arc_enabled')})
+                'session_id','runtime_identity','application_identity','emulator_identity','audio_identity','crow_enabled','input_timeout','arc_enabled','startup_chime','desktop_audio')})

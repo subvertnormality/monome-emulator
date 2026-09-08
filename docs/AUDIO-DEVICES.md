@@ -119,3 +119,29 @@ include four arrays of 64 LEDs and arc device metadata. Arc is absent by default
 Native, Windows Chromium and cheat codes arc window-control checks have passed;
 the tested subset is admitted for opt-in use. No physical USB support is
 implied. See [arc evidence](delivery/completions/P03-progress.md).
+
+## Direct desktop audio candidate
+
+H01 is being validated; it has not yet completed integration review. Build the
+current audio candidate as above, then add its optional desktop route:
+
+```sh
+python3 scripts/prepare_desktop_audio.py --install .runtime/my-audio-tools/installation.json --output .runtime/my-desktop-tools
+./dev/emu start --experimental-install .runtime/my-desktop-tools/installation.json --script fixtures/probes/desktop-tone/desktop-tone.lua --code-root fixtures/probes --no-crow --no-startup-chime --desktop-audio-server unix:/mnt/wslg/PulseServer --desktop-audio-sink RDPSink
+```
+
+Open the returned URL. K2 plays, K3 stops, and E3 changes pitch. Desktop routing
+starts with the session; the browser Listen button is unnecessary for this path.
+Selecting Listen as well creates a second audible route with different latency.
+Both desktop flags are required. Use `pactl list short sinks` with the selected
+server to identify its sink. Stopping the session closes only its own route.
+A missing server, removed sink, JACK fault or detected Pulse underrun fails
+explicitly. Restart the session after correcting the route. Controlled-clock
+sessions do not support desktop output.
+
+`--no-startup-chime` suppresses the official boot chime through a documented,
+optional runtime patch; older builds reject this flag. Without the flag the
+upstream chime is preserved. This is separate from the earlier click investigation.
+Actual engine output has been measured at the WSLg sink and the Windows WASAPI
+render endpoint. Physical speaker output and macOS have not been measured.
+End-to-end interactive latency remains unmeasured for this desktop route.
