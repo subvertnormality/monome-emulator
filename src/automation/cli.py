@@ -18,6 +18,7 @@ def main(argv=None):
     start.add_argument('--fixture'); start.add_argument('--fixture-profile',default='base-midi')
     start.add_argument('--midi-config',help='JSON with ordered virtual port names and optional capture_limit')
     start.add_argument('--random-seed',type=int,help='Opt-in repeatable native Lua seed, including script reseeding')
+    start.add_argument('--experimental-install',help='Use an identified experimental installation without promoting it')
     fetch=commands.add_parser('fetch'); fetch.add_argument('--locked',action='store_true',required=True)
     commands.add_parser('build')
     fixtures=commands.add_parser('fixtures'); fixture_commands=fixtures.add_subparsers(dest='fixture_command',required=True)
@@ -53,8 +54,8 @@ def main(argv=None):
                 if args.script or args.code_root: raise ContractError('fixture_inputs','Choose either a fixture or external script inputs')
                 import app_fixtures
                 options=app_fixtures.launch_options(args.fixture,args.fixture_profile)
-                result=session.start(args.backend,data=args.data,midi_config=midi_config,random_seed=args.random_seed,**options)
-            else: result=session.start(args.backend,args.script,args.code_root,args.data,midi_config=midi_config,random_seed=args.random_seed)
+                result=session.start(args.backend,data=args.data,midi_config=midi_config,random_seed=args.random_seed,experimental_install=args.experimental_install,**options)
+            else: result=session.start(args.backend,args.script,args.code_root,args.data,midi_config=midi_config,random_seed=args.random_seed,experimental_install=args.experimental_install)
         elif args.command=='snapshot': result=session.request(args.session_id,'/snapshot')
         elif args.command=='capabilities': result=session.request(args.session_id,'/capabilities')
         elif args.command=='stop': result=session.stop(args.session_id)

@@ -1,5 +1,9 @@
 # Automated acceptance contract
 
+The opt-in experimental audio/device expansion has separate acceptance in
+[AUDIO.md](AUDIO.md). Its feasibility/browser results do not promote the default
+runtime or change the existing MIDI release gates below.
+
 This is the release contract for a general-purpose norns/grid development utility,
 with Mosaic as its first comprehensive application fixture, not a claim
 of electrical or hard real-time equivalence with a norns. All required tests are
@@ -270,3 +274,9 @@ contents must not enter the bundle.
 the tests the caller happens to name. It fails on missing tests, skipped tests,
 zero collection, missing artifacts, source mismatch, and any required failure.
 Warm caches may speed builds but may not supply stale runtime/output evidence.
+# Desktop expansion amendment, 2026-09-08
+
+The authorized audio, official Maiden and optional Docker requirements in
+[DESKTOP.md](DESKTOP.md) supplement this original contract. Historical MIDI-only
+exclusions do not prohibit this work; each new feature requires its own actual
+runtime/browser/host evidence, and no existing generic or application gate is waived.

@@ -1,6 +1,20 @@
 -- Host profile applied after native startup installs its core/menu functions.
 -- Preserve script loading, drawing, params and clocks. No musical logic lives here.
 local report = _norns.emu_report
+-- Standard local norns audio endpoints are session-local in the desktop host.
+-- Preserve native OSC serialization and external destinations unchanged.
+local sc_language_port=tonumber(os.getenv('NORNS_EMU_SCLANG_PORT'))
+if sc_language_port then
+  local native_send=osc.send
+  osc.send=function(destination, path, args)
+    if type(destination)=='table' and
+      (destination[1]=='localhost' or destination[1]=='127.0.0.1' or destination[1]=='::1') then
+      local port=tonumber(destination[2])
+      if port==57120 then destination={destination[1],sc_language_port} end
+    end
+    return native_send(destination,path,args)
+  end
+end
 -- Opt-in native PRNG seed policy, including scripts that reseed from os.time.
 -- The PRNG algorithm and every native clock/time source remain unchanged.
 local seed=tonumber(os.getenv('NORNS_EMU_RANDOM_SEED'))

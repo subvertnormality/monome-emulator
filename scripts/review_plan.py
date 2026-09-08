@@ -31,6 +31,7 @@ async def main():
     parser.add_argument("--branch-spec", help="Repo-relative JSON with project_summary, diff_intent and focus for this checkpoint")
     parser.add_argument("--plan-file", action="append", help="Review these repo-relative files instead of the original emulator packet")
     parser.add_argument("--context-file", help="Repo-relative file describing current review context")
+    parser.add_argument("--stakes", help="Explicit stakes for a scoped contract amendment")
     args = parser.parse_args()
     if bool(args.base_ref) != bool(args.branch_spec):
         parser.error("A branch review requires both --base-ref and an explicit --branch-spec")
@@ -51,6 +52,7 @@ async def main():
         "focus": "Find only substantive in-scope delivery gaps, dependency cycles, untestable acceptance, circular oracles, false-green escape routes, unsupported runtime assumptions, or disproportionate governance. Check whether a fresh execution agent can deliver end to end. Cite document and section/line. Limit to the most consequential findings; no speculative hardening or unlimited review machinery.",
     }
     tool_name = "critique_plan"
+    if args.stakes:request['stakes']=args.stakes
     if args.context_file:request['context']=(repo/args.context_file).read_text()
     if args.base_ref:
         spec=json.loads((repo/args.branch_spec).read_text())
@@ -61,6 +63,7 @@ async def main():
             isolate=False,converge=False,class_closure=False,round=1,engine=args.engine,effort='medium',web_search=False,
             stakes='Trusted single-user local MIDI-only development utility on Ubuntu 20.04 WSL. Risks are misleading tests, native runtime mismatch and local project damage. No financial system, hostile users, physical hardware certification or mandatory audio support.',
             **spec)
+        if args.stakes:request['stakes']=args.stakes
         if args.context_file:request['project_summary']+='\n'+(repo/args.context_file).read_text()
         packet+=subprocess.check_output(['git','diff','--no-ext-diff',args.base_ref,'HEAD'],cwd=repo,text=True)
     if args.question_file:

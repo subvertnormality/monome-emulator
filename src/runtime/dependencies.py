@@ -20,6 +20,22 @@ def verify_install(install):
             raise ContractError('changed_binary','Runtime binary differs: '+name)
     if install.get('interpreted_files')!=runtime_content(install['source']):
         raise ContractError('changed_runtime','Installed Lua/SuperCollider source differs; rebuild a clean candidate')
+    crow=install.get('experimental',{}).get('crow')
+    if bool(crow)!=('crow_host' in install['binaries']):
+        raise ContractError('changed_runtime','Crow profile and binary must be identified together')
+    if crow:verify_crow(crow,Path(crow['manifest'].get('serial_path',ROOT/'src/devices/crow_host/serial.lua')))
+
+def verify_crow(profile,adapter):
+    source=Path(profile['source'])
+    bound=profile['manifest'].get('lua_files')
+    if bound is not None and bound!=profile['lua_files']:
+        raise ContractError('changed_runtime','Crow Lua identity differs from validated host build')
+    observed={p.relative_to(source).as_posix():hashlib.sha256(p.read_bytes()).hexdigest()
+              for p in sorted((source/'lua').glob('**/*.lua' if bound is not None else '*.lua'))}
+    if observed!=profile['lua_files']:
+        raise ContractError('changed_runtime','Crow Lua source differs from candidate')
+    if hashlib.sha256(Path(adapter).read_bytes()).hexdigest()!=profile['manifest']['adapter']['serial.lua']:
+        raise ContractError('changed_runtime','Crow serial adapter differs from candidate')
 
 def command(args,cwd,log=None,env=None):
     result=subprocess.run(args,cwd=cwd,env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)

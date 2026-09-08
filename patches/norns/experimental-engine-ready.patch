@@ -1,0 +1,10 @@
+--- a/sc/core/CroneEngine.sc
++++ b/sc/core/CroneEngine.sc
+@@ -24,6 +24,7 @@
+ 		context.postln;
+ 		fork {
+ 			this.alloc;
++			Crone.server.sync;
+ 			doneCallback.value(this);
+ 		};
+ 	}

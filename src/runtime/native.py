@@ -28,7 +28,10 @@ class NativeBackend:
     def __init__(self,directory,config):
         self.directory=Path(directory); self.config=config
         self.processes=[]; self.logs=[]; self.closed=False
+        self.crow_fds=[]
+        self.crow_capture=None
         self.errors=[]; self.absent=[]; self.ready=False; self.sequence=0; self.acks={}
+        self.sc_log_offset=0; self.sc_log_partial=b''
         self.schedule_responses={}; self.input_schedule=None
         self.frame_revision=0; self.grid_revision=0; self.frame=bytes(32768); self.grid=[0]*128
         self.saved_frame=None
@@ -127,7 +130,24 @@ class NativeBackend:
         # The native keyboard configuration is a declared layout, not a missing file.
         (dust/'data/system.kbd_layout').write_text("return 'us'\n")
         scconfig=self.directory/'sclang.yaml'
-        scconfig.write_text('includePaths:\n  - '+str(self.native/'sc/core')+'\nexcludePaths: []\npostInlineWarnings: false\n')
+        sc_paths=[str(self.native/'sc/core')]
+        sc_exclusions=[]
+        # Optional engines belong to the selected, identified code tree. Never
+        # search the user's global SC extensions or another session's apps.
+        if self.config['runtime_identity'].get('experimental',{}).get('status')=='audio-feasibility-only':
+            sc_paths.append(str(runtime_dust/'code'))
+            from automation.identity import APPLICATION_EXCLUDED_DIRS
+            seen=set()
+            for current,dirs,_ in os.walk(dust/'code',followlinks=True):
+                real=Path(current).resolve()
+                if real in seen:dirs[:]=[];continue
+                seen.add(real)
+                for name in dirs:
+                    if name in APPLICATION_EXCLUDED_DIRS:
+                        sc_exclusions.append(str(runtime_dust/'code'/Path(current).relative_to(dust/'code')/name))
+                dirs[:]=[d for d in dirs if d not in APPLICATION_EXCLUDED_DIRS]
+        scconfig.write_text('includePaths:\n'+''.join('  - '+json.dumps(p)+'\n' for p in sc_paths)+
+                            'excludePaths: '+json.dumps(sc_exclusions)+'\npostInlineWarnings: false\n')
         ports=free_ports(5)
         self.ports=dict(zip(['matron','crone','sclang','scsynth','remote'],ports))
         self.env=dict(os.environ,HOME=str(self.alias),SDL_VIDEODRIVER='dummy',QT_QPA_PLATFORM='offscreen',
@@ -136,6 +156,14 @@ class NativeBackend:
             NORNS_EMU_CRONE_PORT=str(self.ports['crone']),NORNS_EMU_MATRON_PORT=str(self.ports['matron']),
             NORNS_EMU_SC_PORT=str(self.ports['scsynth']),NORNS_EMU_MIDI_PORTS='\n'.join(self.midi_config['ports']))
         self.env.pop('NORNS_EMU_RANDOM_SEED',None)
+        self.env.pop('NORNS_EMU_CROW_PATH',None)
+        self.env.pop('NORNS_EMU_CROW_TRACE',None)
+        self.env.pop('NORNS_EMU_CROW_II_TRACE',None)
+        self.env.pop('NORNS_EMU_CROW_CAPTURE_FD',None)
+        self.env.pop('NORNS_EMU_CROW_CAPTURE_DIRECTORY',None)
+        self.env.pop('NORNS_EMU_SCLANG_PORT',None)
+        if self.config['runtime_identity'].get('experimental',{}).get('status')=='audio-feasibility-only':
+            self.env['NORNS_EMU_SCLANG_PORT']=str(self.ports['sclang'])
         self.env.pop('NORNS_EMU_CLOCK',None)
         if self.clock_mode!='real-time':self.env.update(NORNS_EMU_CLOCK=self.clock_mode,TZ='UTC')
         if self.config.get('random_seed') is not None:self.env['NORNS_EMU_RANDOM_SEED']=str(self.config['random_seed'])
@@ -163,11 +191,51 @@ class NativeBackend:
         self.wait_log('crone','entering main loop',10)
         self.launch('sclang',['sclang','-D','-u',str(self.ports['sclang']),'-l',str(self.directory/'sclang.yaml')])
         self.wait_log('sclang','AudioContext: initPolls',40)
+        self.launch_crow()
         self.launch('matron',['stdbuf','-oL','-eL',str(self.native/'build/matron/matron'),
             '-l',str(self.ports['matron']),'-c',str(self.ports['crone']),'-e',str(self.ports['sclang']),'-o',str(self.ports['remote'])],bridge=True)
+    def launch_crow(self):
+        install=self.config['runtime_identity']
+        binary=install['binaries'].get('crow_host')
+        if not binary:return
+        import pty,tty
+        profile=install['experimental']['crow'];source=Path(profile['source'])
+        adapter=Path(profile['manifest'].get('serial_path',ROOT/'src/devices/crow_host/serial.lua'))
+        from .dependencies import verify_crow
+        verify_crow(profile,adapter)
+        master,slave=pty.openpty();self.crow_fds=[master,slave];tty.setraw(slave)
+        self.env['NORNS_EMU_CROW_PATH']=os.ttyname(slave)
+        self.env['NORNS_EMU_CROW_TRACE']='1'
+        if profile['manifest'].get('ii_protocol')==1:
+            self.env['NORNS_EMU_CROW_II_TRACE']=str(self.directory/'crow-ii.jsonl')
+        logfile=open(self.directory/'crow.log','w');self.logs.append(logfile)
+        capture_child=None
+        if profile['manifest'].get('capture_protocol')==1:
+            from .crow_capture import CrowCapture
+            parent,capture_child=socket.socketpair(socket.AF_UNIX,socket.SOCK_SEQPACKET)
+            directory=self.directory/'crow-captures';directory.mkdir()
+            self.crow_capture=CrowCapture(parent,directory)
+            self.env['NORNS_EMU_CROW_CAPTURE_FD']=str(capture_child.fileno())
+            self.env['NORNS_EMU_CROW_CAPTURE_DIRECTORY']=str(directory)
+        process=subprocess.Popen([binary['path'],str(source),str(adapter),'--serial'],
+            cwd=self.directory,env=self.env,stdin=master,stdout=master,stderr=logfile,start_new_session=True,
+            pass_fds=(capture_child.fileno(),) if capture_child else ())
+        if capture_child:capture_child.close()
+        self.processes.append(('crow',process))
     def check_processes(self):
         for name,process in self.processes:
             if process.poll() is not None: raise ContractError('backend_dead',name+' exited '+str(process.returncode)+'; '+str(self.directory/(name+'.log')))
+        # SC language and synth-server errors can leave both processes alive.
+        # Surface them through the same health/action failure contract as Lua.
+        path=self.directory/'sclang.log'
+        if path.exists():
+            with path.open('rb') as log:
+                log.seek(self.sc_log_offset); chunk=log.read();self.sc_log_offset=log.tell()
+            lines=(self.sc_log_partial+chunk).split(b'\n');self.sc_log_partial=lines.pop()
+            for line in lines:
+                message=line.decode('utf-8',errors='replace').strip()
+                if message.startswith(('ERROR:', 'FAILURE IN SERVER', "warning: didn't find engine:")):
+                    if not self.errors:self.errors.append(dict(code='audio_engine_error',message=message+'; '+str(path)))
         if self.errors: raise ContractError(self.errors[0]['code'],self.errors[0]['message'])
     def receive(self):
         try:
@@ -429,6 +497,10 @@ class NativeBackend:
         return result
     def close(self):
         if self.closed: return
+        capture_error=None
+        if self.crow_capture and self.crow_capture.active is not None:
+            try:self.crow_capture.cancel(self.crow_capture.active)
+            except Exception as error:capture_error=str(error)
         cleanup=[]
         # Stop clients before their JACK server. Simultaneous termination can
         # deadlock JACK shutdown and leave its finite server registry occupied.
@@ -464,6 +536,10 @@ class NativeBackend:
         if hasattr(self,'reader'): self.reader.join(timeout=1)
         self.events.close()
         for logfile in self.logs: logfile.close()
+        if self.crow_capture:self.crow_capture.connection.close()
+        for fd in self.crow_fds:os.close(fd)
+        self.crow_fds=[]
         if hasattr(self,'alias') and self.alias.is_symlink(): self.alias.unlink()
-        unexpected=[c for c in cleanup if c['returncode'] not in ((0,-signal.SIGTERM) if c['service']=='sclang' else (0,))]
+        unexpected=[c for c in cleanup if c['returncode'] not in ((0,-signal.SIGTERM) if c['service'] in ('sclang','crow') else (0,))]
         if unexpected: raise ContractError('cleanup_failed','Unexpected native shutdown exits: '+json.dumps(unexpected))
+        if capture_error:raise ContractError('cleanup_failed','Crow capture cleanup failed: '+capture_error)

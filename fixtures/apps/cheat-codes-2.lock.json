@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "status": "opt-in audio feasibility fixture; not full compatibility acceptance",
+  "application": {
+    "url": "https://github.com/dndrks/cheat_codes_2.git",
+    "commit": "7134bd5b275ffc650210742715d277b6d8f3b927",
+    "code_directory": "cheat_codes_2",
+    "entrypoint": "cheat_codes_2.lua",
+    "submodules": [{"path": "lib/nb", "url": "https://github.com/sixolet/nb.git", "commit": "2dac055c06bc516b92995d0ba7b0c4d9f6593e26"}]
+  },
+  "requirements": {
+    "norns_update_minimum": "250406",
+    "engine": "PolyPerc",
+    "audio": ["softcut", "amplitude polls", "buffer file IO", "phase/render callbacks"],
+    "optional": ["arc", "Crow/ii", "n.b. players", "OSC controllers", "zxcvbn/lib/aubiogo/aubiogo onset helper"]
+  }
+}

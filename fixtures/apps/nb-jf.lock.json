@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "fixture": "nb-jf",
+  "install_by_default": false,
+  "sources": {
+    "nb_jf": {
+      "url": "https://github.com/sixolet/nb_jf.git",
+      "commit": "fc0922feb5f8e91f7732602a3b99716bf7099e78",
+      "submodules": [],
+      "license_status": "No root licence file found. External opt-in fetch only; do not redistribute source."
+    }
+  }
+}

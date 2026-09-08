@@ -1,0 +1,40 @@
+{
+  "started_at": "2026-09-08T12:22:58.279801+00:00",
+  "packet_sha256": "f69b2626be7aaed909910fa86c9cbd15f3387d5df0e82008a8f7dc5ddcceb30e",
+  "files": [
+    "docs/delivery/AUDIO.md"
+  ],
+  "tool": "query",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator",
+    "engine": "codex",
+    "question": "Please perform the single focused follow-up allowed by the local runbook.\nReview only the two substantive A00 scope findings and their implementation:\nrecorded audio cannot pass through live-input monitoring, and loaded engine\nsources are verified before startup. Read AUDIO.md, A00-triage.md,\nscripts/build_audio_candidate.py, tests/audio_feasibility.py,\ntests/audio_jack_probe.c and fixtures/probes/audio-softcut/audio-softcut.lua.\nCheck whether those fixes close the findings, and report a remaining substantive\ngap if one exists. Context: trusted single-user experimental feasibility, pinned\nofficial runtime, unchanged default installation, no hardware acceptance. Do not\nrequire the later supported API or full cheat codes 2 workflow scope in A00.\n",
+    "files": [
+      {
+        "path": "docs/delivery/AUDIO.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/reviews/A00-triage.md",
+        "reason": "Findings and fixes"
+      }
+    ],
+    "web_search": false,
+    "effort": "medium"
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "Both fixes close the two substantive findings for A00\u2019s experimental scope. I found no remaining substantive gap in those fixes.\n\n- **Recording bypass:** `audio-softcut.lua:4\u20136` disables engine output and monitoring; line 29 clears the entire recording channel. `audio_feasibility.py:154\u2013166` waits for injection to finish before separately capturing playback, checks the saved buffer, and requires disabled recording to produce silence and fail the tone oracle. `audio_jack_probe.c:86` closes the injector\u2019s JACK client before exit.\n- **Engine identity:** `build_audio_candidate.py:28,41` copies official engines into the hashed `sc/core` tree. `native.py:44\u201361` verifies installation identity before launching services; line 127 includes that tree. `dependencies.py:21\u201322` rejects changed interpreted sources. The disposable TestSine mutation exercises this rejection (`audio_feasibility.py:113\u2013125`).\n- **Retained evidence:** `artifacts/audio/20260908-132159/report.json` passes both checks. Recomputing its WAV metrics confirmed 330 Hz playback and saved-buffer tone energy fractions above 0.9995, with disabled-recording RMS exactly zero on both channels.\n\n**CONFIDENCE: High.** I inspected code, git history and retained audio; I could not rerun native startup in this read-only environment.\n\n---\n_paranoia-local \u00b7 engine=codex \u00b7 session_ref=`01a080f8-baed-7282-a3df-a51f6d4b4e57` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "status": "returned",
+  "finished_at": "2026-09-08T12:24:09.403022+00:00"
+}
