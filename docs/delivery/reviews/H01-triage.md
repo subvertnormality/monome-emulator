@@ -28,3 +28,4 @@ limit.0021). Native desktop223330 failed explicitly on startup: JACK reports
 110us scheduling xrun, helper jack_faults1/underflows0; all other services exited
 normally and owned processes reaped. One fresh run pending, no fault suppression.
 Strict native failures223531 passed all3 scenarios with exact service exits and private daemon0. Desktop223421 passed10. Top-level24 tests passed. Both major findings fixed; focused review pending.
+Focused follow-up01a082f4-2e55-7a62-b9fc-b2c306271401 confirms both major gaps closed, no substantive remaining issue in552e4a1. Review budget complete (one critique, one focused query). Residuals remain recorded; admission is scoped opt-in desktop support.

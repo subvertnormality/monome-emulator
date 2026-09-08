@@ -15,7 +15,7 @@
     "Stage2 reviewed, admitted and merged to main with post-merge native checks"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "H01 review complete session01a082eb-1578-7722-a282-0505faf28671; 2majors accepted fixed uncommitted, triageH01-triage.md. Exact per-service exit tests+private daemon exit; continuity bothchannels through tail, initial250ms only; tests2pass reject25sampleinterior/taildropouts andothercrashes. Nonfiniteblockpublication fixed. Candidate desktop-tools-04. Windows actual allboundaries PASS223232, retained221650 continuity oracle explicitly rejects residual.15646 limit.0021. Native desktop_audio.py currently running (inspect latest toolhandle/report). Next strict failure suite, recordevidence, commit fixes and focusedfollowup then mergeH01 beforeH02/H03. Otherstate/main unchanged. No originalclickssolved claim.",
+  "next_action": "H01 review complete bothmajorsclosed followup01a082f4-2e55-7a62-b9fc-b2c306271401. Candidate desktop-tools-04 admittedoptin with retained221650dropout/223330startupxrun. Finaldocscommit andmainmerge pending, recheckmainstatehash. Commit/mergeH01beforeH02Maiden. Alltest/reviewhandles terminal. EvidenceH01.md andH01-evidence.json. No defaultpromotion.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",

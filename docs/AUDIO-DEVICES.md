@@ -122,7 +122,7 @@ implied. See [arc evidence](delivery/completions/P03-progress.md).
 
 ## Direct desktop audio candidate
 
-H01 is being validated; it has not yet completed integration review. Build the
+H01 is reviewed for opt-in use on the tested WSL/Windows path. Build the
 current audio candidate as above, then add its optional desktop route:
 
 ```sh
@@ -145,3 +145,11 @@ upstream chime is preserved. This is separate from the earlier click investigati
 Actual engine output has been measured at the WSLg sink and the Windows WASAPI
 render endpoint. Physical speaker output and macOS have not been measured.
 End-to-end interactive latency remains unmeasured for this desktop route.
+
+A retained Windows endpoint capture contained a 25-sample dropout during concurrent
+development work. Later bounded captures pass, but its cause remains unresolved.
+JACK scheduling overruns fail explicitly; a 110 microsecond startup overrun was
+observed and cleaned up. This non-realtime host path cannot promise uninterrupted
+output under arbitrary load. TestSine checks both channels but does not prove
+stereo channel order because its signal is duplicated mono.
+
