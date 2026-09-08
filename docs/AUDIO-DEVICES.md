@@ -2,7 +2,7 @@
 
 These features use the pinned official norns/JACK/SuperCollider runtime in the
 existing Ubuntu 20.04 WSL environment. Tranche-1 audio/Crow support is admitted
-for opt-in use; the newer sampler/arc additions are under review. The default
+for opt-in use, along with the tested sampler/arc subset. The default
 installation is not replaced by these commands.
 
 From the repository directory inside WSL, after the normal locked runtime setup:
@@ -90,7 +90,7 @@ loops overview to select rate, then use E2 to change it. Live buffer 1 recording
 is toggled at `(16,7)` when that buffer is focused. Automated input injection
 uses session-data WAV files; this is not physical microphone/device support.
 Collection save and fresh-session restoration also have automated coverage;
-broader-tranche review remains pending. See
+the tested subset is admitted for opt-in use. See
 [sampler evidence](delivery/completions/A03-sampler-controls.md).
 
 `--audio-directory /path/to/audio` (Python: `audio_directory=...`) imports a
@@ -116,6 +116,6 @@ arc has keys. LED levels and intensity come from the script's official arc API.
 Disconnect/reconnect uses the real native device callbacks and releases held
 keys. Automation uses `arc_delta`, `arc_key` and `arc_connection`; observations
 include four arrays of 64 LEDs and arc device metadata. Arc is absent by default.
-Native and Windows Chromium checks have passed; broader-tranche admission and
-cheat codes arc workflow coverage remain pending. No physical USB support is
+Native, Windows Chromium and cheat codes arc window-control checks have passed;
+the tested subset is admitted for opt-in use. No physical USB support is
 implied. See [arc evidence](delivery/completions/P03-progress.md).

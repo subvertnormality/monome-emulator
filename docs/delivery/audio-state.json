@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "current_card": "Stage2 focused follow-up ready",
+  "current_card": "Stage2 admitted; main integration pending",
   "status": "in_progress",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
@@ -8,10 +8,13 @@
     "A00 audio feasibility",
     "A01 tested native audio and continuous browser monitoring",
     "P01/P02 tested virtual Crow CV/input/clock/JF subset",
-    "tranche1 committed, reviewed and merged to main"
+    "tranche1 committed, reviewed and merged to main",
+    "A02 generic sampler services and explicit audio file errors",
+    "A03 unchanged cheat codes sampler recording and collection persistence",
+    "P03 native/browser virtual arc and optional app integration"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "Reviewfixes completewithfocusednative/browserproof, allregressionsgreen. Firstcontractsrunfailedonlysource_changed becauseeditingtestduringrun (manifest e9c8808719454b93bd073865a91398de), retained. Frozenrerun62738 passed68tests198.373sec logreview-fixes-contracts-02; top22pass. AllwarnedPIDs gone review-fixes-process-check.json. Normalbrowser5pass browser203413; strengthenedslowlease2pass203150; nativedeadlines3pass202634; normalnativearc8pass203035. Allhandles terminal. Next commitreviewfixesthen ONEfocusedParanoiaquery600secCodexmedium using reviews/A02-A03-P03-followup.md andtriage, originalreviewref01a08272-9f3e-7df1-b8ff-2729c4b23372. Capture output, resolve anyremaining substantiveissues beforeadmission/merge. No codeeditswhileevidence runs. Stage2notmerged; stage3queued; olddemo andmainother-taskstate untouched.",
+  "next_action": "Stage2 admitted scopedoptin after reviewfixesabef865/3b94aed/dc4f086 andallrequiredchecks. Finalreviewcaseownedemptyrelease exactguard+4nativecases pass204420; nofindingswaived, tworeviewcallscomplete. Next mergeaudio-monitor fastforward main afterconfirmingstatehash14f3157de699e4d3fa946b3215a82ecc8be0be09333f816983ce9186adabb990 andmainHEADf301e76; preserveother-taskstatebytes/userdemo/worktrees/defaultinstall. Runmerged main generic native arcfixture smoke againstretainedarc-tools-01 (ownpathcrossroot), recordintegrationresult. Then stage3DESKTOPH00eligible; readrecordeddocs/references beforeimplementation. Allreview/testhandles terminal; no newownedaudio/buildlive.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",
@@ -124,7 +127,7 @@
   },
   "desktop_queue": {
     "contract": "docs/delivery/DESKTOP.md",
-    "status": "queued_after_mosaic_and_broader_scripts",
+    "status": "eligible_after_stage2_main_integration",
     "order": [
       "Mosaic reliable audio/devices and clicks",
       "broader scripts including cheat codes 2",
@@ -158,8 +161,8 @@
     "merged_implementation": "4b7ab6b"
   },
   "broader_tranche": {
-    "status": "in_progress",
-    "review": "pending",
+    "status": "admitted-opt-in-integration-pending",
+    "review": "docs/delivery/reviews/A02-A03-P03-triage.md",
     "softcut_services": "artifacts/audio/softcut-services-20260908-181251/report.json",
     "softcut_sequence": "artifacts/audio/softcut-sequence-20260908-180555/report.json",
     "softcut_errors": "artifacts/audio/softcut-file-errors-20260908-180918/report.json",
@@ -175,11 +178,12 @@
       "docs/delivery/completions/A03-read-bounds.md",
       "docs/delivery/completions/A03-sampler-controls.md",
       "docs/delivery/completions/A03-persistence-progress.md",
-      "docs/delivery/completions/P03-progress.md"
+      "docs/delivery/completions/P03-progress.md",
+      "docs/delivery/completions/A02-A03-P03.md"
     ],
-    "sampler_candidate": ".runtime/sampler-tools-01/installation.json",
+    "sampler_candidate": ".runtime/arc-tools-01/installation.json",
     "sampler_playback": "artifacts/audio/cheat-codes-sampler-20260908-184824/report.json",
-    "sampler_scope": "Unchanged external app, no Crow: file picker, pad/loop, loop-end editing, pitch rates, asymmetric reverse, actual live recording and repeated retained playback after input disconnect. Source identity and cleanup pass. Persistence/arc/review remain; not full A03 admission.",
+    "sampler_scope": "Unchanged opt-in app with no Crow: sample/pad/loop/rate/reverse, live recording, collection save/fresh-session load and optional arc window control. Actual PCM, source preservation and cleanup verified. Scoped admission A02-A03-P03.md.",
     "sampler_rates": "artifacts/audio/cheat-codes-sampler-20260908-185127/report.json",
     "sampler_reverse": "artifacts/audio/cheat-codes-sampler-20260908-185546/report.json",
     "sampler_live_recording": "artifacts/audio/cheat-codes-record-20260908-185756/report.json",
@@ -190,6 +194,7 @@
       "artifacts/audio/cheat-codes-record-20260908-192015/report.json",
       "artifacts/audio/cheat-codes-record-20260908-192326/report.json"
     ],
-    "arc_status": "native patch generated and C compile-check passed; public/runtime/browser integration pending"
+    "arc_status": "native/browser/optional unchanged cheat codes window-control passed; reviewed opt-in subset",
+    "final_deadlines": "artifacts/arc/deadlines-20260908-204420/report.json"
   }
 }
