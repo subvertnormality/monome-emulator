@@ -1,12 +1,11 @@
 # Virtual MIDI connection lifecycle
 
-Status: required implementation, not a supported capability yet. Owner: C05/C10,
-with generic conformance and C16 checks before Mosaic hot-plug acceptance.
-
-The current native bridge creates named MIDI devices at startup and accepts
-input for their fixed slots. `NativeRuntime.action` supports grid connection
-changes but has no MIDI connection action. A disconnected-port Lua spy test
-does not establish real norns device removal or reconnection behavior.
+Status: implemented by locked patch 0013 and validated in the hot-plug delivery
+worktree. Real-time and controlled native lifecycle/fragment/held-note tests pass;
+the two Codex findings have native baseline/fix evidence and a closed follow-up.
+See `../delivery/completions/C05-hotplug-progress.json`. Main checkout integration
+and Mosaic panic hot-plug acceptance remain; full controlled-time admission is
+separate. The following contract remains the implementation/acceptance reference.
 
 Add a generic `midi_connection` action with a configured port and a boolean
 connection state. Serialize it through the same native device-event queue as

@@ -17,6 +17,7 @@ action={'oneOf':[
  obj(dict(type=const('enc'),n=integer(1,3),delta=integer(-127,127))),
  obj(dict(type=const('grid'),x=integer(1,16),y=integer(1,8),state=integer(0,1))),
  obj(dict(type=const('grid_connection'),connected=dict(type='boolean'))),
+ obj(dict(type=const('midi_connection'),port=integer(1,16),connected=dict(type='boolean'))),
  obj(dict(type=const('midi'),port=integer(1,16),bytes=array(integer(0,255),1,4096),at_monotonic_ns=integer(0,10**20)),['type','port','bytes']),
  obj(dict(type=const('release_all'))),
 ]}

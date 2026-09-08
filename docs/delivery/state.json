@@ -3,7 +3,7 @@
   "updated": "2026-09-08",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "All current native/review processes terminal: matrix56912 Dpass Rfailed live-tail retention. Preserve failure081cb06ca7a4497da59c2c2a55d8ed55. Its native export has61813contiguous MIDI events, no native errors. Replace panic live MidiWindow data assertions with post-close full native-export validation using identified input and recorded after/cursor windows; keep existing live-tail loss detector unchanged for other cases. Follow established fractional c.finish()/offline assertion/results-finally pattern. Partition every native NoteOn/Off into panic or melody windows, reject extra outside events; panic exact2048offs perport or selected-button silence; melody note_pairs and literal4note phrase checks. Add missing/extra/wrong-port/outside-window fault contracts, then fresh M-PANIC003 D/R and focused Codex follow-up for capture gate+0046. After that add active-note test: quiet playing pattern, startpanic, wait until sweep passedpitch24, press MIDI24 while sweepstillactive, waitcompletion, Stop mustemit explicit NoteOff; finallyreleasekeyboard forcleanup. Do not claim new ownership bug withoutnativeproof: current note_off already sends fallback releases even withmissingcounts. Record/publish candidates0044/45/46 and navigation evidence whenvalidated; continue full manual/emulator scope.",
+  "next_action": "Publish reviewed codex/midi-hotplug branch, integrate into main preserving unrelated state/audio work and update default runtime record to new locked installation. Runtime locked01 and controlled-locked01 native lifecycle pass; both Codex findings closed. Next Mosaic native panic hotplug cases then full manual/emulator obligations. No active processes. See completions/C05-midi-hotplug.md and C05-hotplug-progress.json.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -5096,10 +5096,9 @@
     }
   },
   "active_execution_checkpoint": {
-    "status": "terminal-reviewed",
-    "native_session": 95523,
-    "review_session": 69035,
-    "next_action": "Publish interaction tests/manual clarification; implement R18 native MIDI hot-plug in isolated D/R runtime candidates with generic probes before Mosaic acceptance.",
+    "status": "terminal-candidate-in-progress",
+    "native_session": 83547,
+    "next_action": "Continue in isolated /home/andy/projects/monome-emulator-midi-hotplug branch codex/midi-hotplug. Add drop-evidence fault tests, held-note/reconnect/parser-fragment probes, broader conformance and Codex review before default promotion/Mosaic hot-plug testing.",
     "full_campaign_complete": false
   },
   "panic_validation": {
@@ -5174,5 +5173,63 @@
     "overlap_passes": 4,
     "review": "01a080f4-f7fd-7b00-b1ed-73d95c9d081e",
     "manual_clarification": "Panic sends Note Off sweeps; transport and scheduled voices continue."
+  },
+  "midi_hotplug_progress": {
+    "status": "candidate-basic-native-lifecycle-validated",
+    "worktree": "/home/andy/projects/monome-emulator-midi-hotplug",
+    "branch": "codex/midi-hotplug",
+    "base_revision": "319e3a077685db5d4f40027c3aa9bb53a6a18622",
+    "runs": [
+      {
+        "run_id": "0405b0560b534b719daf37ab79890031",
+        "clock_mode": "real-time",
+        "legacy": false,
+        "result_sha256": "e1d489702840fa2774b93e584a809dd2dd2966042071d22bbc885f5bfb843f00",
+        "passed": true
+      },
+      {
+        "run_id": "52677758be6e45f1b01a8b6a9f42364d",
+        "clock_mode": "controlled-experimental",
+        "legacy": false,
+        "result_sha256": "2c684cf8a2fb723b8eaf6d88fbe4c372cca2f560cb29e094bed3e3e0f8fe82b9",
+        "passed": true
+      },
+      {
+        "run_id": "7c80d1dbf9fa4e658ab9466c4edf7ef3",
+        "clock_mode": "real-time",
+        "legacy": true,
+        "result_sha256": "0469a3706722a53026f2c14728e5af4743ef0f405944ed7d1d793f95558f0a09",
+        "passed": true
+      }
+    ],
+    "real_time_install": "/home/andy/projects/monome-runtime-candidates/midi-hotplug-rt-03/installation.json",
+    "controlled_install": "/home/andy/projects/monome-runtime-candidates/midi-hotplug-d-03/installation.json",
+    "connection_contract_tests": 5,
+    "existing_schedule_contract_tests": 5,
+    "behavior": "Official Lua add/remove callbacks and stable virtual slots; disconnected retained sends suppressed; other port continues; scheduled events dropped at disconnected deadlines with explicit evidence; reconnect permits later events; legacy runtime rejects new action.",
+    "remaining": [
+      "Adversarial drop-evidence regressions",
+      "Held-note removal and repeated reconnect cases",
+      "Scheduled note fragments and SysEx parser reset",
+      "Broader generic conformance in both modes",
+      "Codex review and official-patch/default-install promotion",
+      "Mosaic native panic hot-plug cases"
+    ],
+    "failures_preserved": [
+      "cce1e11a4aed48379954a51cb5d40b07",
+      "7ccfff3e088e4ecaa192969117a448d7",
+      "843006255d06442a9313fabdb6aa02bb",
+      "a9aa011f9f80410b8a1ce063b3cbb7a9",
+      "bdf1af26a92042858315cf0f69af83dc"
+    ],
+    "host_note": "A JACK startup hit the shared server registry limit. Attempted stale-server recovery stopped during read-only ownership checks; no recovery server started and no registry entry was deleted. A live server later exited normally; subsequent probes passed. Concurrent audio work was preserved.",
+    "default_runtime_unchanged": true,
+    "full_campaign_complete": false
+  },
+  "midi_hotplug_checkpoint": {
+    "worktree": "/home/andy/projects/monome-emulator-midi-hotplug",
+    "branch": "codex/midi-hotplug",
+    "status": "reviewed-locked-runtime-validated-integration-pending",
+    "receipt": "docs/delivery/completions/C05-hotplug-progress.json"
   }
 }

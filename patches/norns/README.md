@@ -109,3 +109,16 @@ registration hook is unused in this standard runtime and only activated by the
 separately built controlled-clock overlay. Native generic queue/grid/MIDI/clock
 checks and Mosaic handoffs validate the adapter. Remove when an official native
 virtual MIDI transport supports the same scheduled arrival/cleanup contract.
+
+`0013-midi-connection-lifecycle.patch` models removal and reconnection of configured
+virtual MIDI slots through official native Lua lifecycle callbacks. Connection,
+input delivery and output emission share a serialized device boundary. Scheduled
+input keeps original deadlines and explicitly reports bytes dropped while absent;
+reconnection cannot replay missed events. Partial-message/running-status/SysEx
+state resets across attachments, with independent real-time bytes still delivered.
+Retained device storage prevents dangling queued pointers; disconnected sends
+produce no output. Generic D/R lifecycle, emitted-SysEx and held-note cases plus a
+separate forced concurrent-send regression cover the boundary. Test-only pauses
+are absent from this patch. Remove when upstream provides equivalent virtual MIDI
+connection lifecycle and ordered observation hooks. This does not replace clocks,
+musical logic, or any application API, and does not certify full controlled time.

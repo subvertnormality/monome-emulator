@@ -37,6 +37,9 @@ class NativeBackend:
         self.midi_config=configuration(config.get('midi_config'))
         self.capture=Capture(self.midi_config['ports'],self.midi_config['capture_limit'])
         self.midi_inputs=[Decoder() for _ in self.midi_config['ports']]
+        self.midi_connections=[True for _ in self.midi_inputs]
+        self.midi_connection_supported=False
+        self.midi_parser_gaps=[False for _ in self.midi_inputs]
         self.midi=self.capture.tail; self.midi_count=0; self.diagnostics={}
         self.held={}; self.condition=threading.Condition(); self.io_lock=threading.Lock()
         from devices.grid import GridInput
@@ -201,6 +204,17 @@ class NativeBackend:
                             self.condition.notify_all(); continue
                         if kind==11:item['logical_ns']=struct.unpack('=Q',payload[8:16])[0]
                         self.midi_count=self.capture.count; record.update(item)
+                    elif kind==18:
+                        if len(payload)!=5 or payload[0] not in (0,1) or not 0<=identifier<len(self.midi_inputs):
+                            raise ValueError('Invalid MIDI connection metadata')
+                        from devices.midi import Decoder
+                        connected=bool(payload[0]);sequence=struct.unpack('=I',payload[1:])[0]
+                        self.midi_connection_supported=True
+                        self.midi_connections[identifier]=connected
+                        if sequence:
+                            self.midi_inputs[identifier]=Decoder();self.midi_parser_gaps[identifier]=True
+                            self.capture.decoders[identifier]=Decoder()
+                        record.update(port=identifier+1,connected=connected,input_sequence=sequence,boundary='native-device-transition')
                     elif kind==12:
                         if len(payload)!=8 or self.clock_mode=='real-time':raise ValueError('Invalid controlled time report')
                         self.logical_ns=struct.unpack('=Q',payload)[0];record['logical_ns']=self.logical_ns
@@ -217,20 +231,32 @@ class NativeBackend:
                             if kind==15:self.input_schedule['cancelled']=count
                         self.schedule_responses[identifier]=response
                         record.update(response)
-                    elif kind in (14,17):
+                    elif kind in (14,17,19,20):
                         if len(payload)<25:raise ValueError('Short scheduled MIDI delivery')
-                        domain='logical' if kind==17 else 'monotonic'
-                        if (kind==17)!=(self.clock_mode!='real-time'):raise ValueError('Scheduled MIDI clock domain mismatch')
+                        domain='logical' if kind in (17,20) else 'monotonic'
+                        if (kind in (17,20))!=(self.clock_mode!='real-time'):raise ValueError('Scheduled MIDI clock domain mismatch')
                         index,port,intended,actual=struct.unpack('=IIQQ',payload[:24])
                         schedule=self.input_schedule; data=list(payload[24:])
-                        if schedule is None or schedule['schedule_id']!=identifier or index!=len(schedule['delivered']) or index>=len(schedule['events']):
+                        if schedule is None or schedule['schedule_id']!=identifier or index!=len(schedule['delivered'])+len(schedule['dropped']) or index>=len(schedule['events']):
                             raise ValueError('Scheduled MIDI delivery order/identity mismatch')
                         if schedule['events'][index]!=dict(port=port,bytes=data,**{'at_'+domain+'_ns':intended}):
                             raise ValueError('Scheduled MIDI input differs from accepted event')
-                        self.midi_inputs[port-1].feed(data)
+                        dropped=kind in (19,20)
+                        if dropped==self.midi_connections[port-1]:raise ValueError('Scheduled delivery contradicts MIDI connection state')
+                        ignored=[]
+                        if not dropped:
+                            # Only a previously accepted batch may contain a
+                            # fragment orphaned by an intervening disconnection.
+                            for byte in data:
+                                if self.midi_parser_gaps[port-1] and (byte<128 or byte==247):
+                                    ignored.append(byte);continue
+                                if 128<=byte<248:self.midi_parser_gaps[port-1]=False
+                                self.midi_inputs[port-1].feed([byte])
                         delivery=dict(index=index,port=port,bytes=data,**{'intended_'+domain+'_ns':intended,'actual_'+domain+'_ns':actual})
-                        schedule['delivered'].append(delivery);record.update(delivery)
-                        if len(schedule['delivered'])==len(schedule['events']):schedule['status']='completed'
+                        if dropped:delivery.update(dropped=True,reason='disconnected')
+                        if ignored:delivery['decoder_ignored_prefix']=ignored
+                        schedule['dropped' if dropped else 'delivered'].append(delivery);record.update(delivery)
+                        if len(schedule['delivered'])+len(schedule['dropped'])==len(schedule['events']):schedule['status']='completed'
                     elif kind==4: self.acks[identifier]=ns
                     elif kind==5:
                         item=dict(code='lua_error',message=payload.decode(errors='replace')); self.errors.append(item); record.update(item)
@@ -307,7 +333,7 @@ class NativeBackend:
                         if event['port']>len(candidates):raise ContractError('midi_port','Requested MIDI port is not configured')
                         candidates[event['port']-1].feed(event['bytes'])
                     self.input_schedule=dict(schedule_id=action['schedule_id'],status='submitting',
-                        events=copy.deepcopy(action['events']),delivered=[],cancelled=0)
+                        events=copy.deepcopy(action['events']),delivered=[],dropped=[],cancelled=0)
                 self.sequence+=1; sequence=self.sequence
                 self.events.write(json.dumps(dict(kind='input',sequence=sequence,type=kind,args=[action],monotonic_ns=time.monotonic_ns()))+'\n')
             if kind in (9,11):
@@ -348,18 +374,26 @@ class NativeBackend:
                 if not connected:
                     for held in list(self.grid_input.held.values()): self.query({'action':dict(held,state=0)})
                 self.send(6,int(connected)); self.grid_input.connected=connected
+            elif kind=='midi_connection':
+                if not self.midi_connection_supported:raise ContractError('unsupported','Runtime does not support MIDI connection changes')
+                port=action['port'];connected=action['connected']
+                if port>len(self.midi_inputs):raise ContractError('midi_port','Requested MIDI port is not configured')
+                if self.midi_connections[port-1]==connected:raise ContractError('midi_connection','MIDI port already has requested state')
+                self.send(12,port,int(connected))
             elif kind=='midi':
                 with self.condition:
                     if self.input_schedule and self.input_schedule['status'] in ('submitting','accepted'):
                         raise ContractError('schedule_busy','Cancel or finish scheduled MIDI before injecting immediate bytes')
                 port=action['port']
                 if port>len(self.midi_inputs): raise ContractError('midi_port','Requested MIDI port is not configured')
+                if not self.midi_connections[port-1]:raise ContractError('midi_disconnected','Requested MIDI port is disconnected')
                 candidate=copy.deepcopy(self.midi_inputs[port-1]); candidate.feed(action['bytes'])
                 if 'at_monotonic_ns' in action:
                     delay=(action['at_monotonic_ns']-time.monotonic_ns())/1e9
                     if delay<0 or delay>2: raise ContractError('midi_input_time','Scheduled MIDI input must be in the next two seconds on the backend monotonic clock')
                     time.sleep(delay)
                 self.send(7,port,action['bytes']); self.midi_inputs[port-1]=candidate
+                if candidate.status is not None or candidate.sysex is not None:self.midi_parser_gaps[port-1]=False
             elif kind in ('midi_schedule','midi_schedule_cancel'):self.schedule_input(action)
             elif kind=='advance':
                 if self.clock_mode=='real-time':raise ContractError('unsupported','advance requires explicit experimental controlled time')
@@ -380,11 +414,11 @@ class NativeBackend:
             result=dict(frame_revision=revision,grid_revision=self.grid_revision,state=dict(
               ready=self.ready,script=self.app_name,frame=dict(path=str(frame_path),width=128,height=64,format='BGRA8',
                 sha256=hashlib.sha256(frame).hexdigest(),pixels_base64=base64.b64encode(frame).decode()),grid=self.grid.copy(),midi=list(self.midi),midi_count=self.midi_count,
-              midi_capture=self.capture.state(),midi_ports=self.midi_config['ports'],
+              midi_capture=self.capture.state(),midi_ports=self.midi_config['ports'],midi_connections=self.midi_connections.copy(),midi_connection_supported=self.midi_connection_supported,
               held=list(self.held.values()),grid_device=dict(self.grid_device),diagnostics=dict(self.diagnostics),absent=self.absent[-64:]))
             result['state']['clock']=dict(mode=self.clock_mode,logical_ns=self.logical_ns if self.clock_mode!='real-time' else None,admitted=self.clock_mode=='real-time')
             result['state']['midi_input_schedule']=copy.deepcopy(self.input_schedule)
-            if payload.get('action',{}).get('type') in ('key','enc','grid','grid_connection','midi','advance'):
+            if payload.get('action',{}).get('type') in ('key','enc','grid','grid_connection','midi_connection','midi','advance'):
                 result['native_ack']=dict(self.last_native_ack)
         # A Windows-mounted filesystem can pause for tens of milliseconds.
         # Never hold the native event reader's condition during artifact I/O.
