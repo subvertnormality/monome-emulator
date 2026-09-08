@@ -1,0 +1,50 @@
+{
+  "status": "returned",
+  "request": {
+    "repo_path": "<emulator-worktree>",
+    "engine": "codex",
+    "effort": "medium",
+    "web_search": false,
+    "question": "Codex-only focused challenge/follow-up to01a07fe2-356c-7462-8b55-fb74e2a30de2. No edits. Preserve D20 thresholds and independence; seek the smallest sufficient solution, not a universal tracing platform. Important additional premise: these external Mosaic fixtures start from stopped fresh state with one identified backend grid/key transport submission. The existing generic native-events.jsonl records that submission in backend CLOCK_MONOTONIC immediately before socket.send, with sequence/id and actual action; native applied acknowledgement is separate. Test can DECLARE this submission as its intended immediate transport deadline q0, count all input/dispatch latency as scheduling error, and never use emitted MIDI to choose origin. A00 interactive acknowledgement remains separate; no claim of latency before backend submission. Mosaic external fixture (not emulator core) independently specifies its phase-preserving lattice immediate first pulse and subsequent period from requested fixed tempo; controlled/actualscheduler contracts establish literal pulse quantisation tables. Then u_i=q0+unrounded musical seconds and q_i=q0+declared native pulse_index*60/(tempo*96), t_i=backendmonotonic emission. Every note/release accounted, forcedStop bounded by input evidence; no clock-reference refitting. Incorrect native JACK time drift would INCREASE error against this fixed monotonic ideal, not be converted away. This is an independently declared input-origin musical deadline, not the first MIDI or actual coroutine-entry origin. Does this meet existing D20 for steady-tempo relative-phase fixtures, while generic scripts with global-grid sync, tempo/source transitions and native-clock-specific conformance still require separate mapping? Do not reject merely because it cannot solve arbitrary scripts: fixture-specific musical intent is explicitly external. Analyze m_lattice auto_pulse offset = clock.get_beats()%interval-interval before firstpulse; firstsync uses this offset, so under correct on-time processing later ticks preserve initial phase. A delayed firstregistration crossingperiod remains a measurable missing/late pulse, not corrected expectation. Need evaluate whether absolute backendsubmission q0 is a sound deadline with latency counted, or whether some hidden native phase term invalidates it even in fresh stopped steady-tempo fixture. If sound, name minimal generic source-bound transport evidence checks and falsification tests (shiftorigin, prependdecoyinput, delayedfirstresume, wrongtempophase). If not, demonstrate a concrete counterexample; no threshold weakening or reclassifying historical failures. Existing reviewed broad tracing recommendation remains for domains that need it; do not imply this narrower fixture solution completes full release.",
+    "files": [
+      {
+        "path": "artifacts/c16/runtime-origin-source/matron/src/clock.c",
+        "reason": "Reference and time domain"
+      },
+      {
+        "path": "artifacts/c16/runtime-origin-source/matron/src/clocks/clock_internal.c",
+        "reason": "Internal ideal ticks and published reference"
+      },
+      {
+        "path": "artifacts/c16/runtime-origin-source/matron/src/clocks/clock_scheduler.c",
+        "reason": "Native desired resume beats"
+      },
+      {
+        "path": "artifacts/c16/runtime-origin-source/lua/core/clock.lua",
+        "reason": "Initial coroutine resume and sync API"
+      },
+      {
+        "path": "artifacts/c16/runtime-origin-source/matron/src/jack_client.c",
+        "reason": "JACK time mapping"
+      }
+    ]
+  },
+  "input_sha256": "df9dad2768534478165f98e394d10e04fdf36b5d0ceb4fffb84985e320edb230",
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "**Yes\u2014under the stated fresh-state, fixed-tempo, phase-preserving fixture contract, backend submission \\(q_0\\) is a sound independent deadline origin for D20.** Input/dispatch delay remains scheduling error; no hidden constant native phase requires fitting the origin to MIDI or coroutine entry.\n\n- **Phase cancellation holds.** The candidate samples `offset = (clock.get_beats() % interval) - interval` before its immediate pulse, then calls `clock.sync(interval, offset)` ([candidate:158\u2013165](artifacts/c16/reentrant-stop-before.lua#L158)). Write the sampled beat as \\(b_0=kI+r\\). The scheduler\u2019s ceiling-plus-offset calculation and advancement loop select \\(b_0+I\\) for an on-time first registration; subsequent registrations advance from the stored desired beat ([clock_scheduler.c:44\u201354, 170\u2013181](artifacts/c16/runtime-origin-source/matron/src/clocks/clock_scheduler.c#L44)). `clock.run` resumes immediately ([clock.lua:24\u201329](artifacts/c16/runtime-origin-source/lua/core/clock.lua#L24)). Thus entry latency shifts actual execution relative to fixed \\(q_0\\); it does not justify shifting expectations. Registration crossing a period can skip a target, which must remain a late/missing-event failure.\n- **The timestamp boundary exists.** [native.py:261\u2013285](src/runtime/native.py#L261) records input sequence, type, arguments and monotonic timestamp before sending, separately retaining applied acknowledgement. Precisely, the timestamp precedes JSON serialization/log writing too: that overhead must also count. Native MIDI uses `CLOCK_MONOTONIC` at emission ([bridge patch:178\u2013201](patches/norns/0004-virtual-device-spike.patch#L178)), and receipt timestamps remain separate ([native.py:171\u2013174](src/runtime/native.py#L171)).\n- **Native clock imperfections remain observable.** Beat interpolation uses the published reference; internal ticks publish at actual wakeup time, while JACK time comes from frames/sample rate ([clock.c:57\u201361](artifacts/c16/runtime-origin-source/matron/src/clock.c#L57), [clock_internal.c:109\u2013140](artifacts/c16/runtime-origin-source/matron/src/clocks/clock_internal.c#L109), [jack_client.c:63\u201383](artifacts/c16/runtime-origin-source/matron/src/jack_client.c#L63)). These can cause residual error against your fixed monotonic ideal. They are not converted away\u2014although a particular disturbance can accidentally cancel another error, so \u201calways increases absolute error\u201d is too strong.\n- **This satisfies the origin design, not admission by itself.** D20 requires independently declared intent/deadlines/origin, every scheduled note/release, and unchanged 10/50/20 ms limits ([ACCEPTANCE.md:202\u2013221](docs/delivery/ACCEPTANCE.md#L202)). Commit `bdf97b6` introduced that wording and explicitly preserved historical failures.\n\nThe smallest sufficient evidence checks are:\n\n1. Bind runtime/build, bridge/backend, actual application source, fixture inputs and literal pulse tables to the run. **The upstream checkout lacks this offset** ([m_lattice.lua:146\u2013150](upstream/mosaic/lib/clock/m_lattice.lua#L146)); candidate identity is essential.\n2. Predeclare the triggering action ID and origin-selection rule; join its acknowledgement\u2019s native sequence to exactly one matching input record, checking actual key/grid arguments and successful application. Never select \u201cfirst input,\u201d acknowledgement time, or first MIDI.\n3. Verify fresh stopped lattice, fixed settled tempo/source, common monotonic domain, complete ordered capture, and absence of intervening reset/restart/source changes. Account for every note/release; tie forced Stop releases to identified Stop evidence and cleanup bounds.\n4. Freeze pulse indices independently of emissions; then apply the existing metric helper and exact data/count/order checks.\n\nRequired falsification tests: **shift origin** while retaining input evidence \u2192 reject the mismatch; **prepend unrelated input** \u2192 retain the identified transport origin; **delay first resume and first registration separately**, including crossing a period \u2192 unchanged deadlines and exposed lateness; **wrong tempo or pulse phase** \u2192 growing/constant residuals or contract rejection, never refitting. Use perturbations large enough to breach the unchanged thresholds.\n\nGlobal-grid scripts, tempo/source transitions and native-clock conformance still need their separate mapping. This narrower solution neither completes release nor reclassifies historical failures.\n\n**CONFIDENCE: High** for the scoped design; actual admission remains unverified until source-bound native runs and these falsification tests pass.\n\n---\n_paranoia-local \u00b7 engine=codex \u00b7 session_ref=`01a08003-98ce-72f0-876a-c64013958292` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "public_export": {
+    "raw_sha256": "817a2429540596460a295d11aecb1ec8117e40f7f020be413c1b84187886a29d",
+    "redaction": "Personal absolute paths replaced; raw retained in ignored artifacts."
+  }
+}

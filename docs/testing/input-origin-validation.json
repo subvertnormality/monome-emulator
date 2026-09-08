@@ -1,0 +1,84 @@
+{
+  "status": "scoped-native-fault-sensitivity-validated",
+  "decision": "01a08003-98ce-72f0-876a-c64013958292",
+  "scope": "Independent fixed-tempo relative-phase generic probe: exact20 ordered MIDI events, identified backend input origin, normal timing and three deliberate timing faults.",
+  "source_sha256": {
+    "src/runtime/native.py": "84816f1542f8588b69ec3d8553fba68ae81664885108f439dd5c34293ba84f59",
+    "src/automation/input_origin.py": "d628ebf3d5d52d8df306b41a95653188ae0abf46651b90dd50e2cd7e8b04d647",
+    "src/automation/scheduling_metrics.py": "9e272a2027fd4d219dae3a9eafdae8f11e63800a435dac7c3e1d4989fc1e05b9",
+    "tests/input_deadline_native.py": "b9dfac0255ff1738ef037433cb9030f5d8d517943b8ae24c31e972e8dfb1f8a7",
+    "fixtures/probes/input-deadline/input-deadline.lua": "14e4a63cfa8ffd114aa9b21ce752900eca648ab20486da09255cdb26939ec1e1"
+  },
+  "runs": [
+    {
+      "mode": "normal",
+      "run_id": "2f67e28b0ad64ed4a6bcec7466940ba9",
+      "manifest_sha256": "c56d742a9aad7740d2c21d993f8c042b857c6441a0e6f353089d75eb89af2541",
+      "identity_sha256": "e8119c5f1eacd7b320404257cee1630fcbac0573952bab0a32f7fedbb4fb324e",
+      "metrics": {
+        "count": 20,
+        "p99_absolute_error_ns": 1578328,
+        "maximum_absolute_error_ns": 1578328,
+        "final_phase_error_ns": 967291,
+        "within_event_profile": true
+      },
+      "input_to_applied_ns": 918016,
+      "shifted_origin_rejected": true,
+      "passed": true
+    },
+    {
+      "mode": "entry-delay",
+      "run_id": "9023e08daa054b239aed0ad921f94021",
+      "manifest_sha256": "7ae4d7d5baa938b440e2191a142141056ab42c72f7a61465113f1ca4fd59107c",
+      "identity_sha256": "4ca998acfbe0e9f32c944fadc333ccf055ce6c308eb813dee72279dfedd74ff6",
+      "metrics": {
+        "count": 20,
+        "p99_absolute_error_ns": 114540957,
+        "maximum_absolute_error_ns": 114540957,
+        "final_phase_error_ns": 91639514,
+        "within_event_profile": false
+      },
+      "input_to_applied_ns": 85896938,
+      "shifted_origin_rejected": true,
+      "passed": true
+    },
+    {
+      "mode": "registration-delay",
+      "run_id": "f79de898891d42838e277895023f028d",
+      "manifest_sha256": "feeb591ab744dc9e1c22cea23de6466f6efbaf79fea776b63126d33cf340b157",
+      "identity_sha256": "49e8c398a6a61dc47a5d9188a591e6d1c263ec89d692ba91e9268c8db039dfe4",
+      "metrics": {
+        "count": 20,
+        "p99_absolute_error_ns": 65185790,
+        "maximum_absolute_error_ns": 65185790,
+        "final_phase_error_ns": 64943332,
+        "within_event_profile": false
+      },
+      "input_to_applied_ns": 82858027,
+      "shifted_origin_rejected": true,
+      "passed": true
+    },
+    {
+      "mode": "wrong-tempo",
+      "run_id": "525acd664ce245e6b653139adc46b0ad",
+      "manifest_sha256": "4ebb3c2179ef8c524d04896354773feeb90deeb1eeb3968f4a82f6cd143fcf86",
+      "identity_sha256": "8ae36272bc2a9cca6de8f5d8061d0216e367fa0c2bca382d7c6932f9c5d68433",
+      "metrics": {
+        "count": 20,
+        "p99_absolute_error_ns": 398127584,
+        "maximum_absolute_error_ns": 398127584,
+        "final_phase_error_ns": 398127584,
+        "within_event_profile": false
+      },
+      "input_to_applied_ns": 563189,
+      "shifted_origin_rejected": true,
+      "passed": true
+    }
+  ],
+  "unit_tests": {
+    "input_origin": 4,
+    "scheduling_metrics": 4,
+    "startup_error_preservation": 3
+  },
+  "limitations": "Not Mosaic scheduling admission, not a universal norns clock mapping, not the45-second fractional suite, not the ten-minute profile. Historical failures remain failed. Native Linux not claimed; these runs used WSL."
+}

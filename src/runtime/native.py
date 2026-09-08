@@ -60,8 +60,14 @@ class NativeBackend:
             self.reader=threading.Thread(target=self.receive,daemon=True); self.reader.start()
             self.launch_services()
             self.await_ready()
-        except Exception:
-            self.close(); raise
+        except Exception as startup_error:
+            try:
+                self.close()
+            except Exception as cleanup_error:
+                code = startup_error.code if isinstance(startup_error, ContractError) else 'native_startup'
+                raise ContractError(code, str(startup_error) +
+                    '; cleanup also failed: ' + str(cleanup_error)) from startup_error
+            raise
     def prepare(self):
         if not self.config.get('script'): raise ContractError('script_required','Select an external script with --script')
         entry=Path(self.config['script']).absolute()
