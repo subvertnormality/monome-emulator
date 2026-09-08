@@ -56,3 +56,9 @@ Mosaic and player mods remain external, optional fixtures. Do not copy their
 source into the core. The default script API and conformance tests must work
 without them. Broader sampler/cheat codes 2 work follows verified tranche-1
 commit/merge; Maiden and optional Docker distribution follow that later tranche.
+
+Crow callback completion dispatch is bounded: at most 4,096 pending completions
+per output and 4,096 callbacks or 0.5 seconds per dispatch batch. Exceeding a bound
+fails explicitly, including a self-triggering chain of instant actions. Ordinary
+instant actions deliver their completion callback; asynchronous input/output
+callbacks service the ii queue without requiring a new serial command.

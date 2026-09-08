@@ -27,8 +27,11 @@ def verify_install(install):
 
 def verify_crow(profile,adapter):
     source=Path(profile['source'])
+    bound=profile['manifest'].get('lua_files')
+    if bound is not None and bound!=profile['lua_files']:
+        raise ContractError('changed_runtime','Crow Lua identity differs from validated host build')
     observed={p.relative_to(source).as_posix():hashlib.sha256(p.read_bytes()).hexdigest()
-              for p in sorted((source/'lua').glob('*.lua'))}
+              for p in sorted((source/'lua').glob('**/*.lua' if bound is not None else '*.lua'))}
     if observed!=profile['lua_files']:
         raise ContractError('changed_runtime','Crow Lua source differs from candidate')
     if hashlib.sha256(Path(adapter).read_bytes()).hexdigest()!=profile['manifest']['adapter']['serial.lua']:

@@ -31,7 +31,7 @@ def main():
         reset=b'''events=0
 input[1].mode('change',1,.1,'both');input[1].change=function() events=events+1 end
 input[2].mode('stream',.01);input[2].stream=function() events=events+1 end
-for i=1,4 do output[i].volts=i;output[i].done=function() error('stale done') end end
+for i=1,4 do output[i].action=to(i,1);output[i]();output[i].done=function() error('stale done') end end
 host_step(32);crow.reset();host_step(4800)
 host_input_set(1,2);host_input_step(4800);assert(events==0)
 for i=1,4 do assert(math.abs(output[i].volts)<.001);output[i]();output[i].done() end

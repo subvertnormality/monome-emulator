@@ -1,0 +1,44 @@
+{
+  "started_at": "2026-09-08T16:33:55.372870+00:00",
+  "packet_sha256": "9a85a641a39e87f176b72a1a3c85501150082dc61d35ea7fb6c07e2f1237fd0f",
+  "files": [
+    "docs/delivery/PLAN.md",
+    "docs/delivery/ACCEPTANCE.md",
+    "docs/delivery/RUNBOOK.md",
+    "docs/delivery/DECISIONS.md",
+    "docs/delivery/UPSTREAM.md"
+  ],
+  "tool": "critique_branch",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor",
+    "base_ref": "319e3a077685db5d4f40027c3aa9bb53a6a18622",
+    "head_ref": "HEAD",
+    "include_uncommitted": false,
+    "isolate": false,
+    "converge": false,
+    "class_closure": false,
+    "round": 1,
+    "engine": "codex",
+    "effort": "medium",
+    "web_search": false,
+    "stakes": "Trusted single-user local norns emulator with authorized audio and virtual Crow support. Risks: runtime mismatch, misleading signal tests, session cross-talk, process leaks and local project damage. No financial, hostile multi-tenant, physical hardware or hard-real-time certification. Queue desktop and broader scripts until tranche1 merged.",
+    "project_summary": "General-purpose trusted single-user norns/grid emulator on Ubuntu 20.04 WSL2. Official pinned monome runtime. This branch adds opt-in real audio and virtual Crow capabilities. Mosaic and unchanged player mods are external acceptance fixtures. Read docs/delivery/AUDIO.md, docs/AUDIO-DEVICES.md and docs/delivery/completions/A01-tranche1-candidate.md. Default MIDI installation remains unchanged. User explicitly requires verified tranche 1 commit and merge before broader scripts or desktop/Maiden/Docker work.",
+    "diff_intent": "Review the complete tranche-1 audio/Crow implementation against main: canonical identified experimental build; native engine readiness/default SC server adapters; identified external mods and session-local OSC; bounded real JACK WAV capture/injection; continuous opt-in browser PCM; Crow official ASL/CASL/Detect and ii encoder host with explicit supported subset, bounded serial/capture/trace and cleanup; optional real Mosaic DoubleDecker and JF acceptance. Historical cheat-codes boot feasibility and DESKTOP.md are queue context, not expanded script or desktop implementation claims.",
+    "focus": "Find substantive reproducible in-scope bugs, misleading acceptance or unsupported claims, source identity or source licensing omissions, runtime readiness/transport/drop issues, session data/process isolation or cleanup defects. Check public API error propagation, continuous browser playback and Crow reset/input/callback/ii bounds. Use actual code and recorded native results. No hostile multi-tenant security, physical hardware certification, finance, mandatory downstream JF DSP, or requests to implement queued Maiden/Docker. One bounded Codex medium review, no convergence. Prioritize blockers/major issues; avoid broad refactoring. Review does not itself prove tests. Give concrete file/line and minimal fixes. Preserve concurrent main docs/delivery/state.json edits. Do not edit files."
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "## What works\n\n- `ui/audio-stream.js:40` preserves resampling phase: `this.phase-=consumed`. The renderer keeps continuity across transport blocks; the retained browser report records `worstResidual: 0.00003605582369417201` (`artifacts/audio/browser-8209c64b13644d59896f8070c3a4db36/report.json:40`). This is inspected evidence, not a test rerun.\n- `scripts/crow_native_patch.py:15` copies received bytes into each event: `memcpy(ev->crow_event.line, ...)`. This fixes the shared-buffer ownership problem without replacing native Crow transport.\n- `src/runtime/audio_capture.py:51` rejects nonzero `xruns`, `nonfinite` and `server_dead` metrics before declaring completion. Capturing a WAV alone cannot produce a successful result.\n\n## What doesn't work\n\n- **[MAJOR] Enabling ii turns harmless CV diagnostics into fatal errors.** `src/devices/crow_ii_host/main.c:18` unconditionally sets `failed=1` for wrapped `printf`; line 20 does the same for `puts`. These wrappers apply to the entire combined host (`scripts/build_crow_host.py:33`), including official CASL\u2019s ordinary `printf(\"do nothing\\n\")` (`.runtime/crow-feasibility/crow/lib/casl.c:356`). Configure `output[1].action=adsr()`, trigger it, then release twice: the redundant release terminates the ii-enabled backend instead of preserving upstream behavior. Restrict fatal handling to actual error paths, retaining the queue-overflow negative test.\n\n- **[MAJOR] Instant ASL completion callbacks are silently lost.** `src/devices/crow_host/main.c:60` takes `counts[c]=done[c]` immediately before stepping, and line 63 dispatches only subsequent increments. Official CASL completes zero-duration actions synchronously through `L_queue_asl_done(index)` (`.runtime/crow-feasibility/crow/lib/casl.c:399`), so `output[1].action=to(5,0); output[1]()` increments the counter during the serial command, before the next snapshot. Voltage changes, but its registered `.done` callback never arrives. Retain pending completions across loop iterations and drain them with bounded dispatch; test an instant action through native Crow callbacks.\n\n- **[MAJOR] Asynchronous Crow callbacks do not drain ii commands.** During normal operation, `flush(L)` runs only after a received serial newline (`src/devices/crow_host/main.c:75\u201379`); input and output callbacks execute separately at lines 59\u201364. A Crow-side change callback calling `ii.jf.play_note(0,5)` therefore leaves its packet queued until another serial command arrives; repeated stream callbacks eventually overflow the queue. Official firmware calls `ii_leader_process()` every event-loop iteration (`.runtime/crow-feasibility/crow/main.c:86`). Service the queue independently of serial reception and test callback-generated packets without sending a follow-up command. Existing key-driven ii tests do not exercise this path.\n\n- **[MAJOR] Candidate composition can bless changed Crow Lua as pinned official source.** `scripts/build_audio_candidate.py:73` creates `lua_files` by hashing whatever currently occupies `crow_source/'lua'`, while line 30 verifies only the previously built executable. Editing `lua/output.lua` after building Crow but before building the audio candidate produces a manifest that retains the official pin and accepts the edited Lua at launch. This contradicts the claimed \u201ccanonical identified experimental build\u201d; `scripts/prepare_crow_runtime.py:20` has the same re-baselining behavior. Record Lua identities when validating/building Crow, then verify and carry those identities through composition instead of generating new expectations.\n\n## Risks\n\nNothing notable.\n\n## Gaps\n\nNothing notable.\n\n## Improvements\n\nNothing notable.\n\n---\n_paranoia-local \u00b7 engine=codex \u00b7 session_ref=`01a081de-87db-7723-b4dd-0382f7977dbc` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "status": "returned",
+  "finished_at": "2026-09-08T16:36:53.566786+00:00"
+}

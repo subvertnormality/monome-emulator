@@ -1,6 +1,7 @@
 """Compile official Crow CASL/slopes and pinned Lua for an isolated host probe."""
 import argparse, hashlib, json, shutil, subprocess
 from pathlib import Path
+from crow_source import pinned_lua_files
 ROOT=Path(__file__).resolve().parents[1]
 def main():
     p=argparse.ArgumentParser();p.add_argument('--source',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--ii-build',type=Path);a=p.parse_args()
@@ -10,6 +11,7 @@ def main():
         if subprocess.check_output(['git','rev-parse','HEAD'],cwd=source/folder,text=True).strip()!=pin:raise ValueError('Wrong Crow source revision')
         if subprocess.check_output(['git','diff','HEAD','--'],cwd=source/folder):raise ValueError('Modified Crow source')
     adapter=ROOT/'src/devices/crow_host'
+    lua_identity=pinned_lua_files(source)
     portable=out/'core';portable.mkdir()
     for name in ('detect.c','detect.h'):shutil.copyfile(source/'lib'/name,portable/name)
     files=[adapter/'main.c']+[source/'lib'/name for name in ['casl.c','slopes.c','shapes.c']]+[source/'submodules/wrDsp/wrBlocks.c']
@@ -35,7 +37,7 @@ def main():
     command[1:1]=ii_flags
     with (out/'build.log').open('w') as log:subprocess.run(command,stdout=log,stderr=subprocess.STDOUT,check=True)
     shutil.copyfile(adapter/'serial.lua',out/'serial.lua')
-    manifest=dict(input_protocol=1,serial_path=str(out/'serial.lua'),capture_protocol=1,pins=pins,source=str(source),command=command,portable_sources={f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in portable.iterdir()},binary_sha256=hashlib.sha256((out/'crow-host').read_bytes()).hexdigest(),
+    manifest=dict(lua_files=lua_identity,input_protocol=1,serial_path=str(out/'serial.lua'),capture_protocol=1,pins=pins,source=str(source),command=command,portable_sources={f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in portable.iterdir()},binary_sha256=hashlib.sha256((out/'crow-host').read_bytes()).hexdigest(),
                   adapter={str(f.relative_to(adapter)):hashlib.sha256(f.read_bytes()).hexdigest() for f in adapter.iterdir() if f.is_file()})
     if ii_manifest:
         manifest.update(ii_protocol=1,ii_build=ii_manifest,ii_adapter={f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in ii_adapter.iterdir() if f.is_file()})

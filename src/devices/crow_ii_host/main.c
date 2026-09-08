@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <string.h>
 #include <time.h>
 #include "ii.h"
 #include "l_ii_mod.h"
@@ -14,10 +15,23 @@ static FILE *ii_trace;
 static unsigned ii_packets;
 static uint8_t address,pullups;
 static void unsupported(const char *name){fprintf(stderr,"unsupported host ii operation: %s\n",name);failed=1;}
-int __wrap_printf(const char *format,...){
-    va_list args;va_start(args,format);int n=vfprintf(stderr,format,args);va_end(args);failed=1;return n;
+/* Pinned upstream error formats, not every printf: CASL release diagnostics
+ * and ii help are normal behavior. Keep diagnostics off the serial channel. */
+static void diagnostic(const char *text){
+    const char *errors[]={"I2C Failed to Init\n","queue full\n","leadRx failed %i\n",
+        "leadTx failed %i\n","ii_follow queue overflow\n","I2C_ERROR %i\n",
+        "ii_decode unmatched\n","no retval found\n","ii_lead failed\n",
+        "Casl* malloc!\n","getdynamic! wrong type\n"};
+    if(strncmp(text,"ERROR",5)==0)failed=1;
+    for(unsigned i=0;i<sizeof(errors)/sizeof(errors[0]);i++){
+        size_t n=strlen(errors[i]);
+        if(strcmp(text,errors[i])==0||(n&&strlen(text)==n-1&&strncmp(text,errors[i],n-1)==0))failed=1;
+    }
 }
-int __wrap_puts(const char *text){failed=1;return fprintf(stderr,"%s\n",text);}
+int __wrap_printf(const char *format,...){
+    va_list args;va_start(args,format);int n=vfprintf(stderr,format,args);va_end(args);diagnostic(format);return n;
+}
+int __wrap_puts(const char *text){diagnostic(text);return fprintf(stderr,"%s\n",text);}
 #ifndef CROW_HOST_II
 void Caw_printf(char *format,...){va_list args;va_start(args,format);vfprintf(stderr,format,args);va_end(args);failed=1;}
 #endif

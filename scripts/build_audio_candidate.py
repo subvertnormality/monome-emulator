@@ -26,6 +26,8 @@ def main():
     crow_manifest=None
     if args.crow_build:
         crow_build=args.crow_build.resolve();crow_manifest=json.loads((crow_build/'manifest.json').read_text())
+        from crow_source import verify_lua_files
+        crow_lua_identity=verify_lua_files(crow_manifest)
         binary=crow_build/'crow-host'
         if hashlib.sha256(binary.read_bytes()).hexdigest()!=crow_manifest['binary_sha256']:raise ValueError('Crow host changed')
         bridge=source/'matron/src/emu_bridge.c';before=bridge.read_text()
@@ -70,7 +72,7 @@ def main():
     if crow_manifest:
         crow_source=Path(crow_manifest['source'])
         install['experimental']['crow']=dict(source=str(crow_source),manifest=crow_manifest,
-            lua_files={str(f.relative_to(crow_source)):hashlib.sha256(f.read_bytes()).hexdigest() for f in (crow_source/'lua').glob('*.lua')})
+            lua_files=crow_lua_identity)
     (out/'installation.json').write_text(json.dumps(install, indent=2)+'\n')
     verify_install(install); print(out/'installation.json', flush=True)
 

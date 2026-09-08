@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <time.h>
 #include "casl.h"
-static int failed,done[4];
+static int failed,done[4],pending_done[4];
 static int invoke(lua_State *L,const char *name,int args);
 static int input_apply(uint32_t channel,float voltage);
 #include "capture.h"
@@ -16,7 +16,12 @@ void Caw_printf(char *text,...) { va_list args;va_start(args,text);vfprintf(stde
 #ifdef CROW_HOST_II
 #include "../crow_ii_host/main.c"
 #endif
-void L_queue_asl_done(int id) { if(id>=0&&id<4)done[id]++; }
+void L_queue_asl_done(int id) {
+    if(id>=0&&id<4){
+        if(pending_done[id]>=4096){fprintf(stderr,"Crow completion queue full\n");failed=1;return;}
+        done[id]++;pending_done[id]++;
+    }
+}
 static int channel(lua_State *L) { int n=luaL_checkinteger(L,1);luaL_argcheck(L,n>=1&&n<=4,1,"output must be 1..4");return n-1; }
 static int describe(lua_State *L) { int c=channel(L);luaL_checktype(L,2,LUA_TTABLE);lua_settop(L,2);casl_describe(c,L);return 0; }
 static int action(lua_State *L) { casl_action(channel(L),luaL_checkinteger(L,2));return 0; }
@@ -27,7 +32,7 @@ static int get(lua_State *L) { lua_pushnumber(L,casl_getdynamic(channel(L),luaL_
 static int state(lua_State *L) { lua_pushnumber(L,S_get_state(channel(L)));return 1; }
 static int completed(lua_State *L) { lua_pushinteger(L,done[channel(L)]);return 1; }
 static int reset_outputs(lua_State *L) {
-    (void)L;for(int c=0;c<4;c++)S_toward(c,0,0,SHAPE_Linear,NULL);return 0;
+    (void)L;for(int c=0;c<4;c++){S_toward(c,0,0,SHAPE_Linear,NULL);pending_done[c]=0;}return 0;
 }
 static double now(void) { struct timespec t;clock_gettime(CLOCK_MONOTONIC,&t);return t.tv_sec+t.tv_nsec/1e9; }
 static double command_deadline;
@@ -43,6 +48,20 @@ static int invoke(lua_State *L,const char *name,int args) {
     command_deadline=previous_deadline;lua_sethook(L,previous_hook,previous_mask,previous_count);
     if(result){fprintf(stderr,"%s: %s\n",name,lua_tostring(L,-1));failed=1;return 0;}return 1;
 }
+static void service_callbacks(lua_State *L){
+    int budget=4096;double deadline=now()+.5;
+    for(int c=0;c<4;c++)while(pending_done[c]&&!failed){
+        if(--budget<0||now()>deadline){fprintf(stderr,"Crow completion dispatch limit exceeded\n");failed=1;return;}
+        pending_done[c]--;
+        lua_getglobal(L,"_host_done");lua_pushinteger(L,c+1);if(!invoke(L,"output.done",1))return;
+#ifdef CROW_HOST_II
+        flush(L);
+#endif
+    }
+#ifdef CROW_HOST_II
+    flush(L);
+#endif
+}
 static void serial(lua_State *L) {
     char line[8192];size_t used=0;double previous=now(),fraction=0;
     setvbuf(stdout,NULL,_IONBF,0);
@@ -55,15 +74,10 @@ static void serial(lua_State *L) {
         int frames=(int)fraction;fraction-=frames;
         for(int start=0;start<frames;start+=32){
             int n=frames-start<32?frames-start:32;float values[4][32];
-            int counts[4];
             input_advance(n);if(failed)return;
-            for(int c=0;c<4;c++){counts[c]=done[c];S_step_v(c,values[c],n);}
+            for(int c=0;c<4;c++)S_step_v(c,values[c],n);
             cv_record(values,n);if(failed)return;
-            for(int c=0;c<4;c++){
-                for(int event=counts[c];event<done[c];event++){
-                    lua_getglobal(L,"_host_done");lua_pushinteger(L,c+1);if(!invoke(L,"output.done",1))return;
-                }
-            }
+            service_callbacks(L);if(failed)return;
         }
         if(ready<0){failed=1;break;}
         if(fds[1].revents&POLLIN){cv_command();if(failed)return;}
@@ -75,9 +89,7 @@ static void serial(lua_State *L) {
                 if(bytes[i]=='\n'){
                     line[used]=0;lua_getglobal(L,"_host_line");lua_pushlstring(L,line,used);used=0;
                     if(!invoke(L,"serial command",1))return;
-#ifdef CROW_HOST_II
-                    flush(L);if(failed)return;
-#endif
+                    service_callbacks(L);if(failed)return;
                 }else if(used<sizeof(line)-1)line[used++]=bytes[i];
                 else{fprintf(stderr,"Crow serial line too long\n");failed=1;return;}
             }
