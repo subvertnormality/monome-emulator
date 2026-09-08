@@ -3,7 +3,7 @@
   "updated": "2026-09-08",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "Commit and push the reviewed fractional oracle/evidence checkpoint after publication audit. Native timing runners terminal. Then continue chord197..256, full manual69unbound requirements and emulator delivery; no refactor.",
+  "next_action": "Audit, commit and push completed chord matrix and candidate0043 dashboard checkpoint. All native/review processes terminal. Then expand remaining dashboard and navigation/manual workflows, controlled admission and emulator release. No refactor.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -2895,10 +2895,10 @@
     "evidence": "M-EDIT-002 both modes; exact pre-documentation-change run identities retained. Final whole-campaign run remains pending."
   },
   "manual_binding_snapshot": {
-    "implemented_cases": 408,
+    "implemented_cases": 416,
     "requirements": 141,
-    "requirements_with_case": 72,
-    "scope": "Bindings only; full domain, interaction and release validation incomplete."
+    "requirements_with_case": 73,
+    "scope": "Bindings only; not full domain or release coverage"
   },
   "note_pattern_selector_validation": {
     "status": "validated",
@@ -5012,10 +5012,10 @@
   },
   "chord_shape_validation": {
     "file": "docs/testing/chord-shape-validation.json",
-    "matrix_passes": 196,
+    "matrix_passes": 256,
     "matrix_total": 256,
     "units": 478,
-    "scope": "Production fixes and focused oracles; full matrix and release incomplete"
+    "scope": "All256 finite shape cases have individually source-bound controlled diagnostic passes across retained attempts. Real-time shape variants, controlled repeat admission, dashboard defect, full manual and emulator release remain incomplete. No refactor prerequisite claim."
   },
   "fractional_deadline_work": {
     "status": "scoped-seven-rate-controlled-and-realtime-validation",
@@ -5025,5 +5025,43 @@
       "419286ddbe0a45e3900ed71ac64cf119"
     ],
     "limitations": "One fresh process per lane. Controlled repeat admission, ten-minute C12, other real-time timing scenarios, full manual and emulator release remain incomplete. No refactor prerequisite claim."
+  },
+  "fractional_published_checkpoint": {
+    "max_rate_p99_ns": 1617493,
+    "emulator": "77b163471dbc11ca70c5b73bce1cc2b4bb0d331d",
+    "mosaic": "b5430a64f8b688f0e223bcb17c38f68b1f03fa2a",
+    "max_realtime_error_ns": 4374914,
+    "review": "01a08080-f62d-71e1-81ac-33873cbd5a06",
+    "controlled": "686a1b059edc4635815d868f75061640",
+    "real_time": "419286ddbe0a45e3900ed71ac64cf119",
+    "pushes_verified": true
+  },
+  "active_chord_remainder": {
+    "first_case": 197,
+    "status": "running",
+    "last_case": 256,
+    "artifact": "artifacts/c16/shape-final-sixty.json",
+    "session_id": 68575
+  },
+  "dashboard_preparation": {
+    "installer": "artifacts/install_dashboard_regressions.py",
+    "baseline_runner": "artifacts/run_dashboard_baselines.py",
+    "status": "prepared-not-installed",
+    "scope": "Four shape controls and actual framebuffer root note/velocity assertions; other dashboard domains remain pending",
+    "source_finding": "step.lua root-last strum updates wrong dashboard table; no note/velocity/length"
+  },
+  "dashboard_candidate": {
+    "candidate": "0043",
+    "status": "scoped-native-and-unit-regressions-validated",
+    "validation": "docs/testing/dashboard-validation.json",
+    "units": 482,
+    "native_candidate_passes": 24,
+    "remaining": "CH-DASHBOARD remains partial: chord freshness, arp, sparse/muted cases, channel-switch freshness, successive-note timing and remaining length domain are pending. Full manual, controlled admission, real-time endurance and emulator release remain incomplete."
+  },
+  "navigation_preparation": {
+    "scope": "All36six-page source/destination transitions, repeated pattern cycles, exact menu LEDs and unchanged4noteMIDI melody after every pair",
+    "remaining": "Held-input combinations across navigation",
+    "status": "prepared-not-installed",
+    "installer": "artifacts/install_navigation_matrix.py"
   }
 }
