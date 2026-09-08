@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "current_card": "A02/A03/P03 integration and broader-tranche review",
+  "current_card": "Stage2 focused follow-up ready",
   "status": "in_progress",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
@@ -11,7 +11,7 @@
     "tranche1 committed, reviewed and merged to main"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "Stage2 acceptance closure progressed: unchanged cheat codes --arc passed7checks200640 (actual440/880 source-window PCM movement), composed generic services11pass200815, sequence/WAV7pass200944, composed persistence5pass201053. Top-level22 unit + separate contracts68 tests pass (216.797sec); Popen warnings checked sampled PIDsexited, no nativecleanupwaiver. Candidate evidence index docs/delivery/completions/A02-A03-P03-candidate.md and branchspec reviews/A02-A03-P03-spec.json ready. Next commit snapshot and run one Paranoia Codex medium600sec branch review from f301e76 with explicit audio/local-tool stakes using scripts/review_plan.py; max1focusedfollowup. Resolve substantive findings before admission/merge. All acceptancehandles terminal (47796/78150/60220/36661/52200); no new owned build/audio live, old demo untouched. Main remainsf301e76 with other-task state edit preserved. Stage3 desktop/Maiden/Docker remains queued.",
+  "next_action": "Reviewfixes completewithfocusednative/browserproof, allregressionsgreen. Firstcontractsrunfailedonlysource_changed becauseeditingtestduringrun (manifest e9c8808719454b93bd073865a91398de), retained. Frozenrerun62738 passed68tests198.373sec logreview-fixes-contracts-02; top22pass. AllwarnedPIDs gone review-fixes-process-check.json. Normalbrowser5pass browser203413; strengthenedslowlease2pass203150; nativedeadlines3pass202634; normalnativearc8pass203035. Allhandles terminal. Next commitreviewfixesthen ONEfocusedParanoiaquery600secCodexmedium using reviews/A02-A03-P03-followup.md andtriage, originalreviewref01a08272-9f3e-7df1-b8ff-2729c4b23372. Capture output, resolve anyremaining substantiveissues beforeadmission/merge. No codeeditswhileevidence runs. Stage2notmerged; stage3queued; olddemo andmainother-taskstate untouched.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",

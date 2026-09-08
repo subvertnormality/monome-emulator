@@ -41,7 +41,7 @@ class Application:
             self.backend=NativeBackend(directory,self.config)
         else: self.backend=FixtureBackend(directory)
         self.sequence=0; self.action_ids=set(); self.lock=threading.Lock(); self.action_lock=threading.Lock(); self.errors=[]
-        self.clients={}; self.input_owners={}; self.client_timeout=2.5
+        self.clients={}; self.client_lock=threading.RLock(); self.input_owners={}; self.client_timeout=2.5
         self.audio_monitor=None
         self.audio_captures={}
     def close(self):
@@ -87,17 +87,25 @@ class Application:
     def heartbeat(self,client_id):
         if not isinstance(client_id,str) or not 1<=len(client_id)<=64 or any(c not in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_' for c in client_id):
             raise ContractError('client_id','Invalid browser client identity')
-        if client_id not in self.clients and len(self.clients)>=8: raise ContractError('client_limit','At most eight browser clients per session')
-        self.clients[client_id]=time.monotonic()
+        with self.client_lock:
+            if client_id not in self.clients and len(self.clients)>=8: raise ContractError('client_limit','At most eight browser clients per session')
+            self.clients[client_id]=time.monotonic()
     def release_client(self,client_id):
         if self.audio_monitor and self.audio_monitor.owner==client_id:
             self.audio_monitor.close();self.audio_monitor=None
-        self.action(dict(schema_version=1,session_id=self.config['session_id'],action_id=uid(),sequence=self.sequence+1,
-                         client_id=client_id,action=dict(type='release_all')))
-        self.clients.pop(client_id,None)
+        try:
+            self.action(dict(schema_version=1,session_id=self.config['session_id'],action_id=uid(),sequence=self.sequence+1,
+                             client_id=client_id,action=dict(type='release_all')))
+        finally:
+            # A sticky native fault is not repairable by repeated lease expiry.
+            with self.client_lock:self.clients.pop(client_id,None)
     def expire_clients(self):
-        for client_id,last in list(self.clients.items()):
-            if time.monotonic()-last>self.client_timeout: self.release_client(client_id)
+        with self.client_lock:clients=list(self.clients)
+        for client_id in clients:
+            with self.client_lock:
+                last=self.clients.get(client_id)
+                expired=last is not None and time.monotonic()-last>self.client_timeout
+            if expired:self.release_client(client_id)
     def snapshot(self):
         raw=self.backend.query({})
         return checked('observation',dict(schema_version=1,session_id=self.config['session_id'],
@@ -149,12 +157,16 @@ class Application:
         if kind in ('key','grid','arc_key') and not action['state'] and client_id and self.input_owners.get(key,(None,None))[0]!=client_id:
             raise ContractError('input_owner','This input belongs to another client')
         raw=None
+        deadline=time.monotonic()+self.config.get('input_timeout',2)
+        def query(action):
+            if self.config['backend']=='native':return self.backend.query({'action':action},deadline=deadline)
+            return self.backend.query({'action':action})
         if kind=='release_all' and client_id:
             for held_key,(owner,held) in list(self.input_owners.items()):
                 if owner==client_id:
-                    self.backend.query({'action':dict(held,state=0)}); self.input_owners.pop(held_key,None)
+                    query(dict(held,state=0)); self.input_owners.pop(held_key,None)
         else:
-            raw=self.backend.query({'action':action})
+            raw=query(action)
             if kind=='release_all': self.input_owners.clear()
             elif kind=='grid_connection' and not action['connected']:
                 self.input_owners={k:v for k,v in self.input_owners.items() if k[0]!='grid'}
@@ -214,6 +226,13 @@ def serve_application(directory,app):
                     size=int(self.headers.get('Content-Length','0'))
                     if size<1 or size>MAX_BODY: raise ContractError('body_size','Invalid request body length')
                     payload=json.loads(self.rfile.read(size))
+                # Receipt of a heartbeat must not wait behind a native callback.
+                # Device state remains serialized by app.lock; only lease time
+                # is updated independently under client_lock.
+                if self.command=='POST' and self.path=='/client/heartbeat':
+                    if not isinstance(payload,dict) or set(payload)!={'client_id'}:raise ContractError('client_id','Expected a client_id')
+                    app.heartbeat(payload['client_id'])
+                    self.respond(200,dict(status='ok'));return
                 if self.command=='POST' and self.path=='/action':
                     with app.action_lock:
                         scheduled=app.wait_schedule(payload)

@@ -1,4 +1,4 @@
-import sys,tempfile,unittest
+import sys,tempfile,unittest,threading
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'src'))
 from automation.protocol import ContractError,checked,uid
@@ -26,16 +26,19 @@ class ArcContract(unittest.TestCase):
         with self.assertRaises(ContractError):policy.validate(dict(type='arc_connection',connected=False))
     def test_browser_ownership_and_release(self):
         class Backend:
-            def __init__(self):self.events=[]
-            def query(self,payload):self.events.append(payload['action']);return {}
+            def __init__(self):self.events=[];self.deadlines=[]
+            def query(self,payload,deadline=None):self.events.append(payload['action']);self.deadlines.append(deadline);return {}
         with tempfile.TemporaryDirectory() as temp:
             app=Application.__new__(Application);app.config=dict(session_id='test',backend='native')
-            app.directory=Path(temp);app.backend=Backend();app.sequence=0;app.action_ids=set();app.clients={};app.input_owners={};app.audio_monitor=None
+            app.directory=Path(temp);app.backend=Backend();app.sequence=0;app.action_ids=set();app.clients={};app.client_lock=threading.RLock();app.input_owners={};app.audio_monitor=None
             def send(action,owner):return app.action(self.payload(action,app.sequence+1,owner))
             send(dict(type='arc_key',n=1,state=1),'a');send(dict(type='arc_key',n=2,state=1),'b')
+            send(dict(type='arc_key',n=3,state=1),'a')
             with self.assertRaises(ContractError):send(dict(type='arc_key',n=1,state=0),'b')
             app.release_client('a')
-            self.assertEqual(app.backend.events[-1],dict(type='arc_key',n=1,state=0))
+            self.assertEqual(app.backend.events[-2:],[dict(type='arc_key',n=1,state=0),dict(type='arc_key',n=3,state=0)])
+            self.assertIsNotNone(app.backend.deadlines[-1])
+            self.assertEqual(app.backend.deadlines[-2],app.backend.deadlines[-1])
             self.assertEqual(list(app.input_owners.values()),[('b',dict(type='arc_key',n=2,state=1))])
             send(dict(type='arc_connection',connected=False),'b')
             self.assertEqual(app.input_owners,{})

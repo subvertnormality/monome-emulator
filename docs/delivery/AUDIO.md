@@ -268,3 +268,13 @@ Use unchanged native file-picker/grid controls to loop pad 2, then turn arc ring
 1 to move its playback window between the marked halves. Assert actual captured
 pitch and native arc LED changes, then reverse the deltas and assert restored
 440 Hz. Baseline sampler and sequence profiles keep arc absent.
+
+Stage 2 review amendment: `input_timeout` bounds the entire native action,
+including all implicit key releases. Native timeout is a sticky session failure
+because a submitted callback may still complete later; further state/actions
+must not claim healthy synchronized input ownership. Authenticated browser
+heartbeats update lease receipt independently of the device-operation lock,
+so a permitted long callback does not impersonate a network disconnect.
+Tests must cover late completion, compound release exhaustion/success and a
+real connected browser held input/audio monitor across a slow callback followed
+by real offline cleanup. See `reviews/A02-A03-P03-triage.md`.

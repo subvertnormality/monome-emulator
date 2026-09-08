@@ -368,21 +368,29 @@ class NativeBackend:
                 if time.monotonic()>end: raise ContractError('init_timeout','Native script init/frame did not complete')
                 self.condition.wait(0.05)
         self.check_processes()
-    def send(self,kind,*args):
+    def ack_timeout(self,message):
+        # A submitted native callback may still complete after this deadline.
+        # Do not expose a healthy session with unreconciled held-input state.
+        self.errors.append(dict(code='native_ack_timeout',message=message))
+        raise ContractError('native_ack_timeout',message)
+    def send(self,kind,*args,deadline=None):
         with self.io_lock:
-            self.check_processes(); self.sequence+=1
+            self.check_processes()
+            end=deadline if deadline is not None else time.monotonic()+self.config.get('input_timeout',2)
+            if time.monotonic()>=end:self.ack_timeout('Native action deadline exhausted before submission')
+            self.sequence+=1
             packet=(struct.pack('=4i',self.sequence,kind,args[0],len(args[1]))+bytes(args[1])) if kind==7 else struct.pack('=6i',self.sequence,kind,*(list(args)+[0]*(4-len(args))))
             with self.condition:
                 self.events.write(json.dumps(dict(kind='input',sequence=self.sequence,type=kind,args=list(args),monotonic_ns=time.monotonic_ns()))+'\n')
             submission_start=time.monotonic_ns()
             self.controller.send(packet)
-            submitted=time.monotonic_ns();end=time.monotonic()+self.config.get('input_timeout',2)
+            submitted=time.monotonic_ns()
             timestamp=None
             try:
                 with self.condition:
                     while self.sequence not in self.acks:
                         self.check_processes()
-                        if time.monotonic()>end: raise ContractError('native_ack_timeout','Native event callback did not complete')
+                        if time.monotonic()>end:self.ack_timeout('Native event callback did not complete before action deadline')
                         self.condition.wait(0.01)
                     timestamp=self.acks.pop(self.sequence)
             finally:
@@ -394,7 +402,7 @@ class NativeBackend:
             self.check_processes()
             self.last_native_ack=dict(sequence=self.sequence,monotonic_ns=timestamp)
             return timestamp
-    def schedule_input(self,action):
+    def schedule_input(self,action,deadline=None):
         domain=action.get('time_domain','logical' if action['type']=='midi_schedule_cancel' and self.clock_mode!='real-time' else 'monotonic')
         if domain not in self.schedule_domains or (domain=='logical')!=(self.clock_mode!='real-time'):
             raise ContractError('unsupported','MIDI scheduling requires an experimental candidate supporting the selected session time domain')
@@ -422,45 +430,47 @@ class NativeBackend:
                 self.input_schedule=previous
                 raise ContractError('schedule_capacity','Native schedule packet exceeds 64 KiB')
             self.controller.send(packet)
-            end=time.monotonic()+2
+            end=deadline if deadline is not None else time.monotonic()+2
             with self.condition:
                 while sequence not in self.schedule_responses:
                     self.check_processes()
-                    if time.monotonic()>end:raise ContractError('native_ack_timeout','Native MIDI schedule response did not arrive')
+                    if time.monotonic()>end:self.ack_timeout('Native MIDI schedule response did not arrive before action deadline')
                     self.condition.wait(.01)
                 response=self.schedule_responses.pop(sequence)
                 if 'error' in response:
                     if kind in (9,11):self.input_schedule=previous
                     raise ContractError(response['error'],'Native MIDI schedule rejected: '+response['error'])
             return response
-    def query(self,payload):
+    def query(self,payload,deadline=None):
         self.check_processes()
+        if deadline is None:deadline=time.monotonic()+self.config.get('input_timeout',2)
+        def send(kind,*args):return self.send(kind,*args,deadline=deadline)
         if 'action' in payload:
             action=payload['action']; kind=action['type']
             if kind=='key':
                 key=('key',action['n'],None,None)
                 if bool(action['state'])==(key in self.held): raise ContractError('duplicate_key_transition','Norns key already has requested state')
-                self.send(1,action['n'],action['state'])
-            elif kind=='enc': self.send(2,action['n'],action['delta'])
+                send(1,action['n'],action['state'])
+            elif kind=='enc': send(2,action['n'],action['delta'])
             elif kind in ('arc_delta','arc_key','arc_connection'):
                 self.arc_input.validate(action)
                 if kind=='arc_connection':
                     if not action['connected']:
-                        for held in list(self.arc_input.held.values()):self.query({'action':dict(held,state=0)})
-                    self.send(14,int(action['connected']))
-                elif kind=='arc_delta':self.send(12,action['n']-1,action['delta'])
-                else:self.send(13,action['n']-1,action['state'])
+                        for held in list(self.arc_input.held.values()):self.query({'action':dict(held,state=0)},deadline=deadline)
+                    send(14,int(action['connected']))
+                elif kind=='arc_delta':send(12,action['n']-1,action['delta'])
+                else:send(13,action['n']-1,action['state'])
                 self.arc_input.applied(action)
             elif kind=='grid':
                 self.grid_input.validate(action)
-                self.send(3,action['x']-1,action['y']-1,action['state'])
+                send(3,action['x']-1,action['y']-1,action['state'])
                 self.grid_input.applied(action)
             elif kind=='grid_connection':
                 connected=action['connected']
                 if connected==self.grid_input.connected: raise ContractError('grid_connection','Grid already has requested connection state')
                 if not connected:
-                    for held in list(self.grid_input.held.values()): self.query({'action':dict(held,state=0)})
-                self.send(6,int(connected)); self.grid_input.connected=connected
+                    for held in list(self.grid_input.held.values()): self.query({'action':dict(held,state=0)},deadline=deadline)
+                send(6,int(connected)); self.grid_input.connected=connected
             elif kind=='midi':
                 with self.condition:
                     if self.input_schedule and self.input_schedule['status'] in ('submitting','accepted'):
@@ -472,20 +482,20 @@ class NativeBackend:
                     delay=(action['at_monotonic_ns']-time.monotonic_ns())/1e9
                     if delay<0 or delay>2: raise ContractError('midi_input_time','Scheduled MIDI input must be in the next two seconds on the backend monotonic clock')
                     time.sleep(delay)
-                self.send(7,port,action['bytes']); self.midi_inputs[port-1]=candidate
-            elif kind in ('midi_schedule','midi_schedule_cancel'):self.schedule_input(action)
+                send(7,port,action['bytes']); self.midi_inputs[port-1]=candidate
+            elif kind in ('midi_schedule','midi_schedule_cancel'):self.schedule_input(action,deadline=deadline)
             elif kind=='advance':
                 if self.clock_mode=='real-time':raise ContractError('unsupported','advance requires explicit experimental controlled time')
                 seconds,nanoseconds=divmod(action['nanoseconds'],1000000000)
-                self.send(8,seconds,nanoseconds)
+                send(8,seconds,nanoseconds)
             elif kind=='release_all':
                 for held in list(self.held.values()):
-                    release=dict(held,state=0); self.query({'action':release})
+                    release=dict(held,state=0); self.query({'action':release},deadline=deadline)
             if kind in ('key','grid','arc_key'):
                 key=(kind,action.get('n'),action.get('x'),action.get('y'))
                 if action['state']: self.held[key]=action
                 else: self.held.pop(key,None)
-        else: self.send(5)
+        else: send(5)
         with self.condition:
             frame=self.frame; revision=self.frame_revision
             # A current lossless raw frame is always available to machine clients.

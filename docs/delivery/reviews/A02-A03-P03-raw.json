@@ -1,0 +1,41 @@
+{
+  "started_at": "2026-09-08T19:14:56.186088+00:00",
+  "packet_sha256": "3871e0823d17b0671dad0111716df17a7b305bac5d3e64a5155065d7a92e8f2f",
+  "files": [
+    "docs/delivery/AUDIO.md",
+    "docs/delivery/completions/A02-A03-P03-candidate.md"
+  ],
+  "tool": "critique_branch",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor",
+    "base_ref": "f301e7644746f699fa769b6ab7cf3bb678f3c228",
+    "head_ref": "HEAD",
+    "include_uncommitted": false,
+    "isolate": false,
+    "converge": false,
+    "class_closure": false,
+    "round": 1,
+    "engine": "codex",
+    "effort": "medium",
+    "web_search": false,
+    "stakes": "Trusted single-user local norns emulator on Ubuntu 20.04 WSL2. Audio and device feature implementation is authorized. Risks are misleading automated tests, native runtime mismatch, audio errors and damage to local user projects. No hostile multitenancy, finance, manual listening, physical hardware certification or out-of-queue desktop work.",
+    "project_summary": "Trusted local general-purpose norns/grid emulator for automated testing and optional browser use on Ubuntu 20.04 WSL2. Official pinned monome runtime, independent app fixtures. Stage 1 audio/Crow work merged at f301e76. Review stage 2 only: sampler/softcut services, real audio file errors, generic media imports and configurable native input timeout, explicit Crow absence, native virtual arc and browser integration. Audio implementation is explicitly authorized. Desktop/Maiden/Docker are deferred.\n# Broader-script combined candidate\n\nStage 1 is merged at `f301e76`. This stage remains in `codex/audio-monitor`,\npending the bounded review and admission. The default installation, user demo,\nexternal applications and concurrent main state are preserved.\n\nCandidate `.runtime/arc-tools-01/installation.json` composes the fresh canonical\n`.runtime/arc-01` runtime, existing host-16 Crow and identified capture/monitor\nhelpers. Official norns stays pinned at\n`14bbeae8646c6717f6bb44c8cd60250bf94b6042`. New locally authored runtime patches:\nexplicit softcut file-read bounds and optional virtual arc transport. Their\nbase, rationale, source checks, regressions and removal conditions are in\n`A03-read-bounds.md` and `P03-progress.md`. No community runtime fork is installed.\n\nImplemented generic capabilities: stereo/phase/render/position/poll acceptance,\nexplicit logged audio-file failures, isolated audio file/tree imports, optional\nabsent Crow, configurable bounded native input timeout, four-ring virtual arc\nthrough official native/Lua APIs, public actions and browser LEDs/controls.\nCheat codes is opt-in and unchanged; no application knowledge enters core.\n\nEvidence index (all under `artifacts/`):\n\n| Boundary | Evidence |\n|---|---|\n| Combined stereo, polls, callbacks, stop/restart and missing-file error | `audio/softcut-services-20260908-200815/report.json`, 11 checks |\n| Combined forward/reverse/rate/loop and actual WAV roundtrip | `audio/softcut-sequence-20260908-200944/report.json`, 7 checks |\n| Other generic file failures and C++ read-bound sentinels | `A02.md`, `A03-read-bounds.md` |\n| Sample/tree import, simultaneous isolation, slow native input | `A03-prerequisites.md`, `A03-persistence-progress.md` |\n| Actual cheat codes sampler/reverse/live recording | `A03-sampler-controls.md` |\n| Actual saved collection and fresh-session restoration | `audio/cheat-codes-record-20260908-201053/report.json`, 5 checks on combined candidate; earlier sampler pass at `200106` |\n| Native arc and two-session isolation | `arc/native-20260908-195446/report.json`, 8 checks |\n| Windows Chromium arc controls/render/offline lease/reconnect | `arc/browser-20260908-195938/report.json`, 5 checks |\n| Old-runtime rejection, actual native absence/presence | `arc/presence-20260908-200325/report.json`, 3 checks |\n| Unchanged cheat codes arc changes actual source playback | `audio/cheat-codes-sampler-20260908-200640/report.json`, 7 checks |\n\nTop-level unittest discovery passes 22 tests. Separate `tests/contracts`\ndiscovery passes 68 tests in 216.797 seconds, exit 0\n(`artifacts/audio/broader-contracts-02.log`). That suite emitted Python\nPopen ResourceWarnings; sampled named PIDs were checked after completion and\nhad exited. No native integration cleanup exception was waived. All integration\nchecks use actual native input and output; generic contracts have no Mosaic\ndependency. Negative controls and historical failed recipes remain recorded.\n\nLimits: supported engines/subsets only; no arbitrary-engine, physical Crow/arc,\nhardware timing, click-free arbitrary loop, desktop-speaker, Maiden or Docker\nclaim. Cheat codes attached ii-module startup remains explicitly unsupported;\nits baseline uses an absent Crow. The saved-audio stimulus changed from 660 to\n600 Hz because the app's 7.99-second recording loop requires integer cycles for\na coherent whole-file tone assertion. Thresholds and xrun rejection did not\nchange. Review must examine that rationale and the retained failure evidence.\n\nNext: commit the review snapshot, then\none Codex medium ten-minute Paranoia branch review plus at most one focused\nfollow-up. No default promotion or stage-3 execution before this stage closes.\n",
+    "diff_intent": "Deliver unchanged cheat codes 2 sample/rate/reverse/live-record/save/load workflows plus generic arc functionality while preserving native browser/automation input parity, per-session data/process isolation and explicit errors. Runtime changes are documented local patches against pinned official norns: bound explicit softcut file reads and optional virtual arc transport. No community fork or application code copied into core. See AUDIO.md and A02/A03/P03 completion notes for exact evidence, retained failures and remaining limits.",
+    "focus": "Find consequential correctness or evidence gaps in the actual diff: native arc lifecycle/held-input ownership/grid independence, absent/old-runtime rejection, action/observation contracts, media import original preservation and isolation, input deadline behavior, sticky real file-I/O errors, bounds patch memory/file limits, actual PCM/native/browser assertions and false-green cleanup paths. Check that 600 Hz recording stimulus correction retains strict signal/xrun tests and does not falsely claim arbitrary live-loop continuity. Do not demand hardware/manual listening, hostile multitenancy defenses, full arbitrary-engine equivalence or out-of-queue desktop scope. Prioritize actionable defects over cosmetic style. One bounded Codex medium review, maximum ten minutes, plus at most one focused follow-up. Candidate is not default-promoted. All unknown capabilities must remain explicit limitations."
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "\u26a0\ufe0f REVIEW FAILED (engine=codex, exit=127) \u2014 treat the output below as an error, not a completed review.\n\n[paranoia-local error] codex exited 127: executable not found: [Errno 2] No such file or directory: 'codex'\n\n---\n_paranoia-local \u00b7 engine=codex_",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "status": "tool_error",
+  "finished_at": "2026-09-08T19:14:59.297388+00:00"
+}

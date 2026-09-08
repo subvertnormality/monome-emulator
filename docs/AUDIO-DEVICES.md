@@ -1,8 +1,9 @@
 # Experimental audio and virtual Crow
 
 These features use the pinned official norns/JACK/SuperCollider runtime in the
-existing Ubuntu 20.04 WSL environment. They are opt-in while tranche-1 admission
-is in progress. The default installation is not replaced by these commands.
+existing Ubuntu 20.04 WSL environment. Tranche-1 audio/Crow support is admitted
+for opt-in use; the newer sampler/arc additions are under review. The default
+installation is not replaced by these commands.
 
 From the repository directory inside WSL, after the normal locked runtime setup:
 
@@ -100,8 +101,10 @@ This copies audio files only; it does not automatically load an app's collection
 
 For scripts with slow synchronous file operations, use `--input-timeout 10`
 (Python: `input_timeout=10`). The default is two seconds; the allowed range is
-0.1–30 seconds. This waits longer for the actual native callback to finish and
-keeps explicit timeout errors. It does not change musical timing tolerances or
+0.1–30 seconds. This bounds the entire native action, including implicit held-key
+releases. A timeout leaves the session in an explicit error state because the
+native callback may complete late; close and start a fresh session to recover.
+It does not change musical timing tolerances or
 make a slow save instantaneous. Session identities record the chosen deadline.
 
 The experimental arc candidate supports one optional virtual four-ring arc.
