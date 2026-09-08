@@ -67,3 +67,20 @@ Full Crow firmware/reset/upload, unsupported input modes, ii reads/follower
 callbacks/downstream JF sound, electrical timing and arbitrary audio engines
 remain outside the supported subset. Full cheat codes 2, arc, Maiden and Docker
 are not delivered by this tranche. Queue order remains binding.
+
+## Main integration
+
+Main fast-forwarded from `319e3a0` to `4b7ab6b` after review and admission.
+The concurrent `docs/delivery/state.json` edit remained byte-identical:
+SHA256 `14f3157de699e4d3fa946b3215a82ecc8be0be09333f816983ce9186adabb990`.
+The other task received coordination before and after integration; its existing
+server, worktrees, project files and default runtime were preserved.
+
+Post-merge `python3 tests/audio_generic.py --install
+.runtime/worktrees/audio-monitor/.runtime/tranche1-final/installation.json`
+passed from the **main checkout**. Its two native generic-script/service and
+capability checks, clean shutdown exports and identity are retained in main at
+`artifacts/audio/generic-20260908-175139/report.json`. This verifies the merged
+launcher can use the retained candidate across the worktree path boundary.
+All tranche-1 runners are terminal. Broader script support is now eligible;
+desktop/Maiden/Docker remains behind it.

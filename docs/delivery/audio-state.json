@@ -1,16 +1,18 @@
 {
   "schema_version": 1,
-  "current_card": "tranche1-integration",
-  "status": "admitted_pending_merge",
+  "current_card": "broader-script-scope",
+  "status": "queued_after_completed_tranche1",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
   "completed": [
     "A00 audio feasibility",
-    "experimental browser monitoring"
+    "A01 tested native audio and continuous browser monitoring",
+    "P01/P02 tested virtual Crow CV/input/clock/JF subset",
+    "tranche1 committed, reviewed and merged to main"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "Tranche1 reviewed and admitted; commit admission records, fast-forward main preserving concurrent docs/delivery/state.json, verify ancestry and state-file preservation, then record merge. Only after main contains tranche1 may broader script/cheat codes 2 work begin. Desktop/Maiden/Docker stays after broader scripts. Final candidate .runtime/tranche1-final/installation.json in audio-monitor worktree; all processes terminal.",
-  "evidence": "docs/delivery/completions/A00.md",
+  "next_action": "Tranche1 merged to main at 4b7ab6b; final docs-only progress commit follows. Main post-merge generic native test passed artifacts/audio/generic-20260908-175139/report.json. All test/review processes terminal, own worktree retained. Next read recorded evidence and define concrete broader-script/cheat codes 2 acceptance before implementing eligible missing features. Keep Mosaic optional, preserve concurrent main state.json, use worktree. Desktop/Maiden/Docker and architecture references remain queued AFTER broader scripts. Do not repeat completed tranche1 suites absent a relevant change.",
+  "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",
   "default_runtime_promoted": false,
@@ -60,12 +62,12 @@
   "crow": {
     "build": ".runtime/crow-host-10",
     "card": "P02",
-    "status": "native-clock-following-scoped-checks-passed",
+    "status": "reviewed_and_merged_tested_subset",
     "checks": "five firmware CV assertions; seven host serial checks; four identity checks; native voltage, pulse, 2000 ordered callback/file/raw-byte agreement, explicit Lua failure and earlier normal teardown",
     "supported_device_exposed": false,
     "evidence": "artifacts/crow/core-20260908-145110/report.json",
     "completion": "docs/delivery/completions/P02-clock.md",
-    "candidate": ".runtime/crow-norns-06/installation.json",
+    "candidate": ".runtime/tranche1-final/installation.json",
     "native_evidence": [
       "artifacts/crow/native-20260908-145126/report.json",
       "artifacts/crow/native-20260908-145233/report.json",
@@ -83,7 +85,7 @@
       "completion": "docs/delivery/completions/P02-input-core.md"
     },
     "input_api": {
-      "evidence": "artifacts/crow/input-api-20260908-154223/report.json",
+      "evidence": "artifacts/crow/input-api-20260908-174834/report.json",
       "capture_regression": "artifacts/crow/capture-api-20260908-154434/report.json",
       "native_injection": true
     },
@@ -101,21 +103,21 @@
       "checks": 7
     },
     "ii_native": {
-      "build": ".runtime/crow-host-14",
-      "candidate": ".runtime/crow-ii-native-04/installation.json",
+      "build": ".runtime/crow-host-16",
+      "candidate": ".runtime/tranche1-final/installation.json",
       "evidence": "artifacts/crow/ii-native-20260908-163347/report.json",
       "cv_regression": "artifacts/crow/native-20260908-161819/report.json",
       "completion": "docs/delivery/completions/P02-ii-native.md",
-      "status": "scoped_pass_remaining_acceptance_pending",
+      "status": "reviewed_and_merged_tested_subset",
       "isolation": "artifacts/crow/ii-isolation-20260908-162958/report.json"
     },
     "serial_lifecycle": {
-      "build": ".runtime/crow-host-15",
-      "evidence": "artifacts/crow/serial-20260908-171423/report.json",
-      "status": "host_tests_passed_native_pending"
+      "build": ".runtime/crow-host-16",
+      "evidence": "artifacts/crow/serial-20260908-174233/report.json",
+      "status": "host_and_native_regressions_passed"
     },
     "mosaic_jf": {
-      "evidence": "artifacts/crow/mosaic-jf-20260908-165705/report.json",
+      "evidence": "artifacts/crow/mosaic-jf-20260908-174750/report.json",
       "completion": "docs/delivery/completions/P02-mosaic-jf.md",
       "status": "scoped-native-pass"
     }
@@ -151,7 +153,8 @@
   "tranche1_candidate": {
     "install": ".runtime/tranche1-final/installation.json",
     "build": ".runtime/tranche1-02/installation.json",
-    "status": "admitted",
-    "completion": "docs/delivery/completions/A01-tranche1.md"
+    "status": "merged_opt_in_subset",
+    "completion": "docs/delivery/completions/A01-tranche1.md",
+    "merged_implementation": "4b7ab6b"
   }
 }
