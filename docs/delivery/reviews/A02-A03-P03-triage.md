@@ -72,6 +72,32 @@ unit tests. Every warned subprocess is checked in
 processes are terminal. The three fixes and their focused evidence are ready
 for the single allowed follow-up; findings remain open until that response.
 
+## Focused follow-up
+
+Completed response `A02-A03-P03-followup-result.json`, session
+`01a08288-7c22-7ac0-a85b-a60aabf415cb`, reviewing `3b94aed`: findings 2 and 3
+resolved. Finding 1 retained one exact case: a browser-owned release_all with
+no recorded inputs skipped native health and falsely acknowledged success after
+a timed-out key-down. The reviewer recommended a health check and regression
+for that case. Added the native health check before the empty-owner branch;
+expanded actual native deadline tests with a browser-owned late key-down and
+both owned/ownerless release attempts. Top-level 22 tests pass at
+`artifacts/audio/final-owner-unit.log`; native final regression is running.
+
+Both planned review calls are complete. This final change implements the
+follow-up's explicit recommendation within the already-reviewed failure policy;
+close it only after the concrete native regression passes. No extra cold review
+or architecture change is needed, and no finding is waived on budget grounds.
+
+Final native regression passes all four cases at
+`artifacts/arc/deadlines-20260908-204420/report.json`: ownerless late-down 2.022s,
+browser-owned late-down 2.016s, compound exhaustion 8.024s, compound success
+10.496s. Both owned and ownerless release attempts remain explicitly faulty
+after the actual late native acknowledgement. All sessions cleanly stop.
+Finding 1 is closed by the follow-up's recommended health guard and this exact
+native regression. Findings 2 and 3 were confirmed resolved by the follow-up.
+There are no remaining substantive review findings and no third review call.
+
 Required tests originally identified:
 late arc key-down with post-timeout health/release rejection; several held arc
 keys whose individually bounded releases exceed one action budget; a successful

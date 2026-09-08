@@ -157,6 +157,9 @@ class Application:
         if kind in ('key','grid','arc_key') and not action['state'] and client_id and self.input_owners.get(key,(None,None))[0]!=client_id:
             raise ContractError('input_owner','This input belongs to another client')
         raw=None
+        # Empty per-browser release sets still require a healthy native session:
+        # a timed-out key-down may have completed without recorded ownership.
+        if self.config['backend']=='native':self.backend.check_processes()
         deadline=time.monotonic()+self.config.get('input_timeout',2)
         def query(action):
             if self.config['backend']=='native':return self.backend.query({'action':action},deadline=deadline)

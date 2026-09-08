@@ -27,6 +27,7 @@ class ArcContract(unittest.TestCase):
     def test_browser_ownership_and_release(self):
         class Backend:
             def __init__(self):self.events=[];self.deadlines=[]
+            def check_processes(self):pass
             def query(self,payload,deadline=None):self.events.append(payload['action']);self.deadlines.append(deadline);return {}
         with tempfile.TemporaryDirectory() as temp:
             app=Application.__new__(Application);app.config=dict(session_id='test',backend='native')

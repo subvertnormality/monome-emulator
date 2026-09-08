@@ -1,0 +1,55 @@
+{
+  "started_at": "2026-09-08T19:39:36.142485+00:00",
+  "packet_sha256": "2aa748aa21c7a5618a8c50cc4173745426c32af455a280fde1932b4adba0488f",
+  "files": [
+    "src/runtime/native.py",
+    "src/automation/server.py",
+    "tests/arc_deadlines.py",
+    "tests/browser_slow_lease.cjs"
+  ],
+  "tool": "query",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor",
+    "engine": "codex",
+    "question": "# Focused follow-up: stage 2 slow callbacks\n\nFollow up the three major findings from Codex review session\n`01a08272-9f3e-7df1-b8ff-2729c4b23372` of `abef865`.\nRead `A02-A03-P03-review.json` and `A02-A03-P03-triage.md` in this directory.\nInspect the current committed fixes and cited regression artifacts. This is the\nsingle allowed focused follow-up, medium effort, ten-minute maximum; do not\nrepeat a whole-branch cold review or invent new platform scope.\n\nStakes: trusted single-user norns/grid emulator on Ubuntu 20.04 WSL2, primarily\nautomated testing. Audio and device work is authorized. Relevant failures are\nmisleading healthy state, incorrect held-input ownership, lost acknowledgements,\nunexpected process lifetime and damage to local projects. No finance, hostile\nmultitenancy, manual listening or physical hardware certification.\n\nDetermine whether these three findings are resolved, or identify a concrete\nremaining defect in the fixes:\n\n1. Native acknowledgement timeout is sticky; late completion does not restore\n   health or permit further actions. Check the actual late arc callback evidence\n   and successful teardown. No fake held-state reconciliation is claimed.\n2. A single action deadline now passes through every native release and through\n   per-browser release_all, within the existing HTTP budget. Check exhausted\n   compound release stops further submission, plus successful compound release\n   within its deadline. MIDI events use the same deadline route.\n3. Authenticated heartbeat receipt bypasses the device lock using a short lease\n   lock; stateful input/audio operations stay serialized. Check the actual\n   browser in-flight heartbeat timing, retained K3/monitor ownership and later\n   real offline cleanup. This verifies lease lifetime, not uninterrupted browser\n   PCM during a long blocking callback. That existing audio-read lock limitation\n   remains explicit and is assigned to the queued browser-streaming work.\n\nThe triage names all focused and normal regression results and retained failures.\nDo not treat an intentionally rejected source-changed evidence run as a waived\nruntime failure. Report whether each original finding is resolved; cite exact\ncode and evidence for any substantive remaining issue. Do not spend this query\non style, optional refactoring or capabilities outside these fixes.\n",
+    "files": [
+      {
+        "path": "src/runtime/native.py",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "src/automation/server.py",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "tests/arc_deadlines.py",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "tests/browser_slow_lease.cjs",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/reviews/A02-A03-P03-triage.md",
+        "reason": "Findings and fixes"
+      }
+    ],
+    "web_search": false,
+    "effort": "medium"
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "**Findings 2 and 3 are resolved. Finding 1 is mostly fixed, but browser-owned `release_all` can still falsely acknowledge success after a native timeout.**\n\n1. **Sticky timeout: one remaining defect.** `native.py:371\u2013395` records the fault, and `check_processes()` rejects subsequent native queries at line 264. The retained `late-down/native-events.jsonl:141\u2013145` shows submission, timeout, then actual late MIDI and acknowledgement; subsequent actions retain `native_ack_timeout`, and `cleanup.json` records successful teardown.\n\n   However, `server.py:164\u2013167` calls the backend only for recorded browser-owned inputs. A timed-out key-down never records ownership because that happens after successful query completion (`server.py:169\u2013176`). Consequently, that browser\u2019s `release_all` skips the backend entirely and returns `\"status\": \"applied\"`, incrementing sequence at lines 178\u2013181. I reproduced this using the actual `Application.apply_action` and `NativeBackend` methods with initialized fault state: observation rejected with `native_ack_timeout`, while browser `release_all` returned `applied`. Health remains faulty, but the release acknowledgement is misleading. Check native health before this empty-owner path; the existing regression exercises ownerless `release_all`, so misses it.\n\n2. **Compound deadline: resolved.** `server.py:160\u2013167` shares one deadline across browser releases; `native.py:460\u2013493` propagates it through arc/grid disconnect, global releases and MIDI routes. `send()` rejects exhausted deadlines before submission (`native.py:380`). In `artifacts/arc/deadlines-20260908-202634`, exhaustion returned at **8.010 seconds**, with only two releases submitted and no disconnect; successful compound release completed in **10.500 seconds** against twelve seconds. All three sessions have teardown records.\n\n3. **Browser lease: resolved.** Authentication precedes heartbeat handling (`server.py:219\u2013235`); lease updates use `client_lock`, while input/audio retain `app.lock`. The source-matching `browser-20260908-203150` evidence passes the in-flight heartbeat assertions in `tests/browser_slow_lease.cjs:15\u201319`, retained K3/monitor ownership, and subsequent real offline cleanup. This establishes lease survival, not uninterrupted PCM.\n\nThe recorded 22-unit and source-frozen 68-contract reruns pass. The retained `source_changed` rejection is an evidence-integrity failure, not a waived runtime failure.\n\n**CONFIDENCE: High.** Native/browser integrations were inspected rather than rerun; a fault check plus regression for browser-owned empty `release_all` would close the remaining issue.\n\n---\n_paranoia-local \u00b7 engine=codex \u00b7 session_ref=`01a08288-7c22-7ac0-a85b-a60aabf415cb` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "status": "returned",
+  "finished_at": "2026-09-08T19:41:59.134731+00:00"
+}
