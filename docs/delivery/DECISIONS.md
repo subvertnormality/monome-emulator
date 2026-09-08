@@ -37,3 +37,19 @@ real-time evidence. The emulator remains general purpose. Mosaic canonical plan:
 User instruction, 2026-09-07: use only Codex for Paranoia reviews from now on.
 The helper enforces this engine selection. Existing completed reviews remain
 historical evidence; the bounded critique/follow-up budget is unchanged.
+
+D20 — Fractional real-time timing metric, 2026-09-08: Codex arbitration
+`01a07f14-57cb-7cb1-9f93-07c02f229e92` found that a newly added pointwise10 ms
+interval/window gate was stronger than the established event-error profile,
+without an independent musical basis. Extend the existing p99/max/final-phase
+10/50/20 ms profile explicitly to each45-second fractional fixture, with the
+population, percentile rule and verified independent deadline/origin mapping in
+ACCEPTANCE.md. Implementation and fresh evidence remain required. Preserve the
+old failed runs, exact controlled-time checks and mandatory ten-minute C12 gate.
+This corrects a metric mismatch; it is not a waiver of measured host jitter.
+
+The same arbitration rejects the new unit fixture's assumed nearest-half-down
+rounding as an undocumented contract. Full-denominator musical windows and
+bounded phase, supplemented by exact reset/no-reset invariants, replace that
+assumption. Existing Mosaic rounding is unchanged; a separate rounding patch
+would require evidence of a violated musical contract.

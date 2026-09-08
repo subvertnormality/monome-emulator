@@ -199,6 +199,27 @@ same documented time origin. No arbitrary sorting of captured events to hide a
 race. Environment-limited timing is reported as failure of that supported profile,
 not silently retried until one run happens to pass.
 
+The same event-error profile applies to each 45-second fractional-rate fixture
+(D20). Before collecting its result, declare every scheduled Note On and Note Off,
+the independent unrounded musical intent, its quantised native pulse deadline,
+and the transport-to-monotonic origin. Exclude explicitly forced Stop releases
+from scheduling quantiles and test them against their input/cleanup contract.
+Use nearest-rank p99 (rank `ceil(0.99*N)`) of absolute emission-minus-deadline
+error, maximum absolute error, and the last planned event's phase error. The
+limits remain 10/50/20 ms respectively. Do not fit tempo or origin to emitted
+notes, choose whichever rounded deadline fits an emission, or substitute a
+short fixture for the required ten-minute C12 profile. Missing verified deadline
+or origin mapping means scheduling conformance is unverified, not passed.
+
+An interval or window compares two emissions: its residual is the difference
+of their individual scheduling errors. The event profile does not imply a
+pointwise 10 ms window bound or a percentile bound on overlapping windows.
+Retain these residuals as diagnostics and check the independently planned
+musical intervals/windows exactly. Controlled-time musical checks retain their
+existing 2 ns allowance, exact MIDI data/counts, and release-before-retrigger
+ordering. Historical failures under the earlier pointwise window oracle remain
+failed records; this amendment does not reclassify them.
+
 Fresh boot and existing-autosave boot have separate initial-state fixtures. The
 runner observes init-return, live scheduler/redraw clocks, and a first script
 frame as readiness; device attachment is a distinct capability. Scenarios seed
