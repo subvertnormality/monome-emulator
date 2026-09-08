@@ -153,3 +153,25 @@ table and its runtime/application identity; verify fresh stopped state and
 settled fixed tempo; account for every scheduled onset/release and separately
 bounded forced Stop release; run the 45-second fixtures and ten-minute profile.
 Retain all historical failures. Thresholds remain 10/50/20 ms.
+
+## Mosaic transport gesture identity
+
+Mosaic dispatches its short Play/Stop gesture when the grid key is released
+(`lib/m_grid.lua`, `g.key` with `z == 0`). The fractional timing fixture must
+therefore identify that release submission and its acknowledgement. The earlier
+press acknowledgement precedes the musical action and cannot bound the forced
+Stop note release. The corrected fixture uses the actual release input for both
+Play and Stop; it does not fit either origin to observed MIDI.
+
+Every exported Note On and Note Off must belong to exactly one validated capture
+window. There are no permitted setup, between-window or cleanup notes in this
+fixture. Injected outside-window offs, complete pairs and zero-velocity ons are
+rejected. Codex follow-up `01a08080-f62d-71e1-81ac-33873cbd5a06` cleared these
+scoped corrections. The fresh controlled run `686a1b059edc4635815d868f75061640`
+passes all seven rates. Corrected real-time run
+`419286ddbe0a45e3900ed71ac64cf119` also passes all seven rates with the unchanged
+10/50/20 ms event profile. Both manifests and their artifact hashes were verified;
+the Mosaic-owned `docs/testing/fractional-clock-validation.json` records compact
+per-rate results and source identities. These are one fresh process per lane;
+controlled repeat admission, the ten-minute profile and the full campaign remain
+incomplete. Previous failed manifests remain failed.
