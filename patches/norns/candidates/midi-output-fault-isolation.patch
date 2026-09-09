@@ -1,0 +1,92 @@
+--- a/lua/core/clock.lua
++++ b/lua/core/clock.lua
+@@ -171,15 +171,16 @@
+ -- Optional ordered observers of the native MIDI clock fanout. The deadline and
+ -- epoch are captured by the scheduler, not inferred from late callback time.
+ local output_subscriptions = {}
++local output_errors = {}
+ local next_output_subscription = 0
+ function clock.midi.subscribe_output(callbacks)
+   assert(type(callbacks) == "table", "MIDI output callbacks must be a table")
+   assert(callbacks.before ~= nil or callbacks.after ~= nil, "MIDI output callback required")
+-  for _, name in ipairs({"before", "after"}) do
++  for _, name in ipairs({"before", "after", "on_error"}) do
+     assert(callbacks[name] == nil or type(callbacks[name]) == "function", "invalid MIDI output callback")
+   end
+   next_output_subscription = next_output_subscription + 1
+-  local record = {id=next_output_subscription, before=callbacks.before, after=callbacks.after, active=true}
++  local record = {id=next_output_subscription, before=callbacks.before, after=callbacks.after, on_error=callbacks.on_error, active=true}
+   table.insert(output_subscriptions, record)
+   return record.id
+ end
+@@ -198,16 +199,45 @@
+ function clock.midi.clear_output_subscriptions()
+   for _, record in ipairs(output_subscriptions) do record.active = false end
+   output_subscriptions = {}
++  output_errors = {}
++end
++
++-- Keep a per-subscription diagnostic until script cleanup. Callers receive a
++-- copy so inspection cannot erase the fault. A failed subscription is disabled.
++function clock.midi.get_output_error(id)
++  local error = output_errors[id]
++  if error then return {phase=error.phase, message=error.message} end
++end
++
++local function invoke_output_callback(callback, ...)
++  if callback == nil then return true end
++  local co = coroutine.create(callback)
++  local ok, err = coroutine.resume(co, ...)
++  if not ok then
++    local formatted, message = pcall(function() return debug.traceback(co, tostring(err)) end)
++    if not formatted then message = "MIDI output callback raised an unprintable error" end
++    return false, message
++  end
++  if coroutine.status(co) ~= "dead" then return false, "MIDI output callbacks must not yield" end
++  return true
+ end
+ 
+ local function output_callback(callback, scheduled, epoch, ports, observed)
+-  if callback == nil then return end
+   local visible_ports = {}
+   for i, port in ipairs(ports) do visible_ports[i] = port.id end
+-  local co = coroutine.create(callback)
+-  local ok, err = coroutine.resume(co, scheduled, epoch, visible_ports, observed)
+-  if not ok then error(err) end
+-  assert(coroutine.status(co) == "dead", "MIDI output callbacks must not yield")
++  return invoke_output_callback(callback, scheduled, epoch, visible_ports, observed)
++end
++
++local function output_failure(record, phase, message)
++  clock.midi.cancel_output(record.id)
++  local fault = {phase=phase, message=message}
++  output_errors[record.id] = fault
++  print("MIDI output subscriber " .. record.id .. " failed in " .. phase .. ": " .. message)
++  local ok, err = invoke_output_callback(record.on_error, message, phase, record.id)
++  if not ok then
++    fault.message = message .. "\non_error: " .. err
++    print("MIDI output subscriber error handler failed: " .. err)
++  end
+ end
+ 
+ local function dispatch_midi_output(selected, observed, scheduled, epoch)
+@@ -218,11 +248,17 @@
+     assert(type(scheduled) == "number" and type(epoch) == "number", "native clock deadline metadata required")
+   end
+   for _, record in ipairs(subscriptions) do
+-    if record.active then output_callback(record.before, scheduled, epoch, ports, observed) end
++    if record.active then
++      local ok, err = output_callback(record.before, scheduled, epoch, ports, observed)
++      if not ok then output_failure(record, "before", err) end
++    end
+   end
+   for _, port in ipairs(ports) do port.device:clock() end
+   for _, record in ipairs(subscriptions) do
+-    if record.active then output_callback(record.after, scheduled, epoch, ports, observed) end
++    if record.active then
++      local ok, err = output_callback(record.after, scheduled, epoch, ports, observed)
++      if not ok then output_failure(record, "after", err) end
++    end
+   end
+ end
+ 

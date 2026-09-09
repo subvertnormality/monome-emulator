@@ -1,0 +1,179 @@
+--- a/matron/src/clocks/clock_scheduler.c
++++ b/matron/src/clocks/clock_scheduler.c
+@@ -18,6 +18,8 @@
+ typedef struct {
+     clock_scheduler_event_type_t type;
+     bool ready;
++    bool queued;
++    unsigned long long sync_epoch;
+     int thread_id;
+ 
+     double sync_beat;
+@@ -35,12 +37,13 @@
+ static pthread_mutex_t clock_scheduler_events_lock;
+ static unsigned long long clock_scheduler_epoch = 0;
+ 
+-static void clock_scheduler_post_clock_resume_event(int thread_id, double value, double scheduled, unsigned long long epoch) {
++static void clock_scheduler_post_clock_resume_event(int thread_id, double value, double scheduled, unsigned long long epoch, bool is_sync) {
+     union event_data *ev = event_data_new(EVENT_CLOCK_RESUME);
+     ev->clock_resume.thread_id = thread_id;
+     ev->clock_resume.value = value;
+     ev->clock_resume.scheduled = scheduled;
+     ev->clock_resume.epoch = epoch;
++    ev->clock_resume.is_sync = is_sync;
+     event_post(ev);
+ }
+ 
+@@ -108,13 +111,15 @@
+             if (event->ready) {
+                 if (event->type == CLOCK_SCHEDULER_EVENT_SYNC) {
+                     if (clock_beat > event->sync_clock_beat) {
+-                        clock_scheduler_post_clock_resume_event(event->thread_id, clock_beat, event->sync_clock_beat, clock_scheduler_epoch);
++                        clock_scheduler_post_clock_resume_event(event->thread_id, clock_beat, event->sync_clock_beat, clock_scheduler_epoch, true);
+                         event->ready = false;
++                    event->queued = true;
+                     }
+                 } else {
+                     if (clock_time >= event->sleep_clock_time) {
+-                        clock_scheduler_post_clock_resume_event(event->thread_id, clock_time, event->sleep_clock_time, clock_scheduler_epoch);
++                        clock_scheduler_post_clock_resume_event(event->thread_id, clock_time, event->sleep_clock_time, clock_scheduler_epoch, false);
+                         event->ready = false;
++                    event->queued = true;
+                     }
+                 }
+             };
+@@ -133,6 +138,7 @@
+     for (int i = 0; i < NUM_CLOCK_SCHEDULER_EVENTS; i++) {
+         clock_scheduler_events[i].ready = false;
+         clock_scheduler_events[i].thread_id = -1;
++            clock_scheduler_events[i].queued = false;
+     }
+ 
+     clock_scheduler_start();
+@@ -171,7 +177,7 @@
+             event->sync_beat_offset = sync_beat_offset;
+ 
+             // count from the stored sync_clock_beat when syncing the same coroutine
+-            if (event->type == CLOCK_SCHEDULER_EVENT_SYNC) {
++            if (event->type == CLOCK_SCHEDULER_EVENT_SYNC && event->sync_epoch == clock_scheduler_epoch) {
+                 event->sync_clock_beat = clock_scheduler_next_clock_beat(event->sync_clock_beat, sync_beat, sync_beat_offset);
+             } else {
+                 event->sync_clock_beat = clock_scheduler_next_clock_beat(clock_beat, sync_beat, sync_beat_offset);
+@@ -185,6 +191,8 @@
+             event->type = CLOCK_SCHEDULER_EVENT_SYNC;
+         }
+ 
++        event->sync_epoch = clock_scheduler_epoch;
++        event->queued = false;
+         pthread_mutex_unlock(&clock_scheduler_events_lock);
+         return true;
+     }
+@@ -202,6 +210,7 @@
+     if (event != NULL) {
+         event->ready = true;
+         event->thread_id = thread_id;
++        event->queued = false;
+         event->sleep_time = seconds;
+         event->sleep_clock_time = clock_time + seconds;
+         event->type = CLOCK_SCHEDULER_EVENT_SLEEP;
+@@ -221,6 +230,7 @@
+         if (clock_scheduler_events[i].thread_id == thread_id) {
+             clock_scheduler_events[i].ready = false;
+             clock_scheduler_events[i].thread_id = -1;
++            clock_scheduler_events[i].queued = false;
+         }
+     }
+ 
+@@ -233,6 +243,7 @@
+     for (int i = 0; i < NUM_CLOCK_SCHEDULER_EVENTS; i++) {
+         clock_scheduler_events[i].ready = false;
+         clock_scheduler_events[i].thread_id = -1;
++            clock_scheduler_events[i].queued = false;
+     }
+ 
+     pthread_mutex_unlock(&clock_scheduler_events_lock);
+@@ -249,7 +260,10 @@
+     for (int i = 0; i < NUM_CLOCK_SCHEDULER_EVENTS; i++) {
+         event = &clock_scheduler_events[i];
+ 
+-        if (event->ready && event->type == CLOCK_SCHEDULER_EVENT_SYNC) {
++        if (event->thread_id >= 0 && (event->ready || event->queued) && event->type == CLOCK_SCHEDULER_EVENT_SYNC) {
++            event->queued = false;
++            event->ready = true;
++            event->sync_epoch = clock_scheduler_epoch;
+             event->sync_clock_beat = clock_scheduler_next_clock_beat(clock_beat, event->sync_beat, event->sync_beat_offset);
+         }
+     }
+@@ -266,10 +280,32 @@
+     for (int i = 0; i < NUM_CLOCK_SCHEDULER_EVENTS; i++) {
+         event = &clock_scheduler_events[i];
+ 
+-        if (event->ready && event->type == CLOCK_SCHEDULER_EVENT_SYNC) {
++        if (event->thread_id >= 0 && (event->ready || event->queued) && event->type == CLOCK_SCHEDULER_EVENT_SYNC) {
++            event->queued = false;
++            event->ready = true;
++            event->sync_epoch = clock_scheduler_epoch;
+             event->sync_clock_beat = 0;
+         }
+     }
+ 
+     pthread_mutex_unlock(&clock_scheduler_events_lock);
+ }
++
++/* Claim a queued resume before entering Lua. Epoch changes invalidate old sync
++ * events and re-arm their waiting coroutines; sleep deadlines stay independent.
++ * A running coroutine is not re-armed: its next sync rebases by sync_epoch. */
++bool clock_scheduler_claim_resume(int thread_id, bool is_sync, unsigned long long epoch) {
++    bool accepted = false;
++    pthread_mutex_lock(&clock_scheduler_events_lock);
++    for (int i = 0; i < NUM_CLOCK_SCHEDULER_EVENTS; i++) {
++        clock_scheduler_event_t *event = &clock_scheduler_events[i];
++        if (event->thread_id != thread_id) continue;
++        if (event->queued && (!is_sync || epoch == clock_scheduler_epoch)) {
++            event->queued = false;
++            accepted = true;
++        }
++        break;
++    }
++    pthread_mutex_unlock(&clock_scheduler_events_lock);
++    return accepted;
++}
+--- a/matron/src/clocks/clock_scheduler.h
++++ b/matron/src/clocks/clock_scheduler.h
+@@ -18,3 +18,5 @@
+ #ifdef NORNS_TEST
+ double clock_scheduler_test_next_clock_beat(double clock_beat, double sync_beat, double sync_beat_offset);
+ #endif
++
++bool clock_scheduler_claim_resume(int thread_id, bool is_sync, unsigned long long epoch);
+--- a/matron/src/event_types.h
++++ b/matron/src/event_types.h
+@@ -225,6 +225,7 @@
+     struct event_common common;
+     uint32_t thread_id;
+     double value;
++    uint8_t is_sync;
+     double scheduled;
+     unsigned long long epoch;
+ }; // + 12
+--- a/matron/src/events.c
++++ b/matron/src/events.c
+@@ -11,6 +11,7 @@
+ #include "battery.h"
+ #include "device_monome.h"
+ #include "events.h"
++#include "clocks/clock_scheduler.h"
+ #include "oracle.h"
+ #include "stat.h"
+ #include "weaver.h"
+@@ -211,7 +212,9 @@
+         w_handle_metro(ev->metro.id, ev->metro.stage);
+         break;
+     case EVENT_CLOCK_RESUME:
+-        w_handle_clock_resume(ev->clock_resume.thread_id, ev->clock_resume.value, ev->clock_resume.scheduled, ev->clock_resume.epoch);
++        if (clock_scheduler_claim_resume(ev->clock_resume.thread_id, ev->clock_resume.is_sync, ev->clock_resume.epoch)) {
++            w_handle_clock_resume(ev->clock_resume.thread_id, ev->clock_resume.value, ev->clock_resume.scheduled, ev->clock_resume.epoch);
++        }
+         break;
+     case EVENT_CLOCK_START:
+         w_handle_clock_start();

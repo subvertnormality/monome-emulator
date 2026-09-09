@@ -3,7 +3,7 @@
   "updated": "2026-09-09",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "Current M5 admitted on combined runtime source ee6ddf57. See C16-current-admission.json. Continue full manual campaign and scoped hotplug evidence binding; release/platform and final unit/integration hardening remain mandatory. No native processes active.",
+  "next_action": "Resume MIDI output boundary candidate07 from docs/delivery/MIDI-OUTPUT-BOUNDARY.md and midi-boundary-fixes-validation.json. Named queued-reset and subscriber-error review findings have passing scoped evidence. Mosaic cleanup wired;520units and7adapter scenarios pass.14D/R candidate06 and4scopedMosaicD/R candidate07 pass; no full admission. Next lifecycle/direct init/reset, forwarding/multiport/remapping, musical gate/intermediate/wrap/tempo matrices; internal tempo-reference correction and complete manual/release/final hardening remain.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -5325,9 +5325,9 @@
     ]
   },
   "midi_output_boundary_checkpoint": {
-    "status": "review_blockers_reproduced",
+    "status": "scoped_review_findings_resolved_unadmitted",
     "document": "docs/delivery/MIDI-OUTPUT-BOUNDARY.md",
-    "evidence": "docs/delivery/midi-boundary-review-validation.json",
-    "next_action": "Fix subscriber-error shared-clock termination and queued pre-reset obsolete scheduler continuation; new candidate and native regressions required before admission. Mosaic consumer startup slice passes14D/R and520units, not full scope."
+    "evidence": "docs/delivery/midi-boundary-fixes-validation.json",
+    "next_action": "Candidate07: rapid lifecycle/direct init/reset cancellation; incoming forwarding and multiport/remapping; master gate/intermediate/wrap/tempo matrices. No default/M5 promotion."
   }
 }

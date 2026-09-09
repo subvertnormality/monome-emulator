@@ -54,14 +54,20 @@ do
   local c,id,out=setup()
   c.midi.subscribe_output({before=function()c.sync(1)end})
   local ok,err=pcall(c.resume,id,1,.25,0)
-  assert(not ok and tostring(err):find('must not yield'));same(out,'')
+  assert(ok,err)
+  assert(c.midi.get_output_error(1).message:find('must not yield'))
+  same(out,'F8:1,F8:2')
+  c.resume(id,2,.5,0);same(out,'F8:1,F8:2,F8:1,F8:2')
   c.cleanup()
 end
 do
   local c,id,out=setup()
   c.midi.subscribe_output({after=function()error('callback failure sentinel')end})
   local ok,err=pcall(c.resume,id,1,.25,0)
-  assert(not ok and tostring(err):find('callback failure sentinel'));same(out,'F8:1,F8:2')
+  assert(ok,err)
+  assert(c.midi.get_output_error(1).message:find('callback failure sentinel'))
+  same(out,'F8:1,F8:2')
+  c.resume(id,2,.5,0);same(out,'F8:1,F8:2,F8:1,F8:2')
   c.cleanup()
 end
 do
@@ -82,4 +88,35 @@ do
   -- Unsubscribed legacy scripts require no new metadata.
   c.resume(id,1);same(out,'F8:1,F8:2');c.cleanup()
 end
-print('PASS:8 output dispatch scenarios; order, exact metadata, fanout snapshot, cancellation, deferred registration, errors, yield rejection, cleanup, legacy use')
+do
+  local c,id,out=setup()
+  local token=c.midi.subscribe_output({before=function()error('bad subscriber')end,
+    on_error=function(message,phase,handle)
+      assert(message:find('bad subscriber') and phase=='before' and handle==1)
+      out[#out+1]='REPORTED';error('bad error handler')
+    end})
+  c.midi.subscribe_output({after=function()out[#out+1]='HEALTHY'end})
+  c.resume(id,1,.25,0);same(out,'REPORTED,F8:1,F8:2,HEALTHY')
+  assert(c.midi.get_output_error(token).message:find('bad error handler'))
+  local copy=c.midi.get_output_error(token);copy.message='erased'
+  assert(c.midi.get_output_error(token).message~='erased')
+  c.resume(id,2,.5,0);same(out,'REPORTED,F8:1,F8:2,HEALTHY,F8:1,F8:2,HEALTHY');c.cleanup()
+end
+do
+  local c,id,out=setup()
+  c.midi.subscribe_output({before=function()error('first failure')end,
+    on_error=function()c.midi.clear_output_subscriptions();error('cleared then failed')end})
+  c.resume(id,1,.25,0);same(out,'F8:1,F8:2')
+  c.resume(id,2,.5,0);same(out,'F8:1,F8:2,F8:1,F8:2');c.cleanup()
+end
+for _,phase in ipairs({'before','on_error'}) do
+  local c,id,out=setup()
+  local function unprintable()return setmetatable({},{__tostring=function()error('formatting failed')end})end
+  c.midi.subscribe_output({before=function()if phase=='before' then error(unprintable())else error('ordinary failure')end end,
+    on_error=function()if phase=='on_error' then error(unprintable())end end})
+  c.midi.subscribe_output({after=function()out[#out+1]='HEALTHY'end})
+  c.resume(id,1,.25,0);same(out,'F8:1,F8:2,HEALTHY')
+  assert(c.midi.get_output_error(1).message:find('unprintable error'))
+  c.resume(id,2,.5,0);same(out,'F8:1,F8:2,HEALTHY,F8:1,F8:2,HEALTHY');c.cleanup()
+end
+print('PASS:12 output dispatch scenarios including unprintable subscriber and handler errors')
