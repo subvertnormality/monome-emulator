@@ -1,0 +1,59 @@
+{
+  "status": "review blockers reproduced; not admitted",
+  "review": {
+    "path": "/home/andy/projects/mosaic-behaviour-runs/midi-boundary-integration-review-01.json",
+    "sha256": "f8e7b4eed8c31dff34da81d02630f4c8584250241af1f4b722ea0759bacc7054",
+    "session": "01a08785-156e-7a81-bc0b-03fed3a76d2e"
+  },
+  "evidence": [
+    {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/737376930cc14f4c9634095b65fd695e/manifest.json",
+      "sha256": "a0e2ac9c3b28064bb271fdd91ed0cd9f2ea20dd424f1c291c9a49574cbc79efb",
+      "result": {
+        "passed": true,
+        "failure": null,
+        "clock_mode": "controlled-experimental",
+        "install": "/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-04/installation.json",
+        "scope": "Native queued-delivery and epoch probe; no full admission"
+      }
+    },
+    {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/d243848ab65f4b41827ad4bb6fab47ec/manifest.json",
+      "sha256": "acb2c1eb0003f34c2caba03be0d438e30fb8ddc1bed581c83af03255e47e2562",
+      "result": {
+        "passed": true,
+        "failure": null,
+        "clock_mode": "real-time",
+        "install": "/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-04/installation.json",
+        "scope": "Native queued-delivery and epoch probe; no full admission"
+      }
+    },
+    {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/238b93253a82450ea1b1225b7bcd48bd/results.json",
+      "sha256": "b349b7ce75732f052ff0f8f7181360740f598bf7dcb33467e9fd0ac9e4b7230c",
+      "result": {
+        "status": "reproduced",
+        "exit_code": 1,
+        "stdout": "PASS: observed value, scheduled deadline, delayed continuation, sleep, epoch/reset/reschedule, queued immutability, cancellation\nqueued_deadline=100.250000000 reset_beat=0.000000000 continuation_deadline=100.500000000\n",
+        "stderr": "FAIL: queued continuation retained pre-reset deadline\n",
+        "source": "/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-04/norns/matron/src/clocks/clock_scheduler.c",
+        "source_sha256": "1d06a6d24f1d65bd3f2534ee9df35cefa8b8d7acdd13587e91c80e655faad3a8",
+        "command": [
+          "cc",
+          "-std=gnu11",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-fsanitize=undefined",
+          "-DSCHEDULER_SOURCE=\"/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-04/norns/matron/src/clocks/clock_scheduler.c\"",
+          "/home/andy/projects/monome-emulator-midi-clock/tests/native_clock_queued_epoch.c",
+          "-o",
+          "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/238b93253a82450ea1b1225b7bcd48bd/probe",
+          "-lm",
+          "-pthread"
+        ]
+      }
+    }
+  ],
+  "next_action": "Reproduce/isolate callback failure without suppressing error reporting; fix queued epoch continuation and add stale-event native lifecycle checks. Rebuild new optional candidate and rerun generic/Mosaic matrix."
+}
