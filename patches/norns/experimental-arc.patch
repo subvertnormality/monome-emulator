@@ -12,15 +12,15 @@
  int emu_grid_rows(void);
 --- a/matron/src/emu_bridge.c
 +++ b/matron/src/emu_bridge.c
-@@ -97,6 +97,42 @@
- static struct event_custom_ops connection_ops={.type_name="emu_grid_connection",.weave=change_connection,.free=release_ack};
+@@ -118,6 +118,42 @@
+ }
  
  static void virtual_deinit(void *self) { (void)self; }
 +static struct dev_monome *arc_device;
 +static atomic_int arc_connected=1, arc_intensity=15;
 +static void arc_metadata(void) {
 +    uint8_t state[2]={arc_connected,arc_intensity};
-+    emit(19,arc_device->dev.id,state,sizeof(state));
++    emit(25,arc_device->dev.id,state,sizeof(state));
 +}
 +void emu_arc_intensity(int value) { arc_intensity=value; arc_metadata(); }
 +int emu_arc_init(struct dev_monome *md) {
@@ -38,7 +38,7 @@
 +    uint8_t leds[256];
 +    for (int ring=0;ring<4;ring++) for (int led=0;led<64;led++)
 +        leds[ring*64+led]=arc_connected ? (md->data[ring][led]&15) : 0;
-+    emit(18,md->dev.id,leds,sizeof(leds));
++    emit(24,md->dev.id,leds,sizeof(leds));
 +    memset(md->dirty,0,sizeof(md->dirty));
 +}
 +static void change_arc_connection(lua_State *l,void *value,void *context) {
@@ -54,33 +54,33 @@
 +
  void emu_midi_init(struct dev_midi *md) {
      if (midi_count>=16) abort();
-     midi_devices[midi_count++] = md;
-@@ -154,6 +190,10 @@
-     if (!midi_count) abort();
+     midi_connected[midi_count]=1;
+@@ -181,6 +217,10 @@
+     for(int port=0;port<midi_count;++port) midi_metadata(port,1,0);
      dev_list_add(DEV_TYPE_MONOME, "emu:grid128", NULL, NULL);
      grid_metadata();
 +    if (getenv("NORNS_EMU_ARC")) {
 +        dev_list_add(DEV_TYPE_MONOME,"emu:arc4",NULL,NULL);
 +        arc_metadata();
 +    }
-     const char *crow_path=getenv("NORNS_EMU_CROW_PATH");
-     if(crow_path) dev_list_add(DEV_TYPE_CROW,crow_path,"Virtual Crow",NULL);
  }
-@@ -280,6 +320,21 @@
+ static struct emu_midi_schedule input_schedule;
+ static pthread_mutex_t input_schedule_lock=PTHREAD_MUTEX_INITIALIZER;
+@@ -328,6 +368,21 @@
              { int *connected=malloc(sizeof(int)); if (!connected) abort();
                *connected=args[1]; ev=event_custom_new(&connection_ops,connected,NULL); }
              break;
-+        case 12:
++        case 16:
 +            if (!arc_device || !arc_connected || args[1]<0 || args[1]>3 || args[2]<-127 || args[2]>127) goto invalid;
 +            ev=event_data_new(EVENT_ARC_ENCODER_DELTA);
 +            ev->arc_encoder_delta.id=arc_device->dev.id;
 +            ev->arc_encoder_delta.number=args[1]; ev->arc_encoder_delta.delta=args[2]; break;
-+        case 13:
++        case 17:
 +            if (!arc_device || !arc_connected || args[1]<0 || args[1]>3 || args[2]<0 || args[2]>1) goto invalid;
 +            ev=event_data_new(EVENT_ARC_ENCODER_KEY);
 +            ev->arc_encoder_key.id=arc_device->dev.id;
 +            ev->arc_encoder_key.number=args[1]; ev->arc_encoder_key.state=args[2]; break;
-+        case 14:
++        case 18:
 +            if (!arc_device || args[1]<0 || args[1]>1) goto invalid;
 +            { int *connected=malloc(sizeof(int)); if (!connected) abort();
 +              *connected=args[1]; ev=event_custom_new(&arc_connection_ops,connected,NULL); }

@@ -1,0 +1,73 @@
+{
+  "status": "returned",
+  "request": {
+    "repo_path": "/home/andy/projects/monome-emulator-midi-hotplug",
+    "engine": "codex",
+    "effort": "medium",
+    "web_search": false,
+    "question": "Codex-only scoped pre-promotion review. Read-only; do not edit sources. Trusted local development emulator, proportionate scrutiny of concrete runtime bugs and false-green acceptance; no enterprise governance. User explicitly authorises external Codex review of repository source/docs/test evidence. General-purpose utility; Mosaic absent from these probes. Review uncommitted MIDI hot-plug implementation on branch codex/midi-hotplug against base319e3a0. Do not certify whole emulator or controlled-time admission.\nNative patch generator scripts/prepare_midi_hotplug.py produces isolated pinned-source rt04 and d04 candidates. Read actual artifacts/hotplug/recipe-rt-04/controlled-runtime.patch and recipe-d-04/controlled-runtime.patch as needed. Installations at /home/andy/projects/monome-runtime-candidates/midi-hotplug-{rt,d}-04/installation.json. Device connection action12 drives native Lua w_handle_midi_remove/add, stable slots, atomic hardware state, schedule lock, transition metadata18 with input sequence, then queued ack4. Native schedule outcomes14/17 delivered or19/20 dropped at original deadlines; backend/evidence verify all accepted events. Retained sends while disconnected suppressed, immediate disconnected input rejected, previous runtime rejects unsupported capability before command submission. Examine concurrent hardware/Lua queue ordering, parser reset, retained-pointer behavior, event evidence identity and timing, stale data, packet limits, false greens.\nNew native probe tests/midi_hotplug_native.py and independent fixtures/probes/midi-hotplug/midi-hotplug.lua exercise two ports, disconnect callbacks, unaffected other port, repeated reconnects, same slot, retained sends, invalid/redundant inputs, scheduled drop and later delivery, fragmented note and SysEx reattachment, long orphan bytes with interleaved clock, held note not spuriously released and real NoteOff after reconnect. Full literal output ledger and causal bracketing in native export. Note official Midi.__index inherits global remove: fixture deliberately sets new device.remove=false in midi.add, otherwise inherited global callback would be called without device on removal; no norns workaround applied.\nConfirmed candidate03 parser defect: baseline8d1126200f76409ea603edda4b400ebf orphan SysEx suffix after reset emitted invalid[0,2,247]. Candidate04 wrapper gap guard suppresses data/F7 until fresh status, passes realtime>=F8 without restoring status. Backend independently predicts same. Both fresh native lanes and old-runtime rejection pass; 10 connection/drop evidence tests and existing5 schedule tests previously passed. Full trace hashes and six existing native timing regressions in docs/delivery/completions/C05-hotplug-progress.json. Existing native clock and controlled MIDI clock plus all four R input deadline normal/entry-delay/registration-delay/wrong-tempo probes passed.\nReturn concrete substantive issues/minimal necessary fixes with evidence; inspect for missing crucial lifecycle scenarios. Default runtime unchanged pending this review and broader generic conformance. Do not run source-mutating or long broad suites, or involve another vendor. Avoid claiming hardware equivalence; focus the small adapter and its acceptance boundary.",
+    "files": [
+      {
+        "path": "scripts/prepare_midi_hotplug.py",
+        "reason": "Scoped native MIDI hot-plug implementation and evidence"
+      },
+      {
+        "path": "src/runtime/native.py",
+        "reason": "Scoped native MIDI hot-plug implementation and evidence"
+      },
+      {
+        "path": "src/automation/midi_connection_evidence.py",
+        "reason": "Scoped native MIDI hot-plug implementation and evidence"
+      },
+      {
+        "path": "src/automation/midi_schedule_evidence.py",
+        "reason": "Scoped native MIDI hot-plug implementation and evidence"
+      },
+      {
+        "path": "tests/midi_connection_contracts.py",
+        "reason": "Scoped native MIDI hot-plug implementation and evidence"
+      },
+      {
+        "path": "tests/midi_hotplug_native.py",
+        "reason": "Scoped native MIDI hot-plug implementation and evidence"
+      },
+      {
+        "path": "fixtures/probes/midi-hotplug/midi-hotplug.lua",
+        "reason": "Scoped native MIDI hot-plug implementation and evidence"
+      },
+      {
+        "path": "docs/architecture/midi-hotplug.md",
+        "reason": "Scoped native MIDI hot-plug implementation and evidence"
+      },
+      {
+        "path": "docs/delivery/completions/C05-hotplug-progress.json",
+        "reason": "Scoped native MIDI hot-plug implementation and evidence"
+      }
+    ]
+  },
+  "input_sha256": "47f5f72f729b4df28ed1ada3b8c104184e40a9b6ae04114034d8074208f7a5fa",
+  "source_sha256": {
+    "scripts/prepare_midi_hotplug.py": "846bb8f0c6ac3d93c1079780425104e0722c1a170df1dda5b9cfe7ab23daf43c",
+    "src/runtime/native.py": "1bb2b20330d211ccc7f52f3fdfa6fb69366e9e75a89aa17925d0a390c6d27f18",
+    "src/automation/midi_connection_evidence.py": "e5616f49f63792513edfa6d3f6c4fa94d731b3b3e2accfd18e03a01ed766fe60",
+    "src/automation/midi_schedule_evidence.py": "6c23b189190267870bf12d7cdfe03ed699e68eb21488ccb74dc7e0a6cbf27367",
+    "tests/midi_connection_contracts.py": "a5be5babc1ee7d556ad93731d97e04143f7672c985b8d6e9feda845342bea126",
+    "tests/midi_hotplug_native.py": "c73683419e7d8873c681d87ed5e16bfc7218c7c7c89aa757975688336440c8c9",
+    "fixtures/probes/midi-hotplug/midi-hotplug.lua": "2783e019f363511dbccd437843c1de706d58fab904a3685af7ca7b8dcf46d59f",
+    "docs/architecture/midi-hotplug.md": "0baae9adba22f6c4e0b54659b2fa9d1a63a57315a31ce1e16d10cd4b14aa34dc",
+    "docs/delivery/completions/C05-hotplug-progress.json": "615d92b1adc44015be92cf6b4e55a947c717bc241cd7f2328a02fc85f3f25522"
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "Hold scoped promotion for two concrete issues: stale output-parser state across reconnect, and an output/disconnection ordering race.\n\n1. **Reconnect can make valid MIDI fail capture.** [native.py:214](/home/andy/projects/monome-emulator-midi-hotplug/src/runtime/native.py:214) resets `midi_inputs`, but leaves `capture.decoders` intact. After an echoed SysEx chunk `[240,1,2]`, disconnect/reconnect followed by `[144,67,101]` raises `midi_sysex: Status interrupted an exclusive message` in [the capture decoder](/home/andy/projects/monome-emulator-midi-hotplug/src/devices/midi/__init__.py:30). I reproduced that decoder failure without modifying files. The [native probes:60](/home/andy/projects/monome-emulator-midi-hotplug/tests/midi_hotplug_native.py:60) use only `[240,1]` before removal\u2014too short for norns to emit its first three-byte SysEx chunk\u2014so they miss this lifecycle case. **Fix:** reset the affected output decoder at the ordered connection boundary, preserving raw history, sequence accounting and outstanding notes. Add a native case that disconnects after an emitted SysEx chunk and verifies fresh MIDI after reconnect.\n\n2. **The atomic connected flag does not serialize output with removal.** [prepare_midi_hotplug.py:34](/home/andy/projects/monome-emulator-midi-hotplug/scripts/prepare_midi_hotplug.py:34) inserts a connected-state check before output emission, but that send path never takes `midi_connection_lock`. Meanwhile [lines 51 onward](/home/andy/projects/monome-emulator-midi-hotplug/scripts/prepare_midi_hotplug.py:51) change state and emit transition metadata under that lock. A Lua send can pass the check, be descheduled, then emit after the device thread records disconnection. Both generated candidates contain this interleaving. **Fix:** serialize the connected check through emission with the transition boundary, using consistent lock ordering. Add a focused concurrent-send/removal probe; the existing retained-send test runs after removal acknowledgement and cannot expose this race.\n\nThe 10 connection/drop tests and five schedule-evidence tests pass. Both candidate patch/source hashes and all three recorded hot-plug run artifact ledgers match their recorded hashes.\n\n**CONFIDENCE: High.** The capture failure was reproduced at decoder level; the race follows from source ordering, but neither new case was exercised in a fresh native run during this read-only review.\n\n---\n_paranoia-local \u00b7 engine=codex \u00b7 session_ref=`01a08138-73f4-76f2-9b4e-28d6fa6f6c9e` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  }
+}

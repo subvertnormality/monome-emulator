@@ -6,7 +6,9 @@ from automation.client import Session
 from automation.protocol import ContractError
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--install',required=True,type=Path);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--install',required=True,type=Path)
+    p.add_argument('--hotplug',action='store_true',help='Exercise MIDI removal while arc remains active')
+    a=p.parse_args()
     out=ROOT/'artifacts/arc'/time.strftime('native-%Y%m%d-%H%M%S');out.mkdir(parents=True)
     report=dict(passed=False,source=source_identity(),checks=[]);client=None
     try:
@@ -45,6 +47,26 @@ def main():
         act(type='arc_connection',connected=True);assert snap()['arc']==expected(positions)
         act(type='arc_key',n=1,state=1);act(type='release_all');assert not snap()['held']
         check('reconnect-and-release-all')
+        if a.hotplug:
+            before=snap();assert before['midi_connection_supported']
+            count=before['midi_count']
+            act(type='midi_connection',port=1,connected=False)
+            act(type='arc_delta',n=1,delta=1)
+            shifted=positions.copy();shifted[0]=positions[0]%64+1
+            state=snap();assert state['arc']==expected(shifted)
+            assert state['midi_count']==count and state['midi_connections']==[False]
+            act(type='arc_delta',n=1,delta=-1)
+            act(type='arc_key',n=1,state=1)
+            act(type='arc_connection',connected=False)
+            assert not snap()['held'] and snap()['midi_connections']==[False]
+            act(type='arc_connection',connected=True)
+            assert snap()['arc']==expected(positions)
+            act(type='midi_connection',port=1,connected=True)
+            act(type='arc_delta',n=1,delta=1)
+            assert snap()['midi'][-1]['bytes']==[176,1,shifted[0]]
+            act(type='arc_delta',n=1,delta=-1)
+            assert snap()['arc']==expected(positions)
+            check('midi-removal-does-not-alias-arc-input-output-or-reconnect')
         act(type='key',n=2,state=1);act(type='key',n=2,state=0);assert snap()['arc_device']['intensity']==5
         check('independent-arc-intensity')
         act(type='key',n=3,state=1);act(type='key',n=3,state=0)

@@ -1,3 +1,6 @@
 * text=auto eol=lf
 *.bat text eol=crlf
 *.cmd text eol=crlf
+
+# Preserve mixed upstream line endings in this tested native diff.
+/patches/norns/experimental-screen-worker-shutdown.patch -text

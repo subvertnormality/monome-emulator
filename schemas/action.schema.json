@@ -315,6 +315,28 @@
             "time_domain"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "midi_connection"
+            },
+            "port": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 16
+            },
+            "connected": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "port",
+            "connected"
+          ],
+          "additionalProperties": false
         }
       ]
     },

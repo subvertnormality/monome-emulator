@@ -1,0 +1,41 @@
+{
+  "status": "scoped-regressions-and-review-complete",
+  "installation": "/home/andy/projects/monome-emulator-behaviour-audio-crow/.runtime/screen-shutdown-tools-01/installation.json",
+  "evidence": [
+    {
+      "path": "/home/andy/projects/monome-emulator-behaviour-audio-crow/artifacts/behaviour-expansion/screen-worker-validation.json",
+      "sha256": "88c6177f763716ad06b68deb2f50ddafa816ac37ea5886e108db5c36ad372164"
+    },
+    {
+      "path": "/home/andy/projects/monome-emulator-behaviour-audio-crow/artifacts/behaviour-expansion/screen-shutdown-20260908-211851/report.json",
+      "sha256": "40d6ee39aa1e72c117dc17788d5efcf623d643f56c4f86aa268a72c2cd53fb76"
+    },
+    {
+      "path": "/home/andy/projects/monome-emulator-behaviour-audio-crow/artifacts/behaviour-expansion/screen-shutdown-20260908-212017/report.json",
+      "sha256": "c1a84c5e6bb9fe18d4a5c1752d97f458d8c665c610804b3541ef1d86c7033882"
+    },
+    {
+      "path": "/home/andy/projects/mosaic-behaviour-runs/5a62d4b2b41c41c881d937fc7279c4b4/manifest.json",
+      "sha256": "eb80366a5cf5b720c70b1cc7f9f560e99702ed43fc8c1df91778a9fa80ffd9d3"
+    },
+    {
+      "path": "/home/andy/projects/mosaic-behaviour-runs/3c8f4c988bcd411698e85d58f93ce89b/manifest.json",
+      "sha256": "743e866b2c0b82ada500d405c3b35407cc97bdd3030fe77489f959bf8944eb39"
+    },
+    {
+      "path": "/home/andy/projects/mosaic-behaviour-runs/ca4608be26cb4c0db8a2e960a06370db/manifest.json",
+      "sha256": "0a0f8c1e61446f28e036058a3b7c4ffdd4ab433ee0039e1a877126643e6a5693"
+    }
+  ],
+  "queued_paints_completed_before_destroy": 16,
+  "mosaic_runs": [
+    "5a62d4b2b41c41c881d937fc7279c4b4",
+    "3c8f4c988bcd411698e85d58f93ce89b",
+    "ca4608be26cb4c0db8a2e960a06370db"
+  ],
+  "full_campaign_complete": false,
+  "default_runtime_promoted": false,
+  "review_artifact": "docs/delivery/reviews/output-integration-followup.json",
+  "next_action": "Publish validated emulator integration checkpoint; selectively publish Mosaic output tests without unvalidated slide candidates. Continue slide timing and critical interaction campaign.",
+  "review": "01a082af-b7d1-70e2-b7fc-814dd8c5cc91"
+}

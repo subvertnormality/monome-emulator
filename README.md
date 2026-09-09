@@ -6,8 +6,9 @@ for the norns screen, three keys and encoders, and a 16×8 grid. Try script chan
 interactively, inspect MIDI output, or automate checks through the CLI and Python
 client.
 
-**Development status:** working on Ubuntu 20.04 under Windows Subsystem for Linux
-(WSL2). This is a source-based development build, not a complete release. Native
+**Development status:** tested on Ubuntu 20.04 under Windows Subsystem for Linux
+(WSL2), with optional Docker profiles tested on Windows x64 and Apple Silicon
+Macs using a native arm64 image. This is a source-based development build, not a complete release. Native
 Linux release validation, clean-install packaging, and full application workflow
 acceptance are still pending. The default build focuses on MIDI; opt-in audio
 engines and virtual-device subsets have separate [tested boundaries](docs/AUDIO-DEVICES.md).
@@ -17,7 +18,11 @@ Physical peripheral equivalence is untested; controlled time remains experimenta
 
 For the optional container build, editable host mounts and browser audio, see
 [Docker instructions](docs/DOCKER.md). WSL remains the primary installation path;
-container and host-platform acceptance are recorded separately.
+Mac users should select the native `linux/arm64` Docker build. The container
+provides browser controls, virtual grid/MIDI, editable scripts, persistent data
+and browser audio for monitoring. Intel Macs are untested; amd64 emulation on
+Apple Silicon failed validation. See [tested platforms and limits](docs/PLATFORMS.md).
+The WSL build instructions below apply to Windows, not macOS.
 
 ### Requirements
 

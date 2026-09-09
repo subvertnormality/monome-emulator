@@ -1,0 +1,11 @@
+--- a/matron/src/hardware/screen/sdl.c
++++ b/matron/src/hardware/screen/sdl.c
+@@ -86,7 +86,7 @@
+     }
+     SDL_FreeSurface(priv->draw_surface);
+     SDL_DestroyWindow(priv->window);
+-    free(priv);
++    /* io_destroy_all owns and frees io->data after this destructor. */
+ }
+ 
+ static cairo_surface_t *screen_sdl_surface_create(screen_sdl_priv_t *priv) {

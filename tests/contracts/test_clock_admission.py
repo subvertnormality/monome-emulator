@@ -142,4 +142,47 @@ class NativeObservationBinding(unittest.TestCase):
         changed=copy.deepcopy(events);changed[2]['args']=[3,-2]
         with self.assertRaisesRegex(ContractError,'ordered native submission'):gate.bind_native_actions(changed,actions)
 
+
+    @staticmethod
+    def hotplug_stream():
+        events=[];actions=[]
+        def native(typ,args):
+            sequence=len(events)+1
+            events.extend([dict(kind='input',sequence=sequence,type=typ,args=args),
+                           dict(kind=4,id=sequence,monotonic_ns=sequence*100)])
+            return dict(native=dict(sequence=sequence,monotonic_ns=sequence*100))
+        def public(action,typ,args):
+            actions.append(dict(request=dict(action=action),ack=native(typ,args)))
+        public(dict(type='key',n=2,state=1),1,[2,1])
+        public(dict(type='grid',x=3,y=4,state=1),3,[2,3,1])
+        for port,connected in [(2,False),(1,False),(2,True),(2,False),(2,True)]:
+            public(dict(type='midi_connection',port=port,connected=connected),12,[port,int(connected)])
+        public(dict(type='midi',port=2,bytes=[144,60,100]),7,[2,[144,60,100]])
+        # MIDI disconnection does not release unrelated held keys/grid input.
+        native(1,[2,0]);native(3,[2,3,0])
+        actions.append(dict(request=dict(action=dict(type='release_all')),ack={}))
+        return events,actions
+
+    def test_midi_hotplug_binds_order_port_state_ack_and_held_inputs(self):
+        events,actions=self.hotplug_stream()
+        gate.bind_native_actions(events,actions)
+
+    def test_midi_hotplug_rejects_missing_forged_and_unreported_evidence(self):
+        events,actions=self.hotplug_stream()
+        gate.bind_native_actions(events,actions) # Establish a valid control.
+        changes=[]
+        e,a=copy.deepcopy(events),copy.deepcopy(actions);e[4]['args'][0]=1;changes.append(('wrong port',e,a))
+        e,a=copy.deepcopy(events),copy.deepcopy(actions);e[4]['args'][1]=1;changes.append(('wrong state',e,a))
+        e,a=copy.deepcopy(events),copy.deepcopy(actions);del e[5];changes.append(('missing native ack',e,a))
+        e,a=copy.deepcopy(events),copy.deepcopy(actions);e.append(copy.deepcopy(e[5]));changes.append(('duplicate native ack',e,a))
+        e,a=copy.deepcopy(events),copy.deepcopy(actions);del a[2]['ack']['native'];changes.append(('missing public ack',e,a))
+        e,a=copy.deepcopy(events),copy.deepcopy(actions);a[2]['ack']=copy.deepcopy(a[3]['ack']);changes.append(('borrowed public ack',e,a))
+        e,a=copy.deepcopy(events),copy.deepcopy(actions);a[2]['ack']['native']['monotonic_ns']+=1;changes.append(('forged time',e,a))
+        e,a=copy.deepcopy(events),copy.deepcopy(actions);e[4]['sequence']=e[2]['sequence'];changes.append(('unordered sequence',e,a))
+        e,a=copy.deepcopy(events),copy.deepcopy(actions);del a[2];changes.append(('unreported transition',e,a))
+        e,a=copy.deepcopy(events),copy.deepcopy(actions);del e[4:6];changes.append(('missing native input',e,a))
+        for label,e,a in changes:
+            with self.subTest(label=label):
+                with self.assertRaises(ContractError):gate.bind_native_actions(e,a)
+
 if __name__=='__main__':unittest.main()

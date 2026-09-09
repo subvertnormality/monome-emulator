@@ -138,6 +138,10 @@
     {
       "path": "patches/norns/0012-scheduled-midi-input.patch",
       "sha256": "fb94e9ed062d52b2dfec48a42db9f3690015d4e16116e6cfb6ef895c52230bcd"
+    },
+    {
+      "path": "patches/norns/0013-midi-connection-lifecycle.patch",
+      "sha256": "ca253b43694e9527bca030b890d60771b4a20a5a82ddc94c4859d5dcfdc09676"
     }
   ],
   "serialosc": {

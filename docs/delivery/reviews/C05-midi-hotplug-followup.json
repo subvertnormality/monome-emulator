@@ -1,0 +1,33 @@
+{
+  "status": "returned",
+  "request": {
+    "repo_path": "/home/andy/projects/monome-emulator-midi-hotplug",
+    "session_ref": "01a08138-73f4-76f2-9b4e-28d6fa6f6c9e",
+    "engine": "codex",
+    "effort": "medium",
+    "web_search": false,
+    "rebuttal": "Focused read-only follow-up to your two demonstrated hot-plug findings. User explicitly authorises Codex repository source, docs and native-evidence export. Do not edit source. No whole-emulator/admission certification.\n1. Added actual emitted-SysEx-chunk native regression to tests/midi_hotplug_native.py, batch5: prefix[240,1,2] is echoed before disconnect, suffix[3,247] crosses reattachment, then fresh note70 on/off. Baseline candidate04 backend failed with Status interrupted an exclusive message: artifacts/hotplug/runs/eacc434ca6ea49f09c9502c774d8e69f/result.json. NativeBackend transition18 now resets capture.decoders[identifier] alongside input decoder only, preserving capture counters/history/notes. Fresh candidate05 full lifecycle D/R passes122b58ced6bb4d68bdaff713d2f36515 and5ff0e58941db4930b97879d20854efb4, all outputs literal-ledger checked. Held-note test proves no fabricated release/count reset across reconnect.\n2. prepare_midi_hotplug.py now holds midi_connection_lock across connected check and output emission; consistently connection->midi->emit locking. No test hook in runtime05. Added scripts/prepare_midi_send_race_probe.py producing separate test-only builds from hash-checked04/05 installs: injects250ms pause after connected check for one CC90. fixtures/probes/midi-send-race schedules native metro send after key2; harness observes entry marker then submits public disconnect during in-flight send. It proves input12 timestamp precedes pending output, exact full4-message output sequence, unaffected other port, reconnected port, native connection/action binding, noLuaerrors and cleanup. Candidate04 failed exact output-after-disconnect assertion: artifacts/hotplug/race-runs/86ae19dce91041999adf9df2017f444f/result.json. Candidate05 passed c61f034befcf42e992b29dba2de04119. Both build from same locked source graph; test-only installation field and patch make delay explicit; never promote test-only builds.\nCheck these minimal remedies and remaining substantive issues in same scope. Broader generic MIDI roundtrip1189emissions,overflow,gridconformance128cells/levels/rotations/holds/reconnect,andtwofaultdetections previouslypassed04; final candidate rerunpending, not relabelled. Default runtime unchanged. Production candidate05 installations /home/andy/projects/monome-runtime-candidates/midi-hotplug-{rt,d}-05/installation.json; test-only race builds /home/andy/projects/monome-runtime-candidates/midi-race-{baseline,fixed}/installation.json. Recipe dirs artifacts/hotplug/recipe-rt-05,recipe-d-05,recipe-race-baseline,recipe-race-fixed. Do not involve other vendors or expand review machinery."
+  },
+  "input_sha256": "80f2786a01705882c62de7c8670bbbb4ae501b4f8241cb2e5748b5b724d75fae",
+  "source_sha256": {
+    "src/runtime/native.py": "d3bdd96b87e1d9b33a086b571525492cb8220cca711106d3674d419d9e6e42f6",
+    "scripts/prepare_midi_hotplug.py": "3432a4c9ef42a54d1e9db6e15b57ed21000d074702d699b015ea7737360e22b3",
+    "scripts/prepare_midi_send_race_probe.py": "9dfdab380500d5f8061ab64c8b92dd994af948de8d27500effdd8e368efa1114",
+    "tests/midi_hotplug_native.py": "844078973379408299288444b57c626c525d9f426f63a6824a26d3f9e6d67d2c",
+    "tests/midi_send_race_native.py": "efaeb52d785ae566eb098353a67302ef9e8453a875998b712880534d1788ea85",
+    "fixtures/probes/midi-send-race/midi-send-race.lua": "60b86e369520246ddaf26bebbfc56167e6e4a5b348cc4f7b3c8f04371824f746"
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "**CONCEDE \u2014 both findings are now resolved in candidate05.** They were valid against candidate04; the supplied changes address them.\n\n- [native.py:216](/home/andy/projects/monome-emulator-midi-hotplug/src/runtime/native.py:216) now resets `capture.decoders[identifier]` without resetting history, counters or notes. [The expanded probe:60](/home/andy/projects/monome-emulator-midi-hotplug/tests/midi_hotplug_native.py:60) exercises an emitted `[240,1,2]` chunk before removal. The recorded baseline fails; both fixed lifecycle lanes pass.\n- [The installed candidate05 send path:131](/home/andy/projects/monome-runtime-candidates/midi-hotplug-rt-05/norns/matron/src/emu_bridge.c:131) holds `midi_connection_lock` from the connected check through emission. [The race probe:40](/home/andy/projects/monome-emulator-midi-hotplug/tests/midi_send_race_native.py:40) proves overlapping removal submission and checks output precedes disconnection. Its baseline fails and fixed build passes.\n\nI verified both production candidate patch/source hashes and all three fixed-run artifact ledgers. This closes these two findings only.\n\n---\n_paranoia-local \u00b7 engine=codex \u00b7 session_ref=`01a08138-73f4-76f2-9b4e-28d6fa6f6c9e` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  }
+}

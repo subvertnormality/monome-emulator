@@ -1,0 +1,25 @@
+{
+  "engine": "codex",
+  "status": "resolved",
+  "findings_open": [],
+  "source_digest": "ee6ddf5788dac501310d9c97b85fb76e76936d24516afde7c5c0429d4468f892",
+  "candidate_sha256": "5efc2367528c21705416c163d0ef1341e16bc63df695d9c5bd920219de9d002b",
+  "raw": {
+    "path": "/home/andy/projects/monome-emulator-behaviour-audio-crow/artifacts/c16/current-P5-delta-raw.json",
+    "sha256": "c5e30ea782f096066fbd28aa32a98de094604e28e6a1085c5510b58ae2a8afe4"
+  },
+  "triage": {
+    "path": "/home/andy/projects/monome-emulator-behaviour-audio-crow/docs/delivery/reviews/P5-current-admission-triage.md",
+    "sha256": "117f3f14f0b955e28be57457f44e7319ca0242a81f2a47a3a3a5bb83388fefb2"
+  },
+  "session_ref": "01a0865c-6632-7762-a06b-035b4121cf69",
+  "reviewed_head": "889282dcfad27ec9c3ae469a712ae6eb52b510cd",
+  "scope": "Current-runtime delta; fourteen selected MIDI application pairs, not hotplug/audio/Crow/full release",
+  "M5_passed": false,
+  "followups": [
+    {
+      "owner": "emulator hotplug evidence extension",
+      "requirement": "Bind midi_connection type12 and verify corresponding acknowledgements before admitting application hotplug scenarios"
+    }
+  ]
+}

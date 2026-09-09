@@ -16,7 +16,7 @@ def apply(source):
 static atomic_int arc_connected=1, arc_intensity=15;
 static void arc_metadata(void) {
     uint8_t state[2]={arc_connected,arc_intensity};
-    emit(19,arc_device->dev.id,state,sizeof(state));
+    emit(25,arc_device->dev.id,state,sizeof(state));
 }
 void emu_arc_intensity(int value) { arc_intensity=value; arc_metadata(); }
 int emu_arc_init(struct dev_monome *md) {
@@ -34,7 +34,7 @@ void emu_arc_refresh(struct dev_monome *md) {
     uint8_t leds[256];
     for (int ring=0;ring<4;ring++) for (int led=0;led<64;led++)
         leds[ring*64+led]=arc_connected ? (md->data[ring][led]&15) : 0;
-    emit(18,md->dev.id,leds,sizeof(leds));
+    emit(24,md->dev.id,leds,sizeof(leds));
     memset(md->dirty,0,sizeof(md->dirty));
 }
 static void change_arc_connection(lua_State *l,void *value,void *context) {
@@ -48,17 +48,17 @@ static void change_arc_connection(lua_State *l,void *value,void *context) {
 }
 static struct event_custom_ops arc_connection_ops={.type_name="emu_arc_connection",.weave=change_arc_connection,.free=release_ack};
 '''
-    cases='''        case 12:
+    cases='''        case 16:
             if (!arc_device || !arc_connected || args[1]<0 || args[1]>3 || args[2]<-127 || args[2]>127) goto invalid;
             ev=event_data_new(EVENT_ARC_ENCODER_DELTA);
             ev->arc_encoder_delta.id=arc_device->dev.id;
             ev->arc_encoder_delta.number=args[1]; ev->arc_encoder_delta.delta=args[2]; break;
-        case 13:
+        case 17:
             if (!arc_device || !arc_connected || args[1]<0 || args[1]>3 || args[2]<0 || args[2]>1) goto invalid;
             ev=event_data_new(EVENT_ARC_ENCODER_KEY);
             ev->arc_encoder_key.id=arc_device->dev.id;
             ev->arc_encoder_key.number=args[1]; ev->arc_encoder_key.state=args[2]; break;
-        case 14:
+        case 18:
             if (!arc_device || args[1]<0 || args[1]>1) goto invalid;
             { int *connected=malloc(sizeof(int)); if (!connected) abort();
               *connected=args[1]; ev=event_custom_new(&arc_connection_ops,connected,NULL); }

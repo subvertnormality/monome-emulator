@@ -67,7 +67,7 @@ def generic_check(path,name,spec,source,candidate,default,profile):
 
 def bind_native_actions(events,actions):
     """Match the ordered public input stream, including implicit releases."""
-    inputs=[e for e in events if e.get('kind')=='input' and e.get('type') in (1,2,3,6,7,8,9,10,11)]
+    inputs=[e for e in events if e.get('kind')=='input' and e.get('type') in (1,2,3,6,7,8,9,10,11,12)]
     require(all(a['sequence']<b['sequence'] for a,b in zip(inputs,inputs[1:])),
             'Unordered native submissions')
     acknowledgements={}
@@ -81,6 +81,7 @@ def bind_native_actions(events,actions):
         elif kind=='enc':typ,args=2,[action['n'],action['delta']]
         elif kind=='grid':typ,args=3,[action['x']-1,action['y']-1,action['state']]
         elif kind=='grid_connection':typ,args=6,[int(action['connected'])]
+        elif kind=='midi_connection':typ,args=12,[action['port'],int(action['connected'])]
         elif kind=='midi':typ,args=7,[action['port'],action['bytes']]
         elif kind=='advance':typ,args=8,list(divmod(action['nanoseconds'],1000000000))
         elif kind=='midi_schedule':typ,args=(11 if action.get('time_domain')=='logical' else 9),[action]
@@ -89,7 +90,7 @@ def bind_native_actions(events,actions):
         require(cursor<len(inputs),'Missing native submission')
         event=inputs[cursor];cursor+=1
         require(event['type']==typ and event['args']==args,'Public action differs from ordered native submission')
-        if typ in (1,2,3,6,7,8):
+        if typ in (1,2,3,6,7,8,12):
             matches=acknowledgements.get(event['sequence'],[])
             require(len(matches)==1,'Missing or duplicate native acknowledgement')
             if ack is not None:

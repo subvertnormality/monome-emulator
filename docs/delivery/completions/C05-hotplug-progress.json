@@ -1,0 +1,238 @@
+{
+  "status": "published-with-mosaic-stopped-panic-integration-validated",
+  "worktree": "/home/andy/projects/monome-emulator-midi-hotplug",
+  "branch": "codex/midi-hotplug",
+  "base_revision": "319e3a077685db5d4f40027c3aa9bb53a6a18622",
+  "real_time_install": "/home/andy/projects/monome-runtime-candidates/midi-hotplug-locked-01/installation.json",
+  "controlled_install": "/home/andy/projects/monome-runtime-candidates/midi-hotplug-controlled-locked-01/installation.json",
+  "connection_contract_tests": 10,
+  "existing_schedule_contract_tests": 5,
+  "behavior": "Official Lua add/remove callbacks and stable virtual slots; disconnected retained sends suppressed; other port continues; scheduled events dropped at disconnected deadlines with explicit evidence; reconnect permits later events; legacy runtime rejects new action.",
+  "remaining": [
+    "Remaining manual domains and interaction campaign",
+    "Controlled-time repeatability/admission and full emulator release gates",
+    "Main integration requires separate authorisation; do not retry or bypass"
+  ],
+  "failures_preserved": [
+    "cce1e11a4aed48379954a51cb5d40b07",
+    "7ccfff3e088e4ecaa192969117a448d7",
+    "843006255d06442a9313fabdb6aa02bb",
+    "a9aa011f9f80410b8a1ce063b3cbb7a9",
+    "bdf1af26a92042858315cf0f69af83dc",
+    "d9066f236e974e1da48b2fbd1e5f9fd0",
+    "8d1126200f76409ea603edda4b400ebf",
+    "eacc434ca6ea49f09c9502c774d8e69f"
+  ],
+  "host_note": "JACK registry filled again. Verified one recorded old probe server name absent from process command lines, started that exact name using normal JACK live-server duplicate protection, and stopped only newly owned process group normally (exit0). No shared-memory deletion or live audio-task termination. Recovery receipt artifacts/hotplug/jack-owned-recovery.json.",
+  "default_runtime_unchanged": false,
+  "full_campaign_complete": false,
+  "historical_basic_runs": [
+    {
+      "run_id": "0405b0560b534b719daf37ab79890031",
+      "clock_mode": "real-time",
+      "legacy": false,
+      "result_sha256": "e1d489702840fa2774b93e584a809dd2dd2966042071d22bbc885f5bfb843f00",
+      "passed": true
+    },
+    {
+      "run_id": "52677758be6e45f1b01a8b6a9f42364d",
+      "clock_mode": "controlled-experimental",
+      "legacy": false,
+      "result_sha256": "2c684cf8a2fb723b8eaf6d88fbe4c372cca2f560cb29e094bed3e3e0f8fe82b9",
+      "passed": true
+    },
+    {
+      "run_id": "7c80d1dbf9fa4e658ab9466c4edf7ef3",
+      "clock_mode": "real-time",
+      "legacy": true,
+      "result_sha256": "0469a3706722a53026f2c14728e5af4743ef0f405944ed7d1d793f95558f0a09",
+      "passed": true
+    }
+  ],
+  "parser_regression": {
+    "baseline": "8d1126200f76409ea603edda4b400ebf",
+    "observed": "After reconnect, orphan SysEx suffix [2,247] produced invalid native MIDI [0,2,247].",
+    "fix": "Discard orphan data/F7 after attachment reset until fresh status; independent real-time bytes pass without restoring running status.",
+    "pre_expansion_fixed_runs": [
+      "95ad0ec532fd4f03905f79f8f78b8abc",
+      "a044ba7652494b388fb5d62c5f97c86b"
+    ]
+  },
+  "additional_verified_behavior": [
+    "Three fragmented-message batches with causally bracketed disconnect/reconnect: note fragment, SysEx suffix, 96 orphan data bytes plus interleaved clock. Literal full-export output ledger; no phantom messages.",
+    "Repeated reconnects and held note: unplug creates no fabricated NoteOff; other port remains usable; actual NoteOff after reconnect clears outstanding ownership."
+  ],
+  "timing_regressions": [
+    {
+      "name": "controlled-midi",
+      "manifest": "/home/andy/projects/monome-emulator-midi-hotplug/artifacts/c16/ad8a8bf99d75444eb030477d7ac7d396/manifest.json",
+      "sha256": "35cc5b05cc11ff40cf7f0215ae3ae0a25691044f53627ea72d9fb83d40391276",
+      "exit_code": 0
+    },
+    {
+      "name": "controlled-clock",
+      "manifest": "/home/andy/projects/monome-emulator-midi-hotplug/artifacts/c16/716684e98366460891a288ad113e48c1/manifest.json",
+      "sha256": "35cc5b05cc11ff40cf7f0215ae3ae0a25691044f53627ea72d9fb83d40391276",
+      "exit_code": 0
+    },
+    {
+      "name": "normal",
+      "manifest": "/home/andy/projects/monome-emulator-midi-hotplug/artifacts/c16/b63942b263424389872abe6fec9929f7/manifest.json",
+      "sha256": "5b864a4dc4af50da4f6c0fc31d044363e3f8804e34e83442eaefcdbeac47760a",
+      "exit_code": 0
+    },
+    {
+      "name": "entry-delay",
+      "manifest": "/home/andy/projects/monome-emulator-midi-hotplug/artifacts/c16/421ee5fe0dc14c80bab1e4be6bf3e554/manifest.json",
+      "sha256": "5c42d7f6f839e4ecba7696eaca93fbaa522ebac15d661d83a1a15db9d43ea8ce",
+      "exit_code": 0
+    },
+    {
+      "name": "registration-delay",
+      "manifest": "/home/andy/projects/monome-emulator-midi-hotplug/artifacts/c16/f39deec267d7478c87fe37b405d04c8c/manifest.json",
+      "sha256": "f844df4044e65de5b22933ed27218dcc55af7fa64a221ab1c4b6641f3e7cdc26",
+      "exit_code": 0
+    },
+    {
+      "name": "wrong-tempo",
+      "manifest": "/home/andy/projects/monome-emulator-midi-hotplug/artifacts/c16/dc3313903cbb42b78166ce8c5cf403d3/manifest.json",
+      "sha256": "421b3fb5f8f01c85b18dee65d1f4641878f3aafc11fb753842dd911e07e322f3",
+      "exit_code": 0
+    }
+  ],
+  "historical_edge_runs": [
+    {
+      "run_id": "99f044667ba84e5790264b817f27c79e",
+      "clock_mode": "controlled-experimental",
+      "legacy": false,
+      "result_sha256": "7e25948ff5a5821521310d37ce3b56283c99e10df6f55d76b8aa1ade38590d4b",
+      "passed": true
+    },
+    {
+      "run_id": "51f01f3044cf441e84e0d087cb51d06d",
+      "clock_mode": "real-time",
+      "legacy": false,
+      "result_sha256": "e17dd563e99c80a5545f56ca76f4bbcf0ffa05a94cb3b6f0a59bfeb6c4674448",
+      "passed": true
+    },
+    {
+      "run_id": "802aca9d49f24f2daeedad47ec9d3413",
+      "clock_mode": "real-time",
+      "legacy": true,
+      "result_sha256": "a8dacc4da51d23869efd07fab7a292d7d41a5b79484a295715b2de222e059c88",
+      "passed": true
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "122b58ced6bb4d68bdaff713d2f36515",
+      "clock_mode": "controlled-experimental",
+      "legacy": false,
+      "result_sha256": "ee4bd101f5f1a6c438aad248537467dcb75d9361eef282a773d1524ec5a3887a",
+      "passed": true
+    },
+    {
+      "run_id": "5ff0e58941db4930b97879d20854efb4",
+      "clock_mode": "real-time",
+      "legacy": false,
+      "result_sha256": "ef52f092dba21b9e0809086d78be50e1cf62ae5368da18e18174f8469892e2b8",
+      "passed": true
+    }
+  ],
+  "review": {
+    "path": "/home/andy/projects/monome-emulator-midi-hotplug/docs/delivery/reviews/C05-midi-hotplug-01.json",
+    "sha256": "216df7f6ee302b8484c1c76bf5fb5acf7126716574102c47045dbfdccacb5f28",
+    "session_ref": "01a08138-73f4-76f2-9b4e-28d6fa6f6c9e",
+    "findings": [
+      {
+        "issue": "Output capture decoder retains partial SysEx across connection change",
+        "native_baseline": "eacc434ca6ea49f09c9502c774d8e69f",
+        "remedy": "Reset only affected capture decoder at ordered transition; preserve capture count, history and outstanding notes",
+        "status": "fresh D/R native regression passed"
+      },
+      {
+        "issue": "Connected-state check and native output emission race with removal metadata",
+        "remedy": "Hold connection mutex across check and MIDI emission; connection then MIDI then emission lock order",
+        "status": "Native forced-overlap baseline failed; fixed passed; Codex follow-up closed"
+      }
+    ],
+    "followup": {
+      "path": "docs/delivery/reviews/C05-midi-hotplug-followup.json",
+      "sha256": "dc71070eb02e4fd09ca171cdb47410af6c282062a489801eaab11853266be04d",
+      "result": "Both scoped findings resolved in candidate05; no full emulator/admission certification"
+    }
+  },
+  "generic_rt04": {
+    "path": "/home/andy/projects/monome-emulator-midi-hotplug/artifacts/hotplug/generic-rt-04.json",
+    "sha256": "5544de69f0b13d380be3606443ea078be13ffae57c845a0e028242a73f11e680",
+    "checks": "1189 MIDI emissions, overflow detection, full grid conformance, coordinate/release fault detection",
+    "scope": "candidate04 before reviewed remedies; rerun relevant checks on final candidate"
+  },
+  "unit_checks": {
+    "connection_and_drop": 10,
+    "schedule_evidence": 5,
+    "native_schedule": 5,
+    "midi_parser": 3
+  },
+  "race_regression": [
+    {
+      "run": "86ae19dce91041999adf9df2017f444f",
+      "status": "failed",
+      "result_sha256": "2951628586ed605b28265217c9c784bc77ae3fe1383dc72eac0853dfadbbab64",
+      "overlap_ns": 248190173,
+      "output_after_disconnect": true
+    },
+    {
+      "run": "c61f034befcf42e992b29dba2de04119",
+      "status": "passed",
+      "result_sha256": "42841123abe2969fbadfdcc271d08d380154fcd782de9c1804ef08db664b5d5d",
+      "overlap_ns": 247514813,
+      "output_after_disconnect": false
+    }
+  ],
+  "generic_rt05": {
+    "path": "artifacts/hotplug/generic-rt-05.json",
+    "sha256": "da855dc343349f648fe0bc1a4c6f85805faa7bddf14c12879dc2bce33380d007",
+    "status": "passed"
+  },
+  "final_candidate_timing_runs": [
+    "cc71ed03866c4c8988f3521233d92be8",
+    "0db420abc9ac457abd0e56536dcbcab4",
+    "8c9a1b8f2e764fc4812b668f3e4f7ff6"
+  ],
+  "locked_runs": [
+    {
+      "run": "7b9265d6e08d4e65b2a0d787dbd64e3f",
+      "status": "passed",
+      "clock_mode": "real-time",
+      "result_sha256": "6cf72ef0409c41142907579302d8486e1edafb0820565d2f162f8ff07cc13f42"
+    },
+    {
+      "run": "d64353598d1d4cdb8db6c5365bfc14e3",
+      "status": "passed",
+      "clock_mode": "controlled-experimental",
+      "result_sha256": "838450fa70f0194c00748b40b51a7dd96367b0967a428a0ce3a456bf891728f4"
+    }
+  ],
+  "default_scope": "Only hot-plug worktree .runtime/current.json activated; main and other worktrees untouched",
+  "publication": {
+    "emulator_branch": "codex/midi-hotplug",
+    "implementation_revision": "ae203883c0c2910d914609e1091df9e844a8ed00",
+    "mosaic_branch": "codex/behaviour-validation",
+    "mosaic_revision": "b9d04eabc137f7eac653e7580151950ab2250f49",
+    "remote_verified": true
+  },
+  "mosaic_validation": {
+    "canonical_hotplug_passes": 8,
+    "existing_musical_regression_passes": 4,
+    "oracle_groups": 7,
+    "review": "01a08158-f66a-7f31-82f0-96988d1ea9d5",
+    "production_source_changed": false,
+    "evidence": "/home/andy/projects/mosaic-behaviour-tests/docs/testing/hotplug-validation.json"
+  },
+  "main_integration": {
+    "status": "not-executed-auto-review-rejected",
+    "reason": "Reviewer recognised feature-branch authorisation, not protected/default main merge or runtime activation",
+    "alternative": "Mosaic directly uses published feature branch and validated branch runtime"
+  }
+}
