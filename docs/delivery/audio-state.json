@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "current_card": "H05 independent host validation",
-  "status": "h05_windows_integration_in_progress",
+  "status": "h05_code_review_closed_mac_verification_pending",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
   "completed": [
@@ -22,7 +22,7 @@
     "H05 native Apple Silicon arm64 Docker profile passed six scoped host gates; amd64 emulation remains failed"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "H05 review01a08641 found target-architecture and diagnostic-timeout false-positive defects plus missing Mac report verification. Code fixes committedfd82a09. Real wrong-target build now fails firstRUN beforeapt; matching amd64 build runner74961 live (context12). Corrected real JACK diagnostic9591165 passes6variants/42clientconnections/exit0; first parsefailure9469263 retained. Unit3architecture+2diagnostic faults pass. After build, startup smoke, record evidence and use one remaining focused follow-up. Mac JSON verification may occur on Mac; files not available here. Main187db42 unchanged; no native test active.",
+  "next_action": "H05 code review/follow-up closed two defects; Windows six gates and architecture/JACK regressions passed. Changes remain in codex/audio-monitor, main187db42 unchanged. Push branch for Mac to finish docs/delivery/H05-MAC-HANDBACK.md: inspect seven existing Mac JSON files in place and record hashes/results, build guarded native arm64 target and startup/reopen smoke. No full log transfer needed. Only new material defects reopen implementation; no redundant Windows tests. No live owned build/test/review process. Mac evidence gate still unclosed; goal remains active.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",

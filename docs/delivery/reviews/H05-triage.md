@@ -73,3 +73,12 @@ H05-fixes-evidence.json identifies actual positive/negative build logs, unchange
 failed diagnostic, corrected live diagnostic, source tests and native smoke.
 No native runner remains active. Focused follow-up now owns only the two code
 fixes; the Mac-side report verification remains an explicit unclosed gate.
+
+Focused follow-up01a08653-d2f7-73f2-ac92-5998bb021691 closes both code findings.
+It verified every artifact hash in the Windows/fix manifests, actual build mismatch
+rejection, matching package inventory/build, native smoke and42 JACK client
+connections across six clean exits. No remaining code defect was identified.
+The H05 one-critique/one-follow-up code review budget is closed. Mac-side report
+inspection and matching guarded arm64 build/smoke remain; H05-MAC-HANDBACK.md
+provides the small on-host verification task. No full log/audio transfer or repeated
+Windows validation is required. Main is unchanged pending the Mac evidence gate.
