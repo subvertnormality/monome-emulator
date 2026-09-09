@@ -6,6 +6,7 @@ import socket
 import tempfile
 import threading
 import unittest
+from unittest import mock
 from automation import session
 from automation.protocol import ContractError, ROOT
 
@@ -13,6 +14,28 @@ spec=importlib.util.spec_from_file_location('container_entry', ROOT/'scripts/con
 entry=importlib.util.module_from_spec(spec);spec.loader.exec_module(entry)
 
 class ContainerContracts(unittest.TestCase):
+    def test_atomic_lease_rejects_when_advisory_lock_is_ineffective(self):
+        with tempfile.TemporaryDirectory() as temporary, mock.patch.object(entry.fcntl, 'flock'):
+            root=Path(temporary)/'data'
+            first=entry.DataRoot(root,'/code/probe/main.lua','/code')
+            try:
+                with self.assertRaisesRegex(ContractError,'Another container'):
+                    entry.DataRoot(root,'/code/probe/main.lua','/code')
+                self.assertTrue((root/entry.DataRoot.LEASE/entry.DataRoot.LEASE_OWNER).is_file())
+            finally:first.close()
+            self.assertFalse((root/entry.DataRoot.LEASE).exists())
+            reopened=entry.DataRoot(root,'/code/probe/main.lua','/code')
+            reopened.close()
+
+    def test_atomic_lease_cleanup_requires_matching_owner(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary)/'data';owner=entry.DataRoot(root,'/code/probe/main.lua','/code')
+            lease=root/entry.DataRoot.LEASE
+            (lease/entry.DataRoot.LEASE_OWNER).write_text(json.dumps(
+                dict(schema_version=1,owner_token='different')))
+            owner.close()
+            self.assertTrue(lease.is_dir())
+
     def test_data_ownership_restart_and_isolation(self):
         with tempfile.TemporaryDirectory() as temporary:
             root=Path(temporary)/'data'

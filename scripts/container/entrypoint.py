@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import re
+import secrets
 import signal
 import sys
 import threading
@@ -18,10 +19,14 @@ from automation.protocol import ContractError, read_json, write_json
 class DataRoot:
     MARKER = '.emu-container.json'
     LOCK = '.emu-container.lock'
+    LEASE = '.emu-container.lease'
+    LEASE_OWNER = 'owner.json'
 
     def __init__(self, root, script, code_root):
         self.root = Path(root).resolve()
         self.fd = None
+        self.lease = None
+        self.lease_token = None
         self.root.mkdir(parents=True, exist_ok=True)
         marker = self.root/self.MARKER
         expected = mapping(dict(script=script, code_root=code_root))
@@ -35,6 +40,24 @@ class DataRoot:
                 fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             except BlockingIOError as error:
                 raise ContractError('container_data_busy', 'Another container owns this data root') from error
+            try:
+                lease = self.root/self.LEASE
+                lease.mkdir(mode=0o700)
+            except FileExistsError as error:
+                raise ContractError('container_data_busy', 'Another container owns this data root') from error
+            token = secrets.token_hex(32)
+            try:
+                write_json(lease/self.LEASE_OWNER,
+                           dict(schema_version=1, owner_token=token))
+            except Exception:
+                try:
+                    (lease/self.LEASE_OWNER).unlink(missing_ok=True)
+                    lease.rmdir()
+                except OSError:
+                    pass
+                raise
+            self.lease = lease
+            self.lease_token = token
             if fresh:
                 self.value = dict(schema_version=1, mapping=expected, dataset=None)
                 write_json(marker, self.value)
@@ -68,6 +91,19 @@ class DataRoot:
                 write_json(self.root/self.MARKER, self.value)
 
     def close(self):
+        if self.lease is not None:
+            owner = self.lease/self.LEASE_OWNER
+            try:
+                value = read_json(owner)
+                if value == dict(schema_version=1, owner_token=self.lease_token):
+                    owner.unlink()
+                    self.lease.rmdir()
+            except (FileNotFoundError, OSError, ValueError, json.JSONDecodeError):
+                # An altered or incomplete sentinel stays conservative: never
+                # remove a lease that this process can no longer authenticate.
+                pass
+            self.lease = None
+            self.lease_token = None
         if self.fd is not None:
             os.close(self.fd)
             self.fd = None
