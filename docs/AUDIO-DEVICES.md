@@ -153,3 +153,27 @@ observed and cleaned up. This non-realtime host path cannot promise uninterrupte
 output under arbitrary load. TestSine checks both channels but does not prove
 stereo channel order because its signal is duplicated mono.
 
+## Browser monitoring improvements (H03 candidate)
+
+The existing Listen button now uses a separate audio request lock, so a slow
+synchronous script callback can complete while browser audio keeps flowing.
+Stop listening and Listen again start a fresh interval; delayed requests from
+the previous interval cannot stop the new one. A hidden page stops monitoring.
+Native buffer gaps, xruns and browser underruns remain visible errors requiring
+reconnection. Stopping listening does not stop the script or desktop audio.
+
+The current worktree candidate uses an80ms starting buffer and10ms polling with
+reused HTTP connections. Windows Chromium tests at44.1/48kHz passed two minutes
+of every-sample tone continuity per rate, including a blocking Lua callback and
+reconnect checks. Measured p95 browser-click to rendered-tone notification was
+152/163ms respectively. These conservative bounds include notification scheduling;
+they exceed the150ms monitoring target and are unsuitable for the30ms interactive
+playing target. They do not measure physical speaker latency. A40ms buffer was
+rejected after a real underrun despite better short-run latency.
+
+These results support delayed browser monitoring for checking scripts, with the
+above limits. Arbitrary host load, long-term clock drift, all audio engines and
+physical device equivalence remain unproven. The original Windows endpoint
+dropout remains unresolved. H03 admission review is pending; see
+[the evidence and reproduction record](delivery/completions/H03.md).
+

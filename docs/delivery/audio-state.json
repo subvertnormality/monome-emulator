@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "current_card": "H02 official Maiden and persistent datasets",
+  "current_card": "H03 browser audio reliability and latency",
   "status": "in_progress",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
@@ -13,10 +13,11 @@
     "A03 unchanged cheat codes sampler recording and collection persistence",
     "P03 native/browser virtual arc and optional app integration",
     "Stage2 reviewed, admitted and merged to main with post-merge native checks",
-    "H01 reviewed desktop audio committed and merged9c67326; main native lifecycle passed"
+    "H01 reviewed desktop audio committed and merged9c67326; main native lifecycle passed",
+    "H02 reviewed and merged7d56cf0; main browser/editor/PCM8 checks passed045101"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "H02 admitted by focused review01a08445-b678-7b31-9b04-aa315ba54d68: all4major/3minor findings closed atf9b0783, six evidence hashes verified. All runners terminal. Commit admission docs/receipt, fast-forward main9c67326 preserving dirtymainstate and Mosaic active docs, then main-source actualMaiden browser/PCM smoke using own engine-reload-01 and maiden-tools-05 manifests. Afterwards H03 browser streaming latency/reconnect perH00. No default runtime promotion, no claim original clicks fully solved. H02-triage/completion/fixes-evidence contain evidence.",
+  "next_action": "H03 implementation validated, all runners terminal. Endurance latency7707434 passes120sec/rate with80ms/10ms HTTP1.1; p95 152.4/163.3ms above monitoring target, no underruns/network failures. Native legacy, slow-read, Maiden transport7/browser8+cleanup, contracts22 + audio3 + HTTP1 + ownership1 + worklet6 pass. H03.md and references/H03-evidence.json record exact results. Commit candidate, run bounded Codex Paranoia H03 branch review against7d56cf0 with H03-spec.json; resolve findings, then commit admission/merge preserving main dirty state beforeH04. No default promotion.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",

@@ -52,3 +52,25 @@ logs alongside ordinary runtime evidence. No capture writes into the selected
 script source. Browser monitoring may run independently, with its own ownership
 and buffering rules. Generic tests live in `tests/audio_capture_api.py` and use
 actual softcut recording through native keys; they do not import Mosaic.
+
+## Browser monitor intervals (H03 candidate)
+
+The existing authenticated POST routes accept `client_id`: `/audio/start`,
+`/audio/read` (also `after`, initially -1), and `/audio/stop`. The browser now
+also sends a fresh `stream_id` for each listening interval:1–64 ASCII letters,
+digits, underscores or hyphens. Start and read echo that identity. Retrying
+start with the same identity is idempotent; a different active identity fails
+with `audio_generation`. Stop the old interval before starting a new one.
+Another browser owner still fails with `audio_owner`.
+
+Legacy automation can omit `stream_id` throughout its interval. It cannot read
+or stop an interval started with an identity. Tagged clients must supply their
+identity on every request; delayed old operations cannot replace or stop a newer
+interval. The identity supplements the session token and browser ownership.
+
+Audio lifetime/read operations have a separate lock from native actions, so a
+synchronous Lua callback does not block PCM reads. Disconnect/session cleanup
+uses that same audio lock. PCM buffers remain bounded and retained sequence gaps,
+native xruns and browser underruns fail explicitly; reconnect starts fresh.
+These changes do not make a slow Lua callback concurrent with another device
+action, or hide a native error.

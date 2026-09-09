@@ -29,7 +29,7 @@ class PCMStream extends AudioWorkletProcessor {
     const output=outputs[0];
     if(this.failed)return false;
     if(!this.started){
-      if(!this.rate||this.write-this.read<this.rate*.15)return true;
+      if(!this.rate||this.write-this.read<this.rate*.08)return true;
       this.started=true;
     }
     const step=this.rate/sampleRate;

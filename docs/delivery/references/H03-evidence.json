@@ -1,0 +1,30 @@
+{
+  "status": "candidate-review-pending",
+  "reports": [
+    {
+      "path": "artifacts/audio/latency-1788927707434/report.json",
+      "sha256": "f22bd51e67ee0dfbc81e8858446032d2a6b143cda2ad472bca411156238568bd",
+      "passed": true
+    },
+    {
+      "path": "artifacts/audio/slow-stream-20260909-052755/report.json",
+      "sha256": "d3ad97b02a67792f4b8575d837b5c3774ebc52e33b03927437e46d6fd2ceca23",
+      "passed": true
+    },
+    {
+      "path": "artifacts/audio/monitor-native-552970b43a16498498d6b5e170777475.json",
+      "sha256": "21aed4baf34b37df7c5e6a8b2ef46dd5de02397bdf318c53de9ba34f406fd30d",
+      "passed": true
+    },
+    {
+      "path": "artifacts/maiden/transport-20260909-053010/report.json",
+      "sha256": "f77b423c4806bf8babc067af71825824e9dff745de20aad76e412b4606217fa4",
+      "passed": true
+    },
+    {
+      "path": "artifacts/maiden/browser-20260909-053124/report.json",
+      "sha256": "87fcd66aae0ceaf22a6a868af0b833a37ee38cc1d6f3a6f968892ede5bf2523b",
+      "passed": true
+    }
+  ]
+}

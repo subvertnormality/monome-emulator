@@ -55,7 +55,7 @@ class Application:
         else: self.backend=FixtureBackend(directory)
         self.sequence=0; self.action_ids=set(); self.lock=threading.Lock(); self.action_lock=threading.Lock(); self.errors=[]
         self.clients={}; self.client_lock=threading.RLock(); self.input_owners={}; self.client_timeout=2.5
-        self.audio_monitor=None
+        self.audio_monitor=None;self.audio_lock=threading.RLock()
         self.audio_captures={}
         self.closed=False
         self.cleanup_complete=False
@@ -67,12 +67,7 @@ class Application:
         try:
             closers=([self.maiden.close] if self.maiden else [])
             closers += [capture.cancel for capture in self.audio_captures.values()]
-            if self.audio_monitor:
-                monitor=self.audio_monitor
-                def close_monitor():
-                    monitor.close()
-                    self.audio_monitor=None
-                closers.append(close_monitor)
+            closers.append(self.close_audio)
             closers.append(self.backend.close)
             for close in closers:
                 try:close()
@@ -105,23 +100,38 @@ class Application:
         if path.endswith('/cancel'):return capture.cancel()
         self.backend.check_processes()
         return capture.status()
+    def close_audio(self,owner=None):
+        # Lock order: app.lock -> audio_lock; audio requests never take app.lock.
+        with self.audio_lock:
+            if self.audio_monitor and (owner is None or self.audio_monitor.owner==owner):
+                self.audio_monitor.close();self.audio_monitor=None
     def audio_request(self,path,payload):
+        with self.audio_lock:
+            if self.closed:raise ContractError('session_stopped','This session has stopped')
+            return self._audio_request(path,payload)
+    def _audio_request(self,path,payload):
         required={'client_id','after'} if path=='/audio/read' else {'client_id'}
-        if not isinstance(payload,dict) or set(payload)!=required: raise ContractError('audio_request','Invalid audio request')
+        if not isinstance(payload,dict) or set(payload) not in (required,required|{'stream_id'}): raise ContractError('audio_request','Invalid audio request')
+        stream_id=payload.get('stream_id')
+        if 'stream_id' in payload and (not isinstance(stream_id,str) or not 1<=len(stream_id)<=64 or any(c not in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_' for c in stream_id)):
+            raise ContractError('audio_request','Invalid stream identity')
         owner=payload['client_id']; self.heartbeat(owner)
         if self.audio_monitor and self.audio_monitor.owner!=owner:raise ContractError('audio_owner','Audio is already monitored by another browser')
+        if self.audio_monitor and self.audio_monitor.stream_id!=stream_id:
+            raise ContractError('audio_generation','This listening interval is no longer current')
         if path=='/audio/start':
             if not self.audio_monitor:
                 if self.config['backend']!='native':raise ContractError('unsupported','Audio requires the native experimental runtime')
                 from runtime.audio_monitor import AudioMonitor
                 self.audio_monitor=AudioMonitor(self.backend,owner)
+                self.audio_monitor.stream_id=stream_id
             self.audio_monitor.check()
-            return dict(status='ready',rate=self.audio_monitor.rate)
+            return dict(status='ready',rate=self.audio_monitor.rate,stream_id=stream_id)
         if path=='/audio/stop':
             if self.audio_monitor:self.audio_monitor.close();self.audio_monitor=None
             return dict(status='stopped')
         if not self.audio_monitor:raise ContractError('audio_stopped','Click Listen to start audio')
-        return self.audio_monitor.read(payload['after'])
+        return dict(self.audio_monitor.read(payload['after']),stream_id=stream_id)
     def heartbeat(self,client_id):
         if not isinstance(client_id,str) or not 1<=len(client_id)<=64 or any(c not in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_' for c in client_id):
             raise ContractError('client_id','Invalid browser client identity')
@@ -129,8 +139,7 @@ class Application:
             if client_id not in self.clients and len(self.clients)>=8: raise ContractError('client_limit','At most eight browser clients per session')
             self.clients[client_id]=time.monotonic()
     def release_client(self,client_id):
-        if self.audio_monitor and self.audio_monitor.owner==client_id:
-            self.audio_monitor.close();self.audio_monitor=None
+        self.close_audio(client_id)
         try:
             self.action(dict(schema_version=1,session_id=self.config['session_id'],action_id=uid(),sequence=self.sequence+1,
                              client_id=client_id,action=dict(type='release_all')))
@@ -241,10 +250,13 @@ def serve_application(directory,app):
                     return
     watchdog_thread=threading.Thread(target=watchdog,daemon=True); watchdog_thread.start()
     class Handler(BaseHTTPRequestHandler):
+        protocol_version='HTTP/1.1'
+        disable_nagle_algorithm=True
         def log_message(self,*args): pass
         def respond(self,status,payload):
             data=json.dumps(payload,allow_nan=False).encode()
             self.send_response(status); self.send_header('Content-Type','application/json')
+            if self.close_connection:self.send_header('Connection','close')
             self.send_header('Content-Length',str(len(data))); self.end_headers(); self.wfile.write(data)
         def asset(self):
             assets={'/':('index.html','text/html'),'/app.js':('app.js','text/javascript'),'/style.css':('style.css','text/css'),'/audio.js':('audio.js','text/javascript'),'/audio-stream.js':('audio-stream.js','text/javascript'),'/audio.css':('audio.css','text/css'),'/editor':('editor.html','text/html'),'/editor.js':('editor.js','text/javascript')}
@@ -265,6 +277,7 @@ def serve_application(directory,app):
                 cookie=cookies.get('emu_maiden_'+app.config['session_id'])
                 editor_auth=editor_path and cookie and cookie.value==app.config['token']
                 if self.headers.get('Authorization')!='Bearer '+app.config['token'] and not editor_auth:
+                    self.close_connection=True
                     self.respond(401,ContractError('unauthorized','Session token required').as_dict()); return
                 if self.headers.get('Origin'):
                     expected='http://127.0.0.1:'+str(self.server.server_port)
@@ -331,6 +344,8 @@ def serve_application(directory,app):
                         scheduled=app.wait_schedule(payload)
                         with app.lock:self.respond(200,app.action(payload,scheduled))
                     return
+                if self.command=='POST' and self.path in ('/audio/start','/audio/read','/audio/stop'):
+                    self.respond(200,app.audio_request(self.path,payload));return
                 with app.lock:
                     if app.closed and self.path!='/stop':raise ContractError('session_stopped','This session has stopped')
                     if self.command=='POST' and self.path=='/crow/ii/read':
@@ -358,8 +373,6 @@ def serve_application(directory,app):
                         self.respond(200,result);return
                     if self.command=='POST' and self.path in ('/audio/capture/start','/audio/capture/status','/audio/capture/cancel'):
                         self.respond(200,app.capture_request(self.path,payload));return
-                    if self.command=='POST' and self.path in ('/audio/start','/audio/read','/audio/stop'):
-                        self.respond(200,app.audio_request(self.path,payload));return
                     if self.command=='GET' and self.path=='/audio/status':
                         enabled=app.config['backend']=='native' and app.config.get('clock_mode','real-time')=='real-time' and 'audio_monitor' in app.config.get('runtime_identity',{}).get('binaries',{})
                         capture_enabled=app.config['backend']=='native' and app.config.get('clock_mode','real-time')=='real-time' and 'audio_capture' in app.config.get('runtime_identity',{}).get('binaries',{})
@@ -415,8 +428,12 @@ def serve_application(directory,app):
                             if app.writers_stopped():threading.Thread(target=self.server.shutdown,daemon=True).start()
                         return
                 raise ContractError('endpoint','Unknown endpoint')
-            except ContractError as error: self.respond(400,error.as_dict())
-            except (ValueError,OSError) as error: self.respond(400,ContractError('request_failed',str(error)).as_dict())
+            except ContractError as error:
+                # Rejected requests may have an unread body: never reuse their
+                # connection with ambiguous framing.
+                self.close_connection=True;self.respond(400,error.as_dict())
+            except (ValueError,OSError) as error:
+                self.close_connection=True;self.respond(400,ContractError('request_failed',str(error)).as_dict())
         do_GET=dispatch
         do_POST=dispatch
         do_PUT=dispatch
