@@ -48,6 +48,7 @@ async function stop(mode){
 async function key(n){await page.locator('#key-'+n).click();await page.evaluate(()=>queue);}
 async function value(expected){await key(3);const s=await api('/snapshot');assert.deepEqual(s.state.midi.at(-1).bytes,[176,20,expected]);assert.deepEqual(s.errors,[]);}
 (async()=>{
+  fs.mkdirSync(out,{recursive:true});
   fs.mkdirSync(path.join(mounts,'code/probe'),{recursive:true});
   const data=path.join(mounts,'data'),other=path.join(mounts,'other');fs.mkdirSync(data);fs.mkdirSync(other);
   const script=path.join(mounts,'code/probe/probe.lua');

@@ -7,6 +7,7 @@ const image=process.env.EMULATOR_IMAGE||'monome-emulator:h04-05';
 const d=(...args)=>execFileSync(docker,args,{encoding:'utf8',timeout:90000,maxBuffer:8*1024*1024}).trim();
 const mounts=mountRoot(out),names=[],report={passed:false,image,mountRoot:mounts},delay=ms=>new Promise(r=>setTimeout(r,ms));
 (async()=>{
+  fs.mkdirSync(out,{recursive:true});
   fs.mkdirSync(path.join(mounts,'data'),{recursive:true});
   try{
     for(let i=0;i<2;i++){

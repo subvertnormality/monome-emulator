@@ -14,6 +14,7 @@ function cleanup(id,label){
   return rows;
 }
 (async()=>{
+  fs.mkdirSync(out,{recursive:true});
   const data=path.join(mounts,'data'),code=path.join(mounts,'code'),script=path.join(code,'probe.lua');
   fs.mkdirSync(data,{recursive:true});fs.mkdirSync(code);
   fs.writeFileSync(script,"engine.name='None'\nfunction init() local f=assert(io.open(_path.data..'startup-entered','w'));f:write('entered');f:close();os.execute('sleep 120') end\n");
