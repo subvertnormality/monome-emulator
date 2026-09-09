@@ -1,0 +1,121 @@
+{
+  "status": "experimental partial checkpoint",
+  "evidence": [
+    {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/126dec7d38064586b67ec592afe7314b/results.json",
+      "sha256": "9af4db59a6e47a4974e6547d98bb17589f4ef8186d163da266b2144ff4690e01",
+      "result": {
+        "passed": true,
+        "official_revision": "14bbeae8646c6717f6bb44c8cd60250bf94b6042",
+        "patch_sha256": "09726e7c5346dcbae3cdb54dd0af3e51587d6d5edcce592be85c87829f5ca479",
+        "runs": [
+          {
+            "label": "stock-parity",
+            "exit_code": 0,
+            "stdout": "0 0 0\n1 1 0.25\n2 2 0.50000000000000011\n2 2 0.50000000000000011\n4 4 0.29999999999999999\n4 4 0.29999999999999999\n4 4 0.29999999999999999\n5 9 0.87500000000000011\n5 9 0.87500000000000011\n6 9 1.1250000000000002\n6 9 1.1250000000000002\n7 9 2.2500000000000004\n7 9 2.2500000000000004\n8 9 4.9406564584124654e-324\n8 9 4.9406564584124654e-324\nPASS: deadlines, order, cancellation, offsets, reset, reschedule, capacity\n",
+            "command": [
+              "cc",
+              "-std=gnu11",
+              "-Wall",
+              "-Wextra",
+              "-Werror",
+              "-fsanitize=undefined",
+              "-DSCHEDULER_SOURCE=\"/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/126dec7d38064586b67ec592afe7314b/stock/matron/src/clocks/clock_scheduler.c\"",
+              "/home/andy/projects/monome-emulator-midi-clock/tests/native_scheduler_step.c",
+              "-o",
+              "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/126dec7d38064586b67ec592afe7314b/stock-parity",
+              "-lm",
+              "-pthread"
+            ]
+          },
+          {
+            "label": "candidate-parity",
+            "exit_code": 0,
+            "stdout": "0 0 0\n1 1 0.25\n2 2 0.50000000000000011\n2 2 0.50000000000000011\n4 4 0.29999999999999999\n4 4 0.29999999999999999\n4 4 0.29999999999999999\n5 9 0.87500000000000011\n5 9 0.87500000000000011\n6 9 1.1250000000000002\n6 9 1.1250000000000002\n7 9 2.2500000000000004\n7 9 2.2500000000000004\n8 9 4.9406564584124654e-324\n8 9 4.9406564584124654e-324\nPASS: deadlines, order, cancellation, offsets, reset, reschedule, capacity\n",
+            "command": [
+              "cc",
+              "-std=gnu11",
+              "-Wall",
+              "-Wextra",
+              "-Werror",
+              "-fsanitize=undefined",
+              "-DSCHEDULER_SOURCE=\"/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/126dec7d38064586b67ec592afe7314b/candidate/matron/src/clocks/clock_scheduler.c\"",
+              "/home/andy/projects/monome-emulator-midi-clock/tests/native_scheduler_step.c",
+              "-o",
+              "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/126dec7d38064586b67ec592afe7314b/candidate-parity",
+              "-lm",
+              "-pthread"
+            ]
+          },
+          {
+            "label": "candidate-deadline",
+            "exit_code": 0,
+            "stdout": "PASS: observed value, scheduled deadline, delayed continuation, sleep, epoch/reset/reschedule, queued immutability, cancellation\n",
+            "command": [
+              "cc",
+              "-std=gnu11",
+              "-Wall",
+              "-Wextra",
+              "-Werror",
+              "-fsanitize=undefined",
+              "-DSCHEDULER_SOURCE=\"/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/126dec7d38064586b67ec592afe7314b/candidate/matron/src/clocks/clock_scheduler.c\"",
+              "/home/andy/projects/monome-emulator-midi-clock/tests/native_clock_deadline.c",
+              "-o",
+              "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/126dec7d38064586b67ec592afe7314b/candidate-deadline",
+              "-lm",
+              "-pthread"
+            ]
+          }
+        ],
+        "limitations": [
+          "C scheduler boundary only; full Lua event bridge and MIDI subscription not yet validated.",
+          "Optional patch not default admitted."
+        ]
+      }
+    },
+    {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/a39b6ca3c2f04f7ea1d781563350a46f/results.json",
+      "sha256": "c15572eb2f67187418707caefe00fe8aea41020c6127ecee01cfbf4410bb06f4",
+      "result": {
+        "passed": true,
+        "exit_code": 0,
+        "stdout": "PASS:8 output dispatch scenarios; order, exact metadata, fanout snapshot, cancellation, deferred registration, errors, yield rejection, cleanup, legacy use\n",
+        "stderr": "",
+        "official_revision": "14bbeae8646c6717f6bb44c8cd60250bf94b6042",
+        "patch_sha256": "1e6ea366b8199a362f4971fe55ece3b0e9eee3b95b0f863ecd0124e353d8c4a2",
+        "scope": "Lua integration with boundary mocks, not native runtime or release admission"
+      }
+    },
+    {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/cdb3e58b35774bde9cabc69870991f8d/manifest.json",
+      "sha256": "130f32edb1425204cc7ce2e72448e25667b492aa074abfbb763dd20d0f99b9ea",
+      "result": {
+        "passed": true,
+        "failure": null,
+        "clock_mode": "controlled-experimental",
+        "install": "/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-04/installation.json",
+        "scope": "Generic native callback/deadline bridge; not complete boundary or Mosaic acceptance"
+      }
+    },
+    {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/a13dfb15ca544473a62b0808e740bd0c/manifest.json",
+      "sha256": "18aaf6fb7ea217ec9a1fd4b5b16aa2e27b873bebb71539fc6347900d8a2e138b",
+      "result": {
+        "passed": true,
+        "failure": null,
+        "clock_mode": "real-time",
+        "install": "/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-04/installation.json",
+        "scope": "Generic native callback/deadline bridge; not complete boundary or Mosaic acceptance"
+      }
+    }
+  ],
+  "install": "/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-04/installation.json",
+  "scope": "Generic scheduler metadata and MIDI output callbacks; not Mosaic fix, default admission, or full release",
+  "remaining": [
+    "queued-delivery native stress",
+    "source/epoch changes and forwarding",
+    "persistent intermediate/coincident pulse ownership",
+    "Mosaic integration and regression matrix",
+    "Codex implementation review"
+  ]
+}

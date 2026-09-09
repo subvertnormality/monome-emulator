@@ -5323,5 +5323,11 @@
       "Full manual behaviour campaign and emulator release/platform gates",
       "Mandatory final Mosaic unit/integration hardening before any refactor"
     ]
+  },
+  "midi_output_boundary_checkpoint": {
+    "status": "experimental_partial",
+    "document": "docs/delivery/MIDI-OUTPUT-BOUNDARY.md",
+    "evidence": "docs/delivery/midi-output-boundary-validation.json",
+    "next_action": "Native queued-delivery/source lifecycle probes; Mosaic coordinated pulse ownership integration and Codex review. No default admission."
   }
 }
