@@ -73,6 +73,11 @@ const char *emu_clock_advance(uint64_t delta) {
         double beat=clock_get_beats(),tempo=clock_get_tempo();
         if (!isfinite(beat) || !isfinite(tempo) || tempo<=0) { failure="invalid clock reference";break; }
         uint64_t sync=deadline((long double)now+((long double)sync_due-beat)*60.L/tempo*1000000000.L,1,now);
+        /* An unacquired MIDI clock advances only on incoming pulses. Other
+         * native deadlines must still run while sync waits for measurement. */
+#ifdef NORNS_CLOCK_ACQUISITION
+        if (!clock_is_beat_advancing()) sync=UINT64_MAX;
+#endif
         if(sync<next)next=sync;
         if(next<=now) {
             /* A zero-period metro or non-progressing native deadline is an

@@ -33,3 +33,18 @@ corrected: tempo samples and received pulse counts are independent, and a
 backwards timestamp does not replace the last valid interval origin. Bunched
 clocks, recovery and arithmetic duration smoothing across two forward/reverse
 ring wraps are now asserted. Runtime and Mosaic acceptance remain pending.
+
+## Acquisition and source handoff checkpoint
+
+The candidate now advances an unacquired MIDI beat only by received pulse count,
+then interpolates once an interval is measured. Atomic acquisition/count state
+and a generic clock acquisition API expose this to the controlled deadline
+predictor. Sleep and metro deadlines continue while sync waits for measurement.
+A native probe fails against candidate02 and passes candidate03.
+
+Mosaic separately counts external-origin pulses exactly once, while local grid
+Play retains its local phase. A source change leaves external-origin accounting
+without replaying the other source’s historical beat count. The original
+32-note handoff burst is retained as a failure; its fixed case passes both modes.
+See `docs/delivery/completions/C07-midi-acquisition-progress.json` for exact
+source-scoped evidence and unresolved gates. This is not default promotion.

@@ -15,7 +15,7 @@ def main():
     rows=[]
     for variant in ('stock','candidate'):
         tree=out/variant
-        for relative in ('matron/src/clock.h','matron/src/clocks/clock_midi.h','matron/src/clocks/clock_midi.c'):
+        for relative in ('matron/src/clock.h','matron/src/clock.c','matron/src/clocks/clock_midi.h','matron/src/clocks/clock_midi.c'):
             p=tree/relative;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(git('show',PIN+':'+relative))
         if variant=='candidate':
             applied=subprocess.run(['git','apply','--unsafe-paths',str(patch)],cwd=tree,capture_output=True,text=True)
@@ -24,8 +24,8 @@ def main():
         build=subprocess.run(['cc','-std=gnu11','-Wall','-Wextra','-Werror','-fsanitize=undefined','-I'+str(source),str(ROOT/'tests/native_midi_clock_start.c'),str(source/'clocks/clock_midi.c'),'-o',str(binary),'-pthread','-lm'],capture_output=True,text=True)
         assert build.returncode==0,build.stderr
         for bpm in (20,30,60,100,120,180,300):
-            for warm,gap in ((0,0),(1,0),(12,0),(49,0),(49,1),(-1,0)):
-                if warm == -1 and bpm != 120: continue
+            for warm,gap in ((0,0),(1,0),(12,0),(49,0),(49,1),(-1,0),(-2,0)):
+                if warm < 0 and bpm != 120: continue
                 run=subprocess.run([str(binary),str(warm),str(bpm),str(gap)],capture_output=True,text=True,timeout=10)
                 assert not run.stderr,run.stderr
                 rows.append(dict(variant=variant,bpm=bpm,warm_ticks=warm,gap_seconds=gap,exit_code=run.returncode,measurements=json.loads(run.stdout)))

@@ -20,6 +20,17 @@ int main(int argc,char **argv) {
     int warm=atoi(argv[1]);double bpm=atof(argv[2]),gap=atof(argv[3]);
     double tick=60/bpm/24;
     clock_midi_init();
+    if (warm == -2) {
+        clock_midi_handle_message(0xfa);clock_midi_handle_message(0xf8);
+        now=.1;
+        int frozen=clock_midi_get_beat()==0 && starts==1;
+        now=.125;clock_midi_handle_message(0xf8);
+        int acquired=fabs(clock_midi_get_beat()-1.0/24)<1e-9 && fabs(clock_midi_get_tempo()-20)<1e-6;
+        now=.15625;
+        int interpolated=fabs(clock_midi_get_beat()-5.0/96)<1e-9;
+        printf("{\"no_speculative_beat\":%d,\"acquired_phase\":%d,\"measured_interpolation\":%d}\n",frozen,acquired,interpolated);
+        return !(frozen && acquired && interpolated);
+    }
     if (warm == -1) {
         clock_midi_handle_message(0xfa);
         clock_midi_handle_message(0xf8);
