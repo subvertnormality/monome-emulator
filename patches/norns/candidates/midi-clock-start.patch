@@ -1,0 +1,82 @@
+--- a/matron/src/clocks/clock_midi.c
++++ b/matron/src/clocks/clock_midi.c
+@@ -13,53 +13,47 @@
+ static uint8_t beat_duration_buf_pos = 0;
+ static uint8_t beat_duration_buf_len = 0;
+ 
+-static double mean_scale;
+ static double mean_sum;
+ 
+ void clock_midi_init() {
+     clock_midi_counter = 0;
+     clock_midi_last_tick_time_set = false;
+     mean_sum = 0;
+-    mean_scale = 1;
++    beat_duration_buf_pos = 0;
++    beat_duration_buf_len = 0;
++    for (int i = 0; i < DURATION_BUFFER_LENGTH; i++) duration_buf[i] = 0;
+     clock_reference_init(&clock_midi_reference);
+ }
+ 
+ static void clock_midi_handle_clock() {
+-    double beat_duration;
+     double current_time = clock_get_system_time();
++    bool had_previous_tick = clock_midi_last_tick_time_set;
+ 
+-    if (clock_midi_last_tick_time_set == false) {
+-        clock_midi_last_tick_time_set = true;
+-        clock_midi_last_tick_time = current_time;
+-    } else {
+-        beat_duration = (current_time - clock_midi_last_tick_time) * 24.0;
+-
+-        if (beat_duration > 4) { // assume clock stopped
+-            clock_midi_last_tick_time = current_time;
+-        } else {
+-            if (beat_duration_buf_len < DURATION_BUFFER_LENGTH) {
+-                beat_duration_buf_len++;
+-                mean_scale = 1.0 / beat_duration_buf_len;
+-            }
+-
+-            double a = beat_duration * mean_scale;
+-            mean_sum = mean_sum + a;
+-            mean_sum = mean_sum - duration_buf[beat_duration_buf_pos];
+-            duration_buf[beat_duration_buf_pos] = a;
+-
++    if (clock_midi_last_tick_time_set) {
++        double duration = (current_time - clock_midi_last_tick_time) * 24.0;
++        if (duration > 0 && duration <= 4) {
++            /* Keep unweighted samples: the divisor changes during warmup. */
++            mean_sum -= duration_buf[beat_duration_buf_pos];
++            duration_buf[beat_duration_buf_pos] = duration;
++            mean_sum += duration;
++            if (beat_duration_buf_len < DURATION_BUFFER_LENGTH) beat_duration_buf_len++;
+             beat_duration_buf_pos = (beat_duration_buf_pos + 1) % DURATION_BUFFER_LENGTH;
+-
+-            clock_midi_counter++;
+-            clock_midi_last_tick_time = current_time;
+-
+-            double reference_beat = clock_midi_counter / 24.0;
+-            clock_update_source_reference(&clock_midi_reference, reference_beat, mean_sum);
+-
+-            if (clock_midi_counter == 0) {
+-                clock_start_from_source(CLOCK_SOURCE_MIDI);
+-            }
+         }
+     }
++    clock_midi_last_tick_time_set = true;
++    /* A backwards timestamp cannot replace the last valid sample origin. */
++    if (!had_previous_tick || current_time >= clock_midi_last_tick_time)
++        clock_midi_last_tick_time = current_time;
++
++    /* A pending Start belongs to this Clock even before a tempo sample exists.
++     * Until the second Clock, tempo is necessarily the last estimate/default. */
++    /* Timestamp equality is not proof of a duplicate MIDI byte. Count each
++     * Clock even when it cannot contribute a positive tempo interval. */
++    if (!had_previous_tick && clock_midi_counter != -1) return;
++    clock_midi_counter++;
++    double beat_duration = beat_duration_buf_len ? mean_sum / beat_duration_buf_len : 0.5;
++    clock_update_source_reference(&clock_midi_reference, clock_midi_counter / 24.0, beat_duration);
++    if (clock_midi_counter == 0) clock_start_from_source(CLOCK_SOURCE_MIDI);
+ }
+ 
+ static void clock_midi_handle_start() {

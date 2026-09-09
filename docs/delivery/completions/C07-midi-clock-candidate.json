@@ -1,0 +1,30 @@
+{
+  "status": "candidate-boundary-passed-runtime-pending",
+  "branch": "codex/midi-clock",
+  "worktree": "/home/andy/projects/monome-emulator-midi-clock",
+  "native_scenarios": 36,
+  "stock_failures": 29,
+  "evidence": {
+    "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/5d49bbd8ca9c49449297bd97bf07f1e4/results.json",
+    "sha256": "5823da653f1ad34fa7ec5c09c824a8aa4ad433f27e61507231b6cb3ecba51f23"
+  },
+  "review": {
+    "path": "/home/andy/projects/mosaic-behaviour-runs/midi-clock-candidate-review-01.json",
+    "sha256": "66f8cb5f24f1687b7e69d0d5e6d24c963d0b7a53cc141c4fbd7ce72766921bdb",
+    "session": "01a0870b-9c0e-73f2-989f-79c485b56e59"
+  },
+  "triage": {
+    "blocker": "Resolved equal-timestamp pulse loss; every received Clock after initial acquisition counts independently of tempo sample acceptance.",
+    "mean": "Raw sample arithmetic confirmed; forward/reverse tempo transitions through two wraps now asserted.",
+    "negative_time": "Preserve last valid interval origin; recovery asserted."
+  },
+  "remaining": [
+    "Build explicitly identified real-time and controlled candidate installations without promoting stock default.",
+    "Run Mosaic M-SYNC-001/002 and affected incoming-clock/recording regressions in both modes.",
+    "Native scheduler interpolation and first unknown-tempo interval; gap threshold boundaries and tempo-changing restart.",
+    "Mosaic master alignment, Stop/Continue/SPP contract and complete bidirectional sync matrix.",
+    "Independent internal-tempo continuity defect, full manual campaign, release gates and final unit/integration hardening."
+  ],
+  "default_promoted": false,
+  "full_goal_complete": false
+}
