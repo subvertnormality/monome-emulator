@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "current_card": "H05 independent host validation",
-  "status": "h05_review_closed_mac_verification_user_confirmed",
+  "status": "h05_merged_mac_verification_user_confirmed",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
   "completed": [
@@ -22,7 +22,7 @@
     "H05 native Apple Silicon arm64 Docker profile passed six scoped host gates; amd64 emulation remains failed"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "Integrate reviewed H05 into main, preserving concurrent Mosaic delivery edits, and run focused post-merge contracts. User confirmed on 2026-09-09 that Mac verification is already complete and local evidence inspection is unnecessary. Accept that confirmation for integration; do not request artifact transfer or duplicate Mac verification. Windows six gates and code review are complete. Retain all platform and latency limitations; broader Mosaic campaign remains separately owned.",
+  "next_action": "H05 merged into main at dca8668; all 13 focused post-merge checks passed. Publish the integration and recorded result. Mac verification is accepted from the user's 2026-09-09 confirmation; no artifact transfer or duplicate verification gate remains. Retain all platform and latency limitations. The broader Mosaic campaign remains separately owned; do not claim its release gates complete.",
   "mac_verification_acceptance": {
     "date": "2026-09-09",
     "basis": "User confirmation: Mac has already been verified - you dont need to see the evidence",
