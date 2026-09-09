@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "status": "failed_macos_apple_silicon_linux_amd64_emulation",
-  "scope": "H05 optional Docker host validation; not native arm64",
+  "status": "passed_macos_apple_silicon_native_arm64_scoped_software_gates",
+  "scope": "H05 optional Docker host validation; native linux/arm64 passes separately while linux/amd64 emulation remains failed",
   "host": {
     "hardware": "MacBookPro17,1; Apple M1; arm64; 16 GB",
     "os": "macOS 15.3.2 (24D81)",
@@ -15,7 +15,7 @@
     "npm": "11.3.0",
     "playwright": "1.62.0; configured to use host Google Chrome"
   },
-  "candidate": {
+  "amd64_candidate": {
     "tag": "monome-emulator:macos-h05-02",
     "image": "sha256:5cb8a62986c4c29a3b6c466b556616c5147a66311d938de2b4b97ebb4e0b005b",
     "platform": "linux/amd64 under emulation",
@@ -35,7 +35,7 @@
       "sha256": "3cb69f2ff9db23f83ffa72026afd977eefc7215e23d9546dafb0b1f1e9c76734"
     }
   },
-  "runner_results": {
+  "amd64_runner_results": {
     "startup_cancel": "failed",
     "browser": "not_run_prerequisite_failed",
     "failures": "not_run_prerequisite_failed",
@@ -43,7 +43,7 @@
     "lease": "not_run_prerequisite_failed",
     "audio_120_seconds": "not_run_prerequisite_failed"
   },
-  "reports": [
+  "amd64_reports": [
     {
       "path": "artifacts/docker/startup-cancel-1788949928163/report.json",
       "sha256": "d267ce6b0f65ba8afc723e572dc89a4a01604967687d95a7564749d3a416c912",
@@ -102,9 +102,103 @@
     "post_restart_result": "unchanged JACK SIGBUS",
     "note": "The guest did not expose /run/rosetta, so the exact binary translation path remains opaque despite Docker's enabled setting."
   },
-  "diagnosis": "The existing linux/amd64 image cannot complete the shared native JACK/matron lifecycle on this Apple Silicon Docker Desktop host. Resource sizing and the Rosetta-configured restart did not remedy packaged JACK startup, and bounded official JACK upgrades did not provide clean client shutdown.",
-  "next_route": "Create a separately pinned native linux/arm64 image and run all six suites; do not reuse this amd64 result as arm64 evidence.",
-  "review": "No adversarial integration review requested; failed disposition and review gap retained.",
+  "native_arm64": {
+    "status": "passed_scoped_software_gates",
+    "candidate": {
+      "tag": "monome-emulator:macos-h05-arm64-02",
+      "image": "sha256:6f0e60e7a34d159cb1007a91dc0e1013a94da987881e48ae47de4a7504c15a8e",
+      "platform": "linux/arm64 native",
+      "size": 400274073,
+      "source": "f6d1f881e58657d1024fabe648902ee0a7bae72f",
+      "base": "ubuntu@sha256:722ea796ac2d57eeb3627c58a582fc1acc58be51faf815e1bce1682ae5c092f7",
+      "package_lock": {
+        "path": "scripts/container/packages.arm64.lock.json",
+        "sha256": "0408b0a25bca448f072119a960b5ba173d6011d48440a4baad59d37578136eb2",
+        "exact_packages": 492,
+        "jack_package": "1.9.12~dfsg-2ubuntu2"
+      },
+      "context": {
+        "path": ".runtime/docker-context-macos-h05-arm64-02/context.json",
+        "sha256": "0386f9279b1bd0d3387a042b075b9c6fa721cd961407703f327a9660e2dcbb6a"
+      },
+      "build_metadata": {
+        "path": "artifacts/docker/build-macos-h05-arm64-02-metadata.json",
+        "sha256": "1a15336c59bd4800a81cd0ef895ea98a838dbb8144e6ee9307fbf28bf26f33e3"
+      },
+      "runtime_lock_sha256": "8b84937d7d1873877f8769762bf3146c61a72df8869147591e051af161b2bd5b"
+    },
+    "first_candidate_failure": {
+      "tag": "monome-emulator:macos-h05-arm64-01",
+      "image": "sha256:20020551b09341c9a9a872df1c7d78b9ece2787761d9ee7e4662afff8de6feff",
+      "source": "b43375257c42a5cbbbac2ed75d0e6a68d4981309",
+      "report": "artifacts/docker/lease-1788955536109/report.json",
+      "sha256": "244f8bcb93ef7c8530148cb2abba678db9958c3973af6aecc7da66fee9119e1a",
+      "result": "failed: Docker Desktop VirtioFS admitted two containers on one data root because advisory flock did not coordinate across separate bind mounts",
+      "fix": "f6d1f881e58657d1024fabe648902ee0a7bae72f adds an atomic owner-tokened directory sentinel with conservative stale-sentinel behavior"
+    },
+    "runner_results": {
+      "startup_cancel": "passed",
+      "browser": "passed",
+      "failures": "passed",
+      "restart": "passed",
+      "lease": "passed",
+      "audio_120_seconds_per_rate": "passed"
+    },
+    "reports": [
+      {
+        "path": "artifacts/docker/startup-cancel-1788956037326/report.json",
+        "sha256": "1d7349718b31afc7a38adda93d39b6882c9699c501e85b8e26cbceb09c07f9d5"
+      },
+      {
+        "path": "artifacts/docker/browser-1788956145228/report.json",
+        "sha256": "10c6c085a613039168b959b0e9c9dc799edfa717a9cc28ef62c3d5f7d7f279d3"
+      },
+      {
+        "path": "artifacts/docker/failures-1788956188994/report.json",
+        "sha256": "b009e803a6a709fe1e313b51c721cab3edf08b934f62c5004b9bd75f441475cc"
+      },
+      {
+        "path": "artifacts/docker/restart-1788956204236/report.json",
+        "sha256": "807773ac0d5671a9395d8e7b53182db1f4ba72b24821df247980b58b8d2a310c"
+      },
+      {
+        "path": "artifacts/docker/lease-1788956234249/report.json",
+        "sha256": "6031ebccf1e0bc75a158d54ff30c9cac677b2e69ada3909ee3f4a4a690c1fbfd"
+      },
+      {
+        "path": "artifacts/docker/audio-1788956253617/report.json",
+        "sha256": "190c20be341b563e71d3e24d80ea754eb60c3be78661846d3bbb17aa41c79bc5",
+        "audio_report": "artifacts/audio/latency-1788956259863/report.json",
+        "audio_report_sha256": "7fcb5e9fe9a53aec58623664fd7cf48a5beec599dac50e1736b0e8d9aa20acb4"
+      }
+    ],
+    "audio": {
+      "continuity_seconds_per_rate": 120,
+      "rates": [
+        {
+          "hz": 44100,
+          "samples": 5347968,
+          "underruns": 0,
+          "p95_notification_upper_bound_ms": 139.2,
+          "suitability": "monitoring"
+        },
+        {
+          "hz": 48000,
+          "samples": 5820928,
+          "underruns": 0,
+          "p95_notification_upper_bound_ms": 169.1,
+          "suitability": "above-monitoring-target"
+        }
+      ],
+      "network_failures": 0,
+      "connection_responses": 16138,
+      "connections_reused": 16130,
+      "claim": "software rendering and continuity only; not physical speaker output or low-latency performance"
+    }
+  },
+  "amd64_diagnosis": "The existing linux/amd64 image cannot complete the shared native JACK/matron lifecycle on this Apple Silicon Docker Desktop host. Resource sizing and the Rosetta-configured restart did not remedy packaged JACK startup, and bounded official JACK upgrades did not provide clean client shutdown.",
+  "next_route": "Native Linux and macOS Intel remain separate unavailable-host lanes; physical devices and speaker output remain untested.",
+  "review": "No adversarial integration review requested; the separate amd64 failure and native arm64 pass retain that review gap.",
   "sources": [
     "https://github.com/jackaudio/jack2/blob/develop/ChangeLog.rst",
     "https://docs.docker.com/desktop/troubleshoot-and-support/troubleshoot/known-issues/",

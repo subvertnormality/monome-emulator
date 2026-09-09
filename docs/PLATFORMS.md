@@ -10,16 +10,22 @@ The following is the measured status as of 2026-09-09.
 | Windows x64, Docker Desktop, Linux amd64 image, Windows Chromium | Passed H04 software gates | Windows10.0.26200; Docker Desktop4.12.0/Engine20.10.17, WSL2 kernel6.6.87.2. Actual host browser controls, grid, MIDI, host code edits, persistent data, isolation, restart, cancellation, cleanup and rendered audio passed. |
 | macOS Intel, Docker, host Chromium | not_run | No macOS host is available in this session. Linux-container results do not establish Mac mount, browser or networking behavior. |
 | macOS Apple Silicon, amd64 container under emulation | Failed H05 prerequisite | On macOS15.3.2/M1 with Docker Desktop4.69.0, pinned Ubuntu JACK1.9.12 exits with SIGBUS before a native session can start. Six JACK variants reproduced it. Official JACK1.9.19 and1.9.22 probes start, but coherently rebuilt clients abort with heap corruption during normal matron shutdown. Startup/cancellation failed; the five dependent suites were not run. This is not native arm64 evidence. |
-| Apple Silicon native arm64 image | in_progress | Approved after the amd64/Rosetta failure. The immutable Ubuntu20.04 arm64 manifest and a separate 492-package prerequisite inventory resolve. Admission still requires a committed architecture-selecting exporter, native image build and the same six sequential Mac host gates. No pass is claimed yet. |
+| macOS Apple Silicon, native arm64 container, host Chrome | Passed H05 software gates | macOS15.3.2/M1; Docker Desktop4.69.0/Engine29.4.0; Chrome152 arm64. The separately pinned native image passed startup cancellation, browser/input/grid/MIDI/data, failures, restart, lease isolation and120-second-per-rate rendered audio. This does not alter the failed amd64-emulation lane. |
 | Native Linux host, Docker and host Chromium | not_run | WSL2 and Docker's Linux VM do not establish native Linux host behavior. |
 
-The final tested image is `monome-emulator:h04-09`, ID
+The final Windows-tested image is `monome-emulator:h04-09`, ID
 `sha256:02ecaa29d325a2af10c0f63c713c60fccf1da699fddf6211265b1d4305805a8a`,
 built from emulator commit `434c2da3fbefae5c7467f1365c6b60e01313a1ba` and the
 repository's pinned official runtime. This is a local image, not a published
 registry download. See [Docker installation](DOCKER.md) to build your snapshot.
 Report identities and hashes are in
 [H04 evidence](delivery/references/H04-evidence.json).
+
+The native Apple Silicon image is `monome-emulator:macos-h05-arm64-02`, ID
+`sha256:6f0e60e7a34d159cb1007a91dc0e1013a94da987881e48ae47de4a7504c15a8e`,
+built from emulator commit `f6d1f881e58657d1024fabe648902ee0a7bae72f` and
+the separate pinned arm64 profile. Exact identities and report hashes are in
+[H05 evidence](delivery/references/H05-evidence.json).
 
 ## Browser audio is a monitoring route
 
@@ -65,15 +71,14 @@ emulation must not be described as a native arm64 build. Reuse these runners
 without replacing browser input with direct runtime calls or weakening signal,
 MIDI, data-isolation or cleanup assertions.
 
-The Apple Silicon H05 failure record is
-[H05 evidence](delivery/references/H05-evidence.json). Its failed startup gate is
-a shared prerequisite for the browser, failure, restart, lease and120-second
-audio runners, so those runners remain explicitly `not_run_prerequisite_failed`.
-An approved retry confirmed Apple Virtualization Framework and Rosetta were
-already enabled, restarted Docker Desktop, and reproduced the same JACK SIGBUS.
-A future retry should use a separately pinned native arm64 image, retain the
-failed reports, rebuild from a committed source snapshot and rerun all six
-commands in order.
+The Apple Silicon H05 record is
+[H05 evidence](delivery/references/H05-evidence.json). It retains the failed
+amd64 startup gate and its five `not_run_prerequisite_failed` dependants. An
+approved Docker Desktop/Rosetta retry reproduced that JACK SIGBUS. The distinct
+native arm64 profile subsequently passed all six commands in order. Its first
+lease attempt is also retained: it exposed ineffective cross-mount `flock` on
+Docker Desktop, after which an atomic owner-tokened sentinel was added, tested,
+rebuilt and validated by restarting the complete sequence at gate1.
 
 ## Physical devices and optional components
 

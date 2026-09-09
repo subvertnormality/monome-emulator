@@ -131,7 +131,9 @@ crashes remain errors. Once ready, the normal native shutdown path is retained.
 H04 records automated Windows Docker Desktop + Windows Chromium results, including
 native framebuffer/keys/encoders/grid/MIDI, editable host scripts, persistence,
 isolation, cleanup and actual engine audio at the browser renderer. It does not
-establish native Linux, macOS or Apple Silicon support. See the
+establish native Linux or macOS Intel support. H05 separately records a native
+Apple Silicon arm64 pass for the same scoped software gates and an amd64-emulation
+failure on that host. See the
 [platform matrix](PLATFORMS.md) for independent host status and reproduction.
 
 The first image includes official engines and the tested audio helper. It omits
@@ -165,5 +167,6 @@ Successful containers are removed; failed containers are stopped and retained
 for diagnosis. No global Docker cleanup is performed. Review generated reports,
 including their actual host architecture and image identity, before making any
 platform claim. On Apple Silicon the original pinned amd64 image uses emulation
-and has a separate H05 failure record. Native arm64 requires the explicit profile
-above and all six host gates before it can be described as tested.
+and has a separate H05 failure record. The explicit native arm64 profile above
+passed all six H05 host gates on the recorded M1/Docker Desktop/host Chrome
+configuration; do not transfer that result to another architecture or host route.

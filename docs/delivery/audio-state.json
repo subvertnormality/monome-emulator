@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "current_card": "H05 independent host validation",
-  "status": "in_progress_macos_apple_silicon_native_arm64",
+  "status": "h05_macos_apple_silicon_native_arm64_passed",
   "worktree": ".worktrees/macos-h05",
   "branch": "codex/macos-h05",
   "completed": [
@@ -18,10 +18,11 @@
     "H03 reviewed and merged996c67c; main-source browser/audio/lifecycle and cleanup passed",
     "H04 optional Docker admitted by focused review; imageh04-09 native/browser/audio/data lifecycle passed",
     "H04 merged436b05c; main five launcher contracts passed; H05 available-host matrix and reproduction documented",
-    "A04 refreshed combined WSL audio/Crow/arc/desktop candidate passed seven native/browser integration reports"
+    "A04 refreshed combined WSL audio/Crow/arc/desktop candidate passed seven native/browser integration reports",
+    "H05 native Apple Silicon arm64 Docker profile passed six scoped host gates; amd64 emulation remains failed"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "Native arm64 image built and gates1-4 passed. Gate5 retained failed because Docker Desktop VirtioFS did not coordinate flock across separate bind mounts and admitted two writers. Implement the recorded atomic, owner-tokened, conservative data-root sentinel with focused ineffective-flock and cleanup tests; rebuild a committed arm64 candidate and restart all six gates from gate1. Native Linux remains separate.",
+  "next_action": "H05 native arm64 passed all six scoped Mac software gates after the atomic owner-tokened lease fix; retain the separate amd64-emulation failure and first arm64 lease failure. Native Linux, macOS Intel, physical devices and direct speaker output remain separate work.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",
@@ -209,11 +210,13 @@
     "macos_apple_silicon_amd64": "failed_shared_jack_lifecycle_prerequisite",
     "windows_docker": "passed_scoped_software_gates",
     "completion": "docs/delivery/completions/H05.md",
-    "native_arm64_image": "in_progress_separate_profile",
+    "native_arm64_image": "passed_scoped_software_gates",
     "macos_intel": "not_run_host_unavailable",
     "document": "docs/PLATFORMS.md",
     "apple_silicon_evidence": "docs/delivery/references/H05-evidence.json",
-    "dependent_suites": "browser_failures_restart_lease_audio_not_run_prerequisite_failed"
+    "amd64_dependent_suites": "browser_failures_restart_lease_audio_not_run_prerequisite_failed",
+    "native_arm64_suites": "startup_cancel_browser_failures_restart_lease_audio_120_seconds_per_rate_passed",
+    "native_arm64_candidate": "monome-emulator:macos-h05-arm64-02 sha256:6f0e60e7a34d159cb1007a91dc0e1013a94da987881e48ae47de4a7504c15a8e source f6d1f881e58657d1024fabe648902ee0a7bae72f"
   },
   "combined_wsl_candidate": {
     "install": ".runtime/wsl-integrated-tools-01/installation.json",
