@@ -3,7 +3,7 @@
   "updated": "2026-09-09",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "Resume MIDI output boundary candidate07 from docs/delivery/MIDI-OUTPUT-BOUNDARY.md and midi-boundary-fixes-validation.json. Named queued-reset and subscriber-error review findings have passing scoped evidence. Mosaic cleanup wired;520units and7adapter scenarios pass.14D/R candidate06 and4scopedMosaicD/R candidate07 pass; no full admission. Next lifecycle/direct init/reset, forwarding/multiport/remapping, musical gate/intermediate/wrap/tempo matrices; internal tempo-reference correction and complete manual/release/final hardening remain.",
+  "next_action": "Implement docs/delivery/MIDI-RECEIVED-ZERO.md from Codex arbitration01a087b2-c56f-7d50-8699-ea5b325ede1d. Candidate07 generic cold forwarding firstF8 late25msD/25.486msR; Mosaic012/013coldwarm all4fail forwarding order while absolute input note/gate checks pass. Need narrowly tagged receivedzero output waiter +atomic sourceStart visibility, preserving ordinarystrictsync/no fictional preClock2tempo, then source-origin-aware Mosaic incomingStart adapter. Lifecycle010/multioutput011/master009 pass6D/R;directinit/reset fixed524units pass. All broader manual/release/finalhardening gates remain.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -5329,5 +5329,10 @@
     "document": "docs/delivery/MIDI-OUTPUT-BOUNDARY.md",
     "evidence": "docs/delivery/midi-boundary-fixes-validation.json",
     "next_action": "Candidate07: rapid lifecycle/direct init/reset cancellation; incoming forwarding and multiport/remapping; master gate/intermediate/wrap/tempo matrices. No default/M5 promotion."
+  },
+  "midi_forwarding_gate": {
+    "status": "baseline_failed",
+    "card": "docs/delivery/MIDI-RECEIVED-ZERO.md",
+    "evidence": "docs/delivery/midi-forwarding-baseline-validation.json"
   }
 }
