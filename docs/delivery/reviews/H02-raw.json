@@ -1,0 +1,41 @@
+{
+  "started_at": "2026-09-09T03:08:31.425389+00:00",
+  "packet_sha256": "33afcd4a4a149843548f392e8bb1a3d455b2aa9bacf66875d24facd56ff0b764",
+  "files": [
+    "docs/delivery/completions/H02.md",
+    "docs/delivery/completions/H02-progress.md"
+  ],
+  "tool": "critique_branch",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor",
+    "base_ref": "9c673269182f4b1d1c6a791339926d560daea676",
+    "head_ref": "HEAD",
+    "include_uncommitted": false,
+    "isolate": false,
+    "converge": false,
+    "class_closure": false,
+    "round": 1,
+    "engine": "codex",
+    "effort": "medium",
+    "web_search": false,
+    "stakes": "Trusted single-user local norns/grid emulator. Audio and official Maiden are explicitly authorized. Review persistence, actual runtime fidelity, process cleanup and false-green tests on Ubuntu20.04 WSL with Windows browser. No financial, hostile-user, physical-hardware or arbitrary-platform certification requirements.",
+    "project_summary": "Trusted single-user general-purpose official norns/grid emulator on Ubuntu20.04 WSL2 for automated testing and practical PC scripts. Mosaic optional. H01 desktop audio is reviewed and merged. H02 adds optional official GPL Maiden and persistent datasets; audio explicitly authorized.",
+    "diff_intent": "Review H02 against merged base9c67326: separately pinned official Maiden builder/patches, owned authenticated proxy/native REPL, explicit full-session restart after sticky SC error, marked single-writer datasets, three narrow Maiden UI/navigation fixes and official Crone reload serialization. Actual browser/native/PCM/isolation/failure tests and completion evidence are included. No default runtime promotion; H03/Docker remain queued.",
+    "focus": "Find substantive implementation, lifecycle, source/licensing, persistence or false-green issues. Read docs/delivery/completions/H02.md and H02-progress.md. Check restart failure paths and held-input/process isolation, preserve explicit native errors, source identity and exact save semantics, runtime reload locking, browser/REPL/PCM tests. Existing trusted-local scope: no hostile multi-tenancy, financial certification, physical hardware requirement or broad refactoring. Do not expand engine/platform claims beyond evidence. Limit to actionable in-scope findings."
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "## What works\n\n- `src/automation/server.py:46` acquires `self.dataset_lease=Lease(self.config)` before constructing NativeBackend. Contention is therefore rejected before native startup writes.\n- `scripts/engine_reload_patch.py:26` sets `loaded.test = true; loaded.signal;`, and line 28 waits before releasing the engine lock. This respects SuperCollider\u2019s [Condition semantics](https://docs.supercollider.online/Classes/Condition.html) and covers asynchronous allocation completion.\n- `tests/maiden_browser.cjs:48` requires `fs.readFileSync(local(info.script),'utf8')===changed`, then checks changed native MIDI. This verifies an actual save/run outcome. All four recorded evidence hashes match their manifest; I inspected those records without rerunning tests.\n\n## What doesn't work\n\n- **[MAJOR] Dataset validation breaks existing symlinked application launches.** `src/automation/datasets.py:12\u201315` uses `entry=Path(config['script']).resolve()` followed by `entry.relative_to(root)`. However, `src/app_fixtures.py:26` deliberately creates profile directories using `link.symlink_to(code/app,target_is_directory=True)`: resolving the script moves it outside the selected profile root. Existing `--fixture mosaic` launches\u2014and generic applications assembled through equivalent directory links\u2014now fail with `dataset_mapping`, even without Maiden or reopening. Preserve the runtime\u2019s declared relative mapping rather than checking containment after dereferencing the application link.\n\n- **[MAJOR] Failed saves are reported as successful, and Run executes the old file.** The integrated pinned frontend, `.runtime/maiden-02/source/web/src/model/edit-actions.js:278`, unconditionally calls `dispatch(bufferSaveSuccess(resource, response.entity))`; line 279 also invokes the completion callback. A read-only file produces HTTP 500 from Maiden, but its reducer still executes `.set('modified', false)` at `web/src/model/edit-reducers.js:295`, and Save-and-Run proceeds. This contradicts the claimed exact-save workflow: the editor appears saved while disk contents remain unchanged. Check HTTP success, retain dirty text on failure, show the error, and suppress Run.\n\n- **[MAJOR] Cleanup failure becomes a permanent no-op on retry, while dataset ownership is released.** `src/automation/server.py:63\u201364` executes `if self.closed:return` and sets `self.closed=True` before cleanup; line 76 releases the lease even when a closer fails. Native cleanup can exit before finishing its process loop\u2014for example, the final `process.wait(timeout=3)` at `src/runtime/native.py:564` can raise. A subsequent restart skips cleanup and starts another session against the released dataset, leaving unfinished native processes behind. Separate \u201creject new work\u201d from \u201ccleanup completed\u201d; retry unfinished cleanup and retain writer ownership until native writers have stopped.\n\n- **[MINOR] Reopened data disappears as a navigable Maiden directory.** `patches/maiden/0001-follow-directory-links.patch:12` resolves links only inside `listingHandler`. The untouched root handler at `.runtime/maiden-02/source/cmd/server.go:238` still uses `ioutil.ReadDir(s.dustRoot())`, and line 930 determines children using `entry.IsDir()`. Restart/reopen makes `dust/data` a symlink (`src/runtime/native.py:115`), so the root response presents it as a file. Apply the same link handling to root listings and verify data navigation after restart.\n\n- **[MINOR] Failed re-verification leaves a successful report flag.** `tests/maiden_cleanup.py:29` records `r['verification_error']=repr(error)` but never resets an existing `r['passed']=True`; line 30 writes that contradictory report back. Rechecking previously successful evidence after a WAV disappears therefore exits unsuccessfully while retaining machine-readable success. Reset `passed` before verification and remove stale verification errors after success.\n\n## Risks\n\n- **[MINOR] Recovery can certify stale build outputs as carrying current patches.** `scripts/build_maiden.py:29` checks only that patches reverse-apply to source, while line 30 checks merely ELF magic and the existence of `web/build/index.html`. Applying a frontend patch after an interrupted build, then finalizing without rebuilding, records the new patch set against old assets. Verify the recovered source against the archive plus declared patches and rebuild affected outputs before recording their identity.\n\n## Gaps\n\n- **[MAJOR] Restart failure/retry and held-input isolation lack acceptance coverage.** `tests/maiden_lifecycle.cjs:51` requires the first restart response to be `200`; session switching at lines 35\u201338 uses completed encoder clicks. Neither path exercises replacement startup failure, cleanup failure, retry, or an input held across switching/restart. Add bounded cases that verify explicit failure, subsequent recovery, writer-lock ownership, absent old processes, and unaffected peer input state. The existing SC-error test proves successful recovery from an interpreter error, not these lifecycle failure paths.\n\n## Improvements\n\nNothing notable.\n\n---\n_paranoia-local \u00b7 engine=codex \u00b7 session_ref=`01a08423-7f43-7511-907e-748513213b36` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "status": "returned",
+  "finished_at": "2026-09-09T03:12:47.580872+00:00"
+}

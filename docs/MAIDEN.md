@@ -36,6 +36,9 @@ norns runtime. Use a disposable copy when experimenting. Lua and SuperCollider
 tabs send commands to the session's actual interpreters. Native errors remain
 visible and can make automation fail explicitly.
 
+A failed Save shows an error and retains your edits. Run does not execute the
+old file after a failed save. Correct the write problem and retry.
+
 **Restart session** stops only this session's processes and opens a new session
 with its saved dataset and original launcher script entry. It replaces the
 session ID, token and URLs. Saved script edits remain on disk; save unsaved

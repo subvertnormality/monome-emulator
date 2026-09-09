@@ -34,7 +34,14 @@ async function capture(info){
   assert.equal(await controls.locator('#editor').getAttribute('href'),first.editor_url);
   await controls.getByRole('button',{name:'Turn encoder 2 up',exact:true}).click();await cc(first,1);
   await controls.getByRole('button',{name:'Turn encoder 2 up',exact:true}).click();await cc(first,2);
+  const heldKey=await controls.locator('#key-2').boundingBox();
+  await controls.mouse.move(heldKey.x+heldKey.width/2,heldKey.y+heldKey.height/2);await controls.mouse.down();
+  await until(async()=>(await api(first,'/snapshot')).state.held.some(row=>row.type==='key'&&row.n===2));
   await controls.goto(peer.browser_url);await controls.locator('#status').filter({hasText:'Ready'}).waitFor();
+  await controls.mouse.up();
+  await until(async()=>(await api(first,'/snapshot')).state.held.length===0);
+  assert.deepEqual((await api(peer,'/snapshot')).state.held,[]);
+  report.checks.push('browser-held-input-released-on-session-switch-without-peer-leak');
   await controls.getByRole('button',{name:'Turn encoder 2 up',exact:true}).click();await cc(peer,1);
   assert.notEqual(first.dataset.dataset_id,peer.dataset.dataset_id);
   report.checks.push('browser-session-switching-independent-saved-counters');
@@ -56,6 +63,10 @@ async function capture(info){
   assert.notEqual(next.session_id,first.session_id);assert.notEqual(next.token,first.token);
   assert.equal(next.dataset.dataset_id,first.dataset.dataset_id);assert.equal(next.data,first.data);
   await cc(next,2);await cc(peer,1);
+  const reopened=editor.frameLocator('#maiden');
+  for(const name of ['data','maiden-probe','counter.txt'])await reopened.getByText(name,{exact:true}).click();
+  await reopened.locator('.ace_content').filter({hasText:'2'}).waitFor();
+  report.checks.push('root-data-link-navigable-after-restart');
   await repl(editor,'supercollider','("RECOVERED_" ++ (6*7).asString).postln;','RECOVERED_42');
   await repl(other,'norns','print("PEER_"..tostring(maiden_session_probe==nil))','PEER_true');
   report.checks.push('owned-restart-recovers-sc-repl-and-original-dataset');

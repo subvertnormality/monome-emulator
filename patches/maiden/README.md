@@ -28,3 +28,14 @@ value and Save writes an empty file. Evidence034725 shows one GET, dirty flag
 preserved, PUT sent, but empty disposable file and editor. No user file was used.
 Remove when official upstream preserves multi-change edits through parent renders
 and saves the exact changed contents in the same browser regression.
+
+0004 checks the actual Save HTTP result and catches network errors. Failure
+shows a browser error dialog, preserves dirty text and does not call Run's
+completion callback. Baseline042202 used an actual read-only Linux file: HTTP500
+was silently treated as success. Remove when upstream passes the same real
+write-failure/recovery test with exact file and runtime-output assertions.
+
+0005 applies directory-link handling to the dust root too. Reopened datasets
+appear as dust/data links; without this change the editor labels data as a file.
+Remove when upstream supports root-link navigation and the post-restart browser
+data/counter-file test passes. Both changes retain the same pinned official base.

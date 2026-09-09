@@ -16,7 +16,7 @@
     "H01 reviewed desktop audio committed and merged9c67326; main native lifecycle passed"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "H02 native/browser/PCM evidence passed: browser040332, lifecycle035759, transport040254, dataset040433. All runners terminal; 24 top-level and 68 contracts covered (67 initialpass, replay source_changed due own concurrent edit then targeted pass29.542s). Current Maiden bundlemaiden-tools-04, engine-reload-01. Prepare committed H02 branch review vs9c67326 with H02-spec and bounded Codex600s medium; no H02 review yet. Review/fix/admit/merge before H03. Preserve main modified state and new Mosaic-NRPN-active.json/Mosaic-trig-parameters-active.json. Original clicks remain bounded/unlocalized perH01. See H02.md/H02-progress.md.",
+  "next_action": "H02 review fixes ready for commit/focused followup to01a08423-7f43-7511-907e-748513213b36. All runners terminal; clean buildmaiden-04 passed, bundlemaiden-tools-05 current. Linked041703, readonlySave043214, lifecycle043344 tenchecks, native restart failures043519, finalbrowser/PCM043913 eightchecks, transport044208 sevenchecks (incl killedGo explicitfailure/cleanup) passed. Verifier missingPCM regression passed. Latest24top-level and shutdown-errorcontract passed. Review fixes include retry/ownership/native FD inheritance, lexical mapping, GPL patches4/5, no weakfinalize. Commit and run one focused query using H02-question/H02-triage; then admit/merge beforeH03. Preserve main state and Mosaic active docs. All test sessions closed.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",

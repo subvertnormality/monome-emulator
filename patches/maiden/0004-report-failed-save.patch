@@ -1,0 +1,31 @@
+--- a/web/src/model/edit-actions.js
++++ b/web/src/model/edit-actions.js
+@@ -273,10 +273,15 @@
+ 
+ export const bufferSave = (resource, value, cb) => dispatch => {
+   dispatch(bufferSaveRequest(resource, value));
+-  return api.writeTextResource(resource, value, response => {
+-    // FIXME: handle errors
++  return api.writeTextResource(resource, value, async response => {
++    if (!response.ok) {
++      throw new Error(`HTTP ${response.status}: ${(await response.text()).slice(0, 512)}`);
++    }
+     dispatch(bufferSaveSuccess(resource, response.entity));
+     return cb ? cb() : null;
++  }).catch(error => {
++    dispatch(bufferSaveFailure(resource, error.message));
++    window.alert(`Save failed: ${error.message}`);
+   });
+ };
+ 
+--- a/web/src/api.js
++++ b/web/src/api.js
+@@ -45,7 +45,7 @@
+     const formData = new FormData();
+     const codeBlob = new Blob([code], { type: 'text/utf-8' });
+     formData.append('value', codeBlob);
+-    fetch(resource, {
++    return fetch(resource, {
+       method: 'PUT',
+       body: formData,
+     }).then(cb);

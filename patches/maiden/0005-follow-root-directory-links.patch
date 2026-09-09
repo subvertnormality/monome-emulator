@@ -1,0 +1,21 @@
+--- a/cmd/server.go
++++ b/cmd/server.go
+@@ -239,6 +239,18 @@
+ 	if err != nil {
+ 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+ 		return
++	}
++
++	// Reopened session data is linked into the private dust root.
++	for i, entry := range entries {
++		if entry.Mode() & os.ModeSymlink != 0 {
++			resolved, statErr := os.Stat(filepath.Join(s.dustRoot(), entry.Name()))
++			if statErr != nil {
++				ctx.JSON(http.StatusBadRequest, gin.H{"error": statErr.Error()})
++				return
++			}
++			entries[i] = linkedEntry{resolved, entry.Name()}
++		}
+ 	}
+ 
+ 	dir := handleDirRead("", &entries, s.resourcePath)

@@ -9,10 +9,13 @@ from automation import session
 from desktop_audio import key
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--install',type=Path,required=True);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--install',type=Path,required=True);p.add_argument('--linked-code',action='store_true');a=p.parse_args()
     out=ROOT/'artifacts/datasets'/time.strftime('native-%Y%m%d-%H%M%S');out.mkdir(parents=True)
     code=out/'code';shutil.copytree(ROOT/'fixtures/probes/dataset-probe',code/'dataset-probe')
-    options=dict(script=code/'dataset-probe/dataset-probe.lua',code_root=code,experimental_install=a.install,crow_enabled=False,startup_chime=False)
+    selected=code
+    if a.linked_code:
+        selected=out/'profile';selected.mkdir();(selected/'dataset-probe').symlink_to(code/'dataset-probe',target_is_directory=True)
+    options=dict(script=selected/'dataset-probe/dataset-probe.lua',code_root=selected,experimental_install=a.install,crow_enabled=False,startup_chime=False)
     clients=[];report=dict(passed=False,source=source_identity(),checks=[])
     def start(**extra):
         c=Session(**dict(options,**extra));clients.append(c);return c
@@ -51,9 +54,10 @@ def main():
         assert sorted(x.name for x in unowned.iterdir())==['user.txt']
         assert (unowned/'user.txt').read_text()=='preserve'
         alternative=code/'dataset-probe/other.lua';alternative.write_text('-- disposable alternative')
-        rejects('dataset_mapping',reopen_data=dataset,script=alternative)
+        rejects('dataset_mapping',reopen_data=dataset,script=selected/'dataset-probe/other.lua')
         rejects('dataset_options',reopen_data=dataset,data_seeds=[dict(source='unused',destination='unused')])
         report['passed']=True
+        report['linked_code']=a.linked_code
     except Exception as error:report['error']=repr(error);raise
     finally:
         for c in clients:

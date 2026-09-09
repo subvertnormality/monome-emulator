@@ -45,7 +45,7 @@ class Application:
                 bundle=verify(self.config['maiden_install'])
             self.dataset_lease=Lease(self.config)
             try:
-                self.backend=NativeBackend(directory,self.config)
+                self.backend=NativeBackend(directory,self.config,dataset_fd=self.dataset_lease.fd)
                 if self.config.get('maiden_install'):self.maiden=Maiden(self.backend,self.config,bundle)
             except Exception:
                 try:
@@ -58,23 +58,35 @@ class Application:
         self.audio_monitor=None
         self.audio_captures={}
         self.closed=False
+        self.cleanup_complete=False
         self.restart_result=None
     def close(self):
-        if self.closed:return
+        if self.cleanup_complete:return
         self.closed=True
         failures=[]
         try:
             closers=([self.maiden.close] if self.maiden else [])
             closers += [capture.cancel for capture in self.audio_captures.values()]
-            if self.audio_monitor:closers.append(self.audio_monitor.close)
+            if self.audio_monitor:
+                monitor=self.audio_monitor
+                def close_monitor():
+                    monitor.close()
+                    self.audio_monitor=None
+                closers.append(close_monitor)
             closers.append(self.backend.close)
             for close in closers:
                 try:close()
                 except Exception as error:failures.append(str(error))
-            self.audio_monitor=None
         finally:
-            if self.dataset_lease:self.dataset_lease.close()
+            # Reject input immediately, but do not release writable data while
+            # a failed closer leaves an interpreter/editor alive.
+            if self.writers_stopped() and self.dataset_lease:self.dataset_lease.close()
         if failures:raise ContractError('cleanup_failed','; '.join(failures))
+        self.cleanup_complete=True
+    def writers_stopped(self):
+        native_stopped=getattr(self.backend,'closed',False) if self.config['backend']=='native' else self.backend.proc.poll() is not None
+        editor_stopped=not self.maiden or self.maiden.closed
+        return native_stopped and editor_stopped
     def capture_request(self,path,payload):
         if self.config['backend']!='native':raise ContractError('unsupported','Capture requires native audio')
         if not isinstance(payload,dict):raise ContractError('audio_request','Expected capture request object')
@@ -399,7 +411,8 @@ def serve_application(directory,app):
                         try:
                             app.close()
                             self.respond(200,dict(status='stopped',session_id=app.config['session_id']))
-                        finally: threading.Thread(target=self.server.shutdown,daemon=True).start()
+                        finally:
+                            if app.writers_stopped():threading.Thread(target=self.server.shutdown,daemon=True).start()
                         return
                 raise ContractError('endpoint','Unknown endpoint')
             except ContractError as error: self.respond(400,error.as_dict())

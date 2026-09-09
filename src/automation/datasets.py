@@ -9,8 +9,10 @@ SYSTEM_FILES=('system.state','system.mods','system.kbd_layout')
 
 def mapping(config):
     if not config.get('script'):raise ContractError('script_required','Select an external script with --script')
-    entry=Path(config['script']).resolve()
-    root=Path(config['code_root']).resolve() if config.get('code_root') else entry.parent.parent
+    # Match NativeBackend's declared mapping. An application directory may be a
+    # link to an external fixture; dereferencing it changes that relative name.
+    entry=Path(os.path.abspath(config['script']))
+    root=Path(os.path.abspath(config['code_root'])) if config.get('code_root') else entry.parent.parent
     try:relative=entry.relative_to(root)
     except ValueError:raise ContractError('dataset_mapping','Script is outside the selected code root')
     return dict(code_root=str(root),entry=relative.as_posix())

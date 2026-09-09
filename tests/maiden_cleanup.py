@@ -6,6 +6,7 @@ from audio_feasibility import silence,ROOT,write_json
 
 p=argparse.ArgumentParser();p.add_argument('report',type=Path);a=p.parse_args()
 r=json.loads(a.report.read_text())
+r['passed']=False
 try:
     assert r.get('browser_passed') and not r['cleanup_errors'],r.get('error')
     r['audio_signal']=signal(Path(r['tone']['output']),440)
@@ -26,6 +27,7 @@ try:
             else:raise AssertionError('Owned process survived: '+str(row))
     r['checks']+=['actual-stereo-tone-continuity-and-silence','all-owned-native-and-maiden-processes-reaped']
     r['passed']=True
+    r.pop('verification_error',None)
 except Exception as error:r['verification_error']=repr(error);raise
 finally:write_json(a.report,r)
 print(json.dumps(dict(passed=r['passed'],checks=r['checks'])),flush=True)

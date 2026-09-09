@@ -25,9 +25,11 @@ def free_ports(count):
 
 class NativeBackend:
     fidelity='native-norns'
-    def __init__(self,directory,config):
+    def __init__(self,directory,config,dataset_fd=None):
         self.directory=Path(directory); self.config=config
+        self.dataset_fds=() if dataset_fd is None else (dataset_fd,)
         self.processes=[]; self.logs=[]; self.closed=False
+        self.cleanup_rows=[]
         self.crow_fds=[]
         self.crow_capture=None
         self.errors=[]; self.absent=[]; self.ready=False; self.sequence=0; self.acks={}
@@ -188,7 +190,7 @@ class NativeBackend:
         env=dict(self.env)
         if bridge: env.update(NORNS_EMU_FD=str(self.child.fileno()),NORNS_EMU_PROFILE=str(ROOT/'src/runtime/host.lua'))
         process=subprocess.Popen(args,cwd=self.directory,env=env,stdin=subprocess.PIPE,stdout=logfile,stderr=subprocess.STDOUT,
-                                 pass_fds=(self.child.fileno(),) if bridge else (),start_new_session=True)
+                                 pass_fds=((self.child.fileno(),) if bridge else ())+self.dataset_fds,start_new_session=True)
         self.processes.append((name,process)); return process
     def wait_log(self,name,marker,timeout):
         end=time.monotonic()+timeout
@@ -243,7 +245,7 @@ class NativeBackend:
             self.env['NORNS_EMU_CROW_CAPTURE_DIRECTORY']=str(directory)
         process=subprocess.Popen([binary['path'],str(source),str(adapter),'--serial'],
             cwd=self.directory,env=self.env,stdin=master,stdout=master,stderr=logfile,start_new_session=True,
-            pass_fds=(capture_child.fileno(),) if capture_child else ())
+            pass_fds=((capture_child.fileno(),) if capture_child else ())+self.dataset_fds)
         if capture_child:capture_child.close()
         self.processes.append(('crow',process))
     def check_processes(self):
@@ -538,20 +540,25 @@ class NativeBackend:
         if self.crow_capture and self.crow_capture.active is not None:
             try:self.crow_capture.cancel(self.crow_capture.active)
             except Exception as error:capture_error=str(error)
-        cleanup=[]
+        cleanup=self.cleanup_rows
         # Stop clients before their JACK server. Simultaneous termination can
         # deadlock JACK shutdown and leave its finite server registry occupied.
         # SuperCollider's normal /quit path also releases its shared-memory file.
         if hasattr(self,'ports'):
             with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as quit_socket:
-                quit_socket.sendto(b'/quit\0\0\0,\0\0\0',('127.0.0.1',self.ports['scsynth']))
-                quit_socket.sendto(b'/quit\0\0\0,\0\0\0',('127.0.0.1',self.ports['crone']))
+                processes=dict(self.processes)
+                for service,port in (('sclang','scsynth'),('crone','crone')):
+                    process=processes.get(service)
+                    if process is not None and process.poll() is None and not any(row['service']==service for row in cleanup):
+                        quit_socket.sendto(b'/quit\0\0\0,\0\0\0',('127.0.0.1',self.ports[port]))
             time.sleep(0.1)
         # EOF is the bridge's native EVENT_QUIT route. Keep draining frames while
         # matron exits so its worker cannot block on the outbound socket.
         try: self.controller.shutdown(socket.SHUT_WR)
         except OSError: pass
         for name,process in reversed(self.processes):
+            # Retry only unfinished groups; never signal a previously reaped PID.
+            if any(row['service']==name for row in cleanup):continue
             started=time.monotonic()
             if name in ('matron','crone'):
                 try: process.wait(timeout=1)

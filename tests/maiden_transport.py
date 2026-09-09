@@ -1,9 +1,11 @@
 """Actual optional Maiden HTTP/WS failure boundaries, without physical devices."""
-import argparse,asyncio,json,shutil,sys,time,urllib.request,urllib.error
+import argparse,asyncio,json,os,signal,shutil,sys,time,urllib.request,urllib.error
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'src'))
 from automation import session
 from automation.protocol import write_json
+from automation.protocol import ContractError
+from automation.datasets import Lease
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--install',type=Path,required=True);p.add_argument('--maiden',type=Path,required=True);a=p.parse_args()
@@ -25,7 +27,7 @@ def main():
             assert http(endpoint)[0]==401,endpoint
         assert http('/maiden/',dict(auth,Origin='http://localhost:1'))[0]==400
         report['checks'].append('http-token-and-origin-required')
-        status,data=http('/api/v1/unit/matron/restart',auth,b'{}')
+        status,data=http('/api/v1/unit/matron?do=restart',auth)
         assert status==400 and json.loads(data)['code']=='unsupported'
         report['checks'].append('host-service-restart-blocked')
         broken=code/'maiden-probe/broken';broken.symlink_to(out/'absent')
@@ -49,6 +51,24 @@ def main():
         asyncio.run(check())
         assert session.request(info['session_id'],'/health')['status']=='ready'
         report['checks'].append('invalid-editor-input-does-not-kill-native-runtime')
+        # Kill only this session's actual Go child; stop must report its bad exit
+        # while still completing cleanup and releasing data ownership.
+        children=Path('/proc/'+str(info['pid'])+'/task/'+str(info['pid'])+'/children').read_text().split()
+        editors=[int(pid) for pid in children if Path('/proc/'+pid+'/cmdline').read_bytes().split(b'\0')[0].decode()==bundle['binary']]
+        assert len(editors)==1,editors
+        os.kill(editors[0],signal.SIGKILL)
+        time.sleep(.05)
+        try:session.stop(info['session_id'])
+        except ContractError as error:assert error.code=='cleanup_failed',error.code
+        else:raise AssertionError('Unexpected Maiden exit was swallowed')
+        directory=session.SESSIONS/info['session_id'];deadline=time.monotonic()+5
+        while not (directory/'stopped.json').exists() and time.monotonic()<deadline:time.sleep(.05)
+        assert (directory/'stopped.json').exists(),'Failed editor cleanup left its HTTP server alive'
+        assert json.loads((directory/'maiden-cleanup.json').read_text())['returncode']==-9
+        assert not Path('/proc/'+str(editors[0])).exists()
+        config=json.loads((directory/'config.json').read_text());config['reopen_data']=True
+        lease=Lease(config);lease.close()
+        report['checks'].append('unexpected-editor-exit-reported-with-complete-cleanup-and-released-lock')
         report['passed']=True
     except Exception as error:report['error']=repr(error);raise
     finally:

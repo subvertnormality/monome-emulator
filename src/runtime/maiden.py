@@ -34,7 +34,7 @@ class Maiden:
             settings=backend.directory/'maiden.toml';settings.write_text('catalogs = []\nsources = []\n')
             self.proc=subprocess.Popen([bundle['binary'],'--config',str(settings),'server','--fd',str(self.listener.fileno()),
                 '--data',str(backend.directory/'dust'),'--app',bundle['web'],'--doc',str(backend.native/'doc')],
-                cwd=backend.directory,env=backend.env,pass_fds=(self.listener.fileno(),),stdin=subprocess.DEVNULL,
+                cwd=backend.directory,env=backend.env,pass_fds=(self.listener.fileno(),)+backend.dataset_fds,stdin=subprocess.DEVNULL,
                 stdout=self.log,stderr=subprocess.STDOUT,start_new_session=True)
             self.listener.close()
             self.thread=threading.Thread(target=self.run,daemon=True);self.thread.start()
@@ -114,7 +114,6 @@ class Maiden:
             if hasattr(self,'loop'):self.loop.close()
     def close(self):
         if self.closed:return
-        self.closed=True
         if self.thread and self.thread.is_alive() and hasattr(self,'stop'):
             self.loop.call_soon_threadsafe(self.stop.set);self.thread.join(4)
         if self.proc:
@@ -124,6 +123,7 @@ class Maiden:
             write_json(self.backend.directory/'maiden-cleanup.json',dict(pid=self.proc.pid,returncode=self.proc.returncode))
         self.listener.close();self.log.close()
         if Path(self.socket_path).exists():Path(self.socket_path).unlink()
-        self.socket_directory.rmdir()
+        if self.socket_directory.exists():self.socket_directory.rmdir()
         if self.thread and self.thread.is_alive():raise ContractError('maiden_cleanup','Relay did not stop')
+        self.closed=True
         if self.proc and self.proc.returncode not in (0,-15):raise ContractError('maiden_cleanup','Unexpected editor exit '+str(self.proc.returncode))

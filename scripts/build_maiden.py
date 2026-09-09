@@ -15,20 +15,12 @@ def extract(archive,destination):
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--source',type=Path,required=True);p.add_argument('--output',type=Path,required=True)
-    p.add_argument('--finalize',action='store_true',help='Record an owned build after manually completing interrupted frontend steps');a=p.parse_args()
+    a=p.parse_args()
     assert platform.system()=='Linux' and platform.machine()=='x86_64','Only the pinned Linux amd64 toolchain is prepared'
     lock=json.loads((ROOT/'maiden.lock.json').read_text());source=a.source.resolve()
     revision=subprocess.check_output(['git','-C',str(source),'rev-parse','HEAD'],text=True).strip();assert revision==lock['revision']
     remote=subprocess.check_output(['git','-C',str(source),'remote','get-url','origin'],text=True).strip();assert remote.rstrip('/')==lock['repository']
     out=a.output.resolve()
-    if a.finalize:
-        archive=out/'source.tar';tree=out/'source';patch=ROOT/'patches/maiden/0001-follow-directory-links.patch'
-        expected=subprocess.check_output(['git','-C',str(source),'archive',revision])
-        assert archive.read_bytes()==expected,'Recovery source archive differs from official pin'
-        for item in sorted((ROOT/'patches/maiden').glob('*.patch')):
-            subprocess.run(['git','apply','--reverse','--check',str(item)],cwd=tree,check=True)
-        assert (out/'maiden').read_bytes()[:4]==b'\x7fELF' and (tree/'web/build/index.html').is_file(),'Incomplete build'
-        record(out,lock,tree,patch);return
     out.mkdir(parents=True,exist_ok=False)
     archive=out/'source.tar'
     with archive.open('wb') as file:subprocess.run(['git','-C',str(source),'archive',revision],stdout=file,check=True)
@@ -54,14 +46,30 @@ def main():
     patch=ROOT/'patches/maiden/0001-follow-directory-links.patch'
     for item in sorted((ROOT/'patches/maiden').glob('*.patch')):
         subprocess.run(['git','apply',str(item)],cwd=tree,check=True)
+    patches=patch_identity()
+    # Stamp before taking the build-input identity. No recovery path can label
+    # old output as carrying a newly applied patch: every build uses fresh output.
+    (tree/'web/src/version.js').write_text("export const VERSION = '0.5.0';\nexport const COMMIT = '"+revision+"';\n")
+    inputs=source_identity(tree)
     with (out/'build.log').open('w') as log:
         subprocess.run([str(go/'bin/go'),'build','-mod=readonly','-o',str(out/'maiden')],cwd=tree,env=env,stdout=log,stderr=log,check=True,timeout=600)
         print('Go binary built; installing pinned frontend dependencies',flush=True)
         subprocess.run([str(node/'bin/node'),str(yarn),'install','--frozen-lockfile','--non-interactive','--network-concurrency','1','--network-timeout','60000'],cwd=tree/'web',env=env,stdout=log,stderr=log,check=True,timeout=1800)
-        # The archive has no .git: stamp the exact pin instead of querying a parent repository.
-        (tree/'web/src/version.js').write_text("export const VERSION = '0.5.0';\nexport const COMMIT = '"+revision+"';\n")
         subprocess.run([str(node/'bin/node'),'node_modules/react-scripts/scripts/build.js'],cwd=tree/'web',env=env,stdout=log,stderr=log,check=True,timeout=300)
+    assert source_identity(tree)==inputs,'Maiden source changed during build'
+    assert patch_identity()==patches,'Maiden patch set changed during build'
     record(out,lock,tree,patch)
+
+def patch_identity():
+    return [dict(path=str(p.relative_to(ROOT)),sha256=hashlib.sha256(p.read_bytes()).hexdigest()) for p in sorted((ROOT/'patches/maiden').glob('*.patch'))]
+
+def source_identity(tree):
+    result={}
+    for directory,folders,files in os.walk(tree):
+        if Path(directory)==tree/'web':folders[:]=[name for name in folders if name not in ('node_modules','build')]
+        for name in files:
+            p=Path(directory)/name;result[str(p.relative_to(tree))]=hashlib.sha256(p.read_bytes()).hexdigest()
+    return result
 
 def record(out,lock,tree,patch):
     # Ace loads these workers at runtime; webpack does not discover their URLs.
@@ -71,5 +79,6 @@ def record(out,lock,tree,patch):
     result=dict(schema_version=1,official=lock,source=str(tree),binary=str(out/'maiden'),binary_sha256=hashlib.sha256((out/'maiden').read_bytes()).hexdigest(),
         web=str(tree/'web/build'),license=str(tree/'LICENSE'),patch_sha256=hashlib.sha256(patch.read_bytes()).hexdigest() if patch.exists() else None)
     result['patches']=[dict(path=str(p.relative_to(ROOT)),sha256=hashlib.sha256(p.read_bytes()).hexdigest()) for p in sorted((ROOT/'patches/maiden').glob('*.patch'))]
+    result['source_files']=source_identity(tree)
     (out/'installation.json').write_text(json.dumps(result,indent=2)+'\n');print(out/'installation.json',flush=True)
 if __name__=='__main__':main()
