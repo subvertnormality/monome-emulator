@@ -18,7 +18,7 @@ class ContainerContracts(unittest.TestCase):
             root=Path(temporary)/'data'
             first=entry.DataRoot(root, '/code/probe/main.lua', '/code')
             try:
-                self.assertEqual(first.options(),dict(data=root))
+                self.assertEqual(first.options(),dict(data=root.resolve()))
                 with self.assertRaisesRegex(ContractError, 'Another container'):
                     entry.DataRoot(root, '/code/probe/main.lua', '/code')
                 dataset='a'*32
@@ -28,7 +28,7 @@ class ContainerContracts(unittest.TestCase):
                 first.remember(dataset)
             finally:first.close()
             second=entry.DataRoot(root, '/code/probe/main.lua', '/code')
-            try:self.assertEqual(second.options(),dict(reopen_data=root/dataset))
+            try:self.assertEqual(second.options(),dict(reopen_data=(root/dataset).resolve()))
             finally:second.close()
             self.assertEqual((root/dataset/'user.txt').read_text(),'keep')
             with self.assertRaisesRegex(ContractError, 'different application'):

@@ -1,10 +1,11 @@
 // Stop while real Lua init is blocked, then reuse the same dataset and container.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{execFileSync,spawnSync}=require('node:child_process');
+const {mountRoot}=require('./container_host.cjs');
 const root=path.resolve(__dirname,'..'),out=path.join(root,'artifacts/docker','startup-cancel-'+Date.now());
 const docker=process.env.DOCKER_EXE||(process.platform==='win32'?'C:/Program Files/Docker/Docker/resources/bin/docker.exe':'docker');
 const image=process.env.EMULATOR_IMAGE||'monome-emulator:h04-06',name='monome-h04-cancel-'+Date.now();
 const d=(...args)=>execFileSync(docker,args,{encoding:'utf8',timeout:90000,maxBuffer:8*1024*1024}).trim();
-const report={passed:false,image,container:name},delay=ms=>new Promise(r=>setTimeout(r,ms));let created=false;
+const mounts=mountRoot(out),report={passed:false,image,container:name,mountRoot:mounts},delay=ms=>new Promise(r=>setTimeout(r,ms));let created=false;
 function logs(){const r=spawnSync(docker,['logs',name],{encoding:'utf8',timeout:10000});assert.equal(r.status,0);return r.stdout+r.stderr;}
 function cleanup(id,label){
   const file=path.join(out,label+'-cleanup.json');d('cp',`${name}:/opt/emulator/.runtime/sessions/${id}/cleanup.json`,file);
@@ -13,7 +14,7 @@ function cleanup(id,label){
   return rows;
 }
 (async()=>{
-  const data=path.join(out,'data'),code=path.join(out,'code'),script=path.join(code,'probe.lua');
+  const data=path.join(mounts,'data'),code=path.join(mounts,'code'),script=path.join(code,'probe.lua');
   fs.mkdirSync(data,{recursive:true});fs.mkdirSync(code);
   fs.writeFileSync(script,"engine.name='None'\nfunction init() local f=assert(io.open(_path.data..'startup-entered','w'));f:write('entered');f:close();os.execute('sleep 120') end\n");
   try{

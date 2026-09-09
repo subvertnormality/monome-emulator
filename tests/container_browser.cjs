@@ -1,10 +1,11 @@
-// Windows Docker Desktop acceptance; all scripts/data are disposable host mounts.
+// Docker Desktop host acceptance; all scripts/data are disposable host mounts.
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),assert=require('node:assert/strict');
 const {execFileSync}=require('node:child_process');
+const {mountRoot}=require('./container_host.cjs');
 const root=path.resolve(__dirname,'..'),out=path.join(root,'artifacts/docker','browser-'+Date.now());
 const docker=process.env.DOCKER_EXE||(process.platform==='win32'?'C:/Program Files/Docker/Docker/resources/bin/docker.exe':'docker');
 const image=process.env.EMULATOR_IMAGE||'monome-emulator:h04-01',port=Number(process.env.CONTAINER_PORT||8765);
-const report={passed:false,host:{platform:os.platform(),arch:os.arch(),release:os.release()},image,checks:[],sessions:[]};
+const mounts=mountRoot(out),report={passed:false,host:{platform:os.platform(),arch:os.arch(),release:os.release()},image,mountRoot:mounts,checks:[],sessions:[]};
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 let browser,page,owned=null,info;
 function d(...args){return execFileSync(docker,args,{encoding:'utf8',timeout:120000,maxBuffer:8*1024*1024}).trim();}
@@ -14,7 +15,7 @@ async function api(endpoint,payload){
 }
 async function start(data,name){
   owned='monome-h04-'+name+'-'+Date.now();
-  d('run','-d','--name',owned,'--shm-size','256m','-p',`127.0.0.1:${port}:${port}`,'--mount',`type=bind,source=${path.join(out,'code')},target=/code`,'--mount',`type=bind,source=${data},target=/data`,image,'--script','/code/probe/probe.lua','--code-root','/code','--port',String(port));
+  d('run','-d','--name',owned,'--shm-size','256m','-p',`127.0.0.1:${port}:${port}`,'--mount',`type=bind,source=${path.join(mounts,'code')},target=/code`,'--mount',`type=bind,source=${data},target=/data`,image,'--script','/code/probe/probe.lua','--code-root','/code','--port',String(port));
   const deadline=Date.now()+90000;
   while(Date.now()<deadline){
     const lines=d('logs',owned).split('\n');
@@ -47,9 +48,9 @@ async function stop(mode){
 async function key(n){await page.locator('#key-'+n).click();await page.evaluate(()=>queue);}
 async function value(expected){await key(3);const s=await api('/snapshot');assert.deepEqual(s.state.midi.at(-1).bytes,[176,20,expected]);assert.deepEqual(s.errors,[]);}
 (async()=>{
-  fs.mkdirSync(path.join(out,'code/probe'),{recursive:true});
-  const data=path.join(out,'data'),other=path.join(out,'other');fs.mkdirSync(data);fs.mkdirSync(other);
-  const script=path.join(out,'code/probe/probe.lua');
+  fs.mkdirSync(path.join(mounts,'code/probe'),{recursive:true});
+  const data=path.join(mounts,'data'),other=path.join(mounts,'other');fs.mkdirSync(data);fs.mkdirSync(other);
+  const script=path.join(mounts,'code/probe/probe.lua');
   const source=`engine.name='None'
 local g=grid.connect()
 local m=midi.connect(1)

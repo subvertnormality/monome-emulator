@@ -1,16 +1,17 @@
 // Real container startup must report errors and leave user files unchanged.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{execFileSync,spawnSync}=require('node:child_process');
+const {mountRoot}=require('./container_host.cjs');
 const root=path.resolve(__dirname,'..'),out=path.join(root,'artifacts/docker','failures-'+Date.now());
 const docker=process.env.DOCKER_EXE||(process.platform==='win32'?'C:/Program Files/Docker/Docker/resources/bin/docker.exe':'docker');
 const image=process.env.EMULATOR_IMAGE||'monome-emulator:h04-01';
 const d=(...args)=>execFileSync(docker,args,{encoding:'utf8',timeout:120000,maxBuffer:8*1024*1024}).trim();
-const report={passed:false,image,checks:[]};
+const mounts=mountRoot(out),report={passed:false,image,mountRoot:mounts,checks:[]};
 fs.mkdirSync(out,{recursive:true});
 try{
   for(const kind of ['unowned','lua-error']){
-    const data=path.join(out,kind);fs.mkdirSync(data);
+    const data=path.join(mounts,kind);fs.mkdirSync(data);
     if(kind==='unowned')fs.writeFileSync(path.join(data,'user.txt'),'preserve');
-    const code=path.join(out,'code-'+kind);fs.mkdirSync(code);
+    const code=path.join(mounts,'code-'+kind);fs.mkdirSync(code);
     fs.writeFileSync(path.join(code,'probe.lua'),"engine.name='None'\nfunction init() error('H04 deliberate Lua failure') end\n");
     const name='monome-h04-negative-'+kind+'-'+Date.now();let created=false,verified=false;
     try{

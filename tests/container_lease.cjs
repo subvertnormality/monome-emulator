@@ -1,16 +1,17 @@
-// The Windows host bind mount must enforce single-writer ownership across containers.
+// The host bind mount must enforce single-writer ownership across containers.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{execFileSync,spawnSync}=require('node:child_process');
+const {mountRoot}=require('./container_host.cjs');
 const root=path.resolve(__dirname,'..'),out=path.join(root,'artifacts/docker','lease-'+Date.now());
 const docker=process.env.DOCKER_EXE||(process.platform==='win32'?'C:/Program Files/Docker/Docker/resources/bin/docker.exe':'docker');
 const image=process.env.EMULATOR_IMAGE||'monome-emulator:h04-05';
 const d=(...args)=>execFileSync(docker,args,{encoding:'utf8',timeout:90000,maxBuffer:8*1024*1024}).trim();
-const names=[],report={passed:false,image},delay=ms=>new Promise(r=>setTimeout(r,ms));
+const mounts=mountRoot(out),names=[],report={passed:false,image,mountRoot:mounts},delay=ms=>new Promise(r=>setTimeout(r,ms));
 (async()=>{
-  fs.mkdirSync(path.join(out,'data'),{recursive:true});
+  fs.mkdirSync(path.join(mounts,'data'),{recursive:true});
   try{
     for(let i=0;i<2;i++){
       const name='monome-h04-lease-'+i+'-'+Date.now();
-      d('run','-d','--name',name,'--shm-size','256m','--mount',`type=bind,source=${path.join(out,'data')},target=/data`,image);names.push(name);
+      d('run','-d','--name',name,'--shm-size','256m','--mount',`type=bind,source=${path.join(mounts,'data')},target=/data`,image);names.push(name);
       if(i===0){
         const deadline=Date.now()+60000;
         while(Date.now()<deadline){

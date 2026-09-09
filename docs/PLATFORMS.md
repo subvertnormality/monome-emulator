@@ -42,6 +42,7 @@ checkout, with a disposable artifact directory and Docker running:
 export EMULATOR_IMAGE=monome-emulator:local
 export PLAYWRIGHT_MODULE=/absolute/path/to/node_modules/playwright
 # Optional: PLAYWRIGHT_EXECUTABLE_PATH=/absolute/path/to/chromium
+# Optional: CONTAINER_MOUNT_ROOT=/canonical/docker-shareable/temporary/root
 node tests/container_startup_cancel.cjs
 node tests/container_browser.cjs
 node tests/container_failures.cjs
@@ -53,8 +54,12 @@ AUDIO_CONTINUITY_SECONDS=120 node tests/container_audio.cjs
 On PowerShell use `$env:NAME='value'` instead of `export`, and set
 `$env:AUDIO_CONTINUITY_SECONDS='120'` before the audio command. Run sequentially;
 the tests use port8765 and own only their uniquely named containers/disposable
-host paths. A failed command/report blocks that host's gate. Keep its stopped
-container and diagnostic bundle. Record actual host/browser architecture,
+host paths. On macOS the runners default disposable bind mounts to the canonical
+system temporary directory because privacy-protected checkout locations may not
+be shared with Docker Desktop; reports still remain under `artifacts/docker`.
+`CONTAINER_MOUNT_ROOT` selects another already shared root. Each report records
+the actual mount root. A failed command/report blocks that host's gate. Keep its
+stopped container and diagnostic bundle. Record actual host/browser architecture,
 Docker version, image ID, source and report hashes; an amd64 image under
 emulation must not be described as a native arm64 build. Reuse these runners
 without replacing browser input with direct runtime calls or weakening signal,

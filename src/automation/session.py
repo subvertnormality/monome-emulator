@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import socket
 import sys
 import time
 import urllib.error
@@ -36,6 +37,14 @@ def start(backend='contract-fixture',script=None,code_root=None,data=None,enable
     if type(jack_period)!=int or jack_period not in (1024,2048):raise ContractError('jack_period','JACK period must be 1024 or 2048 frames')
     if jack_period!=1024 and backend!='native':raise ContractError('jack_period','JACK period selection requires native runtime')
     if maiden_install is not None and http_port:raise ContractError('maiden_options','Maiden restart currently requires an automatically allocated HTTP port')
+    if http_port:
+        # Darwin can allow a wildcard bind over a live loopback listener when
+        # HTTPServer enables SO_REUSEADDR. Reject the occupied fixed port before
+        # creating session state; a stopped listener remains immediately reusable.
+        with socket.socket() as probe:
+            probe.settimeout(.2)
+            if probe.connect_ex(('127.0.0.1',http_port))==0:
+                raise ContractError('http_port','Address already in use')
     if maiden_install is not None and (backend!='native' or clock_mode!='real-time'):
         raise ContractError('maiden_options','Maiden requires the real-time native runtime')
     if reopen_data is not None and (backend!='native' or data is not None or data_seeds):

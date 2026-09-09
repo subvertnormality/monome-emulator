@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "current_card": "H05 independent host validation",
-  "status": "blocked_host_access",
-  "worktree": ".runtime/worktrees/audio-monitor",
-  "branch": "codex/audio-monitor",
+  "status": "in_progress_macos_apple_silicon_amd64_emulation",
+  "worktree": ".worktrees/macos-h05",
+  "branch": "codex/macos-h05",
   "completed": [
     "A00 audio feasibility",
     "A01 tested native audio and continuous browser monitoring",
@@ -21,7 +21,7 @@
     "A04 refreshed combined WSL audio/Crow/arc/desktop candidate passed seven native/browser integration reports"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "Required macOS host validation remains not_run; only local Windows Docker contexts are available. Same host dependency recorded across H04/H05, A04 and current goal audit. Available-host queued work complete,32 latest report hashes/statuses verified. Resume with actual macOS host access and run six PLATFORMS.md commands; Apple Silicon/native Linux need separate host evidence. Do not substitute Windows repeats for missing host acceptance. No live owned runner; all implementations and combined WSL evidence merged. Full goal not achieved; original click limitations retained and concurrent Mosaic campaign independently owned.",
+  "next_action": "Apple Silicon host available. Pinned linux/amd64 image built under emulation from187db42. Two retained startup-cancel attempts timed out before container creation because Docker Desktop could not bind the privacy-protected Documents worktree; /private/tmp mount probe passed. Implement the recorded disposable mount-root portability adaptation, rerun focused contracts, then run all six host suites sequentially with Mac Chrome. Native arm64 and native Linux remain separate untested lanes.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",
