@@ -1,0 +1,80 @@
+{
+  "started_at": "2026-09-09T03:45:55.037351+00:00",
+  "packet_sha256": "e9dd4fdf58d6b3a35ad9e272e432024553698f64e9d097821cd87a2f3e9932e3",
+  "files": [
+    "docs/delivery/completions/H02.md",
+    "src/automation/server.py",
+    "src/automation/datasets.py",
+    "src/runtime/maiden.py",
+    "src/runtime/native.py",
+    "tests/maiden_restart_failures.py",
+    "tests/maiden_save_failure.cjs",
+    "tests/maiden_lifecycle.cjs",
+    "scripts/build_maiden.py"
+  ],
+  "tool": "query",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor",
+    "engine": "codex",
+    "question": "Focused follow-up to Codex review01a08423-7f43-7511-907e-748513213b36, not a new cold review. Trusted single-user norns/grid emulator; actual audio/Maiden are explicitly authorized. No finance, hostile-user, physical-hardware or arbitrary-platform certification.\n\nPlease assess whether the four majors and three minors are resolved by the committed fixes and evidence in H02-triage.md. Linked-profile mapping now matches the native lexical mapping. Failed actual HTTP500 Save preserves edits and suppresses Run. Cleanup has separate admission/completion state, retains dataset ownership until writers stop, passes the lock FD to native/editor processes, retries unfinished groups, and reports abnormal editor exits while completing shutdown. Actual native failure/retry/peer-held-input tests and browser held-input switching are present. Root data-link navigation and missing-PCM false-green regression pass. The weak finalize route was removed; fresh pinned builds validate unchanged source/patch inputs and rebuild both outputs.\n\nInspect the named current reports and fixes, especially tests/maiden_restart_failures.py, tests/maiden_save_failure.cjs, tests/maiden_lifecycle.cjs and transport's deliberate Go exit. Existing normal browser/REPL/reload/PCM/cleanup tests pass on maiden-tools-05 and engine-reload-01. Determine closure of the original findings; identify only remaining substantive in-scope blockers in these fixes. Do not expand the declared engine/platform scope or require a broader campaign.\n",
+    "files": [
+      {
+        "path": "docs/delivery/completions/H02.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "src/automation/server.py",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "src/automation/datasets.py",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "src/runtime/maiden.py",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "src/runtime/native.py",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "tests/maiden_restart_failures.py",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "tests/maiden_save_failure.cjs",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "tests/maiden_lifecycle.cjs",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "scripts/build_maiden.py",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/reviews/H02-triage.md",
+        "reason": "Findings and fixes"
+      }
+    ],
+    "web_search": false,
+    "effort": "medium"
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "Yes. Commit `f9b0783` resolves the original four majors and three minors within the declared scope. I found no remaining substantive blocker in these fixes.\n\n- **Linked profiles:** `src/automation/datasets.py:14` preserves lexical mapping, consistent with `src/runtime/native.py:88`; linked-profile native persistence evidence passes.\n- **Failed Save:** `patches/maiden/0004-report-failed-save.patch:9` checks HTTP success before dispatching success or invoking Run. `tests/maiden_save_failure.cjs:24` verifies actual HTTP500, retained dirty edits, unchanged disk and suppressed Run, followed by successful save/native execution.\n- **Cleanup and lifecycle:** `src/automation/server.py:63` separates admission from cleanup completion and retains ownership until writers stop. `src/runtime/native.py:543` retains completed groups for retry. `tests/maiden_restart_failures.py:45` exercises live-writer failure, lock contention, retry, replacement-start failure and peer-held-input isolation; `tests/maiden_lifecycle.cjs:43` exercises browser held-input switching.\n- **Abnormal editor exit:** `src/runtime/maiden.py:128` records completion before reporting the abnormal exit. `tests/maiden_transport.py:59` deliberately kills Go and requires `cleanup_failed`, completed shutdown, absent editor PID and reacquirable dataset ownership.\n- **Remaining minors:** Root navigation is exercised after restart; `tests/maiden_cleanup.py:9` resets success before verification, and the missing-PCM artifact records `passed:false`. `scripts/build_maiden.py:24` requires fresh output, rebuilds both components and checks unchanged inputs before recording.\n\nAll six reports in `H02-fixes-evidence.json` match their committed SHA-256 values and report success. The fresh five-patch build log records successful frontend compilation.\n\n**CONFIDENCE: High.** I inspected code, history and recorded evidence; read-only permissions prevented fresh runtime/browser test execution.\n\n---\n_paranoia-local \u00b7 engine=codex \u00b7 session_ref=`01a08445-b678-7b31-9b04-aa315ba54d68` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "status": "returned",
+  "finished_at": "2026-09-09T03:47:44.226755+00:00"
+}

@@ -1,8 +1,13 @@
 # H02 review triage — implementation3365fe3
 
 Codex Paranoia01a08423-7f43-7511-907e-748513213b36, one bounded branch pass.
-Four majors and three minors (including build recovery) are accepted. H02 remains
-unadmitted. One focused follow-up remains after fixes and actual regressions.
+Four majors and three minors (including build recovery) were accepted. The
+initial review left H02 unadmitted pending fixes and one focused follow-up.
+
+Final disposition: focused follow-up01a08445-b678-7b31-9b04-aa315ba54d68 closes
+all four majors and three minors atf9b0783, with no remaining substantive blocker.
+It verified the six recorded evidence hashes and code; actual test execution was
+performed by this task. H02 is admitted within the stated opt-in tested scope.
 
 1. Major linked-app mapping: preserve the runtime's lexical declared entry under
    its code root instead of dereferencing the application link first. Add a

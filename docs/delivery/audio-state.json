@@ -16,7 +16,7 @@
     "H01 reviewed desktop audio committed and merged9c67326; main native lifecycle passed"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "H02 review fixes ready for commit/focused followup to01a08423-7f43-7511-907e-748513213b36. All runners terminal; clean buildmaiden-04 passed, bundlemaiden-tools-05 current. Linked041703, readonlySave043214, lifecycle043344 tenchecks, native restart failures043519, finalbrowser/PCM043913 eightchecks, transport044208 sevenchecks (incl killedGo explicitfailure/cleanup) passed. Verifier missingPCM regression passed. Latest24top-level and shutdown-errorcontract passed. Review fixes include retry/ownership/native FD inheritance, lexical mapping, GPL patches4/5, no weakfinalize. Commit and run one focused query using H02-question/H02-triage; then admit/merge beforeH03. Preserve main state and Mosaic active docs. All test sessions closed.",
+  "next_action": "H02 admitted by focused review01a08445-b678-7b31-9b04-aa315ba54d68: all4major/3minor findings closed atf9b0783, six evidence hashes verified. All runners terminal. Commit admission docs/receipt, fast-forward main9c67326 preserving dirtymainstate and Mosaic active docs, then main-source actualMaiden browser/PCM smoke using own engine-reload-01 and maiden-tools-05 manifests. Afterwards H03 browser streaming latency/reconnect perH00. No default runtime promotion, no claim original clicks fully solved. H02-triage/completion/fixes-evidence contain evidence.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",

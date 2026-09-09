@@ -160,6 +160,9 @@ The [acceptance contract](docs/delivery/ACCEPTANCE.md) defines those checks;
 work. The [upstream policy](docs/delivery/UPSTREAM.md) explains how runtime
 dependencies stay separate from application fixtures.
 
+The optional [official Maiden editor and persistent sessions](docs/MAIDEN.md)
+provide browser editing, real Lua/SuperCollider REPLs and owned session restart.
+
 **Working with an LLM coding assistant?** Start with the
 [LLM repository and tools guide](docs/LLM_GUIDE.md) for task routing, commands,
 validation, and handoff instructions.
@@ -168,4 +171,5 @@ validation, and handoff instructions.
 
 This project is licensed under the [MIT License](LICENSE). Upstream
 dependencies retain their own licenses; recorded notices are listed in the
-[runtime lock](dependencies.lock.json) and [application fixture lock](fixtures/apps/mosaic.lock.json).
+[runtime lock](dependencies.lock.json), [optional Maiden lock](maiden.lock.json)
+and [application fixture lock](fixtures/apps/mosaic.lock.json).

@@ -1,7 +1,7 @@
 # Official Maiden editor and persistent sessions
 
-H02 candidate: implementation and automated tests are in progress; admission
-review is still required. This optional component uses official monome/maiden
+H02 is reviewed for opt-in use on the tested WSL/Windows browser path.
+This optional component uses official monome/maiden
 at the revision in `maiden.lock.json`. It is a separate GPL-3.0 program; the
 emulator remains MIT. Keep its source, licence, lockfiles and documented patches
 with a distributed bundle. Winder and Schollz supplied architecture references,
