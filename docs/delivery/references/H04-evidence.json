@@ -24,11 +24,56 @@
       "sha256": "2c32e4e866c21b24765f2c26cab71c897f9322c34e64b1ec38eb9e2c3fc8bdc6",
       "passed": true,
       "path": "artifacts/datasets/native-20260909-063706/report.json"
+    },
+    {
+      "path": "artifacts/docker/audio-1788933919648/report.json",
+      "sha256": "eea4818be701c5049e45b0d6405ffcf6aae8f44e3836c455700d172f9ad8afd4",
+      "passed": true
+    },
+    {
+      "path": "artifacts/docker/audio-1788934013394/report.json",
+      "sha256": "9fce42925dc9213b939f418544319e07864e61b1e06750e885c939ac4c086fdc",
+      "passed": true
+    },
+    {
+      "path": "artifacts/audio/latency-1788934019705/report.json",
+      "sha256": "fd2c98042951602c7215d994864a2187a964dd5e178c3a79d9cfb5cc64e7abdd",
+      "passed": true
+    },
+    {
+      "path": "artifacts/docker/old-period-20260909-070435.json",
+      "sha256": "11998d9c8d96a56b46847c142e125dffa8d089911d8ac47145cd2adbed0f6dd7",
+      "passed": true
+    },
+    {
+      "path": "artifacts/audio/slow-stream-20260909-065703/report.json",
+      "sha256": "a719ee3a4ccb9362e74a93fb0594b4f4cdb17241e0e165214d6ff7d375800449",
+      "passed": true
+    },
+    {
+      "sha256": "14bbd7d0cf1d6542702a7f846694afdf85b35335f478c627e209920bc71e402e",
+      "passed": true,
+      "path": "artifacts/docker/browser-1788934321377/report.json"
+    },
+    {
+      "sha256": "026e33e20ae911d5514420753aa3352e2d4fd1e74f8ae96eb8ef9400364c6d89",
+      "passed": true,
+      "path": "artifacts/docker/failures-1788934361551/report.json"
+    },
+    {
+      "sha256": "371fd1976a152a5d04182b9e20450ebf9a2a74e7fe05059b229b25310c8dad8b",
+      "passed": true,
+      "path": "artifacts/docker/restart-1788934369902/report.json"
+    },
+    {
+      "sha256": "db410c777829d0d7aef1ceeb61fb94799d972f48f5a2496118db42307379cd7a",
+      "passed": true,
+      "path": "artifacts/docker/runtime-only.json"
     }
   ],
-  "image_source": "5a4ceaec95763af8e44315a0257f05ed030dee7c",
-  "image": "sha256:7d530ae85f87625002713850fd1837fd7ce8e476d62b6445ed8c13e6ed003139",
-  "status": "final_audio_and_review_pending",
+  "image_source": "213ade4317b903c60364c76d9a44f795a4dd054d",
+  "image": "sha256:9c405f88b846ddb9c23000a1a076b79924dd789ac22ad45249205c59b3305e01",
+  "status": "candidate_review_pending",
   "upstream_period_check": {
     "result": "Both capacities remain2048 and Bus asserts numFrames<BlockSize; no existing larger-period fix in inspected official HEAD.",
     "commit": "1d7209428841bc2b38619c8238ba0d2788bdbe68",

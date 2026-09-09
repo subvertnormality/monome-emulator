@@ -9,10 +9,15 @@ client.
 **Development status:** working on Ubuntu 20.04 under Windows Subsystem for Linux
 (WSL2). This is a source-based development build, not a complete release. Native
 Linux release validation, clean-install packaging, and full application workflow
-acceptance are still pending. Audio engines and physical peripheral behaviour
-are outside the tested scope; controlled time remains experimental.
+acceptance are still pending. The default build focuses on MIDI; opt-in audio
+engines and virtual-device subsets have separate [tested boundaries](docs/AUDIO-DEVICES.md).
+Physical peripheral equivalence is untested; controlled time remains experimental.
 
 ## Get started
+
+For the optional container build, editable host mounts and browser audio, see
+[Docker instructions](docs/DOCKER.md). WSL remains the primary installation path;
+container and host-platform acceptance are recorded separately.
 
 ### Requirements
 
