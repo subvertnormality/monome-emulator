@@ -1,0 +1,198 @@
+--- a/matron/src/clock.c
++++ b/matron/src/clock.c
+@@ -3,2 +3,3 @@
+ #include <stdbool.h>
++#include <stdatomic.h>
+ #include <stdint.h>
+@@ -16,4 +17,4 @@
+ 
+-static clock_source_t clock_source;
+-static bool clock_source_initialized = false;
++static _Atomic clock_source_t clock_source;
++static atomic_bool clock_source_initialized = false;
+ 
+@@ -35,3 +36,3 @@
+ 
+-    switch (clock_source) {
++    switch (atomic_load(&clock_source)) {
+     case CLOCK_SOURCE_INTERNAL:
+@@ -70,3 +71,3 @@
+ 
+-    switch (clock_source) {
++    switch (atomic_load(&clock_source)) {
+     case CLOCK_SOURCE_INTERNAL:
+@@ -113,9 +114,4 @@
+ 
+-void clock_start_from_source(clock_source_t source) {
+-    if (clock_source == source) {
+-        clock_scheduler_begin_source_epoch(false, NULL, NULL);
+-    }
+-}
+-
+ typedef struct {
++    clock_source_t source;
+     clock_reference_t *reference;
+@@ -125,15 +121,24 @@
+ 
+-static void clock_publish_start_reference(void *context) {
++static bool clock_publish_start_if_selected(void *context) {
+     clock_source_publication_t *publication = context;
+-    clock_update_source_reference(publication->reference, publication->beats, publication->beat_duration);
++    if (publication->reference != NULL) {
++        clock_update_source_reference(publication->reference,
++            publication->beats, publication->beat_duration);
++    }
++    return atomic_load(&clock_source) == publication->source;
+ }
+ 
+-void clock_start_from_source_reference(clock_source_t source, clock_reference_t *reference, double beats, double beat_duration) {
+-    clock_source_publication_t publication = {reference, beats, beat_duration};
+-    if (clock_source == source) {
+-        clock_scheduler_begin_source_epoch(source == CLOCK_SOURCE_MIDI && beats == 0,
+-            clock_publish_start_reference, &publication);
+-    } else {
+-        clock_publish_start_reference(&publication);
+-    }
++void clock_start_from_source(clock_source_t source) {
++    clock_source_publication_t publication = {source, NULL, 0, 0};
++    clock_scheduler_begin_source_epoch(false,
++        clock_publish_start_if_selected, &publication);
++}
++
++void clock_start_from_source_reference(clock_source_t source,
++        clock_reference_t *reference, double beats, double beat_duration) {
++    clock_source_publication_t publication = {
++        source, reference, beats, beat_duration};
++    clock_scheduler_begin_source_epoch(
++        source == CLOCK_SOURCE_MIDI && beats == 0,
++        clock_publish_start_if_selected, &publication);
+ }
+@@ -141,3 +146,3 @@
+ void clock_stop_from_source(clock_source_t source) {
+-    if (clock_source == source) {
++    if (atomic_load(&clock_source) == source) {
+         union event_data *ev = event_data_new(EVENT_CLOCK_STOP);
+@@ -148,5 +153,12 @@
+ void clock_reschedule_sync_events_from_source(clock_source_t source) {
+-    if (clock_source == source) {
++    if (atomic_load(&clock_source) == source) {
+         clock_scheduler_reschedule_sync_events();
+     }
++}
++
++typedef struct { clock_source_t source; } clock_source_selection_t;
++
++static void clock_publish_source_selection(void *context) {
++    clock_source_selection_t *selection = context;
++    atomic_store(&clock_source, selection->source);
+ }
+@@ -156,28 +168,16 @@
+     // always reschedule on first set to bootstrap scheduler state.
+-    if (!clock_source_initialized) {
+-        clock_source_initialized = true;
+-        if (source == CLOCK_SOURCE_LINK) {
+-            clock_link_join_session();
+-        }
+-        clock_source = source;
+-        clock_scheduler_reschedule_sync_events();
+-        return;
+-    }
++    bool initialized = atomic_exchange(&clock_source_initialized, true);
++    clock_source_t previous = atomic_load(&clock_source);
++    if (initialized && previous == source) return;
+ 
+-    // no-op when source is already active. avoids duplicate reschedules
+-    // and unnecessary link session join/leave churn.
+-    if (clock_source == source) {
+-        return;
+-    }
+-
+-    // join link session when switching to link, leave when switching away.
+-    // only performed when crossing the link boundary to avoid redundant calls.
++    // Link side effects occur before the atomic scheduler/source transaction;
++    // source selection itself is published only while the scheduler is locked.
+     if (source == CLOCK_SOURCE_LINK) {
+         clock_link_join_session();
+-    } else if (clock_source == CLOCK_SOURCE_LINK) {
++    } else if (initialized && previous == CLOCK_SOURCE_LINK) {
+         clock_link_leave_session();
+     }
+-
+-    clock_source = source;
+-    clock_scheduler_reschedule_sync_events();
++    clock_source_selection_t selection = {source};
++    clock_scheduler_reschedule_sync_events_with_publication(
++        clock_publish_source_selection, &selection);
+ }
+@@ -189,3 +189,3 @@
+ bool clock_is_beat_advancing(void) {
+-    return clock_source != CLOCK_SOURCE_MIDI || clock_midi_is_acquired();
++    return atomic_load(&clock_source) != CLOCK_SOURCE_MIDI || clock_midi_is_acquired();
+ }
+--- a/matron/src/clocks/clock_scheduler.c
++++ b/matron/src/clocks/clock_scheduler.c
+@@ -270,14 +270,8 @@
+ 
+-void clock_scheduler_reschedule_sync_events() {
+-    clock_scheduler_event_t *event;
+-
+-    pthread_mutex_lock(&clock_scheduler_events_lock);
++static void clock_scheduler_reschedule_sync_events_locked() {
+     clock_scheduler_epoch++;
+-
+     double clock_beat = clock_get_beats();
+-
+-    for (int i = 0; i < NUM_CLOCK_SCHEDULER_EVENTS; i++) {
+-        event = &clock_scheduler_events[i];
++    for (int i = 0; i < NUM_CLOCK_SCHEDULER_EVENTS; i++) {
++        clock_scheduler_event_t *event = &clock_scheduler_events[i];
+         event->received_zero = false;
+-
+         if (event->thread_id >= 0 && (event->ready || event->queued) && event->type == CLOCK_SCHEDULER_EVENT_SYNC) {
+@@ -289,3 +283,15 @@
+     }
+-
++}
++
++void clock_scheduler_reschedule_sync_events() {
++    pthread_mutex_lock(&clock_scheduler_events_lock);
++    clock_scheduler_reschedule_sync_events_locked();
++    pthread_mutex_unlock(&clock_scheduler_events_lock);
++}
++
++void clock_scheduler_reschedule_sync_events_with_publication(
++        void (*publish)(void *), void *context) {
++    pthread_mutex_lock(&clock_scheduler_events_lock);
++    if (publish != NULL) publish(context);
++    clock_scheduler_reschedule_sync_events_locked();
+     pthread_mutex_unlock(&clock_scheduler_events_lock);
+@@ -333,8 +339,12 @@
+ 
+-/* Publish the source reference and Start before a scheduler poll can expose its
+- * new waiters. The callback only publishes C reference data, never executes Lua. */
+-void clock_scheduler_begin_source_epoch(bool received_zero, void (*publish)(void *), void *context) {
+-    pthread_mutex_lock(&clock_scheduler_events_lock);
++/* Check source eligibility and publish its C reference while source selection
++ * and scheduler epochs are serialized. The callback never executes Lua. */
++bool clock_scheduler_begin_source_epoch(bool received_zero,
++        bool (*publish_if_selected)(void *), void *context) {
++    pthread_mutex_lock(&clock_scheduler_events_lock);
++    if (publish_if_selected != NULL && !publish_if_selected(context)) {
++        pthread_mutex_unlock(&clock_scheduler_events_lock);
++        return false;
++    }
+     clock_scheduler_epoch++;
+-    if (publish != NULL) publish(context);
+     for (int i = 0; i < NUM_CLOCK_SCHEDULER_EVENTS; i++) {
+@@ -354,2 +364,3 @@
+     pthread_mutex_unlock(&clock_scheduler_events_lock);
++    return true;
+ }
+--- a/matron/src/clocks/clock_scheduler.h
++++ b/matron/src/clocks/clock_scheduler.h
+@@ -24,3 +24,4 @@
+ bool clock_scheduler_schedule_midi_output(int thread_id);
+-void clock_scheduler_begin_source_epoch(bool received_zero, void (*publish)(void *), void *context);
++void clock_scheduler_reschedule_sync_events_with_publication(void (*publish)(void *), void *context);
++bool clock_scheduler_begin_source_epoch(bool received_zero, bool (*publish_if_selected)(void *), void *context);
+ bool clock_scheduler_epoch_is_current(unsigned long long epoch);

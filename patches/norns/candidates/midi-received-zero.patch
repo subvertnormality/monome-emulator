@@ -1,0 +1,292 @@
+--- a/matron/src/clock.c
++++ b/matron/src/clock.c
+@@ -113,9 +113,28 @@
+ 
+ void clock_start_from_source(clock_source_t source) {
+     if (clock_source == source) {
+-        clock_scheduler_reset_sync_events();
+-        union event_data *ev = event_data_new(EVENT_CLOCK_START);
+-        event_post(ev);
++        clock_scheduler_begin_source_epoch(false, NULL, NULL);
++    }
++}
++
++typedef struct {
++    clock_reference_t *reference;
++    double beats;
++    double beat_duration;
++} clock_source_publication_t;
++
++static void clock_publish_start_reference(void *context) {
++    clock_source_publication_t *publication = context;
++    clock_update_source_reference(publication->reference, publication->beats, publication->beat_duration);
++}
++
++void clock_start_from_source_reference(clock_source_t source, clock_reference_t *reference, double beats, double beat_duration) {
++    clock_source_publication_t publication = {reference, beats, beat_duration};
++    if (clock_source == source) {
++        clock_scheduler_begin_source_epoch(source == CLOCK_SOURCE_MIDI && beats == 0,
++            clock_publish_start_reference, &publication);
++    } else {
++        clock_publish_start_reference(&publication);
+     }
+ }
+ 
+--- a/matron/src/clock.h
++++ b/matron/src/clock.h
+@@ -36,3 +36,5 @@
+ 
+ #define NORNS_CLOCK_ACQUISITION 1
+ bool clock_is_beat_advancing(void);
++
++void clock_start_from_source_reference(clock_source_t source, clock_reference_t *reference, double beats, double beat_duration);
+--- a/matron/src/clocks/clock_midi.c
++++ b/matron/src/clocks/clock_midi.c
+@@ -55,9 +55,12 @@
+     if (!had_previous_tick && clock_midi_counter != -1) return;
+     clock_midi_counter++;
+     double beat_duration = beat_duration_buf_len ? mean_sum / beat_duration_buf_len : 0.5;
+-    clock_update_source_reference(&clock_midi_reference, clock_midi_counter / 24.0, beat_duration);
++    if (clock_midi_counter == 0) {
++        clock_start_from_source_reference(CLOCK_SOURCE_MIDI, &clock_midi_reference, 0, beat_duration);
++    } else {
++        clock_update_source_reference(&clock_midi_reference, clock_midi_counter / 24.0, beat_duration);
++    }
+     if (beat_duration_buf_len > 0) atomic_store(&clock_midi_acquired, true);
+-    if (clock_midi_counter == 0) clock_start_from_source(CLOCK_SOURCE_MIDI);
+ }
+ 
+ static void clock_midi_handle_start() {
+--- a/matron/src/clocks/clock_scheduler.c
++++ b/matron/src/clocks/clock_scheduler.c
+@@ -19,6 +19,8 @@
+     clock_scheduler_event_type_t type;
+     bool ready;
+     bool queued;
++    bool midi_output;
++    bool received_zero;
+     unsigned long long sync_epoch;
+     int thread_id;
+ 
+@@ -110,8 +112,10 @@
+ 
+             if (event->ready) {
+                 if (event->type == CLOCK_SCHEDULER_EVENT_SYNC) {
+-                    if (clock_beat > event->sync_clock_beat) {
+-                        clock_scheduler_post_clock_resume_event(event->thread_id, clock_beat, event->sync_clock_beat, clock_scheduler_epoch, true);
++                    if (clock_beat > event->sync_clock_beat ||
++                        (event->received_zero && event->sync_clock_beat == 0 && clock_beat >= 0)) {
++                        event->received_zero = false;
++                    clock_scheduler_post_clock_resume_event(event->thread_id, clock_beat, event->sync_clock_beat, clock_scheduler_epoch, true);
+                         event->ready = false;
+                     event->queued = true;
+                     }
+@@ -164,7 +168,7 @@
+     clock_scheduler_thread_stop = false;
+ }
+ 
+-bool clock_scheduler_schedule_sync(int thread_id, double sync_beat, double sync_beat_offset) {
++static bool clock_scheduler_schedule_sync_kind(int thread_id, double sync_beat, double sync_beat_offset, bool midi_output) {
+     pthread_mutex_lock(&clock_scheduler_events_lock);
+ 
+     double clock_beat = clock_get_beats();
+@@ -177,13 +181,16 @@
+             event->sync_beat_offset = sync_beat_offset;
+ 
+             // count from the stored sync_clock_beat when syncing the same coroutine
+-            if (event->type == CLOCK_SCHEDULER_EVENT_SYNC && event->sync_epoch == clock_scheduler_epoch) {
++            if (midi_output && event->received_zero && event->sync_epoch != clock_scheduler_epoch) {
++                event->sync_clock_beat = 0;
++            } else if (event->type == CLOCK_SCHEDULER_EVENT_SYNC && event->sync_epoch == clock_scheduler_epoch) {
+                 event->sync_clock_beat = clock_scheduler_next_clock_beat(event->sync_clock_beat, sync_beat, sync_beat_offset);
+             } else {
+                 event->sync_clock_beat = clock_scheduler_next_clock_beat(clock_beat, sync_beat, sync_beat_offset);
+                 event->type = CLOCK_SCHEDULER_EVENT_SYNC;
+             }
+         } else {
++            event->received_zero = false;
+             event->thread_id = thread_id;
+             event->ready = true;
+             event->sync_beat = sync_beat;
+@@ -191,6 +198,8 @@
+             event->type = CLOCK_SCHEDULER_EVENT_SYNC;
+         }
+ 
++        event->midi_output = midi_output;
++        if (!midi_output) event->received_zero = false;
+         event->sync_epoch = clock_scheduler_epoch;
+         event->queued = false;
+         pthread_mutex_unlock(&clock_scheduler_events_lock);
+@@ -201,6 +210,14 @@
+     return false;
+ }
+ 
++bool clock_scheduler_schedule_sync(int thread_id, double sync_beat, double sync_beat_offset) {
++    return clock_scheduler_schedule_sync_kind(thread_id, sync_beat, sync_beat_offset, false);
++}
++
++bool clock_scheduler_schedule_midi_output(int thread_id) {
++    return clock_scheduler_schedule_sync_kind(thread_id, 1.0 / 24.0, 0, true);
++}
++
+ bool clock_scheduler_schedule_sleep(int thread_id, double seconds) {
+     pthread_mutex_lock(&clock_scheduler_events_lock);
+ 
+@@ -211,6 +228,8 @@
+         event->ready = true;
+         event->thread_id = thread_id;
+         event->queued = false;
++        event->received_zero = false;
++        event->midi_output = false;
+         event->sleep_time = seconds;
+         event->sleep_clock_time = clock_time + seconds;
+         event->type = CLOCK_SCHEDULER_EVENT_SLEEP;
+@@ -259,6 +278,7 @@
+ 
+     for (int i = 0; i < NUM_CLOCK_SCHEDULER_EVENTS; i++) {
+         event = &clock_scheduler_events[i];
++        event->received_zero = false;
+ 
+         if (event->thread_id >= 0 && (event->ready || event->queued) && event->type == CLOCK_SCHEDULER_EVENT_SYNC) {
+             event->queued = false;
+@@ -279,6 +299,7 @@
+ 
+     for (int i = 0; i < NUM_CLOCK_SCHEDULER_EVENTS; i++) {
+         event = &clock_scheduler_events[i];
++        event->received_zero = false;
+ 
+         if (event->thread_id >= 0 && (event->ready || event->queued) && event->type == CLOCK_SCHEDULER_EVENT_SYNC) {
+             event->queued = false;
+@@ -309,3 +330,33 @@
+     pthread_mutex_unlock(&clock_scheduler_events_lock);
+     return accepted;
+ }
++
++/* Publish the source reference and Start before a scheduler poll can expose its
++ * new waiters. The callback only publishes C reference data, never executes Lua. */
++void clock_scheduler_begin_source_epoch(bool received_zero, void (*publish)(void *), void *context) {
++    pthread_mutex_lock(&clock_scheduler_events_lock);
++    clock_scheduler_epoch++;
++    if (publish != NULL) publish(context);
++    for (int i = 0; i < NUM_CLOCK_SCHEDULER_EVENTS; i++) {
++        clock_scheduler_event_t *event = &clock_scheduler_events[i];
++        if (event->thread_id < 0 || event->type != CLOCK_SCHEDULER_EVENT_SYNC) continue;
++        event->received_zero = received_zero && event->midi_output;
++        if (event->ready || event->queued) {
++            event->queued = false;
++            event->ready = true;
++            event->sync_epoch = clock_scheduler_epoch;
++            event->sync_clock_beat = 0;
++        }
++    }
++    union event_data *ev = event_data_new(EVENT_CLOCK_START);
++    ev->clock_start.epoch = clock_scheduler_epoch;
++    event_post(ev);
++    pthread_mutex_unlock(&clock_scheduler_events_lock);
++}
++
++bool clock_scheduler_epoch_is_current(unsigned long long epoch) {
++    pthread_mutex_lock(&clock_scheduler_events_lock);
++    bool current = epoch == clock_scheduler_epoch;
++    pthread_mutex_unlock(&clock_scheduler_events_lock);
++    return current;
++}
+--- a/matron/src/clocks/clock_scheduler.h
++++ b/matron/src/clocks/clock_scheduler.h
+@@ -20,3 +20,7 @@
+ #endif
+ 
+ bool clock_scheduler_claim_resume(int thread_id, bool is_sync, unsigned long long epoch);
++
++bool clock_scheduler_schedule_midi_output(int thread_id);
++void clock_scheduler_begin_source_epoch(bool received_zero, void (*publish)(void *), void *context);
++bool clock_scheduler_epoch_is_current(unsigned long long epoch);
+--- a/matron/src/event_types.h
++++ b/matron/src/event_types.h
+@@ -232,6 +232,7 @@
+ 
+ struct event_clock_start {
+     struct event_common common;
++    unsigned long long epoch;
+ }; // + 0
+ 
+ struct event_clock_stop {
+@@ -425,6 +426,7 @@
+     struct event_stat stat;
+     struct event_metro metro;
+     struct event_clock_resume clock_resume;
++    struct event_clock_start clock_start;
+     struct event_poll_value poll_value;
+     struct event_poll_data poll_data;
+     struct event_poll_io_levels poll_io_levels;
+--- a/matron/src/events.c
++++ b/matron/src/events.c
+@@ -217,7 +217,7 @@
+         }
+         break;
+     case EVENT_CLOCK_START:
+-        w_handle_clock_start();
++        if (clock_scheduler_epoch_is_current(ev->clock_start.epoch)) w_handle_clock_start();
+         break;
+     case EVENT_CLOCK_STOP:
+         w_handle_clock_stop();
+--- a/matron/src/weaver.c
++++ b/matron/src/weaver.c
+@@ -289,6 +289,7 @@
+ // clock
+ static int _clock_schedule_sleep(lua_State *l);
+ static int _clock_schedule_sync(lua_State *l);
++static int _clock_schedule_midi_output(lua_State *l);
+ static int _clock_cancel(lua_State *l);
+ static int _clock_internal_set_tempo(lua_State *l);
+ static int _clock_internal_start(lua_State *l);
+@@ -581,6 +582,7 @@
+     // clock
+     lua_register_norns("clock_schedule_sleep", &_clock_schedule_sleep);
+     lua_register_norns("clock_schedule_sync", &_clock_schedule_sync);
++    lua_register_norns("clock_schedule_midi_output", &_clock_schedule_midi_output);
+     lua_register_norns("clock_cancel", &_clock_cancel);
+     lua_register_norns("clock_internal_set_tempo", &_clock_internal_set_tempo);
+     lua_register_norns("clock_internal_start", &_clock_internal_start);
+@@ -2118,6 +2120,13 @@
+         clock_scheduler_schedule_sync(coro_id, sync_beat, offset);
+     }
+ 
++    return 0;
++}
++
++int _clock_schedule_midi_output(lua_State *l) {
++    lua_check_num_args(1);
++    int coro_id = (int)luaL_checkinteger(l, 1);
++    if (!clock_scheduler_schedule_midi_output(coro_id)) luaL_error(l, "MIDI output scheduler is full");
+     return 0;
+ }
+ 
+--- a/lua/core/clock.lua
++++ b/lua/core/clock.lua
+@@ -39,6 +39,7 @@
+ 
+ local SCHEDULE_SLEEP = 0
+ local SCHEDULE_SYNC = 1
++local SCHEDULE_MIDI_OUTPUT = 2
+ 
+ --- suspend execution of the calling coroutine and schedule resuming in specified time.
+ -- must be called from a coroutine previously started using clock.run.
+@@ -72,6 +73,8 @@
+     if result and mode ~= nil then
+       if mode == SCHEDULE_SLEEP then
+         _norns.clock_schedule_sleep(coro_id, time)
++      elseif mode == SCHEDULE_MIDI_OUTPUT then
++        _norns.clock_schedule_midi_output(coro_id)
+       elseif mode == SCHEDULE_SYNC then
+         _norns.clock_schedule_sync(coro_id, time, offset)
+       else
+@@ -437,7 +440,7 @@
+   -- executes midi out (needs a subtick)
+   clock.run(function()
+     while true do
+-      local observed, scheduled, epoch = clock.sync(1/24)
++      local observed, scheduled, epoch = coroutine.yield(SCHEDULE_MIDI_OUTPUT)
+       dispatch_midi_output(send_midi_clock, observed, scheduled, epoch)
+     end
+   end)
