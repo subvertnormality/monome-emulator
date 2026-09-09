@@ -23,3 +23,9 @@ Combined runtime hotplug, arc, capture, slow stream and Windows Docker/browser
 checks passed before correction. Corrected locked/audio rebuild and focused native
 hotplug/arc/audio checks follow; no full M5 or new Mac claim. One focused review
 follow-up is reserved for the timestamp fix and its regression evidence.
+
+Follow-up01a086c9-2792-7a01-ae79-7ef6de8ea943 closed the timestamp finding after
+inspecting source, lock/hash identity and baseline/fixed C results. Corrected
+whole-runtime hotplug, arc and audio capture plus Windows Docker startup/browser
+checks subsequently passed; H06-final-evidence.json records their identities.
+No remaining substantive finding; review budget closed.

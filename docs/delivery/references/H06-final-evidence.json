@@ -1,0 +1,59 @@
+{
+  "image": "sha256:871a05abf75e8df6389c0623759a8293cdfbb62d643b3a2b577731ce86648b77",
+  "reports": [
+    {
+      "passed": true,
+      "path": "artifacts/hotplug/arrival-contention-20260909-162712/report.json",
+      "sha256": "396ef4616549ec85d293aea82fada7bdd9efea88778f61fccb9baf9a5c57575e"
+    },
+    {
+      "passed": true,
+      "path": "artifacts/hotplug/runs/44aec49d2f85404981580bedac7b0fb1/result.json",
+      "sha256": "3c6e6475a49652b0550115e5ee2900f0b6b9b4f3b82f0eaa99fb020df7662873"
+    },
+    {
+      "passed": true,
+      "path": "artifacts/arc/native-20260909-163255/report.json",
+      "sha256": "edf2e6c3e413e5fb795611bb0fdcf99b91d3bdee94a11b64f2e8f8e311d3fe42"
+    },
+    {
+      "passed": true,
+      "path": "artifacts/audio/capture-api-20260909-163403/report.json",
+      "sha256": "2b62dbd103d7fb48a7b09e842ca7b85ee4c3f527b1c01c66daa3cbf0bc34ffd0"
+    },
+    {
+      "passed": true,
+      "path": "artifacts/docker/startup-cancel-1788967930203/report.json",
+      "sha256": "7988eaecdecb78f7700863ff0c1a01ef5a95c76ab76ef42844242397d0ac1531"
+    },
+    {
+      "passed": true,
+      "path": "artifacts/docker/browser-1788968028828/report.json",
+      "sha256": "167c10c154cb78b4b75251553db162eb0aaaf542a1413eddfbb14855095bec14"
+    }
+  ],
+  "scope": "Corrected arrival timestamp, combined native hotplug/arc/audio and Windows Docker startup/browser. Prior pre-fix reports remain historical; no new Mac or full M5 admission claim.",
+  "files": [
+    {
+      "path": ".runtime/h06-tools-02/installation.json",
+      "sha256": "84afebb7be3285abaaaab0a282327bac4d3cde86b2b16962f9ac93721452f56c"
+    },
+    {
+      "path": ".runtime/h06-audio-02/build-inputs.json",
+      "sha256": "7a5051f7494600e51190315746f64a21f265f8d869aa3eb6245c52317fa8d57c"
+    },
+    {
+      "path": "artifacts/docker/build-h06-02.log",
+      "sha256": "5d74d012bab103b98ee75926ef213c8ae12693b67cfe1acfadd860559e432037"
+    },
+    {
+      "path": ".runtime/docker-context-h06-final/context.json",
+      "sha256": "db195427513c0059c5d11423d62049c7252f6475953a251d163c0a480387cd5a"
+    },
+    {
+      "path": "docs/delivery/reviews/H06-followup.json",
+      "sha256": "0f73d5f5ee5f9c1be57f1eed635ff4d579fff4411be5a3373559f349538296ce"
+    }
+  ],
+  "source": "a0c8ed465b34437a5901f3ce4e42e384d1da0195"
+}

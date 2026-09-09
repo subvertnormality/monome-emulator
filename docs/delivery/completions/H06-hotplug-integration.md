@@ -1,5 +1,34 @@
 # H06 — Hotplug integration with audio and arc
 
+## Final acceptance
+
+Integration is ready for main. Corrected source a0c8ed4 passed the rebuilt native
+hotplug lifecycle, nine combined arc/MIDI checks, ten real capture/recording checks
+and final Windows Docker startup/reopen/cleanup and eight browser checks.
+Final reports, build identities and hashes are in references/H06-final-evidence.json.
+The native installation is .runtime/h06-tools-02/installation.json; Docker image
+monome-emulator:h06-02 is
+sha256:871a05abf75e8df6389c0623759a8293cdfbb62d643b3a2b577731ce86648b77.
+
+Review01a086c0-9132-7882-b2d1-48252b958e0a identified hidden mutex wait in scheduled
+arrival timestamps. Patch0013 and its generator now sample after acquiring the
+connection mutex. The actual C boundary test reproduced about250ms hidden delay
+on baseline and passed both delivery/drop cases after correction. Follow-up
+01a086c9-2792-7a01-ae79-7ef6de8ea943 closes the finding; no further code issue.
+No clock/deadline tolerance changed. The review budget is closed.
+
+Earlier merged-source validation also passed78 shared contracts, explicit arc
+presence/rejection, real-time and controlled hotplug, slow-callback PCM and Windows
+browser audio. Those source-specific reports remain historical, not relabelled as
+final-source results. Existing subprocess/file ResourceWarnings remain recorded.
+No new native source change followed the final tests. Main's shared delivery
+state and current installation are preserved; rebuilding for the new lock is
+documented. The Mac profile was already merged; README now makes it discoverable.
+This integration does not recertify the final source on Mac or grant full M5
+admission from the imported prior-source receipt.
+
+## Execution record
+
 Implementation authorized after inspection of origin/codex/hotplug-admission
 at 801fcdc, with main at eb6c427. Work remains in codex/audio-monitor; concurrent
 main delivery changes must remain intact. Status: integration in progress.

@@ -1,0 +1,60 @@
+{
+  "started_at": "2026-09-09T15:28:43.553030+00:00",
+  "packet_sha256": "51b3a861f47f7ccf48d75a3878c1d411e8ffbd7a231f73611d1274891b68164f",
+  "files": [
+    "docs/delivery/PLAN.md",
+    "docs/delivery/ACCEPTANCE.md",
+    "docs/delivery/RUNBOOK.md",
+    "docs/delivery/DECISIONS.md",
+    "docs/delivery/UPSTREAM.md"
+  ],
+  "tool": "query",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor",
+    "engine": "codex",
+    "question": "Review only the accepted scheduled-arrival timestamp finding from session\n01a086c0-9132-7882-b2d1-48252b958e0a. No new cold whole-project review.\nPatch0013 and prepare_midi_hotplug now place the actual timestamp inside\nmidi_connection_lock, immediately before connection determination/delivery/drop.\nThe dependency lock hash was updated; current.json and old candidates preserved.\n\nRead tests/midi_arrival_contention.py/.c and the actual retained report/logs at\nartifacts/hotplug/arrival-contention-20260909-162712. The test compiles the exact\nscheduled_midi function extracted from baseline and fixed reconstructed sources;\nreal pthread_mutex/sem synchronization forces a 250ms contention interval. Both\nconnected and disconnected branches must report timestamps after mutex release;\nbaseline fails and candidate passes. Transport callbacks are stubs, so this is\nexplicitly a native C boundary regression, not whole-runtime acceptance. Existing\nreal-runtime hotplug and audio tests separately cover dispatch and lifecycle;\ncorrected build checks are recorded in H06-hotplug-integration.md as they finish.\n\nDoes this resolve the concrete timing-evidence defect without changing logical\nclock semantics, delivery/drop order or existing deadlines? Inspect actual source\nand evidence. Identify only concrete remaining issues in this fix. Budget is one\nfocused Codex medium600s follow-up; no hardware or artifact-transfer gate.\n",
+    "files": [
+      {
+        "path": "docs/delivery/PLAN.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/ACCEPTANCE.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/RUNBOOK.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/DECISIONS.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/UPSTREAM.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/reviews/H06-triage.md",
+        "reason": "Findings and fixes"
+      }
+    ],
+    "web_search": false,
+    "effort": "medium"
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "Yes\u2014the fix resolves the accepted timing-evidence defect. I found no concrete remaining issue in the timestamp change; logical-clock semantics, delivery/drop ordering, and existing deadlines remain unchanged.\n\n- Patch 0013 now locks before sampling `actual`, then determines connection state, delivers or drops, emits the report, and unlocks (`patches/norns/0013-midi-connection-lifecycle.patch:114\u2013123`). The generator matches (`scripts/prepare_midi_hotplug.py:37\u201342`). The reconstructed baseline/candidate sources differ only by this movement; both source/function hashes match the retained report, and the patch hash matches the dependency lock.\n- The test extracts and compiles the actual function (`tests/midi_arrival_contention.py:17\u201324`). Its semaphore and real mutex establish contention; both branches check timestamp placement and delivery/report behavior (`tests/midi_arrival_contention.c:29\u201350`). Retained results show baseline timestamps approximately **250 ms early**, versus candidate timestamps **46,320 ns and 28,460 ns after the release marker** (`artifacts/hotplug/arrival-contention-20260909-162712/report.json:9\u201318`).\n- Logical time still reads `emu_clock_now()`, an atomic logical counter; the clock advances after synchronous scheduled delivery returns (`src/runtime/native_clock/emu_clock.c:24,54,85`). No deadline or admission tolerance changed.\n\n**CONFIDENCE: High.** I verified source and retained evidence without rerunning tests; corrected whole-runtime checks were not yet recorded in H06\u2019s completion file, so this closes the focused native-boundary finding only.\n\n---\n_paranoia-local \u00b7 engine=codex \u00b7 session_ref=`01a086c9-2792-7a01-ae79-7ef6de8ea943` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "status": "returned",
+  "finished_at": "2026-09-09T15:30:24.146600+00:00"
+}

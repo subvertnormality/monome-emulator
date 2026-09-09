@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "current_card": "H06 hotplug integration",
-  "status": "h06_native_passed_review_and_host_checks_running",
+  "status": "h06_reviewed_verified_integration_complete",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
   "completed": [
@@ -22,7 +22,7 @@
     "H05 native Apple Silicon arm64 Docker profile passed six scoped host gates; amd64 emulation remains failed"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "Queue complete and published through 59881b5; final audit rechecked 42 retained report hashes/outcomes. Mac verification accepted from user confirmation. No queued audio/device/desktop card remains. Preserve documented platform, latency and peripheral limits; the separately owned Mosaic behavior/release campaign remains unfinished.",
+  "next_action": "H06 hotplug integration is reviewed and verified on corrected source a0c8ed4. Merge/publish its final receipt, preserving main's concurrent delivery state and current installation. Rebuild users' runtime for the changed lock; use .runtime/h06-tools-02 as the tested optional combined candidate. No further H06 test/review process remains. Existing platform and source-specific controlled-time limits remain; the independent application campaign is not certified by this integration.",
   "mac_verification_acceptance": {
     "date": "2026-09-09",
     "basis": "User confirmation: Mac has already been verified - you dont need to see the evidence",
