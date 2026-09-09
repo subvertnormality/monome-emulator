@@ -24,3 +24,32 @@ Codex medium/600-second integration review, with at most one focused follow-up.
 Update user-facing generic protocol and installation instructions and record
 actual commands/results here. Do not claim existing old-source admission passes
 establish admission for the combined source.
+
+Merge checkpoint 50c8d1e resolves all three textual conflicts and the wire-ID
+collision. Dedicated imported evidence receipts are retained; shared state.json
+was deliberately kept from main to preserve its independently owned campaign.
+README now describes the already merged native Apple Silicon Docker profile.
+
+Rebuilt .runtime/h06-locked-01 from the current official lock using the verified
+existing prefix, then .runtime/h06-audio-01 with --arc, --crow-build
+.runtime/crow-host-16, --large-jack-period, --sdl-ownership and
+--screen-worker-shutdown. The audio build accepts --reference-install so no
+current installation is overwritten. .runtime/h06-tools-01 adds capture/monitor.
+
+Focused checks passed: 11 clock-admission tests, 10 MIDI connection tests, 3 arc
+contracts. Syntax compilation passed. Actual runtime acceptance:
+
+- tests/arc_native.py --install .runtime/h06-tools-01/installation.json --hotplug:
+  9 checks passed, including MIDI-disconnected arc delta/LED/key release,
+  independent arc reconnect, resumed MIDI sends and two-session isolation.
+  Report: artifacts/arc/native-20260909-161513/report.json.
+- tests/midi_hotplug_native.py --install .runtime/h06-tools-01/installation.json:
+  passed; artifacts/hotplug/runs/f6034fbc29e54648b1700ddae1d8c8de/result.json.
+- tests/audio_capture_api.py --install .runtime/h06-tools-01/installation.json:
+  10 checks passed, actual retained PCM, channel routing, silence negative,
+  cancellation/restart/shutdown. artifacts/audio/capture-api-20260909-161703/report.json.
+
+Committed Docker context .runtime/docker-context-h06 exports 50c8d1e. Windows
+amd64 image monome-emulator:h06-01 built successfully; full log retained at
+artifacts/docker/build-h06-01.log. Host smoke and slow-stream checks are in progress.
+The new merged source is not claimed to have repeated Mac or full M5 admission.

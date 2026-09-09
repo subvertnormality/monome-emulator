@@ -109,9 +109,10 @@
 @@ -172,11 +199,14 @@
      (void)context;
      uint8_t report[24+4096];
-     uint64_t actual=logical_schedule() ? logical_now() : input_now();
+-    uint64_t actual=logical_schedule() ? logical_now() : input_now();
 -    dev_midi_emu_receive(midi_devices[event->port-1],event->port-1,bytes,event->size);
 +    pthread_mutex_lock(&midi_connection_lock);
++    uint64_t actual=logical_schedule() ? logical_now() : input_now();
 +    int connected=midi_connected[event->port-1];
 +    if(connected) dev_midi_emu_receive(midi_devices[event->port-1],event->port-1,bytes,event->size);
      memcpy(report,&index,4);memcpy(report+4,&event->port,4);

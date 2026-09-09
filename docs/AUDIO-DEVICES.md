@@ -26,6 +26,14 @@ audio, external-script sampler and Maiden checks; see
 candidates are not modified automatically. Rebuild into a new directory to obtain
 the fix; the default MIDI installation remains separate.
 
+After a runtime-lock update, rebuild the base before building an audio candidate.
+To preserve the current installation, use `scripts/build_locked_candidate.py
+--reference-install /path/to/old/installation.json --output /new/locked-build`,
+then pass `--reference-install /new/locked-build/installation.json` to
+`scripts/build_audio_candidate.py`. The first command verifies and reuses the
+existing library prefix while reconstructing norns from the current lock; it
+does not reuse old native binaries or update `.runtime/current.json`.
+
 For audio **with virtual Crow**, use this alternative build recipe:
 
 ```sh

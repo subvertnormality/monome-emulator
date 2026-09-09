@@ -34,7 +34,8 @@ static int midi_slot(struct dev_midi *device) {
     text=replace(text,'ssize_t emu_midi_send(struct dev_midi *md, uint8_t *data, size_t size) {','ssize_t emu_midi_send(struct dev_midi *md, uint8_t *data, size_t size) {\n    int port=midi_slot(md);\n    pthread_mutex_lock(&midi_connection_lock);\n    if(port<0 || !midi_connected[port]) { pthread_mutex_unlock(&midi_connection_lock);return -1; }')
     text=replace(text,'    pthread_mutex_unlock(&midi_lock);\n    return size;','    pthread_mutex_unlock(&midi_lock);\n    pthread_mutex_unlock(&midi_connection_lock);\n    return size;')
     text=replace(text,'    if (!midi_count) abort();','    if (!midi_count) abort();\n    for(int port=0;port<midi_count;++port) midi_metadata(port,1,0);')
-    text=replace(text,'    dev_midi_emu_receive(midi_devices[event->port-1],event->port-1,bytes,event->size);','''    pthread_mutex_lock(&midi_connection_lock);
+    text=replace(text,'    uint64_t actual=logical_schedule() ? logical_now() : input_now();\n    dev_midi_emu_receive(midi_devices[event->port-1],event->port-1,bytes,event->size);','''    pthread_mutex_lock(&midi_connection_lock);
+    uint64_t actual=logical_schedule() ? logical_now() : input_now();
     int connected=midi_connected[event->port-1];
     if(connected) dev_midi_emu_receive(midi_devices[event->port-1],event->port-1,bytes,event->size);''')
     text=replace(text,'    emit(logical_schedule() ? 17 : 14,id,report,24+event->size);','''    emit(connected ? (logical_schedule() ? 17 : 14) : (logical_schedule() ? 20 : 19),id,report,24+event->size);

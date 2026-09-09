@@ -1,0 +1,44 @@
+{
+  "started_at": "2026-09-09T15:19:19.008827+00:00",
+  "packet_sha256": "6bcb7cebde53b038eba8eea39f7d8d22c9d6da19c616bdaaa399a376306422da",
+  "files": [
+    "docs/delivery/PLAN.md",
+    "docs/delivery/ACCEPTANCE.md",
+    "docs/delivery/RUNBOOK.md",
+    "docs/delivery/DECISIONS.md",
+    "docs/delivery/UPSTREAM.md"
+  ],
+  "tool": "critique_branch",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor",
+    "base_ref": "eb6c427",
+    "head_ref": "HEAD",
+    "include_uncommitted": false,
+    "isolate": false,
+    "converge": false,
+    "class_closure": false,
+    "round": 1,
+    "engine": "codex",
+    "effort": "medium",
+    "web_search": false,
+    "stakes": "Trusted single-user local MIDI-only development utility on Ubuntu 20.04 WSL. Risks are misleading tests, native runtime mismatch and local project damage. No financial system, hostile users, physical hardware certification or mandatory audio support.",
+    "project_summary": "General-purpose local official-norns emulator. Integrate reviewed hotplug branch 801fcdc into main eb6c427 while preserving audio, Crow, arc, browser and isolated sessions. No physical hardware equivalence or full release claim.",
+    "diff_intent": "Review merge 50c8d1e and subsequent H06 integration fixes. Hotplug input12/output18,19,20 collided with arc. Arc now uses input16,17,18/output24,25; generator and documented patch rebased onto new lock. Preserve combined action deadlines, JACK lifetime/period fixes, imported optional SDL/screen worker fixes and installation prefix ownership. Audio builder gains an explicit verified reference installation to preserve current.json after lock update. Shared delivery state excluded; imported receipts remain source-specific. Existing hotplug and teardown review receipts are retained, not new claims for merged controlled-time admission.",
+    "focus": "Concrete integration defects, packet ID collisions or evidence misinterpretation, preservation of native input deadlines and cleanup, old-install rejection, patch/build coherence, arc/MIDI coexistence and actual audio regressions. Read H06-hotplug-integration.md for live evidence. Avoid duplicate whole-project review, new platform gates or application-specific core work. One Codex medium600s critique plus at most one focused follow-up. Docker build/host smoke may be in progress; do not assume it has passed. Main unchanged pending acceptance."
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "## What works\n\n- Arc IDs agree across generator and host: `scripts/arc_native_patch.py:37` emits `emit(24,...)`; `src/runtime/native.py:394` handles `kind==24`. Inputs 16/17/18 also match. The recorded arc and hotplug runs identify the same combined installation; the hotplug artifact hashes match.\n- Combined deadlines survive: `src/runtime/native.py:507` passes `deadline=deadline` through implicit arc releases, as do grid disconnection and `release_all`.\n- Capture reset preserves history and held notes: `src/runtime/native.py:334` replaces only `self.capture.decoders[identifier]=Decoder()`.\n- Audio evidence remains bounded: `artifacts/audio/capture-api-20260909-161703/report.json:2231` records `\"name\": \"retained-recording\"` with `\"passed\": true`, alongside routing, silence and cancellation checks. These are inspected records; I executed no tests.\n\n## What doesn't work\n\n- [MAJOR] **Scheduled-arrival timestamps exclude the new mutex wait.** In `patches/norns/0013-midi-connection-lifecycle.patch:112`, `uint64_t actual=logical_schedule() ? logical_now() : input_now();` precedes the newly added `pthread_mutex_lock(&midi_connection_lock)` at line 114. The send path holds that mutex through `emit(...)` (lines 88\u201397), so output backpressure or a descheduled sender delays actual input delivery while its recorded timestamp remains unchanged.\n\n  This undermines the intent to preserve native input deadlines and trustworthy evidence: `src/automation/midi_schedule_admission.py:56` computes lateness from `actual_*_ns` and accepts up to 10 ms. An event sampled on time and then blocked for 15 ms can pass that assertion despite arriving late. This follows from the reconstructed native source; it is not a newly executed reproduction.\n\n## Risks\n\nNothing notable.\n\n## Gaps\n\nNothing notable.\n\n## Improvements\n\n- [MAJOR] Move the `actual` sample inside the connection lock, immediately before delivery/drop determination, in patch 0013 and its generator. Extend the existing `usleep(250000)` seam in `scripts/prepare_midi_send_race_probe.py:17` with a scheduled-input case that verifies reported lateness includes contention. Cost: a small patch/generator change, lock-hash update, rebuild and one focused native regression.\n\n---\n_paranoia-local \u00b7 engine=codex \u00b7 session_ref=`01a086c0-9132-7882-b2d1-48252b958e0a` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "status": "returned",
+  "finished_at": "2026-09-09T15:23:34.103276+00:00"
+}

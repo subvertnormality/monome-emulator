@@ -9,7 +9,7 @@ helpers. See [installation profiles](PLATFORMS.md).
 | Interface | Supported software boundary | Unsupported or unverified boundary |
 |---|---|---|
 | Grid | Virtual 16×8 keys, holds and native LED output through the shared browser/automation path | Physical tilt APIs, USB grid passthrough and hardware timing equivalence |
-| MIDI | Virtual input/output and timestamped emitted-message capture | Physical MIDI port routing/passthrough is not established by virtual-port tests |
+| MIDI | Virtual input/output, timestamped capture and explicit disconnect/reconnect of configured slots | Physical MIDI port routing/passthrough is not established by virtual-port tests |
 | Arc | Optional four-ring relative input, native 4×64 LED output, connection lifecycle; virtual keys are a profile feature | Physical device passthrough; virtual keys do not imply every arc model has keys |
 | Crow outputs | Four CV outputs using official ASL/CASL behavior and captured voltage trajectories | Electrical DAC behavior, downstream synthesis and hardware timing equivalence |
 | Crow inputs | Held voltage injection, voltage query, none/change/stream modes | Frequency, window, scale, volume, peak and Crow's separate input clock mode |
@@ -33,3 +33,11 @@ the [CV/input API](architecture/crow-capture-api.md) and
 [ii trace API](architecture/crow-ii-api.md) describing capture formats and limits.
 Historical architecture investigations and delivery/test records retain exact
 fixture names and revisions for reproducibility; they are not installation guides.
+
+Use `{"type":"midi_connection","port":1,"connected":false}` to disconnect a
+configured virtual slot and `connected:true` to reconnect it. Official add/remove
+callbacks complete before acknowledgement. Disconnected immediate input is
+rejected; scheduled input records explicit drops without changing its deadlines.
+Reconnect resets parser framing and does not replay missed messages. Inspect
+`midi_connections` and `midi_connection_supported` in the session snapshot.
+This requires a runtime rebuilt with the current lock.

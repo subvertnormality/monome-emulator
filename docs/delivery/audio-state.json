@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "current_card": "H05 independent host validation",
-  "status": "audio_device_desktop_queue_complete",
+  "current_card": "H06 hotplug integration",
+  "status": "h06_native_passed_review_and_host_checks_running",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
   "completed": [

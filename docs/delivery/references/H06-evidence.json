@@ -1,0 +1,41 @@
+{
+  "scope": "Native combined audio/Crow/arc/hotplug and Windows Docker regression; not a new Mac or full controlled-time admission",
+  "source": "50c8d1eb9a03859d2586fa9c2f31dbdf5c2d42b3",
+  "reports": [
+    {
+      "passed": true,
+      "sha256": "6495f0f7f3765bd32a33101aa0c2286e017e06fb063b40ca5e4fadb004999de1",
+      "path": "artifacts/arc/native-20260909-161513/report.json"
+    },
+    {
+      "passed": true,
+      "sha256": "d30c23b5c3ed913423bd42bc12e047ece71bfd33af4b371842fd0370d5235f05",
+      "path": "artifacts/hotplug/runs/f6034fbc29e54648b1700ddae1d8c8de/result.json"
+    },
+    {
+      "passed": true,
+      "sha256": "339aa63ecaf90b796d8c84e6859abdeed3468b6d45d20f5c8049895470dd03d4",
+      "path": "artifacts/audio/capture-api-20260909-161703/report.json"
+    },
+    {
+      "passed": true,
+      "sha256": "303debc4efbdc72eebc97b12a8e36fe872a5addf4718a1d5638bbc5225327497",
+      "path": "artifacts/audio/slow-stream-20260909-161822/report.json"
+    },
+    {
+      "passed": true,
+      "sha256": "4b20cebb2b48823ac1259d7e1b176f880b12ae67856f160fc3dbe5118adbd7c7",
+      "path": "artifacts/arc/presence-20260909-162036/report.json"
+    },
+    {
+      "passed": true,
+      "sha256": "b1d8520c02b2287920f01e56391cf93b145d1dde2287001239a7ed89017d5891",
+      "path": "artifacts/docker/startup-cancel-1788967089166/report.json"
+    },
+    {
+      "passed": true,
+      "sha256": "4872ccefad0b502070757353abce0236ce571b5a0d563da5c3157d16da376aa1",
+      "path": "artifacts/docker/browser-1788967222551/report.json"
+    }
+  ]
+}

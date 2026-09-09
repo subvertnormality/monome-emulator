@@ -141,7 +141,7 @@
     },
     {
       "path": "patches/norns/0013-midi-connection-lifecycle.patch",
-      "sha256": "ca253b43694e9527bca030b890d60771b4a20a5a82ddc94c4859d5dcfdc09676"
+      "sha256": "5598ce08c2829565e8614c8f8b3c88834c5ebb003d62342384e72d879fa90e29"
     }
   ],
   "serialosc": {
