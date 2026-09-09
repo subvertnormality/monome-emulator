@@ -278,3 +278,24 @@ so a permitted long callback does not impersonate a network disconnect.
 Tests must cover late completion, compound release exhaustion/success and a
 real connected browser held input/audio monitor across a slow callback followed
 by real offline cleanup. See `reviews/A02-A03-P03-triage.md`.
+
+## A04 — Refresh the combined WSL candidate after H04
+
+H04/H05 available-host work is merged. The completion audit found that the
+existing WSL candidate predates H04's captured JACK lifetime fix. Build a fresh
+optional candidate from current pinned official sources with existing Crow and
+arc flags; attach existing audio/desktop helpers and reuse the separately pinned
+Maiden installation. Do not promote or edit the current installation and do not
+replace another agent's sessions. This adds no new emulated API or DSP behavior.
+
+Acceptance: verify builder source/patch identities; generic native audio stream
+and clean shutdown, generic Crow/arc probes, real desktop sink capture, unchanged
+Mosaic audio and cheat codes sampler/arc checks against that same candidate.
+Existing external fixtures remain opt-in. Reuse H04's reviewed patch and recorded
+baseline failure; new combined-build failures require diagnosis, not a waiver.
+Update user setup instructions and candidate evidence. This is integration of
+already reviewed code; another cold review is not required absent a new material
+implementation or acceptance change. Leave platform-not_run lanes explicit.
+A04 additionally verifies official Maiden's generic browser edit/run, Lua/SC
+REPLs, rendered runtime audio and exact owned cleanup against the refreshed
+candidate, reusing its existing disposable fixture and pinned Maiden build.

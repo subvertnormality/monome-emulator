@@ -5,7 +5,28 @@ existing Ubuntu 20.04 WSL environment. Tranche-1 audio/Crow support is admitted
 for opt-in use, along with the tested sampler/arc subset. The default
 installation is not replaced by these commands.
 
-From the repository directory inside WSL, after the normal locked runtime setup:
+For audio without virtual Crow, run these commands inside WSL after the normal
+locked runtime setup. Each output directory must be new:
+
+```sh
+python3 scripts/build_audio_candidate.py --output .runtime/my-audio
+python3 scripts/prepare_audio_monitor.py --install .runtime/my-audio/installation.json --output .runtime/my-audio-tools
+./dev/emu start --experimental-install .runtime/my-audio-tools/installation.json --script fixtures/probes/audio-tone/audio-tone.lua --code-root fixtures/probes --no-startup-chime
+```
+
+Open `browser_url`, click **Listen**, then **K2** to play. **K3 stops** the tone;
+E3 changes frequency. Keep the returned session ID and use
+`./dev/emu stop SESSION_ID` when finished. Closing the browser stops monitoring,
+but does not stop the script's runtime.
+
+Current audio builds include the reviewed JACK shutdown lifetime fix. A refreshed
+WSL build combining Crow, arc and desktop helpers also passed generic device,
+audio, Mosaic, cheat codes and Maiden checks; see
+[combined candidate evidence](delivery/completions/A04.md). Older installed
+candidates are not modified automatically. Rebuild into a new directory to obtain
+the fix; the default MIDI installation remains separate.
+
+For audio **with virtual Crow**, use this alternative build recipe:
 
 ```sh
 git clone https://github.com/monome/crow.git .runtime/crow-feasibility/crow
@@ -54,9 +75,9 @@ CV/input state; it is not a full firmware VM reboot. Lua instruction deadlines
 cover commands and callbacks, not blocking native/C calls.
 
 Mosaic and player mods remain external, optional fixtures. Do not copy their
-source into the core. The default script API and conformance tests must work
-without them. Broader sampler/cheat codes 2 work follows verified tranche-1
-commit/merge; Maiden and optional Docker distribution follow that later tranche.
+source into the core. Generic conformance works independently of them. The
+tested sampler/arc, [Maiden](MAIDEN.md), and optional [Docker](DOCKER.md) features
+are now available with their separately documented boundaries.
 
 Crow callback completion dispatch is bounded: at most 4,096 pending completions
 per output and 4,096 callbacks or 0.5 seconds per dispatch batch. Exceeding a bound

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "current_card": "H05 independent platform matrix",
+  "current_card": "A04 combined WSL candidate refresh",
   "status": "available_host_work_complete",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
@@ -17,10 +17,11 @@
     "H02 reviewed and merged7d56cf0; main browser/editor/PCM8 checks passed045101",
     "H03 reviewed and merged996c67c; main-source browser/audio/lifecycle and cleanup passed",
     "H04 optional Docker admitted by focused review; imageh04-09 native/browser/audio/data lifecycle passed",
-    "H04 merged436b05c; main five launcher contracts passed; H05 available-host matrix and reproduction documented"
+    "H04 merged436b05c; main five launcher contracts passed; H05 available-host matrix and reproduction documented",
+    "A04 refreshed combined WSL audio/Crow/arc/desktop candidate passed seven native/browser integration reports"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "H04 reviewed and merged436b05c; H05 measured-host documentation merged9a51100. Available-host queue complete. Remaining macOS Intel, Apple Silicon amd64 emulation and native Linux Docker validation require actual hosts: run six commands in docs/PLATFORMS.md and retain per-host reports before admission. Native arm64 image is not implemented. Do not rerun admitted Windows gates merely to update documentation. Concurrent Mosaic campaign remains independent. Original clicks not all localized; delayed browser monitoring p95176.9/162.1ms. Existing WSL runtime unpromoted. No active owned test/review/runtime; failed diagnostic containers retained stopped.",
+  "next_action": "A04 combined WSL refresh complete: seven reports pass for generic stream/Crow/arc, desktop sink, unchanged Mosaic/cheat codes and official Maiden with reviewed JACK fix. No runtime/test code changed in this refresh; reviewed code was rebuilt and its integration verified. Actual remaining platform validation needs macOS Intel/Apple Silicon/native Linux hosts per PLATFORMS.md; do not claim those lanes complete. Original clicks investigated but not all conclusively localized; delayed browser latency documented. Concurrent Mosaic campaign remains independently owned. No active A04 native/browser/build process; current installation unpromoted.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",
@@ -211,5 +212,12 @@
     "native_arm64_image": "not_implemented",
     "macos_intel": "not_run_host_unavailable",
     "document": "docs/PLATFORMS.md"
+  },
+  "combined_wsl_candidate": {
+    "install": ".runtime/wsl-integrated-tools-01/installation.json",
+    "completion": "docs/delivery/completions/A04.md",
+    "default_promoted": false,
+    "status": "tested_optional_candidate",
+    "evidence": "docs/delivery/references/A04-evidence.json"
   }
 }

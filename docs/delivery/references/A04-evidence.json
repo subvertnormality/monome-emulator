@@ -1,0 +1,83 @@
+{
+  "binaries": {
+    "matron": {
+      "path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor/.runtime/wsl-integrated-01/norns/build/matron/matron",
+      "sha256": "5cf314fd79a7538e17b51e9c3af3ff8a2d10520f80de5cf57b5ec8a17b1aeaf9"
+    },
+    "crone": {
+      "path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor/.runtime/wsl-integrated-01/norns/build/crone/crone",
+      "sha256": "f1d44e03f223d2c631d6f133694e07ab5c19d464b4d8858443704c7faa1e92f8"
+    },
+    "libmonome": {
+      "path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/prefix/lib/libmonome.so",
+      "sha256": "0c55b7a7ee59cf376304eed493d396e1ce6a740a4eb554123e77014d18c2fe3f"
+    },
+    "crow_host": {
+      "path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor/.runtime/crow-host-16/crow-host",
+      "sha256": "3fb4185eeabd278d5ff0caf3dcbe501ebc65770994601ccad1a1362f13610e69"
+    },
+    "audio_monitor": {
+      "path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor/.runtime/wsl-integrated-monitor-01/jack-monitor",
+      "sha256": "3da5a2264317fd445361de2988b729650da8066ec3c07d2f3c07196d69316c17"
+    },
+    "audio_capture": {
+      "path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor/.runtime/wsl-integrated-monitor-01/jack-capture",
+      "sha256": "f87fe874be36def25b85c96adaafd7886d36124d33959939ed939653a064e380"
+    },
+    "desktop_audio": {
+      "path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor/.runtime/wsl-integrated-tools-01/jack-desktop",
+      "sha256": "4ae51548042f5664f5c14781b22e1a69024f9e0c519c17129609bf6b67457854"
+    }
+  },
+  "reports": [
+    {
+      "sha256": "2cfd48cd6c00f3e2fffa1f32b73621167153a0456aac7e48a64cca5f34ed0b07",
+      "path": "artifacts/audio/slow-stream-20260909-082345/report.json",
+      "passed": true,
+      "checks": 0
+    },
+    {
+      "sha256": "83a443b090ae54f98a9b8b2a29180d052c00905cbaea2e83f327118c54157db2",
+      "path": "artifacts/crow/native-20260909-082440/report.json",
+      "passed": true,
+      "checks": 14
+    },
+    {
+      "sha256": "d41bdfd17edcff476665eff289ba0d2f4cfa83cd284b9de1f90e45b2ddf60007",
+      "path": "artifacts/arc/native-20260909-082503/report.json",
+      "passed": true,
+      "checks": 8
+    },
+    {
+      "sha256": "aff1d812d88fead2cdf5b5ae29296dbf4fcd32ab90983b4d689eb214c9440bb4",
+      "path": "artifacts/audio/desktop-20260909-082547/report.json",
+      "passed": true,
+      "checks": 10
+    },
+    {
+      "sha256": "f853fa02817f22474fd97dabfea7e365deed20f3ee8d37ea6c4c8eee4131be3c",
+      "path": "artifacts/audio/mosaic-20260909-082650/report.json",
+      "passed": true,
+      "checks": 3
+    },
+    {
+      "sha256": "b4b8d54bc0f0a40338d016b6a50e76f25dc04ca052943d001266f7f9e8e285dd",
+      "path": "artifacts/audio/cheat-codes-sampler-20260909-082752/report.json",
+      "passed": true,
+      "checks": 7
+    },
+    {
+      "sha256": "6de54b05ae63057d3027085d0b6272453d48cac774910d45fd853e746fc895c9",
+      "path": "artifacts/maiden/browser-20260909-082924/report.json",
+      "passed": true,
+      "checks": 8
+    }
+  ],
+  "source_revision": "b98be61",
+  "build_inputs_sha256": "030bcfcda6fdd49c56fbd8b3bad979c80fc0e0c9471b31f99d42fddcfed6fecf",
+  "norns_revision": "14bbeae8646c6717f6bb44c8cd60250bf94b6042",
+  "default_runtime_promoted": false,
+  "installation_sha256": "ce643239905d5b8189c7b427ba8c8d56d2287282a3c7886a8e8cce9605e6556f",
+  "jack_lifetime_patch_sha256": "dcba13ef304b28c1aa78d2ac60781f2757adbbd529264bacef5399287a1b1814",
+  "candidate": ".runtime/wsl-integrated-tools-01/installation.json"
+}
