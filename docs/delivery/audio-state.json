@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "current_card": "A04 combined WSL candidate refresh",
-  "status": "available_host_work_complete",
+  "current_card": "H05 independent host validation",
+  "status": "blocked_host_access",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
   "completed": [
@@ -21,7 +21,7 @@
     "A04 refreshed combined WSL audio/Crow/arc/desktop candidate passed seven native/browser integration reports"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "A04 combined WSL refresh complete: seven reports pass for generic stream/Crow/arc, desktop sink, unchanged Mosaic/cheat codes and official Maiden with reviewed JACK fix. No runtime/test code changed in this refresh; reviewed code was rebuilt and its integration verified. Actual remaining platform validation needs macOS Intel/Apple Silicon/native Linux hosts per PLATFORMS.md; do not claim those lanes complete. Original clicks investigated but not all conclusively localized; delayed browser latency documented. Concurrent Mosaic campaign remains independently owned. No active A04 native/browser/build process; current installation unpromoted.",
+  "next_action": "Required macOS host validation remains not_run; only local Windows Docker contexts are available. Same host dependency recorded across H04/H05, A04 and current goal audit. Available-host queued work complete,32 latest report hashes/statuses verified. Resume with actual macOS host access and run six PLATFORMS.md commands; Apple Silicon/native Linux need separate host evidence. Do not substitute Windows repeats for missing host acceptance. No live owned runner; all implementations and combined WSL evidence merged. Full goal not achieved; original click limitations retained and concurrent Mosaic campaign independently owned.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",
@@ -219,5 +219,6 @@
     "default_promoted": false,
     "status": "tested_optional_candidate",
     "evidence": "docs/delivery/references/A04-evidence.json"
-  }
+  },
+  "completion_audit": "docs/delivery/completion-audit-audio.md"
 }
