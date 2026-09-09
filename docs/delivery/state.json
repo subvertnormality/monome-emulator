@@ -5325,9 +5325,9 @@
     ]
   },
   "midi_output_boundary_checkpoint": {
-    "status": "experimental_partial",
+    "status": "review_blockers_reproduced",
     "document": "docs/delivery/MIDI-OUTPUT-BOUNDARY.md",
-    "evidence": "docs/delivery/midi-output-boundary-validation.json",
-    "next_action": "Native queued-delivery/source lifecycle probes; Mosaic coordinated pulse ownership integration and Codex review. No default admission."
+    "evidence": "docs/delivery/midi-boundary-review-validation.json",
+    "next_action": "Fix subscriber-error shared-clock termination and queued pre-reset obsolete scheduler continuation; new candidate and native regressions required before admission. Mosaic consumer startup slice passes14D/R and520units, not full scope."
   }
 }
