@@ -1,0 +1,33 @@
+{
+  "status": "input-binding-followup-implemented",
+  "review_owner": "P5-current-admission-triage.md type12 follow-up",
+  "base": "2020f3b6bf06ddfa172fc87d17d52d87e951233a",
+  "contract_tests": 11,
+  "midi_contract_tests": 8,
+  "retained_native_traces": 8,
+  "retained_transitions": 16,
+  "evidence": [
+    {
+      "path": "/home/andy/projects/monome-emulator-hotplug-admission/artifacts/hotplug-admission/baseline.json",
+      "sha256": "cc12bb4d66e39d21c5a30558688b56f661d824ae72f1000556c9cca9c446fc57"
+    },
+    {
+      "path": "/home/andy/projects/monome-emulator-hotplug-admission/artifacts/hotplug-admission/candidate-contracts.json",
+      "sha256": "b007b7ffc477e541839c51125bc7f22dc07b4259da6c1bbfeb13ce307b681f10"
+    },
+    {
+      "path": "/home/andy/projects/monome-emulator-hotplug-admission/artifacts/hotplug-admission/midi-contracts.json",
+      "sha256": "47d046c3cbf6ab5892ffeb5e59c491c0dcb783917df4956d1343e045b2215273"
+    },
+    {
+      "path": "/home/andy/projects/monome-emulator-hotplug-admission/artifacts/hotplug-admission/retained-traces.json",
+      "sha256": "304fb9ce33a79ace70d52d5c9053fab5a379f66518c13f0b25550f6e4fc1bad7"
+    }
+  ],
+  "scope": "Bind midi_connection to ordered native type12 port/state submissions and unique matching acknowledgement; reject wrong port/state, absent/duplicate/borrowed acknowledgements, changed times, missing/unreported inputs and reordered sequences. Held key/grid releases remain unaffected.",
+  "limitations": [
+    "Retained native traces verify the new binding logic only; they do not readmit historical application results as current-source M5 evidence.",
+    "No runtime change, default activation or full release claim. Integrate this isolated branch after the current Mosaic native batch, then include it in the next full admission checkpoint."
+  ],
+  "full_goal_complete": false
+}
