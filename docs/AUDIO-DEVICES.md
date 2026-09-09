@@ -21,7 +21,7 @@ but does not stop the script's runtime.
 
 Current audio builds include the reviewed JACK shutdown lifetime fix. A refreshed
 WSL build combining Crow, arc and desktop helpers also passed generic device,
-audio, Mosaic, cheat codes and Maiden checks; see
+audio, external-script sampler and Maiden checks; see
 [combined candidate evidence](delivery/completions/A04.md). Older installed
 candidates are not modified automatically. Rebuild into a new directory to obtain
 the fix; the default MIDI installation remains separate.
@@ -54,7 +54,7 @@ monitor, while stopping the session ends its owned runtime processes.
 
 The tested set includes TestSine, an application-owned engine, softcut file/live
 recording probes, unchanged n.b./DoubleDecker note/velocity/bend/pressure/polyphony,
-and Mosaic pattern playback through DoubleDecker. A two-minute browser test
+and external-script pattern playback through DoubleDecker. A two-minute browser test
 measures rendered tone continuity; it is not a physical speaker or latency test.
 Arbitrary engines and every script are not implied by these checks.
 
@@ -74,10 +74,13 @@ fail or remain explicitly unsupported. `crow.reset()` resets the implemented
 CV/input state; it is not a full firmware VM reboot. Lua instruction deadlines
 cover commands and callbacks, not blocking native/C calls.
 
-Mosaic and player mods remain external, optional fixtures. Do not copy their
+Applications and player mods remain external, optional fixtures. Do not copy their
 source into the core. Generic conformance works independently of them. The
 tested sampler/arc, [Maiden](MAIDEN.md), and optional [Docker](DOCKER.md) features
 are now available with their separately documented boundaries.
+
+See [peripheral support](PERIPHERALS.md) for unsupported APIs and the distinction
+between reading a captured ii trace and receiving a response from an ii module.
 
 Crow callback completion dispatch is bounded: at most 4,096 pending completions
 per output and 4,096 callbacks or 0.5 seconds per dispatch batch. Exceeding a bound

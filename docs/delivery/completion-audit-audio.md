@@ -1,5 +1,44 @@
 # Audio/device goal completion audit — 2026-09-09
 
+## Final disposition after H05 integration
+
+The audio/device and subsequent desktop distribution queue is complete and
+published through `59881b5` on main and codex/audio-monitor. This supersedes the
+unavailable-Mac blocker and historical disposition below. The user confirmed Mac
+verification is complete and explicitly removed any requirement to inspect its
+artifacts here. H05.md records that acceptance without inventing local inspection.
+
+The requirement table below remains the scope inventory, with its final platform
+row replaced by H05's native Apple Silicon acceptance and Windows regression
+results. A00–A04/P01–P03 and H00–H05 have completion records, reviewed admissions,
+user instructions and retained actual-runtime evidence. The user-required merge
+order was preserved. No fixture dependency was added to the general runtime.
+Windows H05's six host gates passed; architecture and JACK diagnostic findings
+were fixed and closed by focused review. The main integration passed 13 focused
+checks. Native Linux and Intel Mac remain explicitly not_run as allowed by H05's
+unavailable-host disposition; amd64 emulation on Apple Silicon remains failed.
+
+This final audit read the current AUDIO.md and DESKTOP.md contracts, stage-2
+admission, H05 integration, source-reference inventory, setup instructions and
+platform matrix. It recomputed hashes and compared actual JSON outcomes for all
+42 reports in A04 (7), H04 (25), H05 Windows (7) and H05 fixes (3). All identities
+and recorded outcomes matched, including retained failures; no failed run was
+reclassified. The earlier audit below supplies the preceding card-by-card review.
+
+The practical boundaries remain: browser output is delayed monitoring, not a
+low-latency instrument; original faint clicks were investigated but not universally
+eliminated; supported Crow/ii and arc software profiles do not certify hardware;
+cheat codes coverage is the documented sampler/recording/persistence/arc profile,
+not all third-party integrations. Optional WSL builds preserve the default install.
+The separately owned comprehensive Mosaic behavior/release campaign remains
+unfinished and is not claimed complete by this audio/device delivery.
+
+No further card in this queue is pending. Future API expansion and additional
+host admission can build on the explicit limitations rather than reopening the
+completed Mac verification or repeating accepted Windows endurance tests.
+
+## Historical pre-H05 audit
+
 Main and audio-monitor are at e201859 before this audit. The preceding goal turn
 was progress: a fresh combined WSL candidate was built and seven integration
 reports passed. This audit does not mark the full goal complete.

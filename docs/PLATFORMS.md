@@ -13,13 +13,22 @@ The following is the measured status as of 2026-09-09.
 | macOS Apple Silicon, native arm64 container, host Chrome | Passed H05 software gates | macOS15.3.2/M1; Docker Desktop4.69.0/Engine29.4.0; Chrome152 arm64. The separately pinned native image passed startup cancellation, browser/input/grid/MIDI/data, failures, restart, lease isolation and120-second-per-rate rendered audio. This does not alter the failed amd64-emulation lane. |
 | Native Linux host, Docker and host Chromium | not_run | WSL2 and Docker's Linux VM do not establish native Linux host behavior. |
 
-The final Windows-tested image is `monome-emulator:h04-09`, ID
+The H04 Windows-tested image is `monome-emulator:h04-09`, ID
 `sha256:02ecaa29d325a2af10c0f63c713c60fccf1da699fddf6211265b1d4305805a8a`,
 built from emulator commit `434c2da3fbefae5c7467f1365c6b60e01313a1ba` and the
 repository's pinned official runtime. This is a local image, not a published
 registry download. See [Docker installation](DOCKER.md) to build your snapshot.
 Report identities and hashes are in
 [H04 evidence](delivery/references/H04-evidence.json).
+
+H05 subsequently passed all six Windows host gates on the shared Mac changes;
+see [Windows regression evidence](delivery/references/H05-windows-evidence.json).
+The guarded build `monome-emulator:h05-windows-02`, image
+`sha256:1f777ecdd4a491afc63988c57bf6a153c5f79b93222c3e5d7e2a8aa1336a4794`,
+then passed native startup/reopen/cleanup after the architecture checks were
+added. [Fix evidence](delivery/references/H05-fixes-evidence.json) identifies its
+source and positive/negative build checks. H05 is merged into main; Mac
+verification was confirmed by the user, with artifacts retained on that machine.
 
 The native Apple Silicon image is `monome-emulator:macos-h05-arm64-02`, ID
 `sha256:6f0e60e7a34d159cb1007a91dc0e1013a94da987881e48ae47de4a7504c15a8e`,
@@ -32,7 +41,9 @@ the separate pinned arm64 profile. Exact identities and report hashes are in
 The final Windows/Docker run captured every rendered sample for120seconds at
 44.1 and48kHz, with zero unintended underruns and verified sine signal properties.
 Reconnect, cancellation, stale-stream handling and native cleanup passed.
-P95 input-to-audio notification bounds were176.9/162.1ms, above the150ms target.
+H04 p95 input-to-audio notification bounds were176.9/162.1ms, above the150ms target.
+The later H05 Windows regression measured148.5/144.4ms. Native Apple Silicon
+measured139.2/169.1ms. These observations do not establish a latency guarantee.
 Earlier runs varied from139.0 to164.2ms. Treat this as delayed monitoring, not
 interactive playing or a guaranteed latency ceiling. It proves actual runtime
 audio reaches the browser renderer, not physical speaker output. The original

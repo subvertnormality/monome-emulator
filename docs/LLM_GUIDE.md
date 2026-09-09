@@ -36,14 +36,14 @@ do not silently rewrite historical records.
 | Browser controls and rendering | `ui/`, [browser reference](architecture/browser-contract.md) |
 | Device and clock semantics | [Grid](architecture/grid-contract.md), [MIDI](architecture/midi-contract.md), [clock](architecture/clock-contract.md) contracts |
 | Generic probes and recipes | `fixtures/probes/`, `fixtures/scenarios/` |
-| App fixtures and expected outputs | `fixtures/apps/`, `fixtures/oracles/`, `compatibility/`, `tests/mosaic_*.py` |
+| App fixtures and expected outputs | `fixtures/apps/`, `fixtures/oracles/`, `compatibility/`, application-specific test runners |
 | Focused tests and package selection | `tests/contracts/`, `compatibility/packages.json`, owning completion note |
 | Delivery scope and evidence summaries | `docs/delivery/` |
 
 Use `rg` and `rg --files` for targeted discovery. Do not scan ignored dependency
 trees and large run artifacts by default. `.runtime/` holds local dependencies,
-builds, and sessions; `artifacts/` holds generated evidence. `upstream/mosaic/` is
-a local inspection checkout, not a core source dependency.
+builds, and sessions; `artifacts/` holds generated evidence. External application
+inspection checkouts are not core source dependencies.
 
 ## Run tools in the correct environment
 
@@ -112,13 +112,13 @@ for longer runs. Never mutate application globals to simulate user editing.
 ```
 
 - `contracts` is currently the only implemented `test --suite` selector. Proposed
-  `conformance`, `workflow`, and `mosaic` selectors are not working shortcuts.
+  Other proposed suite selectors are not working shortcuts.
 - `run` creates its own artifact directory and reports the manifest path. Inspect
   its exit code, assertions, and error, then verify the evidence.
 - `replay` executes on current source with recorded provenance; it does not
   restore an old checkout automatically.
 - Native packages have their own runners. Consult `compatibility/packages.json`
-  and the owning completion note. `tests/native_loader.py` includes Mosaic and
+  and the owning completion note. `tests/native_loader.py` includes external apps and
   needs its opt-in fixtures; it is not a fixture-free generic smoke test.
 - Browser acceptance uses `tests/browser_package.ps1` on Windows. Inspect its
   pinned runtime/browser paths before running it; do not assume host portability.
@@ -133,7 +133,7 @@ errors, and missing artifacts must remain visible; never report them as passes.
 
 ## Preserve runtime and acceptance boundaries
 
-- Keep the emulator general-purpose. Mosaic, n.b., matrix and toolkit are opt-in
+- Keep the emulator general-purpose. Applications and their mods are opt-in
   fixture inputs, never core imports, runtime branches, or UI models.
 - Use pinned official monome sources with small, documented patches. Do not copy
   norns APIs into an expanding local reimplementation.

@@ -127,17 +127,10 @@ See the [MIDI reference](docs/architecture/midi-contract.md) for port configurat
 and timestamped capture. Snapshots contain a bounded MIDI tail; use complete event
 logs when checking long sequences.
 
-Mosaic is an optional compatibility fixture, not an installation requirement.
-Its [fixture lock](fixtures/apps/mosaic.lock.json) owns its separate dependencies
-and profiles. If you want to try it:
-
-```sh
-./dev/emu fixtures fetch mosaic --locked
-./dev/emu start --fixture mosaic --fixture-profile base-midi
-```
-
-The `midi-modulation` profile additionally enables the fixture's pinned mods.
-Both profiles boot, but complete Mosaic workflow acceptance is still in progress.
+Application fixtures are optional test inputs, not installation requirements.
+Use your own script with `--script` and `--code-root`. Consult the
+[peripheral support table](docs/PERIPHERALS.md) before running scripts that need
+Crow, ii modules or physical devices.
 
 ## Troubleshooting and contributing
 
@@ -177,4 +170,4 @@ validation, and handoff instructions.
 This project is licensed under the [MIT License](LICENSE). Upstream
 dependencies retain their own licenses; recorded notices are listed in the
 [runtime lock](dependencies.lock.json), [optional Maiden lock](maiden.lock.json)
-and [application fixture lock](fixtures/apps/mosaic.lock.json).
+and the optional [application fixture manifests](fixtures/apps/).
