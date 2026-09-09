@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import socket
 import tempfile
+import threading
 import unittest
 from automation import session
 from automation.protocol import ContractError, ROOT
@@ -72,5 +73,11 @@ class ContainerContracts(unittest.TestCase):
                         dict(jack_period=True),dict(jack_period=512),dict(jack_period=2048)]:
             with self.assertRaises(ContractError):session.start(**options)
         self.assertEqual(set(session.SESSIONS.iterdir()),before)
+
+    def test_already_cancelled_start_creates_no_session(self):
+        before=set(session.SESSIONS.iterdir()) if session.SESSIONS.exists() else set();event=threading.Event();event.set()
+        with self.assertRaisesRegex(ContractError,'startup was cancelled'):
+            session.start(cancel_event=event)
+        self.assertEqual(set(session.SESSIONS.iterdir()) if session.SESSIONS.exists() else set(),before)
 
 if __name__=='__main__':unittest.main()

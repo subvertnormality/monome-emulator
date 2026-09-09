@@ -1,0 +1,43 @@
+{
+  "started_at": "2026-09-09T06:17:10.284404+00:00",
+  "packet_sha256": "29ddb78cc129f658ff662cce28da87b0b51d8022dc162e02c6b840b90d38c907",
+  "files": [
+    "docs/delivery/completions/H04.md",
+    "docs/DOCKER.md",
+    "docs/delivery/references/H04-evidence.json",
+    "docs/delivery/UPSTREAM.md"
+  ],
+  "tool": "critique_branch",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor",
+    "base_ref": "996c67c",
+    "head_ref": "HEAD",
+    "include_uncommitted": false,
+    "isolate": false,
+    "converge": false,
+    "class_closure": false,
+    "round": 1,
+    "engine": "codex",
+    "effort": "medium",
+    "web_search": false,
+    "stakes": "Trusted single-user local music development and testing utility. Audio and optional Docker distribution are authorized. Risks are misleading tests, local data loss, runtime lifecycle errors and unsupported platform claims. No financial certification, hostile multitenancy or physical hardware prerequisite.",
+    "project_summary": "Trusted single-user general-purpose official norns/grid emulator. Mosaic remains optional and external. Earlier audio/device, broader sampler/arc, desktop audio, official Maiden and browser audio work is reviewed and merged through996c67c. H04 adds an optional Ubuntu20.04 amd64 container using the existing launcher and pinned official builders. Windows Docker Desktop plus Windows Chromium is the tested host profile; macOS/Apple Silicon/native Linux hosts are not admitted.",
+    "diff_intent": "Review the H04 branch since996c67c: committed Git bundle build context, pinned base and exact package inventory, official native/audio builds, non-root PID1 session wrapper with owned persistent data and single-writer locking, explicit container bind/port with unchanged WSL defaults and explicit unsupported Maiden/fixed-port combination, generic browser/data/audio/lifecycle/error acceptance, and user instructions. H00 already reviewed the architecture plan. No community code is copied. After a measured native scheduling xrun, an optional 2048-frame JACK profile uses an explicit two-constant crone buffer-capacity patch against the pinned official base; current official HEAD still has the strict limit. WSL defaults remain1024; older candidates reject2048 before native startup.",
+    "focus": "Find substantive in-scope lifecycle, persistence, package/source identity, platform-overclaim or false-green acceptance issues. Read H04.md, DOCKER.md and H04-evidence.json and verify referenced evidence. Check source export preserves actual commit and excludes caches, no arbitrary host-data adoption or deletion, same-container and replacement restart, SIGTERM/startup failure/server loss, stable bearer/origin and native input contracts, exact output and actual renderer audio checks. No speculative enterprise hardening, physical hardware prerequisite, WSL replacement, mandatory multiarchitecture build, or untested platform admission. Mac unavailable is an explicit H05 obligation. Review one shot, medium effort, no convergence. Main and other worktrees contain concurrent Mosaic work and must not be changed. Do not start new native/container tests concurrently with an active audio endurance run; inspect existing evidence. Keep any suggested fix narrow and actionable. Check the optional buffer-capacity patch, supported-period metadata and honest preservation of failed1024endurance and unpatched2048startup experiments. No dropout or latency threshold is relaxed."
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "## What works\n\n- `scripts/container/prepare.py:24` exports `git('bundle', 'create', str(out/'emulator.bundle'), 'HEAD')`; Dockerfile line 6 verifies the checked-out revision. The recorded context hashes all match, and the final image evidence identifies source `213ade4`.\n- `scripts/build_audio_candidate.py:33` rejects `period_patch!=expected`. The capacity change is bounded and explicitly identified; `src/runtime/native.py:53` rejects unsupported periods before native startup. The three recorded upstream file hashes match their Git objects.\n- `tests/container_browser.cjs:89` checks `await value(11)` after editing the host script and replacing the container. This tests persisted data through actual native input and literal MIDI output.\n- `docs/delivery/completions/H04.md:220` preserves \u201c164.2ms \u2026 part of the observed range.\u201d All 14 referenced report hashes match, including the renderer\u2019s recorded sample counts; both failed experiments remain available. These are inspected existing results, not newly executed tests.\n\n## What doesn't work\n\n- [MAJOR] **SIGTERM does not cancel startup.** `scripts/container/entrypoint.py:85` installs `lambda *_: stopped.set()`, but line 90 blocks in `session.start(...)` before line 101 checks `while not stopped.wait(.2)`. Meanwhile, `src/automation/session.py:95` permits 60 seconds of startup, followed by up to 30 seconds of cleanup at line 114. Stopping during a slow or stalled startup therefore continues initialization and can exceed the documented Docker grace period, causing forced termination instead of owned cleanup. This contradicts `docs/DOCKER.md:100`: \u201cAllow 40 seconds for Docker termination to finish cleanup.\u201d\n\n- [MINOR] **The negative runner deletes failed diagnostic containers.** `tests/container_failures.cjs:33` unconditionally executes `finally{if(created){d('stop','--time','40',name);d('rm',name);}}`, including after an assertion or artifact-export failure. Earlier assertions can also bypass the log export at line 32. The resulting failure loses its container and internal diagnostics, contradicting `docs/DOCKER.md:137`: \u201cfailed containers are stopped and retained for diagnosis.\u201d Remove only cases whose assertions and evidence exports completed successfully.\n\n## Risks\n\nNothing notable.\n\n## Gaps\n\n- [MAJOR] **Startup termination has no regression coverage.** `tests/container_restart.cjs:24` waits for `let info=await ready()` before stopping anything; `tests/container_failures.cjs:10` covers only `['unowned','lua-error']`. Add a deliberately delayed startup, terminate before readiness, and require bounded cleanup plus successful reuse of the owned data root. The current passing lifecycle evidence does not exercise the defective phase.\n\n## Improvements\n\n- [MAJOR] Pass the wrapper\u2019s cancellation event into the startup polling loop at `src/automation/session.py:97`, and route cancellation through its existing `proc.terminate()` / `proc.wait(timeout=30)` cleanup. Cost: one optional launcher argument and the focused startup-termination regression; this makes the documented stop behavior apply before readiness.\n\n---\n_paranoia-local \u00b7 engine=codex \u00b7 session_ref=`01a084d0-347a-7e13-a7ec-ab749760b36c` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "status": "returned",
+  "finished_at": "2026-09-09T06:21:11.560797+00:00"
+}

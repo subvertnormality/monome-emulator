@@ -1,0 +1,43 @@
+{
+  "started_at": "2026-09-09T06:15:47.258542+00:00",
+  "packet_sha256": "29ddb78cc129f658ff662cce28da87b0b51d8022dc162e02c6b840b90d38c907",
+  "files": [
+    "docs/delivery/completions/H04.md",
+    "docs/DOCKER.md",
+    "docs/delivery/references/H04-evidence.json",
+    "docs/delivery/UPSTREAM.md"
+  ],
+  "tool": "critique_branch",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor",
+    "base_ref": "996c67c",
+    "head_ref": "HEAD",
+    "include_uncommitted": false,
+    "isolate": false,
+    "converge": false,
+    "class_closure": false,
+    "round": 1,
+    "engine": "codex",
+    "effort": "medium",
+    "web_search": false,
+    "stakes": "Trusted single-user local music development and testing utility. Audio and optional Docker distribution are authorized. Risks are misleading tests, local data loss, runtime lifecycle errors and unsupported platform claims. No financial certification, hostile multitenancy or physical hardware prerequisite.",
+    "project_summary": "Trusted single-user general-purpose official norns/grid emulator. Mosaic remains optional and external. Earlier audio/device, broader sampler/arc, desktop audio, official Maiden and browser audio work is reviewed and merged through996c67c. H04 adds an optional Ubuntu20.04 amd64 container using the existing launcher and pinned official builders. Windows Docker Desktop plus Windows Chromium is the tested host profile; macOS/Apple Silicon/native Linux hosts are not admitted.",
+    "diff_intent": "Review the H04 branch since996c67c: committed Git bundle build context, pinned base and exact package inventory, official native/audio builds, non-root PID1 session wrapper with owned persistent data and single-writer locking, explicit container bind/port with unchanged WSL defaults and explicit unsupported Maiden/fixed-port combination, generic browser/data/audio/lifecycle/error acceptance, and user instructions. H00 already reviewed the architecture plan. No community code is copied. After a measured native scheduling xrun, an optional 2048-frame JACK profile uses an explicit two-constant crone buffer-capacity patch against the pinned official base; current official HEAD still has the strict limit. WSL defaults remain1024; older candidates reject2048 before native startup.",
+    "focus": "Find substantive in-scope lifecycle, persistence, package/source identity, platform-overclaim or false-green acceptance issues. Read H04.md, DOCKER.md and H04-evidence.json and verify referenced evidence. Check source export preserves actual commit and excludes caches, no arbitrary host-data adoption or deletion, same-container and replacement restart, SIGTERM/startup failure/server loss, stable bearer/origin and native input contracts, exact output and actual renderer audio checks. No speculative enterprise hardening, physical hardware prerequisite, WSL replacement, mandatory multiarchitecture build, or untested platform admission. Mac unavailable is an explicit H05 obligation. Review one shot, medium effort, no convergence. Main and other worktrees contain concurrent Mosaic work and must not be changed. Do not start new native/container tests concurrently with an active audio endurance run; inspect existing evidence. Keep any suggested fix narrow and actionable. Check the optional buffer-capacity patch, supported-period metadata and honest preservation of failed1024endurance and unpatched2048startup experiments. No dropout or latency threshold is relaxed."
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "\u26a0\ufe0f REVIEW FAILED (engine=codex, exit=127) \u2014 treat the output below as an error, not a completed review.\n\n[paranoia-local error] codex exited 127: executable not found: [Errno 2] No such file or directory: 'codex'\n\n---\n_paranoia-local \u00b7 engine=codex_",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "status": "tool_error",
+  "finished_at": "2026-09-09T06:15:49.344358+00:00"
+}

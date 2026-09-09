@@ -29,7 +29,8 @@ def request(session_id,path,payload=None,timeout=None):
         raise ContractError(value.get('code','http_error'),value.get('message',str(error))) from error
     except (OSError,ValueError) as error: raise ContractError('session_unavailable',str(error)) from error
 
-def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None,midi_config=None,random_seed=None,clock_mode='real-time',experimental_install=None,crow_enabled=True,audio_files=None,audio_directory=None,input_timeout=2,arc_enabled=False,desktop_audio=None,startup_chime=True,reopen_data=None,maiden_install=None,listen_address='127.0.0.1',http_port=0,jack_period=1024):
+def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None,midi_config=None,random_seed=None,clock_mode='real-time',experimental_install=None,crow_enabled=True,audio_files=None,audio_directory=None,input_timeout=2,arc_enabled=False,desktop_audio=None,startup_chime=True,reopen_data=None,maiden_install=None,listen_address='127.0.0.1',http_port=0,jack_period=1024,cancel_event=None):
+    if cancel_event is not None and cancel_event.is_set():raise ContractError('startup_cancelled','Session startup was cancelled')
     if listen_address not in ('127.0.0.1','0.0.0.0'):raise ContractError('listen_address','Use IPv4 loopback or an explicit container-wide bind')
     if type(http_port)!=int or not 0<=http_port<=65535:raise ContractError('http_port','HTTP port must be an integer from 0 to 65535')
     if type(jack_period)!=int or jack_period not in (1024,2048):raise ContractError('jack_period','JACK period must be 1024 or 2048 frames')
@@ -95,6 +96,7 @@ def start(backend='contract-fixture',script=None,code_root=None,data=None,enable
     deadline=time.monotonic()+(60 if backend=='native' else 10)
     try:
         while time.monotonic()<deadline:
+            if cancel_event is not None and cancel_event.is_set():raise ContractError('startup_cancelled','Session startup was cancelled')
             if proc.poll() is not None:
                 if (directory/'startup-error.json').exists():
                     error=read_json(directory/'startup-error.json')
@@ -115,6 +117,12 @@ def start(backend='contract-fixture',script=None,code_root=None,data=None,enable
             except subprocess.TimeoutExpired:
                 write_json(directory/'cleanup-error.json',dict(code='cleanup_timeout',message='Owned server did not finish cleanup within 30 seconds',pid=proc.pid))
                 raise ContractError('cleanup_timeout','Startup failed and owned server cleanup timed out; '+str(directory)) from failure
+        if getattr(failure,'code',None)=='startup_cancelled' and (directory/'cleanup.json').exists():
+            rows=read_json(directory/'cleanup.json')
+            unexpected=[row for row in rows if row['returncode'] not in ((0,-15) if row['service'] in ('sclang','crow') else (0,))]
+            if unexpected:
+                error=ContractError('cleanup_failed','Cancelled startup had unexpected native exits: '+json.dumps(unexpected))
+                error.session_id=session_id;raise error from failure
         raise
 
 def stop(session_id):

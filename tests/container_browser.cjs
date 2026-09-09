@@ -36,9 +36,12 @@ async function stop(mode){
   for(const file of ['cleanup.json','stopped.json','server.log','jack.log','matron.log','crone.log','sclang.log','actions.jsonl','native-events.jsonl','frame.bgra','native-config.json'])
     d('cp',`${owned}:/opt/emulator/.runtime/sessions/${info.session_id}/${file}`,path.join(dest,file));
   const rows=JSON.parse(fs.readFileSync(path.join(dest,'cleanup.json'),'utf8'));assert.ok(rows.length>=4);
+  const midi=fs.readFileSync(path.join(dest,'native-events.jsonl'),'utf8').trim().split('\n').map(x=>JSON.parse(x)).filter(x=>x.kind===3);
+  const expected={first:[[176,20,0],[176,20,1],[176,22,65],[176,21,8],[176,21,7]],replaced:[[176,20,11],[176,20,12]],isolated:[[176,20,10]],restarted:[[176,20,12]]}[report.sessions.at(-1).name];
+  assert.deepEqual(midi.map(x=>({port:x.port,bytes:x.bytes})),expected.map(bytes=>({port:1,bytes})));
   for(const row of rows)assert.ok((row.service==='sclang'?[0,-15]:[0]).includes(row.returncode),JSON.stringify(row));
   assert.ok(fs.existsSync(path.join(dest,'stopped.json')));
-  report.checks.push({name:'native-cleanup-'+mode,session:info.session_id,rows});
+  report.checks.push({name:'native-cleanup-'+mode,session:info.session_id,rows,midi:midi.map(x=>({port:x.port,bytes:x.bytes}))});
   d('rm',owned);owned=null;info=null;
 }
 async function key(n){await page.locator('#key-'+n).click();await page.evaluate(()=>queue);}

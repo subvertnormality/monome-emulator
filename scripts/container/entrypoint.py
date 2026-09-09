@@ -89,11 +89,14 @@ def main():
         try:
             info = session.start(backend='native', script=args.script, code_root=args.code_root,
                 experimental_install=ROOT/'.runtime/container-audio-tools/installation.json',
-                crow_enabled=False, startup_chime=False, listen_address='0.0.0.0', http_port=args.port, jack_period=args.jack_period,
+                crow_enabled=False, startup_chime=False, listen_address='0.0.0.0', http_port=args.port, jack_period=args.jack_period,cancel_event=stopped,
                 **owner.options())
         except Exception as error:
             if getattr(error, 'session_id', None):
                 owner.remember(error.session_id)
+            if isinstance(error,ContractError) and error.code=='startup_cancelled' and stopped.is_set():
+                print(json.dumps(dict(status='cancelled',session_id=getattr(error,'session_id',None))),flush=True)
+                return
             raise
         owner.remember(info['session_id'])
         write_json(owner.root/'.emu-container-current.json', info)
