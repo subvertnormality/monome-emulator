@@ -25,6 +25,12 @@ def main():
     path.write_text(after)
     patch = ''.join(difflib.unified_diff(before.splitlines(True), after.splitlines(True),
                  fromfile='a/matron/src/weaver.c', tofile='b/matron/src/weaver.c'))
+    from jack_lifetime_patch import apply as apply_jack_lifetime
+    jack_lifetime_patch = apply_jack_lifetime(source)
+    if jack_lifetime_patch != (ROOT/'patches/norns/experimental-jack-lifetime.patch').read_text():
+        raise ValueError('JACK lifetime patch differs from the documented patch')
+    patch += jack_lifetime_patch
+    (out/'jack-lifetime.patch').write_text(jack_lifetime_patch)
     period_patch=None
     if args.large_jack_period:
         from audio_period_patch import apply as apply_period
@@ -91,6 +97,7 @@ def main():
     if crow_manifest:binaries['crow_host']=dict(path=str(crow_build/'crow-host'),sha256=crow_manifest['binary_sha256'])
     install = dict(base, source=str(source), binaries=binaries, interpreted_files=runtime_content(source),
         experimental=dict(status='audio-feasibility-only', patch_sha256=hashlib.sha256(patch.encode()).hexdigest(),
+                          jack_lifetime_patch_sha256=hashlib.sha256(jack_lifetime_patch.encode()).hexdigest(),
                           default_server_patch_sha256=hashlib.sha256(default_server_patch.encode()).hexdigest(),
                           engine_ready_patch_sha256=hashlib.sha256(engine_ready_patch.encode()).hexdigest(),
                           startup_chime_control=True,startup_chime_patch_sha256=hashlib.sha256(startup_chime_patch.encode()).hexdigest(),

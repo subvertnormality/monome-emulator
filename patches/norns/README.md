@@ -127,3 +127,20 @@ registration hook is unused in this standard runtime and only activated by the
 separately built controlled-clock overlay. Native generic queue/grid/MIDI/clock
 checks and Mosaic handoffs validate the adapter. Remove when an official native
 virtual MIDI transport supports the same scheduled arrival/cleanup contract.
+
+`experimental-jack-lifetime.patch` is a locally authored optional audio-build
+patch against official monome/norns14bbeae8646c6717f6bb44c8cd60250bf94b6042.
+A GDB capture (`artifacts/docker/gdb-1788936476185/matron-gdb.log`) shows matron's
+scheduler in jack_time_to_frames while main closes/unmaps that JACK client.
+It extends the existing non-audio-thread time mutex across the JACK read and
+close, clears the client after close, and freezes the final clock value after
+shutdown. CPU-load access uses the same lifetime guard. Audio callbacks and
+live clock arithmetic are unchanged; initialization remains single-threaded.
+Current official1d7209428841bc2b38619c8238ba0d2788bdbe68 was inspected at
+matron/src/jack_client.cpp (the old .c path has moved) and retains the race.
+No community code was copied. Remove this patch when the selected official
+runtime synchronizes clock readers with client destruction or joins every reader
+before destruction. The builder checks the exact patch and records its SHA256.
+`tests/jack_lifetime.py` compiles the pinned C boundary: an instrumented JACK
+read/close overlap fails on baseline and passes on the patched source. Actual
+container startup/browser/audio cleanup tests remain required for admission.

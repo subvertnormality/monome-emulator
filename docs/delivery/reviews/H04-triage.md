@@ -58,3 +58,20 @@ was rejected while the original runtime stayed healthy. The final browser runner
 also checks the entire captured MIDI sequence/port for each session, alongside
 its existing per-action assertions and raw event/frame exports. These strengthen
 the original H04 data/MIDI contract without expanding product scope.
+
+Review-fix validation and newly localized shutdown defect:
+- h04-08 startup-cancel-1788936027308 passed in1017.654ms, explicit startup
+  SIGTERM and all service exits recorded; same-container data reopen passed.
+- Normal browser-1788936073027 failed with matron SIGSEGV. GDB capture
+  gdb-1788936476185/matron-gdb.log localizes a JACK close/read race: scheduler
+  jack_time_to_frames against main-thread jack_client_close/munmap.
+- Current upstream1d720942 still has this race in jack_client.cpp. The optional
+  audio builder now applies an explicit lifetime-lock patch (patch README gives
+  base and removal condition). Native acceptance is pending. Deterministic
+  tests/jack_lifetime.py fails baseline (-6) and passes patched source (0),
+  including post-close time/CPU access and repeated close. This does not replace
+  actual native lifecycle checks or establish all historical crash causes.
+- Diagnostic retention fault verification passed in retention-verification.json;
+  the deliberately failed report5312554 remains false and its stopped container
+  remains retained. No failed native signal is reclassified as success.
+The one focused follow-up remains unused and must cover this additional fix.
