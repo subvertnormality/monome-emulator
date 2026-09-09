@@ -1,5 +1,5 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
-const root=path.resolve(__dirname,'..'),meta=JSON.parse(fs.readFileSync(path.join(root,'.runtime/h03-session.json'),'utf8'));
+const root=path.resolve(__dirname,'..'),meta=JSON.parse(fs.readFileSync(process.env.EMULATOR_SESSION_METADATA||path.join(root,'.runtime/h03-session.json'),'utf8'));
 const info=meta.info,out=path.join(root,'artifacts/audio','latency-'+Date.now());
 const fault=process.env.H03_PROBE_FAULT;
 const report={passed:false,source:meta.source,session_id:info.session_id,fault,checks:[],rates:[],silenceWindows:[],networkFailures:[],audioConnections:{responses:0,reused:0}};
@@ -12,7 +12,7 @@ const continuitySeconds=Number(process.env.AUDIO_CONTINUITY_SECONDS||2);
     assert.ok(Number.isFinite(continuitySeconds)&&continuitySeconds>=2&&continuitySeconds<=600);
     const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
     browser=await chromium.launch({headless:true,executablePath:fault==='browser-launch'?path.join(root,'.runtime/missing-h03-browser.exe'):
-      path.join(process.env.PLAYWRIGHT_BROWSERS_PATH,'chromium_headless_shell-1234/chrome-headless-shell-win64/chrome-headless-shell.exe')});
+      (process.env.PLAYWRIGHT_EXECUTABLE_PATH||(process.platform==='win32'?path.join(process.env.PLAYWRIGHT_BROWSERS_PATH,'chromium_headless_shell-1234/chrome-headless-shell-win64/chrome-headless-shell.exe'):chromium.executablePath()))});
     for(const rate of [44100,48000]){
       page=await browser.newPage();
       page.on('requestfailed',request=>report.networkFailures.push({path:new URL(request.url()).pathname,error:request.failure()}));
