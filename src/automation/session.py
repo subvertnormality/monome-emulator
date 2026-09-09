@@ -29,7 +29,10 @@ def request(session_id,path,payload=None,timeout=None):
         raise ContractError(value.get('code','http_error'),value.get('message',str(error))) from error
     except (OSError,ValueError) as error: raise ContractError('session_unavailable',str(error)) from error
 
-def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None,midi_config=None,random_seed=None,clock_mode='real-time',experimental_install=None,crow_enabled=True,audio_files=None,audio_directory=None,input_timeout=2,arc_enabled=False,desktop_audio=None,startup_chime=True,reopen_data=None,maiden_install=None):
+def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None,midi_config=None,random_seed=None,clock_mode='real-time',experimental_install=None,crow_enabled=True,audio_files=None,audio_directory=None,input_timeout=2,arc_enabled=False,desktop_audio=None,startup_chime=True,reopen_data=None,maiden_install=None,listen_address='127.0.0.1',http_port=0):
+    if listen_address not in ('127.0.0.1','0.0.0.0'):raise ContractError('listen_address','Use IPv4 loopback or an explicit container-wide bind')
+    if type(http_port)!=int or not 0<=http_port<=65535:raise ContractError('http_port','HTTP port must be an integer from 0 to 65535')
+    if maiden_install is not None and http_port:raise ContractError('maiden_options','Maiden restart currently requires an automatically allocated HTTP port')
     if maiden_install is not None and (backend!='native' or clock_mode!='real-time'):
         raise ContractError('maiden_options','Maiden requires the real-time native runtime')
     if reopen_data is not None and (backend!='native' or data is not None or data_seeds):
@@ -79,7 +82,7 @@ def start(backend='contract-fixture',script=None,code_root=None,data=None,enable
                 audio_directory=str(Path(audio_directory).resolve()) if audio_directory is not None else None,
                 input_timeout=input_timeout,
                 arc_enabled=arc_enabled,desktop_audio=desktop_audio,startup_chime=startup_chime,reopen_data=reopen_data is not None,
-                maiden_install=str(Path(maiden_install).resolve()) if maiden_install else None,
+                maiden_install=str(Path(maiden_install).resolve()) if maiden_install else None,listen_address=listen_address,http_port=http_port,
                 clock_mode=clock_mode,experimental_install=str(Path(experimental_install).resolve()) if experimental_install else None)
     write_json(directory/'config.json',config)
     log=open(directory/'server.log','w')

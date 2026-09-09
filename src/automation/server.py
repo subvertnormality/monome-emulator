@@ -328,7 +328,7 @@ def serve_application(directory,app):
                                 from .session import start
                                 fields=('script','code_root','enabled_mods','midi_config','random_seed','clock_mode',
                                     'experimental_install','crow_enabled','audio_files','audio_directory','input_timeout',
-                                    'arc_enabled','desktop_audio','startup_chime','maiden_install')
+                                    'arc_enabled','desktop_audio','startup_chime','maiden_install','listen_address','http_port')
                                 options={key:app.config[key] for key in fields}
                                 options['reopen_data']=app.config['data']
                                 result=start('native',**options)
@@ -445,7 +445,7 @@ def serve_application(directory,app):
         do_PUT=dispatch
         do_PATCH=dispatch
         do_DELETE=dispatch
-    server=ThreadingHTTPServer(('127.0.0.1',0),Handler)
+    server=ThreadingHTTPServer((app.config.get('listen_address','127.0.0.1'),app.config.get('http_port',0)),Handler)
     server.daemon_threads=True
     if app.maiden:
         app.maiden.origin='http://127.0.0.1:'+str(server.server_port)

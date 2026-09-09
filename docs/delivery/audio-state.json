@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "current_card": "H03 browser audio reliability and latency",
+  "current_card": "H04 optional Docker distribution",
   "status": "in_progress",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
@@ -15,10 +15,10 @@
     "Stage2 reviewed, admitted and merged to main with post-merge native checks",
     "H01 reviewed desktop audio committed and merged9c67326; main native lifecycle passed",
     "H02 reviewed and merged7d56cf0; main browser/editor/PCM8 checks passed045101",
-    "H03 reviewed/admitted at e7136a9; merge and main-source smoke pending"
+    "H03 reviewed and merged996c67c; main-source browser/audio/lifecycle and cleanup passed"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "H03 focusedreview01a08487-d467-7911-b68f-2ae849c0b448 closed all3major2minor ate7136a9. Reviewbudgetcomplete. Commitadmissiondocs and fast-forward main7d56cf0 preservingstate.json andtwoMosaicactivefiles exactly, then main-source audio_browser_start/browser_latency/defaultshort+cleanup using own engine-reload-01. Afterwardsrecordproof and prepareH04Docker perH00. Alltest/review runners terminal. Corrected120sec/rate9454875 passes, p95142.2/149.1ms butothercorrectedrun158.2; delayedmonitoringonly. No defaultpromotion.",
+  "next_action": "H03 complete/merged996c67c, main artifact audio/latency-1788930271910 passed24silence/onsets+6races+cleanup. H04.md scoped beforeimplementation. DockerDesktop4.12/Engine20.10.17 Linuxamd64 nowrunning via existingWindowsCLI; startedinstalledDesktophidden, servicewasalreadyrunning. WSLshim initiallyunavailable. ResolveUbuntu20.04base digest and buildpackage inputs, inspectnative namespace requirements, implementfixedbind/port containerentrypoint reusingofficialbuilders and session/datasets/browser contracts. Preserveallotherwork and no broadDocker cleanup. H04reviewbudgetnotused. No Mac host, no platformclaims yet.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",
@@ -131,7 +131,7 @@
   },
   "desktop_queue": {
     "contract": "docs/delivery/DESKTOP.md",
-    "status": "H03_reviewed_merge_pending",
+    "status": "H04_in_progress",
     "order": [
       "Mosaic reliable audio/devices and clicks",
       "broader scripts including cheat codes 2",
