@@ -112,7 +112,12 @@ You can also replace the stopped container with the same mounts and mapping.
 The launcher records its dataset under `/data` and reopens it on restart. It
 refuses an unmarked nonempty directory, concurrent use of one data root, or a
 different script mapping. Use a separate data root for another script/session.
-Do not delete the ownership markers to bypass these checks. Session metadata
+The lease uses both an advisory file lock and an atomic directory sentinel so
+separate Docker Desktop bind mounts cannot acquire the same root concurrently.
+Graceful shutdown removes only the sentinel bearing that process's random owner
+token. An uncleanly terminated container may leave a conservative stale sentinel;
+confirm that no container still uses the data root before removing it for
+recovery. Do not delete ownership markers to bypass a live lease. Session metadata
 is available at `/data/.emu-container-current.json`; the usual authenticated
 HTTP automation contract is unchanged. `/stop` cleans up the native services
 and exits the container. Allow 40 seconds for Docker termination to finish cleanup.

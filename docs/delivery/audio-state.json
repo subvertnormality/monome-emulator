@@ -21,7 +21,7 @@
     "A04 refreshed combined WSL audio/Crow/arc/desktop candidate passed seven native/browser integration reports"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "User approved a separately pinned native linux/arm64 continuation after the amd64/Rosetta failure. The official Ubuntu20.04 arm64 manifest and a 492-package prerequisite inventory resolve. Add an explicit committed arm64 export profile without changing amd64, build the official runtime natively, then run all six Mac suites sequentially with host Chrome. Native Linux remains a separate untested lane.",
+  "next_action": "Native arm64 image built and gates1-4 passed. Gate5 retained failed because Docker Desktop VirtioFS did not coordinate flock across separate bind mounts and admitted two writers. Implement the recorded atomic, owner-tokened, conservative data-root sentinel with focused ineffective-flock and cleanup tests; rebuild a committed arm64 candidate and restart all six gates from gate1. Native Linux remains separate.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",
