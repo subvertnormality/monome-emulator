@@ -21,7 +21,7 @@ def main():
     lock = json.loads((out/'packages.lock.json').read_text())
     (out/'packages.txt').write_text('\n'.join(k+'='+v for k,v in sorted(lock['packages'].items()))+'\n')
     (out/'revision.txt').write_text(revision+'\n')
-    git('bundle', 'create', str(out/'emulator.bundle'), revision)
+    git('bundle', 'create', str(out/'emulator.bundle'), 'HEAD')
     heads = git('bundle', 'list-heads', str(out/'emulator.bundle')).decode()
     if not heads.startswith(revision+' '):
         raise RuntimeError('Bundle does not identify the selected commit')
