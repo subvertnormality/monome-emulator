@@ -33,7 +33,7 @@ async function stop(mode){
   if(mode==='api')await api('/stop',{});else d('stop','--time','40',owned);
   const exit=Number(d('wait',owned));assert.equal(exit,0,d('logs',owned));
   const dest=path.join(out,info.session_id);fs.mkdirSync(dest);
-  for(const file of ['cleanup.json','stopped.json','server.log','jack.log','config.json','session.json'])
+  for(const file of ['cleanup.json','stopped.json','server.log','jack.log','matron.log','crone.log','sclang.log','actions.jsonl','native-events.jsonl','frame.bgra','native-config.json'])
     d('cp',`${owned}:/opt/emulator/.runtime/sessions/${info.session_id}/${file}`,path.join(dest,file));
   const rows=JSON.parse(fs.readFileSync(path.join(dest,'cleanup.json'),'utf8'));assert.ok(rows.length>=4);
   for(const row of rows)assert.ok((row.service==='sclang'?[0,-15]:[0]).includes(row.returncode),JSON.stringify(row));

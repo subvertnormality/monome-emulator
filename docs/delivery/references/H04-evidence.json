@@ -1,0 +1,32 @@
+{
+  "reports": [
+    {
+      "sha256": "51cb31f9b66f9289f1b7d844e334c862c0147dc36e0f790a14c46650e80d5457",
+      "passed": true,
+      "path": "artifacts/docker/browser-1788932673182/report.json"
+    },
+    {
+      "sha256": "e302f3b7c0fa4e6716f3bd0a381e6c13382d2e933d93748997bc92835ff69010",
+      "passed": true,
+      "path": "artifacts/docker/failures-1788932687883/report.json"
+    },
+    {
+      "sha256": "70be6d2aec790ec39d084a308b0dac07372225f9b65742ca7461471add4483cf",
+      "passed": true,
+      "path": "artifacts/docker/restart-1788932750253/report.json"
+    },
+    {
+      "sha256": "96c267ae438b7aa79268b56cbc6f24f3083311079b1adc808e192f1753326a3a",
+      "passed": true,
+      "path": "artifacts/docker/audio-1788932173093/report.json"
+    },
+    {
+      "sha256": "2c32e4e866c21b24765f2c26cab71c897f9322c34e64b1ec38eb9e2c3fc8bdc6",
+      "passed": true,
+      "path": "artifacts/datasets/native-20260909-063706/report.json"
+    }
+  ],
+  "image_source": "5a4ceaec95763af8e44315a0257f05ed030dee7c",
+  "image": "sha256:7d530ae85f87625002713850fd1837fd7ce8e476d62b6445ed8c13e6ed003139",
+  "status": "final_audio_and_review_pending"
+}

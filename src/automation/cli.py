@@ -18,6 +18,7 @@ def main(argv=None):
     start.add_argument('--fixture'); start.add_argument('--fixture-profile',default='base-midi')
     start.add_argument('--listen-address',default='127.0.0.1',choices=['127.0.0.1','0.0.0.0'],help='Explicit container bind; normal sessions stay on loopback')
     start.add_argument('--http-port',type=int,default=0,help='Fixed HTTP port; default chooses a free port')
+    start.add_argument('--jack-period',type=int,choices=(1024,2048),default=1024,help='Native JACK buffer frames; larger values trade latency for scheduling headroom')
     start.add_argument('--midi-config',help='JSON with ordered virtual port names and optional capture_limit')
     start.add_argument('--random-seed',type=int,help='Opt-in repeatable native Lua seed, including script reseeding')
     start.add_argument('--experimental-install',help='Use an identified experimental installation without promoting it')
@@ -68,8 +69,8 @@ def main(argv=None):
                 if args.script or args.code_root: raise ContractError('fixture_inputs','Choose either a fixture or external script inputs')
                 import app_fixtures
                 options=app_fixtures.launch_options(args.fixture,args.fixture_profile)
-                result=session.start(args.backend,data=args.data,midi_config=midi_config,random_seed=args.random_seed,experimental_install=args.experimental_install,crow_enabled=not args.no_crow,audio_files=args.audio_file,audio_directory=args.audio_directory,input_timeout=args.input_timeout,arc_enabled=args.arc,desktop_audio=desktop_audio,startup_chime=not args.no_startup_chime,reopen_data=args.reopen_data,maiden_install=args.maiden_install,listen_address=args.listen_address,http_port=args.http_port,**options)
-            else: result=session.start(args.backend,args.script,args.code_root,args.data,midi_config=midi_config,random_seed=args.random_seed,experimental_install=args.experimental_install,crow_enabled=not args.no_crow,audio_files=args.audio_file,audio_directory=args.audio_directory,input_timeout=args.input_timeout,arc_enabled=args.arc,desktop_audio=desktop_audio,startup_chime=not args.no_startup_chime,reopen_data=args.reopen_data,maiden_install=args.maiden_install,listen_address=args.listen_address,http_port=args.http_port)
+                result=session.start(args.backend,data=args.data,midi_config=midi_config,random_seed=args.random_seed,experimental_install=args.experimental_install,crow_enabled=not args.no_crow,audio_files=args.audio_file,audio_directory=args.audio_directory,input_timeout=args.input_timeout,arc_enabled=args.arc,desktop_audio=desktop_audio,startup_chime=not args.no_startup_chime,reopen_data=args.reopen_data,maiden_install=args.maiden_install,listen_address=args.listen_address,http_port=args.http_port,jack_period=args.jack_period,**options)
+            else: result=session.start(args.backend,args.script,args.code_root,args.data,midi_config=midi_config,random_seed=args.random_seed,experimental_install=args.experimental_install,crow_enabled=not args.no_crow,audio_files=args.audio_file,audio_directory=args.audio_directory,input_timeout=args.input_timeout,arc_enabled=args.arc,desktop_audio=desktop_audio,startup_chime=not args.no_startup_chime,reopen_data=args.reopen_data,maiden_install=args.maiden_install,listen_address=args.listen_address,http_port=args.http_port,jack_period=args.jack_period)
         elif args.command=='snapshot': result=session.request(args.session_id,'/snapshot')
         elif args.command=='capabilities': result=session.request(args.session_id,'/capabilities')
         elif args.command=='stop': result=session.stop(args.session_id)

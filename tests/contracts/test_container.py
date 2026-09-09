@@ -68,7 +68,8 @@ class ContainerContracts(unittest.TestCase):
     def test_invalid_binding_rejected_before_session_creation(self):
         before=set(session.SESSIONS.iterdir())
         for options in [dict(http_port=True),dict(http_port=-1),dict(http_port=65536),
-                        dict(listen_address='example.com'),dict(http_port=8765,maiden_install='unused')]:
+                        dict(listen_address='example.com'),dict(http_port=8765,maiden_install='unused'),
+                        dict(jack_period=True),dict(jack_period=512),dict(jack_period=2048)]:
             with self.assertRaises(ContractError):session.start(**options)
         self.assertEqual(set(session.SESSIONS.iterdir()),before)
 

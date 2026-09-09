@@ -78,6 +78,7 @@ def main():
     parser.add_argument('--code-root', type=Path)
     parser.add_argument('--data-root', type=Path, default=Path('/data'))
     parser.add_argument('--port', type=int, default=8765)
+    parser.add_argument('--jack-period', type=int, choices=(1024,2048), default=2048)
     args = parser.parse_args()
     stopped = threading.Event()
     for sig in (signal.SIGTERM, signal.SIGINT):
@@ -88,7 +89,7 @@ def main():
         try:
             info = session.start(backend='native', script=args.script, code_root=args.code_root,
                 experimental_install=ROOT/'.runtime/container-audio-tools/installation.json',
-                crow_enabled=False, startup_chime=False, listen_address='0.0.0.0', http_port=args.port,
+                crow_enabled=False, startup_chime=False, listen_address='0.0.0.0', http_port=args.port, jack_period=args.jack_period,
                 **owner.options())
         except Exception as error:
             if getattr(error, 'session_id', None):

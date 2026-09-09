@@ -14,7 +14,7 @@ not build inputs.
 
 ```sh
 python3 scripts/container/prepare.py --output .runtime/docker-context
-docker build --progress plain -t monome-emulator:local .runtime/docker-context
+docker build --platform linux/amd64 --progress plain -t monome-emulator:local .runtime/docker-context
 ```
 
 If WSL Docker integration is unavailable, run the second command with the Windows
@@ -59,6 +59,11 @@ same alternative port on both sides and pass it to the launcher, for example
 The native runtime is non-root and does not require `--privileged`, host networking
 or device passthrough. The tested configuration requires `--shm-size 256m`;
 JACK failed with Docker's default 64 MiB and the working runtime used about 87 MB.
+The container selects a 2048-frame JACK period to allow more scheduling time;
+`--jack-period 1024` selects the original shorter period. The latter produced a
+native scheduling dropout in a longer Docker test. The WSL launcher still defaults
+to 1024. Both profiles report xruns explicitly; neither promises hard real-time
+performance. The larger period's measured audio results are recorded in H04.
 
 ## Editable scripts and persistent data
 

@@ -328,7 +328,7 @@ def serve_application(directory,app):
                                 from .session import start
                                 fields=('script','code_root','enabled_mods','midi_config','random_seed','clock_mode',
                                     'experimental_install','crow_enabled','audio_files','audio_directory','input_timeout',
-                                    'arc_enabled','desktop_audio','startup_chime','maiden_install','listen_address','http_port')
+                                    'arc_enabled','desktop_audio','startup_chime','maiden_install','listen_address','http_port','jack_period')
                                 options={key:app.config[key] for key in fields}
                                 options['reopen_data']=app.config['data']
                                 result=start('native',**options)

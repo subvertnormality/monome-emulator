@@ -184,7 +184,7 @@ class NativeBackend:
         if self.config.get('random_seed') is not None:self.env['NORNS_EMU_RANDOM_SEED']=str(self.config['random_seed'])
         write_json(self.directory/'native-config.json',dict(script=str(entry),mapped=str(self.mapped_entry),code_root=str(code),
             ports=self.ports,midi=self.midi_config,jack_server=self.env['JACK_DEFAULT_SERVER'],enabled_mods=mods,runtime=str(self.native),random_seed=self.config.get('random_seed'),clock_mode=self.clock_mode,crow_enabled=self.config.get('crow_enabled',True),
-            jack_profile=dict(driver='dummy',rate=48000,period=1024,realtime=False,clock_source='system')))
+            jack_profile=dict(driver='dummy',rate=48000,period=self.config.get('jack_period',1024),realtime=False,clock_source='system')))
     def launch(self,name,args,bridge=False):
         logfile=open(self.directory/(name+'.log'),'w'); self.logs.append(logfile)
         env=dict(self.env)
@@ -200,7 +200,7 @@ class NativeBackend:
             time.sleep(0.05)
         raise ContractError('service_timeout',name+' did not reach '+marker+'; inspect '+str(self.directory/(name+'.log')))
     def launch_services(self):
-        self.launch('jack',['jackd','--name',self.env['JACK_DEFAULT_SERVER'],'--no-realtime','-d','dummy','-r','48000','-p','1024'])
+        self.launch('jack',['jackd','--name',self.env['JACK_DEFAULT_SERVER'],'--no-realtime','-d','dummy','-r','48000','-p',str(self.config.get('jack_period',1024))])
         time.sleep(0.5); self.check_processes()
         self.launch('crone',[str(self.native/'build/crone/crone')])
         self.wait_log('crone','entering main loop',10)
