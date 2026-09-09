@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "updated": "2026-09-08",
+  "updated": "2026-09-09",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "Hotplug implementation and Mosaic stopped-panic integration are published: emulator codex/midi-hotplug ae203883; Mosaic codex/behaviour-validation b9d04ea. Work directly on authorised branches: automatic review rejected main merge/runtime activation, neither ran. No active native/build/review processes. Next audit manual requirements/domain gaps using artifacts/hotplug/next-coverage-audit.json (141 requirements,431 registered cases; statuses incomplete). Start CH-PATCH-SENTINEL/CH-PATCH-RECALL: inspect current manual, parameter routing and existing cases before adding user-input bounds/sentinel and load/play persistence tests. Continue controlled-time repeatability/admission and full emulator stages; no refactor, no routine routing questions.",
+  "next_action": "Current M5 admitted on combined runtime source ee6ddf57. See C16-current-admission.json. Continue full manual campaign and scoped hotplug evidence binding; release/platform and final unit/integration hardening remain mandatory. No native processes active.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -5276,5 +5276,52 @@
     "receipt": "/home/andy/projects/monome-emulator-behaviour-audio-crow/docs/delivery/completions/screen-worker-progress.json",
     "full_campaign_complete": false,
     "review": "01a082af-b7d1-70e2-b7fc-814dd8c5cc91"
+  },
+  "current_controlled_admission": {
+    "status": "passed",
+    "milestone": "M5",
+    "profile": "wsl",
+    "result": {
+      "milestone": "M5",
+      "passed": true,
+      "profile": "wsl",
+      "source_digest": "ee6ddf5788dac501310d9c97b85fb76e76936d24516afde7c5c0429d4468f892",
+      "candidate_sha256": "5efc2367528c21705416c163d0ef1341e16bc63df695d9c5bd920219de9d002b",
+      "controlled_probes": 8,
+      "application_comparisons": 14,
+      "default_promoted": false,
+      "full_emulator_release": false
+    },
+    "index": {
+      "path": "/home/andy/projects/monome-emulator-behaviour-audio-crow/artifacts/c16/current-M5-index-01.json",
+      "sha256": "3b369613e5f1eac6f148c01cf0e5bd33898934bfc28871b4e2cfcdd030950051"
+    },
+    "verification": {
+      "path": "/home/andy/projects/monome-emulator-behaviour-audio-crow/artifacts/c16/current-M5-verification-01.json",
+      "sha256": "35afdec764ca5557d83874c51fcfd7afd1809b23804b89c7c99c80dc9a21145a"
+    },
+    "generic_index": {
+      "path": "/home/andy/projects/monome-emulator-behaviour-audio-crow/artifacts/c16/current-generic-index-01.json",
+      "sha256": "9768e12fb5e1ef6d7d8fa19c30b9be157fa41035e0f8f6b036b8ab644d1e787a"
+    },
+    "external_index": {
+      "path": "/home/andy/projects/monome-emulator-behaviour-audio-crow/artifacts/c16/current-external-index-03.json",
+      "sha256": "83c09b3c58902bb78894f7c4ec8bcc807f59c6f31fe22dc3d7b363eea29b673c"
+    },
+    "review": {
+      "path": "/home/andy/projects/monome-emulator-behaviour-audio-crow/docs/delivery/reviews/P5-current-admission-receipt.json",
+      "sha256": "a0734948fd41dbe689ee314036960b8be23bd202b317c60a92f2fc79fa4c533d"
+    },
+    "mosaic_published_revision": "45c1b6d5854c02a0c30c216e978f8fff0a2331e4",
+    "controlled_probe_families": 8,
+    "generic_checks": 10,
+    "application_comparisons": 14,
+    "default_promoted": false,
+    "full_goal_complete": false,
+    "remaining": [
+      "Application hotplug type12 evidence binding and rejection tests before broader hotplug admission",
+      "Full manual behaviour campaign and emulator release/platform gates",
+      "Mandatory final Mosaic unit/integration hardening before any refactor"
+    ]
   }
 }
