@@ -32,6 +32,7 @@ class ArcContract(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             app=Application.__new__(Application);app.config=dict(session_id='test',backend='native')
             app.directory=Path(temp);app.backend=Backend();app.sequence=0;app.action_ids=set();app.clients={};app.client_lock=threading.RLock();app.input_owners={};app.audio_monitor=None
+            app.audio_lock=threading.RLock()
             def send(action,owner):return app.action(self.payload(action,app.sequence+1,owner))
             send(dict(type='arc_key',n=1,state=1),'a');send(dict(type='arc_key',n=2,state=1),'b')
             send(dict(type='arc_key',n=3,state=1),'a')

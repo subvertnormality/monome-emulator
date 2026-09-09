@@ -1,20 +1,24 @@
 'use strict';
-const audioState={context:null,stream:null,streamId:null,startPromise:null,gain:null,analyser:null,active:false,generation:0,after:-1,blocks:0,underruns:0};
+const audioState={context:null,stream:null,streamId:null,startPromise:null,stopPromise:null,gain:null,analyser:null,active:false,generation:0,after:-1,blocks:0,underruns:0};
 const audioButton=document.querySelector('#listen'), audioStatus=document.querySelector('#audio-status');
 async function stopListening(message='Audio off',error=false){
+  if(audioState.stopPromise)return audioState.stopPromise;
+  audioButton.disabled=true;
   audioState.active=false;audioState.generation++;
   const generation=audioState.generation,streamId=audioState.streamId,startPromise=audioState.startPromise;
   audioState.streamId=null;audioState.startPromise=null;
   const context=audioState.context;audioState.context=null;
   audioButton.textContent='Listen';audioButton.setAttribute('aria-pressed','false');
   audioStatus.textContent=message;audioStatus.dataset.error=String(error);
-  try{
-    if(context&&context.state!=='closed')await context.close();
+  audioState.stopPromise=(async()=>{
+    const failures=[];
+    try{if(context&&context.state!=='closed')await context.close();}catch(e){failures.push(e.message);}
     // A canceled startup must finish before its matching stop is sent.
     if(startPromise)await startPromise.catch(()=>{});
-    if(streamId)await request('/audio/stop',{client_id:clientId,stream_id:streamId});
-  }
-  catch(e){if(generation===audioState.generation){audioStatus.textContent=message+' · '+e.message;audioStatus.dataset.error='true';}}
+    try{if(streamId)await request('/audio/stop',{client_id:clientId,stream_id:streamId});}catch(e){failures.push(e.message);}
+    if(failures.length&&generation===audioState.generation){audioStatus.textContent=message+' · '+failures.join(' · ');audioStatus.dataset.error='true';}
+  })().finally(()=>{audioState.stopPromise=null;if(generation===audioState.generation)audioButton.disabled=false;});
+  return audioState.stopPromise;
 }
 async function pumpAudio(generation){
   if(!audioState.active||generation!==audioState.generation)return;
@@ -38,6 +42,7 @@ async function pumpAudio(generation){
   }catch(error){if(generation===audioState.generation)await stopListening(error.message,true);}
 }
 audioButton.addEventListener('click',async()=>{
+  if(audioState.stopPromise)return;
   audioButton.disabled=true;
   if(audioState.active){try{await stopListening();}finally{audioButton.disabled=false;}return;}
   const generation=++audioState.generation;
@@ -65,7 +70,7 @@ audioButton.addEventListener('click',async()=>{
     audioButton.textContent='Stop listening';audioButton.setAttribute('aria-pressed','true');
     audioStatus.dataset.error='false';pumpAudio(audioState.generation);
   }catch(error){if(generation===audioState.generation)await stopListening(error.message,true);}
-  finally{audioButton.disabled=false;}
+  finally{if(generation===audioState.generation&&!audioState.stopPromise)audioButton.disabled=false;}
 });
 document.querySelector('#audio-volume').addEventListener('input',event=>{
   if(audioState.context)audioState.gain.gain.setTargetAtTime(Number(event.target.value),audioState.context.currentTime,.02);

@@ -268,6 +268,10 @@ def serve_application(directory,app):
         def dispatch(self):
             try:
                 self.connection.settimeout(2)
+                if self.headers.get('Transfer-Encoding'):
+                    raise ContractError('body_size','Transfer encoding is not supported')
+                if self.command=='GET' and self.headers.get('Content-Length','0')!='0':
+                    raise ContractError('body_size','GET requests cannot contain a body')
                 if self.asset(): return
                 from urllib.parse import urlsplit
                 from http.cookies import SimpleCookie
@@ -286,6 +290,8 @@ def serve_application(directory,app):
                 if editor_path:
                     if not app.maiden:raise ContractError('unsupported','This session has no Maiden bundle')
                     app.maiden.check()
+                    if path in ('/maiden/repl-endpoints.json','/maiden/units.json') and self.command!='GET':
+                        raise ContractError('method','This editor endpoint requires GET')
                     if path=='/maiden/repl-endpoints.json':
                         prefix='ws://127.0.0.1:'+str(app.maiden.port)
                         self.respond(200,{name:prefix+'/'+name+'?token='+app.config['token'] for name in ('norns','supercollider')});return

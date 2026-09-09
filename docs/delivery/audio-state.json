@@ -17,7 +17,7 @@
     "H02 reviewed and merged7d56cf0; main browser/editor/PCM8 checks passed045101"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "H03 implementation validated, all runners terminal. Endurance latency7707434 passes120sec/rate with80ms/10ms HTTP1.1; p95 152.4/163.3ms above monitoring target, no underruns/network failures. Native legacy, slow-read, Maiden transport7/browser8+cleanup, contracts22 + audio3 + HTTP1 + ownership1 + worklet6 pass. H03.md and references/H03-evidence.json record exact results. Commit candidate, run bounded Codex Paranoia H03 branch review against7d56cf0 with H03-spec.json; resolve findings, then commit admission/merge preserving main dirty state beforeH04. No default promotion.",
+  "next_action": "H03 allreviewremediesvalidated. Final tightened120sec/rate9454875 passes24silence/onsets+6races, no network failures andnativecleanup; p95142.2/149.1ms, earliercorrected145.1/158.2 so delayedmonitoringvariablelatency. Fournegativereportsremainfalse cleanupverified; Maidentransport8, topunits24, HTTPframing/worklet pass. Allrunners terminal. Commitremedies thenfocusedCodexfollowup usingH03-question.txt/H03-triage.md/H03-fixes-evidence.json (onecallremaining). Afterclosureadmit/commit/merge beforeH04, preservemainstate, no defaultpromotion.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",

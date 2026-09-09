@@ -1,0 +1,42 @@
+{
+  "started_at": "2026-09-09T04:35:16.503333+00:00",
+  "packet_sha256": "997964034bbc01e0648f1957426e19a6660352981844c9f916578a1500c635e5",
+  "files": [
+    "docs/delivery/completions/H03.md",
+    "docs/delivery/RUNBOOK.md",
+    "docs/delivery/UPSTREAM.md"
+  ],
+  "tool": "critique_branch",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor",
+    "base_ref": "7d56cf0",
+    "head_ref": "HEAD",
+    "include_uncommitted": false,
+    "isolate": false,
+    "converge": false,
+    "class_closure": false,
+    "round": 1,
+    "engine": "codex",
+    "effort": "medium",
+    "web_search": false,
+    "stakes": "Trusted single-user local music development and testing utility. Audio and editor support explicitly authorized. Consequences are interrupted playback, misleading tests and local session lifecycle mistakes; no financial certification, hostile multi-tenancy or physical hardware requirement.",
+    "project_summary": "Trusted single-user official norns/grid emulator, Ubuntu20.04 WSL2 with Windows browser automation. Audio/device support and optional official Maiden are reviewed and merged through7d56cf0. Mosaic remains external and optional. H03 improves the existing browser PCM route; Docker remains queued.",
+    "diff_intent": "Review H03 from7d56cf0: separate monitor lifetime/read locking from slow native actions; opt-in listening interval identities with legacy API compatibility; browser stale asynchronous completion guards; measured prefill/poll tuning; HTTP persistent connections and TCP_NODELAY to reduce polling connection churn. Generic real-engine tests cover slow callbacks, actual renderer onset/continuity, stale operations/reconnect, cleanup and existing transport regressions. Failed tuning experiments remain evidence, not silently waived.",
+    "focus": "Find actionable in-scope concurrency, lifecycle, protocol-framing and false-green issues. Inspect H03.md and actual referenced reports. Check audio lock order and shutdown/disconnect, old read/start/stop behavior and browser startup cancellation, bounded queues and explicit errors, successful response lengths versus rejected unread request bodies with keepalive, honest latency boundaries/uncertainty and suitability. Do not infer physical speakers, all engines, arbitrary-duration reliability or platform support from browser tests. No financial/enterprise scope, hardware prerequisites or broad refactoring. Review evidence and implementation, not only documentation."
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "## What works\n\n- `src/automation/server.py:109` uses `with self.audio_lock:` independently of native actions, while cleanup acquires the same lock. The retained slow-read reports show 1.105 seconds before versus 4.066 milliseconds afterward.\n- `ui/audio.js:38` guards failures with `if(generation===audioState.generation)`. This prevents a delayed old read error from stopping current playback.\n- `docs/delivery/completions/H03.md:112` states \u201cdelayed monitoring above the 150 ms target.\u201d The saved measurements support that limitation, failed tuning reports remain failed, and all five admission-report hashes match their manifest.\n\n## What doesn't work\n\n- [MAJOR] **An existing ownership test now fails before checking releases.** `src/automation/server.py:105` unconditionally enters `with self.audio_lock:`, reached through `release_client()` at line 142. But `tests/test_arc_contract.py:33\u201334` constructs `Application.__new__(Application)` without initializing `audio_lock`, then calls `app.release_client('a')` at line 39. That raises `AttributeError` before either owned key is released. Initialize the lock in this fixture and rerun the affected test. This is established by inspection; I did not execute tests.\n\n- [MAJOR] **The latency oracle accepts an onset preceding its stimulus.** `tests/audio_browser_latency.cjs:31` uses `await delay(450)` without asserting rendered silence; `tests/audio_render_audit.js:16` reports the first sample satisfying `Math.abs(value)>.01`, including tone already playing before the click. Lines 45\u201360 subtract the later stimulus timestamp without rejecting negative measurements and classify them as interactive. A broken mute action therefore produces false-green latency and silence acceptance, contradicting H03\u2019s \u201cReal signal and silence at the browser renderer\u201d requirement. Assert a rendered silence window and require each onset to follow its corresponding stimulus.\n\n- [MAJOR] **Browser launch failure leaks the already-started native session.** `tests/audio_browser_latency.cjs:10` executes `await chromium.launch(...)` before the `try` at line 12; the session\u2019s `/stop` request exists only in its `finally` at line 104. An unavailable browser executable bypasses cleanup and report writing, despite `tests/audio_browser_start.py:1` declaring \u201cbrowser runner owns its stop.\u201d Also, `await page.close();await browser.close()` at line 102 can prevent the subsequent native stop if either rejects. Put launch inside the ownership scope and ensure browser-close failures cannot skip native cleanup or report persistence.\n\n- [MINOR] **Automatic stopping leaves reconnect exposed to the unfinished stop.** `ui/audio.js:5\u20138` immediately clears active/context state, but line 15 sends `/audio/stop` asynchronously. The visibility and worklet-error handlers call `stopListening()` without disabling Listen or recording a stop promise; startup cancellation also re-enables the button at line 68 before that stop necessarily completes. A new Listen request arriving first is rejected by `src/automation/server.py:120` with `audio_generation`, so reconnect requires another attempt. Serialize new starts behind pending stops; the current click-stop-click test does not exercise this ordering.\n\n## Risks\n\n- [MINOR] **Successful early responses still leave request bodies unread on reusable connections.** `src/automation/server.py:292` returns `self.respond(200,dict(units={}));return` before reading the body at line 297, without restricting the method. An authenticated `POST /maiden/units.json` containing `{}` succeeds, but a subsequent request on that socket encounters the leftover bytes as part of its request line. Reject unsupported methods through the closing error path, and handle declared bodies on early GET responses too. `tests/contracts/test_http_reuse.py:20\u201328` covers rejected bodies but misses this successful-response case.\n\n## Gaps\n\nNothing notable.\n\n## Improvements\n\nNothing notable.\n\n---\n_paranoia-local \u00b7 engine=codex \u00b7 session_ref=`01a08472-ee92-7113-ab09-9a5481e03330` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "status": "returned",
+  "finished_at": "2026-09-09T04:38:16.641746+00:00"
+}

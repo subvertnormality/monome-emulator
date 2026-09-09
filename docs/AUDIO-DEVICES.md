@@ -165,10 +165,12 @@ reconnection. Stopping listening does not stop the script or desktop audio.
 The current worktree candidate uses an80ms starting buffer and10ms polling with
 reused HTTP connections. Windows Chromium tests at44.1/48kHz passed two minutes
 of every-sample tone continuity per rate, including a blocking Lua callback and
-reconnect checks. Measured p95 browser-click to rendered-tone notification was
-152/163ms respectively. These conservative bounds include notification scheduling;
-they exceed the150ms monitoring target and are unsuitable for the30ms interactive
-playing target. They do not measure physical speaker latency. A40ms buffer was
+reconnect checks. The corrected oracle verifies rendered silence before every
+onset. Its final p95 browser-click to rendered-tone notification was 142/149 ms
+respectively; a separate corrected run reached 158 ms. These conservative bounds
+include notification scheduling and can exceed the 150 ms monitoring target.
+This is unsuitable for the 30 ms interactive playing target and does not measure
+physical speaker latency. A 40 ms buffer was
 rejected after a real underrun despite better short-run latency.
 
 These results support delayed browser monitoring for checking scripts, with the

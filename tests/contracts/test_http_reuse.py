@@ -26,6 +26,11 @@ class HTTPReuse(unittest.TestCase):
                 self.assertIsNone(connection.sock)
                 connection.request('GET','/health',headers=auth)
                 response=connection.getresponse();self.assertEqual(response.status,200);response.read()
+            for method,endpoint,headers in [('GET','/health',auth),('GET','/',auth),
+                                            ('POST','/client/heartbeat',dict(auth,**{'Transfer-Encoding':'chunked'}))]:
+                connection.request(method,endpoint,'{}',headers)
+                response=connection.getresponse();self.assertEqual(response.status,400)
+                self.assertTrue(response.will_close);response.read();self.assertIsNone(connection.sock)
         finally:connection.close();session.stop(info['session_id'])
 
 if __name__=='__main__':unittest.main()

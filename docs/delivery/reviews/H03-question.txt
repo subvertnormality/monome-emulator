@@ -1,0 +1,27 @@
+Assess closure of the three major and two minor findings from Codex session
+01a08472-ee92-7113-ab09-9a5481e03330, which reviewed candidate0abf891 against
+base7d56cf0. Use the current committed fixes and H03-triage.md. This is the one
+focused follow-up allowed by RUNBOOK; do not start another broad feature audit.
+
+Check the arc ownership fixture initializes the new lock; actual rendered silence
+and positive finite onset delays guard the latency oracle; browser module/launch
+and close failures cannot skip native stop/reporting; pending automatic stops and
+canceled starts serialize reconnect; and successful early HTTP responses cannot
+leave unread bodies on persistent connections.
+
+Inspect docs/delivery/references/H03-fixes-evidence.json and verify the referenced report hashes.
+Expected-negative browser reports must remain passed:false with independently
+verified native cleanup. They demonstrate rejection, not successful playback.
+The normal browser reports must include both rates, actual silence/onsets,
+continuous signal, stale operations, automatic-stop recovery and pending-start
+cancellation. The pending-start probe invokes the same stop function used by the
+visibility handler; it does not claim a physical visibility event. The automatic
+stop test causes a real worklet underrun by withholding PCM and explicitly
+separates it from the uninterrupted continuity measurement.
+
+Report any remaining substantive issue in these fixes or their evidence. Retain
+the honest boundaries: delayed browser monitoring, measured notification upper
+bounds rather than physical speaker timing, unchanged150ms/30ms targets, failed
+tuning experiments retained, original host dropout unresolved, no default runtime
+promotion, no new engine/platform or arbitrary-duration claim. Do not treat a
+source inspection as having rerun the tests.

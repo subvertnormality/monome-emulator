@@ -27,6 +27,10 @@ def main():
             assert http(endpoint)[0]==401,endpoint
         assert http('/maiden/',dict(auth,Origin='http://localhost:1'))[0]==400
         report['checks'].append('http-token-and-origin-required')
+        for endpoint in ('/maiden/units.json','/maiden/repl-endpoints.json'):
+            assert http(endpoint,auth,body=b'{}')[0]==400,endpoint
+            assert http(endpoint,auth)[0]==200,endpoint
+        report['checks'].append('early-editor-endpoints-reject-unread-post-body')
         status,data=http('/api/v1/unit/matron?do=restart',auth)
         assert status==400 and json.loads(data)['code']=='unsupported'
         report['checks'].append('host-service-restart-blocked')

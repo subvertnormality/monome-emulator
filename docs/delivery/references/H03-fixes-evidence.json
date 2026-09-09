@@ -1,0 +1,55 @@
+{
+  "status": "review-remedies-validated",
+  "reports": [
+    {
+      "path": "artifacts/audio/latency-1788929454875/report.json",
+      "sha256": "0d97c58787937c23550468bd28630095e0ff148158a8ddbd940643b28f3a474d",
+      "passed": true,
+      "kind": "positive"
+    },
+    {
+      "path": "artifacts/audio/latency-1788929100884/report.json",
+      "sha256": "6e5c933f7948a589930e9f38ee56a6de4159f97a6bcde498c0d661873962eb34",
+      "passed": true,
+      "kind": "positive"
+    },
+    {
+      "path": "artifacts/maiden/transport-20260909-054938/report.json",
+      "sha256": "db744cd08da06d651daba252f5f3ea421c27449b7c7928f9a0737affb30c357f",
+      "passed": true,
+      "kind": "positive"
+    },
+    {
+      "path": "artifacts/audio/latency-1788929246718/report.json",
+      "sha256": "030e30d93b5e4785cb3c9227eb1d115ac271ebe712b7f9203fe81283ad6a37e6",
+      "passed": false,
+      "kind": "expected-rejection",
+      "fault": "browser-launch",
+      "native_cleanup_verified": true
+    },
+    {
+      "path": "artifacts/audio/latency-1788929263930/report.json",
+      "sha256": "f8b0a6c4950172581af70e02e2135f0e036bf04f0b45d5cb3c1836f68e8bafe8",
+      "passed": false,
+      "kind": "expected-rejection",
+      "fault": "mute",
+      "native_cleanup_verified": true
+    },
+    {
+      "path": "artifacts/audio/latency-1788929282617/report.json",
+      "sha256": "daac00dca2a6137c65b01b64696ec34c558eb13e5878b16fdd6d4104bcc83954",
+      "passed": false,
+      "kind": "expected-rejection",
+      "fault": "early-onset",
+      "native_cleanup_verified": true
+    },
+    {
+      "path": "artifacts/audio/latency-1788929301660/report.json",
+      "sha256": "e8633b4bd19a508a5c0b8cf477517a91822faf814a3d3da6d9a12953b4f1b8ee",
+      "passed": false,
+      "kind": "expected-rejection",
+      "fault": "browser-close",
+      "native_cleanup_verified": true
+    }
+  ]
+}
