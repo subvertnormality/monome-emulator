@@ -1,7 +1,8 @@
 FROM ubuntu@sha256:722ea796ac2d57eeb3627c58a582fc1acc58be51faf815e1bce1682ae5c092f7
 ENV DEBIAN_FRONTEND=noninteractive
+ARG TARGETPLATFORM
 COPY packages.txt packages.lock.json verify_packages.py /opt/build-inputs/
-RUN apt-get update && xargs -r apt-get install -y --no-install-recommends < /opt/build-inputs/packages.txt && python3 /opt/build-inputs/verify_packages.py /opt/build-inputs/packages.lock.json && rm -rf /var/lib/apt/lists/*
+RUN test "$TARGETPLATFORM" = linux/arm64 && test "$(dpkg --print-architecture)" = arm64 && apt-get update && xargs -r apt-get install -y --no-install-recommends < /opt/build-inputs/packages.txt && python3 /opt/build-inputs/verify_packages.py /opt/build-inputs/packages.lock.json --target-platform "$TARGETPLATFORM" && rm -rf /var/lib/apt/lists/*
 COPY emulator.bundle revision.txt /opt/build-inputs/
 RUN git clone /opt/build-inputs/emulator.bundle /opt/emulator && cd /opt/emulator && git checkout --detach "$(cat /opt/build-inputs/revision.txt)" && test "$(git rev-parse HEAD)" = "$(cat /opt/build-inputs/revision.txt)"
 WORKDIR /opt/emulator

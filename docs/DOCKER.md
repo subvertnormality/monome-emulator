@@ -40,7 +40,10 @@ docker build --platform linux/arm64 --progress plain -t monome-emulator:arm64 .r
 This profile uses the official Ubuntu20.04 arm64 manifest
 `sha256:722ea796ac2d57eeb3627c58a582fc1acc58be51faf815e1bce1682ae5c092f7`
 and its own exact package inventory. The amd64 Dockerfile, package lock, image
-and evidence remain unchanged. The exporter must reject unknown platforms, and
+and retained evidence remain separate. Both Dockerfiles require BuildKit's
+`TARGETPLATFORM` and the runtime architecture to match the selected profile.
+Use BuildKit (`DOCKER_BUILDKIT=1` with older Docker installations); a missing or
+mismatched target fails before package installation. The exporter rejects unknown platforms, and
 the image build must fail if its architecture or installed inventory differs
 from the selected lock.
 

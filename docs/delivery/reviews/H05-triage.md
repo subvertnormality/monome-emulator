@@ -30,3 +30,27 @@ The user confirmed the Mac artifacts remain on the other machine and asked
 whether they are necessary. Clarified that seven JSON reports suffice for initial
 independent verification; full logs/audio are only needed if inconsistencies
 arise. Windows/code review proceeds without pretending Mac evidence was inspected.
+
+Review01a08641-8f92-7152-9ac6-1bd3809feb98 returned three majors. Accepted:
+(1) requested build target architecture is not enforced; require BuildKit's
+TARGETPLATFORM plus runtime dpkg architecture to match the selected lock, with
+actual mismatched-build rejection and matching-profile acceptance.
+(2) JACK diagnostic timeout is not startup evidence; separate detached container
+startup, require activated JACK client connections with advancing frame time,
+observe bounded continued operation, and explicitly stop/retain owned containers.
+Regression faults must reject Docker startup timeouts and absent JACK clients.
+(3) Mac independent evidence verification remains pending. It may be completed
+where the reports reside on the Mac; no full audio/log transfer is required for
+initial JSON report verification. No missing file is treated as verified here.
+One focused follow-up remains after fixes/evidence; no second full branch pass.
+
+Architecture baseline reproduced on Windows: context11 exported amd64 source5366789
+and `docker build --platform linux/arm64` succeeded, producing image
+adf34715d2eec6af14c0a9f1df8fd7bb3f93c15ab78ec2182cf29be24729d75c labelled arm64.
+Retained log h05-wrong-platform-baseline.log; never use this diagnostic image as
+an accepted runtime. Both Dockerfiles now enforce TARGETPLATFORM/runtime dpkg
+architecture before apt, and the inventory verifier compares against lock.platform.
+Three focused architecture tests pass. JACK timeout/no-client rejection tests
+pass. First real diagnostic9469263 failed on mixed JACK stdout/JSON, remains false;
+explicit prefixed JSON result parsing fixes the reporting boundary. Native rerun
+is live; no passing claim yet. Build mismatch/correct profile tests follow.
