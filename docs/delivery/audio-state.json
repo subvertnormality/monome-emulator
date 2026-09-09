@@ -14,10 +14,11 @@
     "P03 native/browser virtual arc and optional app integration",
     "Stage2 reviewed, admitted and merged to main with post-merge native checks",
     "H01 reviewed desktop audio committed and merged9c67326; main native lifecycle passed",
-    "H02 reviewed and merged7d56cf0; main browser/editor/PCM8 checks passed045101"
+    "H02 reviewed and merged7d56cf0; main browser/editor/PCM8 checks passed045101",
+    "H03 reviewed/admitted at e7136a9; merge and main-source smoke pending"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "H03 allreviewremediesvalidated. Final tightened120sec/rate9454875 passes24silence/onsets+6races, no network failures andnativecleanup; p95142.2/149.1ms, earliercorrected145.1/158.2 so delayedmonitoringvariablelatency. Fournegativereportsremainfalse cleanupverified; Maidentransport8, topunits24, HTTPframing/worklet pass. Allrunners terminal. Commitremedies thenfocusedCodexfollowup usingH03-question.txt/H03-triage.md/H03-fixes-evidence.json (onecallremaining). Afterclosureadmit/commit/merge beforeH04, preservemainstate, no defaultpromotion.",
+  "next_action": "H03 focusedreview01a08487-d467-7911-b68f-2ae849c0b448 closed all3major2minor ate7136a9. Reviewbudgetcomplete. Commitadmissiondocs and fast-forward main7d56cf0 preservingstate.json andtwoMosaicactivefiles exactly, then main-source audio_browser_start/browser_latency/defaultshort+cleanup using own engine-reload-01. Afterwardsrecordproof and prepareH04Docker perH00. Alltest/review runners terminal. Corrected120sec/rate9454875 passes, p95142.2/149.1ms butothercorrectedrun158.2; delayedmonitoringonly. No defaultpromotion.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",
@@ -130,13 +131,13 @@
   },
   "desktop_queue": {
     "contract": "docs/delivery/DESKTOP.md",
-    "status": "H00_eligible",
+    "status": "H03_reviewed_merge_pending",
     "order": [
       "Mosaic reliable audio/devices and clicks",
       "broader scripts including cheat codes 2",
       "H00-H05 desktop audio Maiden browser extensions and optional Docker"
     ],
-    "reference_commits": "pending H00"
+    "reference_commits": "docs/delivery/references/H00.json"
   },
   "merge_gate": "User instruction: finish and verify tranche 1 (Mosaic reliable audio/devices including clicks), commit and merge it before starting tranche 2 broader scripts or tranche 3 desktop/Maiden/Docker. Merge authorization provided; inspect main concurrent changes and preserve them. Do not treat current scoped probes as full tranche completion.",
   "mosaic_audio": {

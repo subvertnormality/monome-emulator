@@ -53,7 +53,7 @@ script source. Browser monitoring may run independently, with its own ownership
 and buffering rules. Generic tests live in `tests/audio_capture_api.py` and use
 actual softcut recording through native keys; they do not import Mosaic.
 
-## Browser monitor intervals (H03 candidate)
+## Browser monitor intervals (reviewed opt-in H03)
 
 The existing authenticated POST routes accept `client_id`: `/audio/start`,
 `/audio/read` (also `after`, initially -1), and `/audio/stop`. The browser now

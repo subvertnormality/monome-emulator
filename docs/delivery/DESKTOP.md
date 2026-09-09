@@ -11,7 +11,8 @@ acceptance are recorded in [H00.md](completions/H00.md), with immutable file
 identities in [references/H00.json](references/H00.json). That contract refines
 the cards below; the bounded H00 plan review and focused follow-up are complete
 with all three findings closed at contract level. H01 is reviewed and merged;
-H02 is now reviewed and admitted, with its merge preceding H03 browser-audio work.
+H02 is reviewed and merged. H03 browser-audio work is now reviewed and admitted;
+its merge and main-source smoke precede H04 optional Docker implementation.
 
 ## Ownership and existing evidence
 

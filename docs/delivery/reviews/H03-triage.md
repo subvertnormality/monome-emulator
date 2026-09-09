@@ -38,4 +38,8 @@ The final 120-second-per-rate run with the corrected oracle passed in
 onsets, six reconnect/cancellation checks, no network failures, and independent
 native cleanup. P95 notification upper bounds were 142.2/149.1 ms; the earlier
 corrected short run reached 158.2 ms. No interactive-playing claim follows.
-The focused review and admission/merge have not yet happened.
+Focused review `01a08487-d467-7911-b68f-2ae849c0b448` closes all five findings
+at `e7136a9`, with no remaining substantive issue. It independently recomputed
+all seven hashes and verified the saved negative cleanup records and PID absence;
+it did not rerun tests. The planned review budget is complete. H03 is admitted
+for its tested opt-in subset; commit/merge and main-source smoke follow.
