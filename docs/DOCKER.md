@@ -98,6 +98,10 @@ Do not delete the ownership markers to bypass these checks. Session metadata
 is available at `/data/.emu-container-current.json`; the usual authenticated
 HTTP automation contract is unchanged. `/stop` cleans up the native services
 and exits the container. Allow 40 seconds for Docker termination to finish cleanup.
+Stopping during initialization cancels startup and releases the data root. Before
+Lua init completes, matron is terminated with an explicitly recorded SIGTERM;
+script cleanup callbacks are not guaranteed in that phase. Unexpected native
+crashes remain errors. Once ready, the normal native shutdown path is retained.
 
 ## Tested boundaries and limitations
 

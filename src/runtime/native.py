@@ -78,6 +78,7 @@ class NativeBackend:
             self.await_ready()
             self.launch_desktop_audio()
         except Exception as startup_error:
+            self.startup_interrupted=getattr(startup_error,'code',None)=='session_terminated'
             try:
                 self.close()
             except Exception as cleanup_error:
@@ -556,17 +557,25 @@ class NativeBackend:
             time.sleep(0.1)
         # EOF is the bridge's native EVENT_QUIT route. Keep draining frames while
         # matron exits so its worker cannot block on the outbound socket.
-        try: self.controller.shutdown(socket.SHUT_WR)
-        except OSError: pass
+        abort_matron=getattr(self,'startup_interrupted',False) and not self.ready
+        # An interrupted init has not established a safe application cleanup
+        # boundary. Do not queue EVENT_QUIT through partially initialized Lua.
+        # Terminate that owned process directly and report the requested signal.
+        if not abort_matron:
+            try: self.controller.shutdown(socket.SHUT_WR)
+            except OSError: pass
         for name,process in reversed(self.processes):
             # Retry only unfinished groups; never signal a previously reaped PID.
             if any(row['service']==name for row in cleanup):continue
             started=time.monotonic()
-            if name in ('matron','crone'):
+            requested_termination=None
+            if name in ('matron','crone') and not (name=='matron' and abort_matron):
                 try: process.wait(timeout=1)
                 except subprocess.TimeoutExpired: pass
             if process.poll() is None:
-                try: os.killpg(process.pid,signal.SIGTERM)
+                try:
+                    os.killpg(process.pid,signal.SIGTERM)
+                    if name=='matron' and abort_matron:requested_termination='startup_sigterm'
                 except ProcessLookupError: pass
             try: process.wait(timeout=3)
             except subprocess.TimeoutExpired:
@@ -575,7 +584,9 @@ class NativeBackend:
             try: os.killpg(process.pid,signal.SIGKILL)
             except ProcessLookupError: pass
             if process.stdin: process.stdin.close()
-            cleanup.append(dict(service=name,pid=process.pid,returncode=process.returncode,seconds=time.monotonic()-started))
+            row=dict(service=name,pid=process.pid,returncode=process.returncode,seconds=time.monotonic()-started)
+            if requested_termination:row['requested_termination']=requested_termination
+            cleanup.append(row)
         self.closed=True
         write_json(self.directory/'cleanup.json',cleanup)
         self.controller.close(); self.child.close()
@@ -586,6 +597,6 @@ class NativeBackend:
         for fd in self.crow_fds:os.close(fd)
         self.crow_fds=[]
         if hasattr(self,'alias') and self.alias.is_symlink(): self.alias.unlink()
-        unexpected=[c for c in cleanup if c['returncode'] not in ((0,-signal.SIGTERM) if c['service'] in ('sclang','crow') else (0,))]
+        unexpected=[c for c in cleanup if c['returncode'] not in ((0,-signal.SIGTERM) if c['service'] in ('sclang','crow') or (c['service']=='matron' and c.get('requested_termination')=='startup_sigterm') else (0,))]
         if unexpected: raise ContractError('cleanup_failed','Unexpected native shutdown exits: '+json.dumps(unexpected))
         if capture_error:raise ContractError('cleanup_failed','Crow capture cleanup failed: '+capture_error)

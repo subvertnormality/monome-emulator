@@ -9,7 +9,7 @@ function logs(){const r=spawnSync(docker,['logs',name],{encoding:'utf8',timeout:
 function cleanup(id,label){
   const file=path.join(out,label+'-cleanup.json');d('cp',`${name}:/opt/emulator/.runtime/sessions/${id}/cleanup.json`,file);
   const rows=JSON.parse(fs.readFileSync(file,'utf8'));assert.equal(rows.length,4);
-  for(const row of rows)assert.ok((row.service==='sclang'?[0,-15]:[0]).includes(row.returncode),JSON.stringify(row));
+  for(const row of rows)assert.ok((row.service==='sclang'||(label==='cancel'&&row.service==='matron'&&row.requested_termination==='startup_sigterm')?[0,-15]:[0]).includes(row.returncode),JSON.stringify(row));
   return rows;
 }
 (async()=>{

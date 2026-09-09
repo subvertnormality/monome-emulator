@@ -119,7 +119,7 @@ def start(backend='contract-fixture',script=None,code_root=None,data=None,enable
                 raise ContractError('cleanup_timeout','Startup failed and owned server cleanup timed out; '+str(directory)) from failure
         if getattr(failure,'code',None)=='startup_cancelled' and (directory/'cleanup.json').exists():
             rows=read_json(directory/'cleanup.json')
-            unexpected=[row for row in rows if row['returncode'] not in ((0,-15) if row['service'] in ('sclang','crow') else (0,))]
+            unexpected=[row for row in rows if row['returncode'] not in ((0,-15) if row['service'] in ('sclang','crow') or (row['service']=='matron' and row.get('requested_termination')=='startup_sigterm') else (0,))]
             if unexpected:
                 error=ContractError('cleanup_failed','Cancelled startup had unexpected native exits: '+json.dumps(unexpected))
                 error.session_id=session_id;raise error from failure

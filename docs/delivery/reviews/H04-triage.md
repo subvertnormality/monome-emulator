@@ -24,6 +24,19 @@ and reported an init timeout/exit1 instead of cancellation. It was not killed
 by Docker's40-second timeout in this experiment. The failure remains retained.
 Candidate verification is pending.
 
+The first corrected polling candidate h04-06 failed in
+`artifacts/docker/startup-cancel-1788935401515/report.json`: matron exited SIGSEGV
+while the old normal-quit sequence interrupted unfinished Lua init. This remains
+a failed native result; its exact crash site is not claimed localized. The
+adapter now skips the queued EVENT_QUIT path only when startup is explicitly
+interrupted before readiness, sends SIGTERM to that owned matron group, and
+records `requested_termination: startup_sigterm`. Only that requested signal
+exit is accepted in this phase; SIGSEGV and unexpected SIGKILL remain errors.
+Ready-session graceful cleanup is unchanged. No Lua cleanup-hook execution is
+promised when initialization is aborted. This is a deliberate startup shutdown
+behavior, not reclassification of the observed crash as a pass. The focused
+follow-up must review this refinement and its actual regression evidence.
+
 Accepted minor: negative-test failures must retain diagnostics. The runner now
 saves stdout/stderr before its oracle, removes only a fully verified case, and
 retains/stops unexpected failures with fallback logs. An injected assertion
