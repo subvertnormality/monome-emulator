@@ -22,7 +22,7 @@
     "H05 native Apple Silicon arm64 Docker profile passed six scoped host gates; amd64 emulation remains failed"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "All six Windows gates pass on Mac5366789 rebuilt as h05-windows-01, plus shared7contracts/host-helper/profile-selection. Evidence H05-windows-evidence.json, audio8437206/8444024 p95148.5/144.4ms zero underruns. Commit integration packet and run bounded H05 Paranoia branch review from187db42. Mac raw reports remain on other machine; seven JSON reports needed for initial independent verification, full logs only for discrepancies. Main187db42 unchanged. No live native/build/test runner; review pending.",
+  "next_action": "H05 review01a08641 found target-architecture and diagnostic-timeout false-positive defects plus missing Mac report verification. Code fixes committedfd82a09. Real wrong-target build now fails firstRUN beforeapt; matching amd64 build runner74961 live (context12). Corrected real JACK diagnostic9591165 passes6variants/42clientconnections/exit0; first parsefailure9469263 retained. Unit3architecture+2diagnostic faults pass. After build, startup smoke, record evidence and use one remaining focused follow-up. Mac JSON verification may occur on Mac; files not available here. Main187db42 unchanged; no native test active.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",

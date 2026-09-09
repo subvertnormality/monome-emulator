@@ -54,3 +54,22 @@ Three focused architecture tests pass. JACK timeout/no-client rejection tests
 pass. First real diagnostic9469263 failed on mixed JACK stdout/JSON, remains false;
 explicit prefixed JSON result parsing fixes the reporting boundary. Native rerun
 is live; no passing claim yet. Build mismatch/correct profile tests follow.
+
+Architecture rejection now observed in actual Docker context12: the first RUN
+expands to `test "linux/arm64" = linux/amd64` and exits1 before apt. Its log and
+expected-rejection record are retained under artifacts/docker/h05-wrong-platform-*
+and h05-platform-rejection.json. A matching linux/amd64 build is in progress.
+The corrected JACK diagnostic passed all six real variants in
+artifacts/docker/jack-emulation-1788959591165/report.json: seven activated client
+connections with advancing frame time per variant, ten-second observation windows,
+all final JACK exits0. Prior mixed-output failure9469263 remains false. Two fault
+tests prove Docker timeout and running-container/no-JACK cannot pass. Runtime DSP
+and the shared launcher/lease code are unchanged since six Windows host gates.
+
+Matching amd64 image built successfully fromfd82a09:
+sha256:1f777ecdd4a491afc63988c57bf6a153c5f79b93222c3e5d7e2a8aa1336a4794.
+Native cancellation/data reopen/normal shutdown passed in startup-cancel9926606.
+H05-fixes-evidence.json identifies actual positive/negative build logs, unchanged
+failed diagnostic, corrected live diagnostic, source tests and native smoke.
+No native runner remains active. Focused follow-up now owns only the two code
+fixes; the Mac-side report verification remains an explicit unclosed gate.

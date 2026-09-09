@@ -1,0 +1,56 @@
+{
+  "reports": [
+    {
+      "path": "artifacts/docker/jack-emulation-1788959469263/report.json",
+      "sha256": "6ccbe791f49834724e5731b76505318dcf71d33700edfbe8d89140e928fe610e",
+      "passed": false
+    },
+    {
+      "path": "artifacts/docker/jack-emulation-1788959591165/report.json",
+      "sha256": "f26f3f3f6ce7dcca25d4bfa4939b87ced868d6a24a10f43ba02104c1c542a4e1",
+      "passed": true
+    },
+    {
+      "path": "artifacts/docker/startup-cancel-1788959926606/report.json",
+      "sha256": "66298daf9f4052fbd26fb48ca500e15d694dc3bd0101c363859402bc2783c0bf",
+      "passed": true
+    }
+  ],
+  "source": "fd82a09dd8a55e16efade4ebe18bf43a0b647ddb",
+  "scope": "Two reviewed code defects fixed; actual mismatched target rejection, matching amd64 build/native smoke, live JACK diagnostic and fault tests. Mac evidence gate remains separate.",
+  "image": "sha256:1f777ecdd4a491afc63988c57bf6a153c5f79b93222c3e5d7e2a8aa1336a4794",
+  "files": [
+    {
+      "path": "artifacts/docker/h05-wrong-platform-baseline.log",
+      "sha256": "63664f105a97e4d5a793283b765a6ca8bf0b81486ef84e17ef602bea351308e4"
+    },
+    {
+      "path": "artifacts/docker/h05-wrong-platform-rejected.log",
+      "sha256": "a8b917c4b224a425a5b9c7bc0449526e4ebb5734d946bdfe642b1fe1435dd39c"
+    },
+    {
+      "path": "artifacts/docker/h05-platform-rejection.json",
+      "sha256": "83d136b72959e69faf1d35f025b80b613a086ceeabe187c9fdf5641a6471f814"
+    },
+    {
+      "path": "artifacts/docker/build-h05-windows-02.log",
+      "sha256": "0b3b9196773c643d526891895ca12c8fdaa74201a63677e842439d3da8cdf0a9"
+    },
+    {
+      "path": ".runtime/docker-context-12/context.json",
+      "sha256": "099929fb82027fd01ecceeb3bb507e144b0687f6795cc6c39e085d452067ad6b"
+    },
+    {
+      "path": "tests/container_jack_emulation.cjs",
+      "sha256": "0fcb668fbc984f98148bc1638dea60111e8fdbe49d749f8ea5f3b7216a579b6c"
+    },
+    {
+      "path": "tests/container_jack_emulation.test.cjs",
+      "sha256": "46a81e4a3e34d170dd775f64144e3ece5797a64b9f202a3279e5685676321b62"
+    },
+    {
+      "path": "tests/test_container_architecture.py",
+      "sha256": "4c888357a316790d889701bd8eeb8785168136f1cd18303e17c360c987408164"
+    }
+  ]
+}
