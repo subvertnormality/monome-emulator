@@ -1,0 +1,44 @@
+{
+  "status": "windows_six_gates_passed_review_pending",
+  "context": ".runtime/docker-context-11/context.json",
+  "source": "5366789360dcedd424ff3c1cf6e9f57feceb13fd",
+  "image": "sha256:955da12afe334d2c8da1fc8f91ef8373cd680afd5ec8831671bef7dcdeba73ce",
+  "mac_evidence": "Mac manifest inspected; raw Mac reports not present locally, so independent verification pending",
+  "reports": [
+    {
+      "passed": true,
+      "path": "artifacts/docker/startup-cancel-1788958321252/report.json",
+      "sha256": "c777482829065a4bbcfa1848aad1683e399787926b3e0cb773e004326b850ae8"
+    },
+    {
+      "passed": true,
+      "path": "artifacts/docker/browser-1788958336750/report.json",
+      "sha256": "c69ae4d9b79b6e402842624cd6760fe6a6fb26a01f5a2855adbcea7a2e91e22a"
+    },
+    {
+      "passed": true,
+      "path": "artifacts/docker/failures-1788958379734/report.json",
+      "sha256": "1e9e8ee504b0fed9af1664bfe0246afa38979c2a6ec27470db6983a6d7797c97"
+    },
+    {
+      "path": "artifacts/docker/restart-1788958388130/report.json",
+      "sha256": "8c8c1792b6c6ffa2b5678c7290d939960cfd233e127ed72d75a5d5e5e0ad848d",
+      "passed": true
+    },
+    {
+      "path": "artifacts/docker/lease-1788958409053/report.json",
+      "sha256": "3acd2b368a3d5ede60cbc2296aeb75423d2c148d6dd659404b05fa27349e53ff",
+      "passed": true
+    },
+    {
+      "passed": true,
+      "sha256": "ba12ab1a1741ee386adcbaa32b7f90d43a9dd2bd698f1db0a4722669f077a14c",
+      "path": "artifacts/docker/audio-1788958437206/report.json"
+    },
+    {
+      "passed": true,
+      "sha256": "2e5507a8202940320ea50af3fb9331acb2e100724bc57e5f1d229e64b9585d26",
+      "path": "artifacts/audio/latency-1788958444024/report.json"
+    }
+  ]
+}

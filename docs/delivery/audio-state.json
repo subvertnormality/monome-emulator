@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "current_card": "H05 independent host validation",
-  "status": "h05_macos_apple_silicon_native_arm64_passed",
-  "worktree": ".worktrees/macos-h05",
-  "branch": "codex/macos-h05",
+  "status": "h05_windows_integration_in_progress",
+  "worktree": ".runtime/worktrees/audio-monitor",
+  "branch": "codex/audio-monitor",
   "completed": [
     "A00 audio feasibility",
     "A01 tested native audio and continuous browser monitoring",
@@ -22,7 +22,7 @@
     "H05 native Apple Silicon arm64 Docker profile passed six scoped host gates; amd64 emulation remains failed"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "H05 native arm64 passed all six scoped Mac software gates after the atomic owner-tokened lease fix; retain the separate amd64-emulation failure and first arm64 lease failure. Native Linux, macOS Intel, physical devices and direct speaker output remain separate work.",
+  "next_action": "All six Windows gates pass on Mac5366789 rebuilt as h05-windows-01, plus shared7contracts/host-helper/profile-selection. Evidence H05-windows-evidence.json, audio8437206/8444024 p95148.5/144.4ms zero underruns. Commit integration packet and run bounded H05 Paranoia branch review from187db42. Mac raw reports remain on other machine; seven JSON reports needed for initial independent verification, full logs only for discrepancies. Main187db42 unchanged. No live native/build/test runner; review pending.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",
