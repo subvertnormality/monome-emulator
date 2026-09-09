@@ -1,0 +1,20 @@
+--- a/web/src/editor.js
++++ b/web/src/editor.js
+@@ -87,12 +87,11 @@
+         */
+   };
+ 
+-  onChange = event => {
+-    if (!this.modified) {
+-      this.modified = true;
+-      // we are consuming the first change, propagate the now modified buffer up
+-      this.props.bufferChange(this.props.bufferName, event);
+-    }
++  onChange = value => {
++    this.modified = true;
++    // Ace is controlled by the buffer value. Keep every edit in that value;
++    // otherwise a later parent render can restore the first change only.
++    this.props.bufferChange(this.props.bufferName, value);
+   };
+ 
+   getValue = () => this.editor.getValue();

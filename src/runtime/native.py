@@ -202,7 +202,8 @@ class NativeBackend:
         time.sleep(0.5); self.check_processes()
         self.launch('crone',[str(self.native/'build/crone/crone')])
         self.wait_log('crone','entering main loop',10)
-        self.launch('sclang',['sclang','-D','-u',str(self.ports['sclang']),'-l',str(self.directory/'sclang.yaml')])
+        sc_mode=['-i','emacs'] if self.config.get('maiden_install') else ['-D']
+        self.launch('sclang',['sclang',*sc_mode,'-u',str(self.ports['sclang']),'-l',str(self.directory/'sclang.yaml')])
         self.wait_log('sclang','AudioContext: initPolls',40)
         self.launch_crow()
         self.launch('matron',['stdbuf','-oL','-eL',str(self.native/'build/matron/matron'),

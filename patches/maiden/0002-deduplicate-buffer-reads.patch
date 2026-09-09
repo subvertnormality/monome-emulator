@@ -1,0 +1,52 @@
+--- a/web/src/model/edit-actions.js
++++ b/web/src/model/edit-actions.js
+@@ -198,28 +198,28 @@
+   });
+ };
+ 
+-export const bufferRead = resource => dispatch => {
++// Selection notifications can request the same file before its first read returns.
++// A second response must not replace edits made after the first response.
++const pendingBufferReads = new Set();
++export const bufferRead = resource => async dispatch => {
++  if (pendingBufferReads.has(resource)) return;
++  pendingBufferReads.add(resource);
+   dispatch(bufferReadRequest(resource));
+-  fetch(resource)
+-    .then(response => {
+-      if (response.ok) {
+-        const contentType = response.headers.get('Content-Type');
+-        if (contentType.includes('text') || contentType.includes('application/json')) {
+-          response.text().then(content => {
+-            dispatch(bufferReadSuccess(resource, content, contentType));
+-          });
+-        } else {
+-          response.blob().then(content => {
+-            dispatch(bufferReadSuccess(resource, content, contentType));
+-          });
+-        }
+-      } else {
+-        dispatch(bufferReadFailure(resource));
+-      }
+-    })
+-    .catch(error => {
+-      dispatch(bufferReadFailure(resource, error));
+-    });
++  try {
++    const response = await fetch(resource);
++    if (response.ok) {
++      const contentType = response.headers.get('Content-Type');
++      const content = contentType.includes('text') || contentType.includes('application/json')
++        ? await response.text() : await response.blob();
++      dispatch(bufferReadSuccess(resource, content, contentType));
++    } else {
++      dispatch(bufferReadFailure(resource));
++    }
++  } catch (error) {
++    dispatch(bufferReadFailure(resource, error));
++  } finally {
++    pendingBufferReads.delete(resource);
++  }
+ };
+ 
+ export const directoryRead = resource => dispatch => {

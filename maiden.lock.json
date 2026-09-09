@@ -1,0 +1,11 @@
+{
+  "repository": "https://github.com/monome/maiden.git",
+  "revision": "2e64f7d59284962ac68055dd556e3fd8515462f8",
+  "license": "GPL-3.0",
+  "platform": "linux-amd64",
+  "tools": [
+    {"name":"go","url":"https://go.dev/dl/go1.16.15.linux-amd64.tar.gz","sha256":"77c782a633186d78c384f972fb113a43c24be0234c42fef22c2d8c4c4c8e7475"},
+    {"name":"node","url":"https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-x64.tar.xz","sha256":"874463523f26ed528634580247f403d200ba17a31adf2de98a7b124c6eb33d87"},
+    {"name":"yarn","url":"https://registry.npmjs.org/yarn/-/yarn-1.22.22.tgz","sha512_base64":"prL3kGtyG7o9Z9Sv8IPfBNrWTDmXB4Qbes8A9rEzt6wkJV8mUvoirjU0Mp3GGAU06Y0XQyA3/2/RQFVuK7MTfg=="}
+  ]
+}

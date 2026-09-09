@@ -1,0 +1,18 @@
+[
+  {
+    "sha256": "79525c6e431f63de2a047e733352d7724acb9a5160023d885fcef60da7c8d666",
+    "path": "artifacts/maiden/browser-20260909-040332/report.json"
+  },
+  {
+    "sha256": "4cd13f5729e19fe8fb954b1d6c6087051166983c25be63b2dea4d0868ed4fc32",
+    "path": "artifacts/maiden/browser-20260909-035759/lifecycle.json"
+  },
+  {
+    "sha256": "9fd13f3b20b3d7c441093d0003c1fc7892b010f696312ae0e6d62162457aa479",
+    "path": "artifacts/maiden/transport-20260909-040254/report.json"
+  },
+  {
+    "sha256": "c7a91ef34c262861fec6c2bf5a8dc3794534e6c571ca007684c1253024b1655b",
+    "path": "artifacts/datasets/native-20260909-040433/report.json"
+  }
+]

@@ -29,7 +29,11 @@ def request(session_id,path,payload=None,timeout=None):
         raise ContractError(value.get('code','http_error'),value.get('message',str(error))) from error
     except (OSError,ValueError) as error: raise ContractError('session_unavailable',str(error)) from error
 
-def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None,midi_config=None,random_seed=None,clock_mode='real-time',experimental_install=None,crow_enabled=True,audio_files=None,audio_directory=None,input_timeout=2,arc_enabled=False,desktop_audio=None,startup_chime=True):
+def start(backend='contract-fixture',script=None,code_root=None,data=None,enabled_mods=None,data_seeds=None,midi_config=None,random_seed=None,clock_mode='real-time',experimental_install=None,crow_enabled=True,audio_files=None,audio_directory=None,input_timeout=2,arc_enabled=False,desktop_audio=None,startup_chime=True,reopen_data=None,maiden_install=None):
+    if maiden_install is not None and (backend!='native' or clock_mode!='real-time'):
+        raise ContractError('maiden_options','Maiden requires the real-time native runtime')
+    if reopen_data is not None and (backend!='native' or data is not None or data_seeds):
+        raise ContractError('dataset_options','Reopen requires native runtime and cannot be combined with fresh data or seeds')
     if type(startup_chime)!=bool:raise ContractError('startup_chime','startup_chime must be boolean')
     if not startup_chime and backend!='native':raise ContractError('unsupported','Startup chime control requires native runtime')
     if desktop_audio is not None:
@@ -60,7 +64,10 @@ def start(backend='contract-fixture',script=None,code_root=None,data=None,enable
     directory.mkdir(parents=True)
     dust=directory/'dust'
     for part in ['code','data','audio/tape']: (dust/part).mkdir(parents=True)
-    if data is not None:
+    if reopen_data is not None:
+        data_path=Path(reopen_data).resolve()
+        if not data_path.is_dir():raise ContractError('dataset_missing','Dataset directory does not exist')
+    elif data is not None:
         # The supplied directory is a parent, never a file tree we clear/overwrite.
         data_path=Path(data).resolve()/session_id
         data_path.mkdir(parents=True,exist_ok=False)
@@ -71,7 +78,8 @@ def start(backend='contract-fixture',script=None,code_root=None,data=None,enable
                 audio_files=[str(Path(p).resolve()) for p in audio_files or []],
                 audio_directory=str(Path(audio_directory).resolve()) if audio_directory is not None else None,
                 input_timeout=input_timeout,
-                arc_enabled=arc_enabled,desktop_audio=desktop_audio,startup_chime=startup_chime,
+                arc_enabled=arc_enabled,desktop_audio=desktop_audio,startup_chime=startup_chime,reopen_data=reopen_data is not None,
+                maiden_install=str(Path(maiden_install).resolve()) if maiden_install else None,
                 clock_mode=clock_mode,experimental_install=str(Path(experimental_install).resolve()) if experimental_install else None)
     write_json(directory/'config.json',config)
     log=open(directory/'server.log','w')

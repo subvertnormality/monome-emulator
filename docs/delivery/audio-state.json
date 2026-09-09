@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "current_card": "H01 direct desktop audio",
+  "current_card": "H02 official Maiden and persistent datasets",
   "status": "in_progress",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
@@ -12,10 +12,11 @@
     "A02 generic sampler services and explicit audio file errors",
     "A03 unchanged cheat codes sampler recording and collection persistence",
     "P03 native/browser virtual arc and optional app integration",
-    "Stage2 reviewed, admitted and merged to main with post-merge native checks"
+    "Stage2 reviewed, admitted and merged to main with post-merge native checks",
+    "H01 reviewed desktop audio committed and merged9c67326; main native lifecycle passed"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "H01 review complete bothmajorsclosed followup01a082f4-2e55-7a62-b9fc-b2c306271401. Candidate desktop-tools-04 admittedoptin with retained221650dropout/223330startupxrun. Finaldocscommit andmainmerge pending, recheckmainstatehash. Commit/mergeH01beforeH02Maiden. Alltest/reviewhandles terminal. EvidenceH01.md andH01-evidence.json. No defaultpromotion.",
+  "next_action": "H02 native/browser/PCM evidence passed: browser040332, lifecycle035759, transport040254, dataset040433. All runners terminal; 24 top-level and 68 contracts covered (67 initialpass, replay source_changed due own concurrent edit then targeted pass29.542s). Current Maiden bundlemaiden-tools-04, engine-reload-01. Prepare committed H02 branch review vs9c67326 with H02-spec and bounded Codex600s medium; no H02 review yet. Review/fix/admit/merge before H03. Preserve main modified state and new Mosaic-NRPN-active.json/Mosaic-trig-parameters-active.json. Original clicks remain bounded/unlocalized perH01. See H02.md/H02-progress.md.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",

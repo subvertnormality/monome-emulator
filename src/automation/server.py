@@ -36,19 +36,45 @@ class FixtureBackend:
 class Application:
     def __init__(self,directory):
         self.directory=directory; self.config=read_json(directory/'config.json')
+        self.dataset_lease=None;self.maiden=None
         if self.config['backend']=='native':
+            from .datasets import Lease
             from runtime.native import NativeBackend
-            self.backend=NativeBackend(directory,self.config)
+            if self.config.get('maiden_install'):
+                from runtime.maiden import verify,Maiden
+                bundle=verify(self.config['maiden_install'])
+            self.dataset_lease=Lease(self.config)
+            try:
+                self.backend=NativeBackend(directory,self.config)
+                if self.config.get('maiden_install'):self.maiden=Maiden(self.backend,self.config,bundle)
+            except Exception:
+                try:
+                    if hasattr(self,'backend'):self.backend.close()
+                finally:self.dataset_lease.close()
+                raise
         else: self.backend=FixtureBackend(directory)
         self.sequence=0; self.action_ids=set(); self.lock=threading.Lock(); self.action_lock=threading.Lock(); self.errors=[]
         self.clients={}; self.client_lock=threading.RLock(); self.input_owners={}; self.client_timeout=2.5
         self.audio_monitor=None
         self.audio_captures={}
+        self.closed=False
+        self.restart_result=None
     def close(self):
-        for capture in self.audio_captures.values():capture.cancel()
-        if self.audio_monitor:
-            self.audio_monitor.close(); self.audio_monitor=None
-        self.backend.close()
+        if self.closed:return
+        self.closed=True
+        failures=[]
+        try:
+            closers=([self.maiden.close] if self.maiden else [])
+            closers += [capture.cancel for capture in self.audio_captures.values()]
+            if self.audio_monitor:closers.append(self.audio_monitor.close)
+            closers.append(self.backend.close)
+            for close in closers:
+                try:close()
+                except Exception as error:failures.append(str(error))
+            self.audio_monitor=None
+        finally:
+            if self.dataset_lease:self.dataset_lease.close()
+        if failures:raise ContractError('cleanup_failed','; '.join(failures))
     def capture_request(self,path,payload):
         if self.config['backend']!='native':raise ContractError('unsupported','Capture requires native audio')
         if not isinstance(payload,dict):raise ContractError('audio_request','Expected capture request object')
@@ -209,7 +235,7 @@ def serve_application(directory,app):
             self.send_response(status); self.send_header('Content-Type','application/json')
             self.send_header('Content-Length',str(len(data))); self.end_headers(); self.wfile.write(data)
         def asset(self):
-            assets={'/':('index.html','text/html'),'/app.js':('app.js','text/javascript'),'/style.css':('style.css','text/css'),'/audio.js':('audio.js','text/javascript'),'/audio-stream.js':('audio-stream.js','text/javascript'),'/audio.css':('audio.css','text/css')}
+            assets={'/':('index.html','text/html'),'/app.js':('app.js','text/javascript'),'/style.css':('style.css','text/css'),'/audio.js':('audio.js','text/javascript'),'/audio-stream.js':('audio-stream.js','text/javascript'),'/audio.css':('audio.css','text/css'),'/editor':('editor.html','text/html'),'/editor.js':('editor.js','text/javascript')}
             if self.command!='GET' or self.path not in assets: return False
             name,kind=assets[self.path]; data=(ROOT/'ui'/name).read_bytes()
             self.send_response(200); self.send_header('Content-Type',kind+'; charset=utf-8')
@@ -219,16 +245,67 @@ def serve_application(directory,app):
             try:
                 self.connection.settimeout(2)
                 if self.asset(): return
-                if self.headers.get('Authorization')!='Bearer '+app.config['token']:
+                from urllib.parse import urlsplit
+                from http.cookies import SimpleCookie
+                path=urlsplit(self.path).path
+                editor_path=path=='/maiden' or path.startswith('/maiden/') or path.startswith('/api/v1')
+                cookies=SimpleCookie();cookies.load(self.headers.get('Cookie',''))
+                cookie=cookies.get('emu_maiden_'+app.config['session_id'])
+                editor_auth=editor_path and cookie and cookie.value==app.config['token']
+                if self.headers.get('Authorization')!='Bearer '+app.config['token'] and not editor_auth:
                     self.respond(401,ContractError('unauthorized','Session token required').as_dict()); return
                 if self.headers.get('Origin'):
                     expected='http://127.0.0.1:'+str(self.server.server_port)
                     if self.headers['Origin']!=expected: raise ContractError('origin','Cross-origin request rejected')
+                if app.closed and path not in ('/editor/restart','/stop'):raise ContractError('session_stopped','This session has stopped')
+                if editor_path:
+                    if not app.maiden:raise ContractError('unsupported','This session has no Maiden bundle')
+                    app.maiden.check()
+                    if path=='/maiden/repl-endpoints.json':
+                        prefix='ws://127.0.0.1:'+str(app.maiden.port)
+                        self.respond(200,{name:prefix+'/'+name+'?token='+app.config['token'] for name in ('norns','supercollider')});return
+                    if path=='/maiden/units.json':self.respond(200,dict(units={}));return
+                    if path.startswith('/api/v1/unit'):
+                        raise ContractError('unsupported','Use Restart session in the emulator editor header')
+                    size=int(self.headers.get('Content-Length','0'))
+                    if size<0 or size>2*1024*1024:raise ContractError('body_size','Editor request exceeds2MiB')
+                    body=self.rfile.read(size) if size else b''
+                    status,headers,data=app.maiden.request(self.command,self.path,body,self.headers.get('Content-Type'))
+                    self.send_response(status)
+                    for name,value in headers:
+                        if name.lower() in ('content-type','location'):self.send_header(name,value)
+                    self.send_header('Content-Length',str(len(data)));self.send_header('Cache-Control','no-store')
+                    self.end_headers();self.wfile.write(data);return
                 payload=None
                 if self.command=='POST':
                     size=int(self.headers.get('Content-Length','0'))
                     if size<1 or size>MAX_BODY: raise ContractError('body_size','Invalid request body length')
                     payload=json.loads(self.rfile.read(size))
+                if self.command=='POST' and self.path=='/editor/auth':
+                    if not app.maiden:raise ContractError('unsupported','This session has no Maiden bundle')
+                    self.send_response(200);self.send_header('Content-Type','application/json')
+                    self.send_header('Set-Cookie','emu_maiden_'+app.config['session_id']+'='+app.config['token']+'; Path=/; HttpOnly; SameSite=Strict')
+                    self.send_header('Content-Length','2');self.end_headers();self.wfile.write(b'{}');return
+                if self.command=='POST' and self.path=='/editor/restart':
+                    if not app.maiden:raise ContractError('unsupported','This session has no Maiden bundle')
+                    if payload!={}:raise ContractError('restart_options','Restart takes no overrides')
+                    with app.action_lock:
+                        with app.lock:
+                            if app.restart_result is None:
+                                watchdog_stop.set()
+                                app.close()
+                                from .session import start
+                                fields=('script','code_root','enabled_mods','midi_config','random_seed','clock_mode',
+                                    'experimental_install','crow_enabled','audio_files','audio_directory','input_timeout',
+                                    'arc_enabled','desktop_audio','startup_chime','maiden_install')
+                                options={key:app.config[key] for key in fields}
+                                options['reopen_data']=app.config['data']
+                                result=start('native',**options)
+                                app.restart_result=dict(session_id=result['session_id'],editor_url=result['editor_url'],
+                                    browser_url=result['browser_url'],dataset_id=result['dataset']['dataset_id'])
+                                write_json(directory/'restarted.json',app.restart_result)
+                            self.respond(200,app.restart_result)
+                    threading.Thread(target=self.server.shutdown,daemon=True).start();return
                 # Receipt of a heartbeat must not wait behind a native callback.
                 # Device state remains serialized by app.lock; only lease time
                 # is updated independently under client_lock.
@@ -238,10 +315,12 @@ def serve_application(directory,app):
                     self.respond(200,dict(status='ok'));return
                 if self.command=='POST' and self.path=='/action':
                     with app.action_lock:
+                        if app.closed:raise ContractError('session_stopped','This session has stopped')
                         scheduled=app.wait_schedule(payload)
                         with app.lock:self.respond(200,app.action(payload,scheduled))
                     return
                 with app.lock:
+                    if app.closed and self.path!='/stop':raise ContractError('session_stopped','This session has stopped')
                     if self.command=='POST' and self.path=='/crow/ii/read':
                         profile=app.config.get('runtime_identity',{}).get('experimental',{}).get('crow',{})
                         if not app.config.get('crow_enabled',True) or profile.get('manifest',{}).get('ii_protocol')!=1:raise ContractError('unsupported','Session has no enabled Crow ii trace')
@@ -281,7 +360,8 @@ def serve_application(directory,app):
                     if self.command=='GET' and self.path=='/health':
                         app.snapshot()
                         self.respond(200,dict(status='ready',session_id=app.config['session_id'],sequence=app.sequence,
-                                             backend=app.config['backend'],fidelity=app.backend.fidelity)); return
+                                             backend=app.config['backend'],fidelity=app.backend.fidelity,
+                                             editor_url=app.config.get('editor_url'))); return
                     if self.command=='GET' and self.path=='/snapshot': self.respond(200,app.snapshot()); return
                     if self.command=='GET' and self.path=='/capabilities':
                         identity=app.config.get('runtime_identity',{});experimental=identity.get('experimental',{});binaries=identity.get('binaries',{})
@@ -326,8 +406,14 @@ def serve_application(directory,app):
             except (ValueError,OSError) as error: self.respond(400,ContractError('request_failed',str(error)).as_dict())
         do_GET=dispatch
         do_POST=dispatch
+        do_PUT=dispatch
+        do_PATCH=dispatch
+        do_DELETE=dispatch
     server=ThreadingHTTPServer(('127.0.0.1',0),Handler)
     server.daemon_threads=True
+    if app.maiden:
+        app.maiden.origin='http://127.0.0.1:'+str(server.server_port)
+        app.config['editor_url']=app.maiden.origin+'/editor#token='+app.config['token']
     # Server socket exists before discovery is published.
     write_json(directory/'session.json',dict(**app.config,port=server.server_port,pid=os.getpid(),
                                            fidelity=app.backend.fidelity,

@@ -115,6 +115,7 @@ async function poll(){
 (async()=>{
   if(!token)throw Error('Open the browser URL returned by emu start; it contains your local session token.');
   const health=await request('/health');sessionId=health.session_id;
+  if(health.editor_url){const editor=document.getElementById('editor');editor.href=health.editor_url;editor.hidden=false;}
   const capabilities=await request('/capabilities');$('#capabilities').textContent=['Supported: '+capabilities.supported.join('; '),'Absent: '+capabilities.absent.join('; '),'Unsupported: '+capabilities.unsupported.join('; ')].join('\n');
   await request('/client/heartbeat',{client_id:clientId});ready=true;poll();
   setInterval(()=>{if(!document.hidden)request('/client/heartbeat',{client_id:clientId}).catch(showError);},500);

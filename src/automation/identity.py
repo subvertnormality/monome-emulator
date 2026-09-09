@@ -21,6 +21,7 @@ def source_identity():
         for p in (ROOT/name).rglob('*'):
             if p.is_file() and '__pycache__' not in p.parts and p.suffix!='.pyc': files.append(artifact(p,ROOT))
     files.append(artifact(ROOT/'dependencies.lock.json',ROOT))
+    if (ROOT/'maiden.lock.json').exists():files.append(artifact(ROOT/'maiden.lock.json',ROOT))
     files.sort(key=lambda f:f['path'])
     digest=hashlib.sha256(json.dumps(files,sort_keys=True).encode()).hexdigest()
     revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()

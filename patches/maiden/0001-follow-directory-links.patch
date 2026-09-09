@@ -1,0 +1,35 @@
+--- a/cmd/server.go
++++ b/cmd/server.go
+@@ -265,6 +265,18 @@
+ 			// not sure why this would fail given that we just stat()'d the dir
+ 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+ 			return
++		}
++
++		// Resolve linked directories in the launcher-provided editable tree.
++		for i, entry := range entries {
++			if entry.Mode() & os.ModeSymlink != 0 {
++				resolved, statErr := os.Stat(filepath.Join(path, entry.Name()))
++				if statErr != nil {
++					ctx.JSON(http.StatusBadRequest, gin.H{"error": statErr.Error()})
++					return
++				}
++				entries[i] = linkedEntry{resolved, entry.Name()}
++			}
+ 		}
+ 
+ 		prefix := filepath.Join(s.apiPrefix, name)
+@@ -904,6 +916,13 @@
+ 	URL string `json:"url"`
+ }
+ 
++// Preserve the directory entry's visible name when following a link.
++type linkedEntry struct {
++	os.FileInfo
++	name string
++}
++func (entry linkedEntry) Name() string { return entry.name }
++
+ func handleDirRead(path string, entries *[]os.FileInfo, resourcePath prefixFunc) *dirInfo {
+ 	var files = []fileInfo{}
+ 	for _, entry := range *entries {
