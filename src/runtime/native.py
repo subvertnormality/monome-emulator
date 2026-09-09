@@ -164,7 +164,9 @@ class NativeBackend:
                             'excludePaths: '+json.dumps(sc_exclusions)+'\npostInlineWarnings: false\n')
         ports=free_ports(5)
         self.ports=dict(zip(['matron','crone','sclang','scsynth','remote'],ports))
-        self.env=dict(os.environ,HOME=str(self.alias),SDL_VIDEODRIVER='dummy',QT_QPA_PLATFORM='offscreen',
+        # The launcher owns OS termination. SDL's default SIGTERM-to-window-quit
+        # conversion cannot complete while Lua initialization is blocked.
+        self.env=dict(os.environ,HOME=str(self.alias),SDL_VIDEODRIVER='dummy',SDL_NO_SIGNAL_HANDLERS='1',QT_QPA_PLATFORM='offscreen',
             QTWEBENGINE_DISABLE_SANDBOX='1',QTWEBENGINE_CHROMIUM_FLAGS='--disable-gpu',
             LD_LIBRARY_PATH=str(ROOT/'.runtime/prefix/lib'),JACK_DEFAULT_SERVER='emu-'+self.config['session_id'][:16],
             NORNS_EMU_CRONE_PORT=str(self.ports['crone']),NORNS_EMU_MATRON_PORT=str(self.ports['matron']),

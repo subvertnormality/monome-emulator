@@ -37,6 +37,16 @@ promised when initialization is aborted. This is a deliberate startup shutdown
 behavior, not reclassification of the observed crash as a pass. The focused
 follow-up must review this refinement and its actual regression evidence.
 
+Candidate h04-07 still required SIGKILL after the requested SIGTERM and remains
+failed (`startup-cancel-1788935729335`). The installed SDL2 header and
+[official SDL documentation](https://wiki.libsdl.org/SDL2/SDL_HINT_NO_SIGNAL_HANDLERS)
+explain the remaining interference: SDL normally translates SIGTERM/SIGINT into
+a window-quit event. The headless native adapter now sets SDL_NO_SIGNAL_HANDLERS=1
+before SDL initialization, leaving OS termination with the launcher. This does
+not replace the browser/native input path or patch SDL/norns code. Ready-session
+EOF shutdown is unchanged. The SIGSEGV's exact crash site is still unlocalized;
+neither observed failure is reclassified as success.
+
 Accepted minor: negative-test failures must retain diagnostics. The runner now
 saves stdout/stderr before its oracle, removes only a fully verified case, and
 retains/stops unexpected failures with fallback logs. An injected assertion
