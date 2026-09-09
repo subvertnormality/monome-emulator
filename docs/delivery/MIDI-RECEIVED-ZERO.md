@@ -1,6 +1,6 @@
 # Received zero boundary and MIDI forwarding
 
-Status: required, unimplemented. Prerequisite: candidate07 and existing boundary
+Status: candidate09 checkpoint accepted; optional runtime remains unpromoted. Prerequisite: candidate07 and existing boundary
 callbacks/epoch claims. Codex arbitration01a087b2-c56f-7d50-8699-ea5b325ede1d.
 Source pin remains official14bbeae8646c6717f6bb44c8cd60250bf94b6042; no default
 runtime promotion or silent strict-sync change is authorised by this checkpoint.
@@ -58,3 +58,16 @@ the minimal constant-tempo repair. Unknown pre-Clock2 fractional intervals
 remain unknowable; only the already-received zero boundary is being admitted.
 This card does not replace the full manual, emulator release, WSL/Linux or final
 unit/integration hardening requirements.
+
+## Candidate09 accepted checkpoint
+
+The received-zero output waiter and source-selection transaction pass the native
+barrier, queued-epoch and ordinary-parity contracts. Generic acquisition and
+forwarding pass controlled and real time. Mosaic M-SYNC001..013 pass 26/26 in
+both lanes, including complete-tail and repeated-Start forwarding assertions;
+526/526 Lua tests and three receiver-oracle mutation tests pass. Codex follow-up
+01a08803-7a7a-7133-aab7-2b7b236169a8 found no remaining blocker in this scoped
+checkpoint. Exact source-bound receipts are in midi-received-zero-checkpoint.json.
+
+Candidate09 is still optional and unpromoted. Continue/SPP, jitter/loss/recovery,
+tempo transitions, sustained drift, full manual coverage and release gates remain.

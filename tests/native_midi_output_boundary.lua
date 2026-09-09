@@ -4,6 +4,7 @@ local function setup()
   local output,scheduled={},{}
   _norns={clock={}}
   function _norns.clock_schedule_sync(id,beat) scheduled[beat]=id end
+  function _norns.clock_schedule_midi_output(id) scheduled[1/24]=id end
   function _norns.clock_schedule_sleep() end
   function _norns.clock_cancel() end
   params={actions={},values={clock_crow_out_div=1,clock_crow_out=1,clock_source=1}}

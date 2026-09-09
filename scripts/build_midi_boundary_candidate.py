@@ -21,7 +21,7 @@ for item in prior['experimental']['files']:
 for n in ['matron/src/event_types.h','matron/src/events.c','matron/src/weaver.c','matron/src/weaver.h','matron/src/clocks/clock_scheduler.c','lua/core/clock.lua']:
     original.setdefault(n,(Path(base['source'])/n).read_bytes())
     changed.setdefault(n,(Path(prior['source'])/n).read_bytes())
-patches=[r/'patches/norns/candidates'/n for n in ['clock-scheduled-deadline.patch','midi-output-boundary.patch','clock-queued-epoch.patch','midi-output-fault-isolation.patch']]
+patches=[r/'patches/norns/candidates'/n for n in ['clock-scheduled-deadline.patch','midi-output-boundary.patch','clock-queued-epoch.patch','midi-output-fault-isolation.patch','midi-received-zero.patch','midi-source-serialization.patch']]
 with tempfile.TemporaryDirectory() as temp:
     for n,b in changed.items():
         p=Path(temp)/n;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(b)
@@ -34,7 +34,7 @@ with tempfile.TemporaryDirectory() as temp:
     assert transform(stock_scheduler)==changed[scheduler].decode(), 'Prior scheduler contains unaccounted edits'
     upstream=Path(temp)/'scheduler-upstream'
     source=upstream/scheduler;source.parent.mkdir(parents=True);source.write_text(stock_scheduler)
-    for index in (0,2):
+    for index in (0,2,4,5):
         subprocess.run(['git','apply','--unsafe-paths','--include='+scheduler,str(patches[index])],cwd=upstream,check=True)
     (Path(temp)/scheduler).write_text(transform(source.read_text()))
     for patch in patches:
