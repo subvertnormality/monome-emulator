@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "current_card": "H05 independent host validation",
-  "status": "h05_code_review_closed_mac_verification_pending",
+  "status": "h05_review_closed_mac_verification_user_confirmed",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
   "completed": [
@@ -22,7 +22,13 @@
     "H05 native Apple Silicon arm64 Docker profile passed six scoped host gates; amd64 emulation remains failed"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "H05 code review/follow-up closed two defects; Windows six gates and architecture/JACK regressions passed. Changes remain in codex/audio-monitor, main187db42 unchanged. Push branch for Mac to finish docs/delivery/H05-MAC-HANDBACK.md: inspect seven existing Mac JSON files in place and record hashes/results, build guarded native arm64 target and startup/reopen smoke. No full log transfer needed. Only new material defects reopen implementation; no redundant Windows tests. No live owned build/test/review process. Mac evidence gate still unclosed; goal remains active.",
+  "next_action": "Integrate reviewed H05 into main, preserving concurrent Mosaic delivery edits, and run focused post-merge contracts. User confirmed on 2026-09-09 that Mac verification is already complete and local evidence inspection is unnecessary. Accept that confirmation for integration; do not request artifact transfer or duplicate Mac verification. Windows six gates and code review are complete. Retain all platform and latency limitations; broader Mosaic campaign remains separately owned.",
+  "mac_verification_acceptance": {
+    "date": "2026-09-09",
+    "basis": "User confirmation: Mac has already been verified - you dont need to see the evidence",
+    "independently_inspected_on_windows": false,
+    "disposition": "Mac verification accepted for integration; no additional local inspection gate"
+  },
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",

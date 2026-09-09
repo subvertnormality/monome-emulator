@@ -1,5 +1,9 @@
 # H05 final Mac-side verification
 
+Superseded on 2026-09-09: the user confirmed Mac verification is already complete
+and no local evidence inspection is required. No further action or artifact
+transfer is requested by this historical handback. See completions/H05.md.
+
 Continue in the existing Mac worktree after inspecting its status and preserving
 uncommitted work. Fetch `origin/codex/audio-monitor`, which descends from Mac
 head5366789 and contains the Windows integration/review fixes. Fast-forward your
