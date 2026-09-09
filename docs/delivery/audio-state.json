@@ -22,7 +22,7 @@
     "H05 native Apple Silicon arm64 Docker profile passed six scoped host gates; amd64 emulation remains failed"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "H06 hotplug integration is reviewed and verified on corrected source a0c8ed4. Merge/publish its final receipt, preserving main's concurrent delivery state and current installation. Rebuild users' runtime for the changed lock; use .runtime/h06-tools-02 as the tested optional combined candidate. No further H06 test/review process remains. Existing platform and source-specific controlled-time limits remain; the independent application campaign is not certified by this integration.",
+  "next_action": "H06 merged into main at9ae95c6;24 post-merge contracts passed and final receipt is ready for publication. No further H06 implementation/test/review work remains. Users must rebuild for the changed lock; .runtime/h06-tools-02 is the tested optional combined candidate. Main's concurrent delivery state and current installation were preserved. Existing platform and source-specific controlled-time limits remain; the independent application campaign is not certified by this integration.",
   "mac_verification_acceptance": {
     "date": "2026-09-09",
     "basis": "User confirmation: Mac has already been verified - you dont need to see the evidence",

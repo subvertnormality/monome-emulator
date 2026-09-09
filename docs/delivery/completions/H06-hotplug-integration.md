@@ -2,6 +2,12 @@
 
 ## Final acceptance
 
+Merged into main by fast-forward at9ae95c6, preserving concurrent PLAN.md,
+ACCEPTANCE.md, state.json and untracked delivery work. Post-merge main checks
+passed10 MIDI-connection,11 clock-admission and3 arc contracts. Publication
+includes the existing Mac README clarification. No owned test/build/review remains
+live; no default installation was overwritten.
+
 Integration is ready for main. Corrected source a0c8ed4 passed the rebuilt native
 hotplug lifecycle, nine combined arc/MIDI checks, ten real capture/recording checks
 and final Windows Docker startup/reopen/cleanup and eight browser checks.
