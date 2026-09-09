@@ -1,0 +1,90 @@
+--- a/lua/core/clock.lua
++++ b/lua/core/clock.lua
+@@ -83,6 +83,7 @@
+ 
+ 
+ clock.cleanup = function()
++  clock.midi.clear_output_subscriptions()
+   for id, coro in pairs(clock.threads) do
+     if coro then
+       clock.cancel(id)
+@@ -166,6 +167,65 @@
+ 
+ 
+ clock.midi = {}
++
++-- Optional ordered observers of the native MIDI clock fanout. The deadline and
++-- epoch are captured by the scheduler, not inferred from late callback time.
++local output_subscriptions = {}
++local next_output_subscription = 0
++function clock.midi.subscribe_output(callbacks)
++  assert(type(callbacks) == "table", "MIDI output callbacks must be a table")
++  assert(callbacks.before ~= nil or callbacks.after ~= nil, "MIDI output callback required")
++  for _, name in ipairs({"before", "after"}) do
++    assert(callbacks[name] == nil or type(callbacks[name]) == "function", "invalid MIDI output callback")
++  end
++  next_output_subscription = next_output_subscription + 1
++  local record = {id=next_output_subscription, before=callbacks.before, after=callbacks.after, active=true}
++  table.insert(output_subscriptions, record)
++  return record.id
++end
++
++function clock.midi.cancel_output(id)
++  for i, record in ipairs(output_subscriptions) do
++    if record.id == id then
++      record.active = false
++      table.remove(output_subscriptions, i)
++      return true
++    end
++  end
++  return false
++end
++
++function clock.midi.clear_output_subscriptions()
++  for _, record in ipairs(output_subscriptions) do record.active = false end
++  output_subscriptions = {}
++end
++
++local function output_callback(callback, scheduled, epoch, ports, observed)
++  if callback == nil then return end
++  local visible_ports = {}
++  for i, port in ipairs(ports) do visible_ports[i] = port.id end
++  local co = coroutine.create(callback)
++  local ok, err = coroutine.resume(co, scheduled, epoch, visible_ports, observed)
++  if not ok then error(err) end
++  assert(coroutine.status(co) == "dead", "MIDI output callbacks must not yield")
++end
++
++local function dispatch_midi_output(selected, observed, scheduled, epoch)
++  local subscriptions, ports = {}, {}
++  for i, record in ipairs(output_subscriptions) do subscriptions[i] = record end
++  for i, port in ipairs(selected) do ports[i] = {id=port, device=midi.vports[port]} end
++  if #subscriptions > 0 then
++    assert(type(scheduled) == "number" and type(epoch) == "number", "native clock deadline metadata required")
++  end
++  for _, record in ipairs(subscriptions) do
++    if record.active then output_callback(record.before, scheduled, epoch, ports, observed) end
++  end
++  for _, port in ipairs(ports) do port.device:clock() end
++  for _, record in ipairs(subscriptions) do
++    if record.active then output_callback(record.after, scheduled, epoch, ports, observed) end
++  end
++end
++
+ 
+ 
+ clock.link = {}
+@@ -341,11 +401,8 @@
+   -- executes midi out (needs a subtick)
+   clock.run(function()
+     while true do
+-      clock.sync(1/24)
+-      for i = 1,#send_midi_clock do
+-        local port = send_midi_clock[i]
+-        midi.vports[port]:clock()
+-      end
++      local observed, scheduled, epoch = clock.sync(1/24)
++      dispatch_midi_output(send_midi_clock, observed, scheduled, epoch)
+     end
+   end)
+ 

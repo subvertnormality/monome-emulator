@@ -1,0 +1,103 @@
+--- a/matron/src/clocks/clock_scheduler.c
++++ b/matron/src/clocks/clock_scheduler.c
+@@ -33,11 +33,14 @@
+ 
+ static clock_scheduler_event_t clock_scheduler_events[NUM_CLOCK_SCHEDULER_EVENTS];
+ static pthread_mutex_t clock_scheduler_events_lock;
+-
+-static void clock_scheduler_post_clock_resume_event(int thread_id, double value) {
++static unsigned long long clock_scheduler_epoch = 0;
++
++static void clock_scheduler_post_clock_resume_event(int thread_id, double value, double scheduled, unsigned long long epoch) {
+     union event_data *ev = event_data_new(EVENT_CLOCK_RESUME);
+     ev->clock_resume.thread_id = thread_id;
+     ev->clock_resume.value = value;
++    ev->clock_resume.scheduled = scheduled;
++    ev->clock_resume.epoch = epoch;
+     event_post(ev);
+ }
+ 
+@@ -105,12 +108,12 @@
+             if (event->ready) {
+                 if (event->type == CLOCK_SCHEDULER_EVENT_SYNC) {
+                     if (clock_beat > event->sync_clock_beat) {
+-                        clock_scheduler_post_clock_resume_event(event->thread_id, clock_beat);
++                        clock_scheduler_post_clock_resume_event(event->thread_id, clock_beat, event->sync_clock_beat, clock_scheduler_epoch);
+                         event->ready = false;
+                     }
+                 } else {
+                     if (clock_time >= event->sleep_clock_time) {
+-                        clock_scheduler_post_clock_resume_event(event->thread_id, clock_time);
++                        clock_scheduler_post_clock_resume_event(event->thread_id, clock_time, event->sleep_clock_time, clock_scheduler_epoch);
+                         event->ready = false;
+                     }
+                 }
+@@ -239,6 +242,7 @@
+     clock_scheduler_event_t *event;
+ 
+     pthread_mutex_lock(&clock_scheduler_events_lock);
++    clock_scheduler_epoch++;
+ 
+     double clock_beat = clock_get_beats();
+ 
+@@ -257,6 +261,7 @@
+     clock_scheduler_event_t *event;
+ 
+     pthread_mutex_lock(&clock_scheduler_events_lock);
++    clock_scheduler_epoch++;
+ 
+     for (int i = 0; i < NUM_CLOCK_SCHEDULER_EVENTS; i++) {
+         event = &clock_scheduler_events[i];
+--- a/matron/src/event_types.h
++++ b/matron/src/event_types.h
+@@ -225,6 +225,8 @@
+     struct event_common common;
+     uint32_t thread_id;
+     double value;
++    double scheduled;
++    unsigned long long epoch;
+ }; // + 12
+ 
+ struct event_clock_start {
+--- a/matron/src/events.c
++++ b/matron/src/events.c
+@@ -211,7 +211,7 @@
+         w_handle_metro(ev->metro.id, ev->metro.stage);
+         break;
+     case EVENT_CLOCK_RESUME:
+-        w_handle_clock_resume(ev->clock_resume.thread_id, ev->clock_resume.value);
++        w_handle_clock_resume(ev->clock_resume.thread_id, ev->clock_resume.value, ev->clock_resume.scheduled, ev->clock_resume.epoch);
+         break;
+     case EVENT_CLOCK_START:
+         w_handle_clock_start();
+--- a/matron/src/weaver.c
++++ b/matron/src/weaver.c
+@@ -2673,13 +2673,15 @@
+ }
+ 
+ // clock handlers
+-void w_handle_clock_resume(const int coro_id, double value) {
++void w_handle_clock_resume(const int coro_id, double value, double scheduled, unsigned long long epoch) {
+     lua_getglobal(lvm, "clock");
+     lua_getfield(lvm, -1, "resume");
+     lua_remove(lvm, -2);
+     lua_pushinteger(lvm, coro_id);
+     lua_pushnumber(lvm, value);
+-    l_report(lvm, l_docall(lvm, 2, 0));
++    lua_pushnumber(lvm, scheduled);
++    lua_pushinteger(lvm, (lua_Integer)epoch);
++    l_report(lvm, l_docall(lvm, 4, 0));
+ }
+ 
+ void w_handle_clock_start() {
+--- a/matron/src/weaver.h
++++ b/matron/src/weaver.h
+@@ -77,7 +77,7 @@
+ extern void w_handle_metro(const int idx, const int stage);
+ 
+ //--- clock
+-extern void w_handle_clock_resume(const int thread_id, double value);
++extern void w_handle_clock_resume(const int thread_id, double value, double scheduled, unsigned long long epoch);
+ extern void w_handle_clock_start();
+ extern void w_handle_clock_stop();
+ 

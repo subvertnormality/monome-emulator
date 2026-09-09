@@ -1,0 +1,61 @@
+# Optional native MIDI output boundary extension
+
+This is an experimental partial checkpoint, not runtime admission. Official
+norns pin14bbeae8646c6717f6bb44c8cd60250bf94b6042 remains the dependency. No default
+lock changes, no Mosaic imports, and no copied replacement clock implementation.
+
+The confirmed Mosaic master bug and rejected independent-coroutine fix are
+recorded in the Mosaic branch02b3427. Codex arbitration session
+01a0876c-f9b2-7c63-95b0-8afea1324d1f motivates this generic extension. Its concrete
+implementation still requires a scoped Codex review.
+
+## Optional patches and contract
+
+`clock-scheduled-deadline.patch` adds scheduled deadline and epoch to the native
+resume event. Lua clock.sync/sleep retain observed time as return1; deadline is
+return2 (beats for sync, seconds for sleep), epoch return3. Reset/reschedule
+increments the scheduler epoch under its existing lock. Already-queued metadata
+is immutable. This does not claim queued stale events are globally suppressed.
+
+`midi-output-boundary.patch` adds clock.midi.subscribe_output({before,after}),
+returning a numeric handle. cancel_output(handle) removes it and returns whether
+it was active. clear_output_subscriptions and clock.cleanup invalidate all.
+Callbacks receive (scheduled, epoch, ports, observed), may not yield, and errors
+remain visible. Every dispatch snapshots subscribers and output ports, runs
+before callbacks, sends the existing native F8 fanout, then runs after callbacks.
+Cancellation takes effect during that dispatch; new subscriptions and output
+selection changes affect the next dispatch. Each callback gets its own list of
+port IDs. No subscriptions means no requirement for new metadata.
+
+## Evidence
+
+`midi-output-boundary-validation.json` retains exact reports and hashes:
+native scheduler legacy parity and deadline/epoch tests;8 Lua API scenarios;
+Mosaic-free controlled and real-time native probes verifying before/F8/after
+ordering, scheduler metadata and cancellation while F8 continues. These tests
+do not establish complete transport, musical timing or lifecycle correctness.
+
+Build with scripts/build_midi_boundary_candidate.py --baseline INSTALLATION_JSON
+--prior CONTROLLED_CANDIDATE_JSON --candidate-work NEW_DIRECTORY --output
+NEW_INSTALL_DIRECTORY. Both inputs are verified. The current baseline must match
+the build tool's selected reference. The composer explicitly reconciles the
+existing scheduler-step extraction with the additive metadata patch; unique
+source assertions protect that reconciliation. Existing installs are preserved.
+
+Run tests/clock_deadline_contract.py and tests/midi_output_boundary_contract.py
+with --upstream-checkout OFFICIAL_GIT_CACHE. Run
+tests/midi_output_boundary_native.py --install CANDIDATE_JSON --clock-mode
+controlled-experimental, then real-time. Full manifests retain source evidence.
+
+## Next required work
+
+Add delayed native delivery and source/epoch/forwarding probes. Integrate Mosaic
+using pending/running generations and exact origin from the dispatch, with a
+persistent owner for coincident24-PPQN pulses and native scheduling for96-PPQN
+intermediate pulses. Test cancellation before onset, rapid Stop/Start, multi-port
+routing and source/output changes. Preserve stock-hardware loading explicitly;
+do not claim fixed master timing without a compatible native capability. Restore
+M-SYNC009 passing in both modes and rerun affected acquisition, recording and
+timing cases, full units and Codex review. Broader emulator/manual/final hardening
+gates remain open. Remove these optional patches when equivalent official
+upstream functionality is pinned and the same conformance tests pass.
