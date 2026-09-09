@@ -1,0 +1,527 @@
+{
+  "status": "named native review findings resolved by scoped regressions; no admission",
+  "review": {
+    "path": "/home/andy/projects/mosaic-behaviour-runs/midi-boundary-fixes-review-02.json",
+    "sha256": "28fb5a01d36dca2ae936529f841137fd1b63f07a73f9e9f5b25f377590d01ff6",
+    "result": {
+      "status": "returned",
+      "request": {
+        "repo_path": "/home/andy/projects/mosaic-behaviour-tests",
+        "engine": "codex",
+        "effort": "medium",
+        "web_search": false,
+        "question": "Focused Codex follow-up to01a08785-156e-7a81-bc0b-03fed3a76d2e two blockers. Read only, no edits/subagents/web. New optional candidate06 built from officialpin14bbeae + prior03 verified controlledsource +deadline/boundarypatches+two suppliedfixes; no default promotion. Queued reset baselineC resumesat100.5afterreset0; newC distinguishes ready/queued/running, epochchanges rearmreadyorqueued sync whileinvalidatingoldepochmetadata; events.c claims queuedresume underlock beforeLua, rejects stale/duplicate/cancelled sync, sleep survivesepoch. Runningcoroutine nextsync rebases ifstoredsync_epoch differs. Cbaseline red/candidategreen plus legacyparity; native queuedreset fixture stallsLua80ms theninternalstart then80ms, old04 firstpoststallboundaryoldepoch fails;06passesD/R. Faultisolation: disablesbadsubscription, preserves per-IDcopied diagnostics andprintstrace, optional nonyieldon_error; handlerfailuresrecorded/printed too; healthyfanout/subscriberscontinue. Lua10casesincludinghandlerclearsubscribedthenfails pass; nativefaultprobe usesbadbefore+onerrorCCnotice+healthyafterCC8times thennativeF8continues passesD/R. Initialbuild05headerboolmissingcompile failed; eventtype nowuint8_t,06builds. Normalnativeoutputprobe06D/Rpass. 14Mosaic affectedD/R running; previous1d689Mosaicconsumer14D/Rand520units on04pass. NoMosaicsourcechanges thisslice. Assess fixes for originalblockers and concrete new regressions, especially claim/reset concurrency, no schedulerthread reentry, canceled/sleep delivery, errorhandler edgepaths/visibility. Mosaicadapterdoesnotyetprovideon_error cleanup; explicitly list this follow-up if needed, forwarding/multiport/lifecycle/gatetiming remaining not fullacceptance. Do not claim complete musical goal. Proportionate developer utility correctness, not cybersecurity/governance."
+      },
+      "input_sha256": {
+        "/home/andy/projects/monome-emulator-midi-clock/patches/norns/candidates/clock-queued-epoch.patch": "158a230daf6529ecfa041a58cb27cb3fb08ad210e0d4af6286c1d5d7ceead569",
+        "/home/andy/projects/monome-emulator-midi-clock/patches/norns/candidates/midi-output-fault-isolation.patch": "e97f5fb8709ecb4fff63ff6a6b04896a61c3130546c77efb291539642b66de73",
+        "/home/andy/projects/monome-emulator-midi-clock/tests/native_clock_epoch_delivery.c": "6226fddd85d2c101156e7350225f33eef68530a6c3203ea5f0a072350a938c88",
+        "/home/andy/projects/monome-emulator-midi-clock/tests/native_midi_output_boundary.lua": "d0d75e342d9f51e6706e15382775fbd5ce9dcf558abc55096af4adaf1010decc",
+        "/home/andy/projects/monome-emulator-midi-clock/scripts/build_midi_boundary_candidate.py": "cee58ab4a779504de14b4eb3f7534daba8c09894a25756966dcdf6f60a168230",
+        "/home/andy/projects/mosaic-behaviour-tests/lib/clock/midi_output_transport.lua": "334db266f5c5b12af5da2a6efb3b828386b546ecfa3022c47a6dbbc9f7a83532"
+      },
+      "query_schema": {
+        "name": "query",
+        "title": null,
+        "description": "Quick adversarial double-check of a single fact or point \u2014 NOT a full review, no five-section scaffold, lower reasoning effort. The reviewer reads the repo (if given) and returns a direct answer with citations and a stated confidence level.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "question": {
+              "type": "string",
+              "description": "The specific question to double-check."
+            },
+            "repo_path": {
+              "type": "string",
+              "description": "Absolute path to the git repo to ground the answer (optional)."
+            },
+            "files": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "path"
+                ]
+              },
+              "description": "Optional files to suggest the reviewer look at first (hints, not a payload \u2014 it can read anything)."
+            },
+            "focus": {
+              "type": "string",
+              "description": "Extra framing for the question."
+            },
+            "engine": {
+              "type": "string",
+              "enum": [
+                "codex",
+                "claude"
+              ],
+              "description": "Override which local engine reviews (default: the server's configured engine; rebut uses known session ownership and requires an explicit engine when unknown)."
+            },
+            "model": {
+              "type": "string",
+              "description": "Override the reviewer model (default: the engine's strongest \u2014 gpt-6-astra / claude-fable-5-1)."
+            },
+            "effort": {
+              "type": "string",
+              "enum": [
+                "low",
+                "medium",
+                "high"
+              ],
+              "description": "Reasoning effort. Reviews default to high; query defaults to medium."
+            },
+            "web_search": {
+              "type": "boolean",
+              "description": "Use the selected reviewer's built-in web search (default true). For critique_plan this is required while claim verification is enabled; there is no custom search endpoint or API-key integration."
+            }
+          },
+          "required": [
+            "question"
+          ]
+        },
+        "outputSchema": null,
+        "icons": null,
+        "annotations": null,
+        "meta": null,
+        "execution": null
+      },
+      "result": {
+        "meta": null,
+        "content": [
+          {
+            "type": "text",
+            "text": "**Candidate06 resolves the queued-reset blocker and isolates ordinary subscriber failures, but fault isolation still has a reproducible error-reporting hole.** I found no concrete new scheduler regression in the inspected paths.\n\n- **Queued reset:** [clock_scheduler.c:285](/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-06/norns/matron/src/clocks/clock_scheduler.c:285) rearms waiting/queued syncs under the same mutex used by [claim_resume:319](/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-06/norns/matron/src/clocks/clock_scheduler.c:319). Claiming clears `queued`; a subsequent reset leaves that running coroutine alone, and its next sync rebases through the epoch check at line202. [events.c:215](/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-06/norns/matron/src/events.c:215) enters Lua after claiming and releasing the scheduler lock. Scheduler polling only publishes events\u2014no scheduler-thread Lua reentry. Cancellation clears queued state; sleep claims deliberately survive epoch changes.\n\n- **Remaining fault-isolation defect:** [clock.lua:221](/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-06/norns/lua/core/clock.lua:221) executes `tostring(err)` outside protection. I reproduced a callback throwing `error(setmetatable({}, {__tostring=function() error(\"formatting failed\") end}))` against the installed06 Lua file: the shared resume failed, **no F8 or healthy callback ran**, no subscription diagnostic appeared, and the next resume reported `cannot resume dead coroutine`. The same formatter handles `on_error` failures. Protect diagnostic conversion with a safe fallback and cover both entry paths. This is an uncommon but concrete remaining instance of the original blocker.\n\n- **Positive evidence:** I reran all ten supplied Lua cases successfully, including yielding callbacks, failing handlers, and clear-subscriptions-then-fail. [Recorded native results](/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/boundary-fixes-native-01.json:1) show the04 queued-reset failure and06 queued-reset, fault-isolation, and normal-output passes in D/R. These establish the ordinary paths; they do not cover the formatter failure.\n\n- **Mosaic follow-up:** [midi_output_transport.lua:37](/home/andy/projects/mosaic-behaviour-tests/lib/clock/midi_output_transport.lua:37) still supplies no `on_error` cleanup. Disabling its subscription can leave transport state and the intermediate coroutine active; wire failure into cancellation and appropriate note-release cleanup. Forwarding, multiport/remapping, lifecycle, and gate/wrap/tempo validation remain outstanding. The [06 Mosaic results](/home/andy/projects/mosaic-behaviour-runs/midi-boundary-regressions-02.json:1) were still marked running when inspected; earlier04 results do not establish06 completion.\n\n**CONFIDENCE: High.** A protected formatter plus passing callback/handler error-object regressions would close the remaining native finding; I did not rerun native processes or establish full musical acceptance.\n\n---\n_paranoia-local \u00b7 engine=codex \u00b7 session_ref=`01a08799-74cf-7b20-8d9e-de45fb8953c9` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+            "annotations": null,
+            "meta": null
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    }
+  },
+  "review_disposition": {
+    "queued_reset": "Codex confirmed correction; native old04 fails and06passesD/R; scheduler unchanged in07.",
+    "subscriber_errors": "Ordinary faults isolated; reviewed unprintable formatter reproduced6b46fd86 and corrected;12Lua scenarios and07nativeD/R pass.",
+    "Mosaic_cleanup": "Fault callback now cancels adapter and calls existing Stop/note-release path;7adapter scenarios and520units pass."
+  },
+  "candidate_install": {
+    "path": "/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-07/installation.json",
+    "sha256": "e5cb276bd68bcc33fba7e20b5ca21542d2488801873f60f6db78e8a85d2c01df"
+  },
+  "native_evidence": [
+    {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/8863f870211a4b8b9d0e6a6229c38509/results.json",
+      "sha256": "34bad4e459511d3709c249dc5dacade000a744e9231dcb1fb45d9c8e21a690a4",
+      "result": {
+        "passed": true,
+        "official_revision": "14bbeae8646c6717f6bb44c8cd60250bf94b6042",
+        "patch_sha256": "158a230daf6529ecfa041a58cb27cb3fb08ad210e0d4af6286c1d5d7ceead569",
+        "rows": [
+          {
+            "label": "baseline-failure",
+            "expected_exit_code": 1,
+            "exit_code": 1,
+            "stdout": "PASS: observed value, scheduled deadline, delayed continuation, sleep, epoch/reset/reschedule, queued immutability, cancellation\nqueued_deadline=100.250000000 reset_beat=0.000000000 continuation_deadline=100.500000000\n",
+            "stderr": "FAIL: queued continuation retained pre-reset deadline\n",
+            "command": [
+              "cc",
+              "-std=gnu11",
+              "-Wall",
+              "-Wextra",
+              "-Werror",
+              "-fsanitize=undefined",
+              "-DSCHEDULER_SOURCE=\"/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/8863f870211a4b8b9d0e6a6229c38509/stock/matron/src/clocks/clock_scheduler.c\"",
+              "/home/andy/projects/monome-emulator-midi-clock/tests/native_clock_queued_epoch.c",
+              "-o",
+              "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/8863f870211a4b8b9d0e6a6229c38509/baseline-failure",
+              "-lm",
+              "-pthread"
+            ]
+          },
+          {
+            "label": "candidate-delivery",
+            "expected_exit_code": 0,
+            "exit_code": 0,
+            "stdout": "PASS: observed value, scheduled deadline, delayed continuation, sleep, epoch/reset/reschedule, queued immutability, cancellation\nPASS: queued reset, stale/duplicate rejection, running reset, source change, sleep independence, queued cancellation\n",
+            "stderr": "",
+            "command": [
+              "cc",
+              "-std=gnu11",
+              "-Wall",
+              "-Wextra",
+              "-Werror",
+              "-fsanitize=undefined",
+              "-DSCHEDULER_SOURCE=\"/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/8863f870211a4b8b9d0e6a6229c38509/candidate/matron/src/clocks/clock_scheduler.c\"",
+              "/home/andy/projects/monome-emulator-midi-clock/tests/native_clock_epoch_delivery.c",
+              "-o",
+              "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/8863f870211a4b8b9d0e6a6229c38509/candidate-delivery",
+              "-lm",
+              "-pthread"
+            ]
+          },
+          {
+            "label": "candidate-parity",
+            "expected_exit_code": 0,
+            "exit_code": 0,
+            "stdout": "0 0 0\n1 1 0.25\n2 2 0.50000000000000011\n2 2 0.50000000000000011\n4 4 0.29999999999999999\n4 4 0.29999999999999999\n4 4 0.29999999999999999\n5 9 0.87500000000000011\n5 9 0.87500000000000011\n6 9 1.1250000000000002\n6 9 1.1250000000000002\n7 9 2.2500000000000004\n7 9 2.2500000000000004\n8 9 4.9406564584124654e-324\n8 9 4.9406564584124654e-324\nPASS: deadlines, order, cancellation, offsets, reset, reschedule, capacity\n",
+            "stderr": "",
+            "command": [
+              "cc",
+              "-std=gnu11",
+              "-Wall",
+              "-Wextra",
+              "-Werror",
+              "-fsanitize=undefined",
+              "-DSCHEDULER_SOURCE=\"/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/8863f870211a4b8b9d0e6a6229c38509/candidate/matron/src/clocks/clock_scheduler.c\"",
+              "/home/andy/projects/monome-emulator-midi-clock/tests/native_scheduler_step.c",
+              "-o",
+              "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/8863f870211a4b8b9d0e6a6229c38509/candidate-parity",
+              "-lm",
+              "-pthread"
+            ]
+          },
+          {
+            "label": "baseline-parity",
+            "expected_exit_code": 0,
+            "exit_code": 0,
+            "stdout": "0 0 0\n1 1 0.25\n2 2 0.50000000000000011\n2 2 0.50000000000000011\n4 4 0.29999999999999999\n4 4 0.29999999999999999\n4 4 0.29999999999999999\n5 9 0.87500000000000011\n5 9 0.87500000000000011\n6 9 1.1250000000000002\n6 9 1.1250000000000002\n7 9 2.2500000000000004\n7 9 2.2500000000000004\n8 9 4.9406564584124654e-324\n8 9 4.9406564584124654e-324\nPASS: deadlines, order, cancellation, offsets, reset, reschedule, capacity\n",
+            "stderr": "",
+            "command": [
+              "cc",
+              "-std=gnu11",
+              "-Wall",
+              "-Wextra",
+              "-Werror",
+              "-fsanitize=undefined",
+              "-DSCHEDULER_SOURCE=\"/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/8863f870211a4b8b9d0e6a6229c38509/stock/matron/src/clocks/clock_scheduler.c\"",
+              "/home/andy/projects/monome-emulator-midi-clock/tests/native_scheduler_step.c",
+              "-o",
+              "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/8863f870211a4b8b9d0e6a6229c38509/baseline-parity",
+              "-lm",
+              "-pthread"
+            ]
+          }
+        ],
+        "scope": "Native scheduler claim boundary only; runtime not yet rebuilt"
+      }
+    },
+    {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/c0b7ca90df2d4cfbb6039b452a1ead35/results.json",
+      "sha256": "b215de4b05c3e05d754924cf5716a49aedc8c4b79fa44b40693f4e2fbea9f426",
+      "result": {
+        "passed": true,
+        "exit_code": 0,
+        "stdout": "MIDI output subscriber 1 failed in before: MIDI output callbacks must not yield\nMIDI output subscriber 1 failed in after: ...mulator-midi-clock/tests/native_midi_output_boundary.lua:65: callback failure sentinel\nstack traceback:\n\t[C]: in function 'error'\n\t...mulator-midi-clock/tests/native_midi_output_boundary.lua:65: in function <...mulator-midi-clock/tests/native_midi_output_boundary.lua:65>\nMIDI output subscriber 1 failed in before: ...mulator-midi-clock/tests/native_midi_output_boundary.lua:93: bad subscriber\nstack traceback:\n\t[C]: in function 'error'\n\t...mulator-midi-clock/tests/native_midi_output_boundary.lua:93: in function <...mulator-midi-clock/tests/native_midi_output_boundary.lua:93>\nMIDI output subscriber error handler failed: ...mulator-midi-clock/tests/native_midi_output_boundary.lua:96: bad error handler\nstack traceback:\n\t[C]: in function 'error'\n\t...mulator-midi-clock/tests/native_midi_output_boundary.lua:96: in function <...mulator-midi-clock/tests/native_midi_output_boundary.lua:94>\nMIDI output subscriber 1 failed in before: ...mulator-midi-clock/tests/native_midi_output_boundary.lua:107: first failure\nstack traceback:\n\t[C]: in function 'error'\n\t...mulator-midi-clock/tests/native_midi_output_boundary.lua:107: in function <...mulator-midi-clock/tests/native_midi_output_boundary.lua:107>\nMIDI output subscriber error handler failed: ...mulator-midi-clock/tests/native_midi_output_boundary.lua:108: cleared then failed\nstack traceback:\n\t[C]: in function 'error'\n\t...mulator-midi-clock/tests/native_midi_output_boundary.lua:108: in function <...mulator-midi-clock/tests/native_midi_output_boundary.lua:108>\nMIDI output subscriber 1 failed in before: MIDI output callback raised an unprintable error\nMIDI output subscriber 1 failed in before: ...mulator-midi-clock/tests/native_midi_output_boundary.lua:115: ordinary failure\nstack traceback:\n\t[C]: in function 'error'\n\t...mulator-midi-clock/tests/native_midi_output_boundary.lua:115: in function <...mulator-midi-clock/tests/native_midi_output_boundary.lua:115>\nMIDI output subscriber error handler failed: MIDI output callback raised an unprintable error\nPASS:12 output dispatch scenarios including unprintable subscriber and handler errors\n",
+        "stderr": "",
+        "official_revision": "14bbeae8646c6717f6bb44c8cd60250bf94b6042",
+        "patch_sha256": "1e6ea366b8199a362f4971fe55ece3b0e9eee3b95b0f863ecd0124e353d8c4a2",
+        "isolation_sha256": "c195d22ad36734b2a33cb7bb1aaf5edab21d90a7d957bfda2f07be5c85d6ea3b",
+        "scope": "Lua integration with boundary mocks, not native runtime or release admission"
+      }
+    },
+    {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/boundary-fixes-native-01.json",
+      "sha256": "63ca0d0883752b2603081f16bde6cf2197ba6ca57384ac78d890b10799b4a5d6",
+      "result": {
+        "status": "passed",
+        "rows": [
+          {
+            "test": "midi_output_queued_reset_native.py",
+            "candidate": "04",
+            "mode": "real-time",
+            "expected_exit_code": 1,
+            "exit_code": 1,
+            "stdout": "{\"path\": \"/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/4c5c8d0f4dc94a98a92ca2a630e8fc09/manifest.json\", \"passed\": false, \"failure\": {\"type\": \"AssertionError\", \"message\": \"Stale pre-reset boundary delivered after the queued reset\"}, \"clock_mode\": \"real-time\", \"install\": \"/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-04/installation.json\", \"scope\": \"Native reset while Lua delivery is queued; no full admission\"}\n",
+            "stderr": ""
+          },
+          {
+            "test": "midi_output_queued_reset_native.py",
+            "candidate": "06",
+            "mode": "controlled-experimental",
+            "expected_exit_code": 0,
+            "exit_code": 0,
+            "stdout": "{\"path\": \"/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/7b0cf811cbb846c9bc1e0a5e2898c038/manifest.json\", \"passed\": true, \"failure\": null, \"clock_mode\": \"controlled-experimental\", \"install\": \"/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-06/installation.json\", \"scope\": \"Native reset while Lua delivery is queued; no full admission\"}\n",
+            "stderr": ""
+          },
+          {
+            "test": "midi_output_queued_reset_native.py",
+            "candidate": "06",
+            "mode": "real-time",
+            "expected_exit_code": 0,
+            "exit_code": 0,
+            "stdout": "{\"path\": \"/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/393623e7133d4c8fa681144c8e6edb44/manifest.json\", \"passed\": true, \"failure\": null, \"clock_mode\": \"real-time\", \"install\": \"/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-06/installation.json\", \"scope\": \"Native reset while Lua delivery is queued; no full admission\"}\n",
+            "stderr": ""
+          },
+          {
+            "test": "midi_output_fault_native.py",
+            "candidate": "06",
+            "mode": "controlled-experimental",
+            "expected_exit_code": 0,
+            "exit_code": 0,
+            "stdout": "{\"path\": \"/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/b6a0adae41e04b4abdf78240c006bf61/manifest.json\", \"passed\": true, \"failure\": null, \"clock_mode\": \"controlled-experimental\", \"install\": \"/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-06/installation.json\", \"scope\": \"Native subscriber fault isolation; not full runtime admission\"}\n",
+            "stderr": ""
+          },
+          {
+            "test": "midi_output_fault_native.py",
+            "candidate": "06",
+            "mode": "real-time",
+            "expected_exit_code": 0,
+            "exit_code": 0,
+            "stdout": "{\"path\": \"/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/78b1602069a2405b888c1e121c32d436/manifest.json\", \"passed\": true, \"failure\": null, \"clock_mode\": \"real-time\", \"install\": \"/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-06/installation.json\", \"scope\": \"Native subscriber fault isolation; not full runtime admission\"}\n",
+            "stderr": ""
+          },
+          {
+            "test": "midi_output_boundary_native.py",
+            "candidate": "06",
+            "mode": "controlled-experimental",
+            "expected_exit_code": 0,
+            "exit_code": 0,
+            "stdout": "{\"path\": \"/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/77ea1d30fb8e4139addf8dfd10dfd0c6/manifest.json\", \"passed\": true, \"failure\": null, \"clock_mode\": \"controlled-experimental\", \"install\": \"/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-06/installation.json\", \"scope\": \"Generic native callback/deadline bridge; not complete boundary or Mosaic acceptance\"}\n",
+            "stderr": ""
+          },
+          {
+            "test": "midi_output_boundary_native.py",
+            "candidate": "06",
+            "mode": "real-time",
+            "expected_exit_code": 0,
+            "exit_code": 0,
+            "stdout": "{\"path\": \"/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/e15dae9eac934cba95b08256c5a206c2/manifest.json\", \"passed\": true, \"failure\": null, \"clock_mode\": \"real-time\", \"install\": \"/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-06/installation.json\", \"scope\": \"Generic native callback/deadline bridge; not complete boundary or Mosaic acceptance\"}\n",
+            "stderr": ""
+          }
+        ],
+        "full_goal_complete": false
+      }
+    }
+  ],
+  "candidate06_matrix": {
+    "path": "/home/andy/projects/mosaic-behaviour-runs/midi-boundary-regressions-02.json",
+    "sha256": "0d690cb43d06c419b601c7045f531587fd0491623c22af4b786055aa518d9593",
+    "result": {
+      "status": "passed",
+      "runs": [
+        {
+          "case": "M-SYNC-009",
+          "clock_mode": "controlled-experimental",
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-SYNC-009\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/c0e6ef34c46d4f768f88728404ccded6/manifest.json\"}\n",
+          "stderr": ""
+        },
+        {
+          "case": "M-SYNC-009",
+          "clock_mode": "real-time",
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-SYNC-009\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/2eeec10d4ac349e3a9ecc4463706cb90/manifest.json\"}\n",
+          "stderr": ""
+        },
+        {
+          "case": "M-SYNC-006",
+          "clock_mode": "controlled-experimental",
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-SYNC-006\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/ec34279b61f441eb897dcf0f1e905f62/manifest.json\"}\n",
+          "stderr": ""
+        },
+        {
+          "case": "M-SYNC-006",
+          "clock_mode": "real-time",
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-SYNC-006\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/ab5d0df69da0442d8e6acac4b64d419a/manifest.json\"}\n",
+          "stderr": ""
+        },
+        {
+          "case": "M-SYNC-008",
+          "clock_mode": "controlled-experimental",
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-SYNC-008\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/fcbda35df7ad4e809f4188f230eb6fef/manifest.json\"}\n",
+          "stderr": ""
+        },
+        {
+          "case": "M-SYNC-008",
+          "clock_mode": "real-time",
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-SYNC-008\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/764a6d6473be44ea865ee6f9461d130b/manifest.json\"}\n",
+          "stderr": ""
+        },
+        {
+          "case": "M-SYNC-005",
+          "clock_mode": "controlled-experimental",
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-SYNC-005\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/1a0590cb94f94870b2d2d39decdfb7ca/manifest.json\"}\n",
+          "stderr": ""
+        },
+        {
+          "case": "M-SYNC-005",
+          "clock_mode": "real-time",
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-SYNC-005\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/c7ed2cfdca324ddcbef1e2722bb47941/manifest.json\"}\n",
+          "stderr": ""
+        },
+        {
+          "case": "M-TIM-002",
+          "clock_mode": "controlled-experimental",
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-TIM-002\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/f315b565221c4b5091219257b7a6dd58/manifest.json\"}\n",
+          "stderr": ""
+        },
+        {
+          "case": "M-TIM-002",
+          "clock_mode": "real-time",
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-TIM-002\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/c581bbf0e5b148cb9d6ba21fed779ef4/manifest.json\"}\n",
+          "stderr": ""
+        },
+        {
+          "case": "M-TIM-003",
+          "clock_mode": "controlled-experimental",
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-TIM-003\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/652762431acf4d60835b18c3ce8f55bb/manifest.json\"}\n",
+          "stderr": ""
+        },
+        {
+          "case": "M-TIM-003",
+          "clock_mode": "real-time",
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-TIM-003\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/402a10b37ecd4d85a3a3debb4633a0fe/manifest.json\"}\n",
+          "stderr": ""
+        },
+        {
+          "case": "M-REC-001",
+          "clock_mode": "controlled-experimental",
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-REC-001\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/4f330b29f8254a71a73c4ae15d4e9169/manifest.json\"}\n",
+          "stderr": ""
+        },
+        {
+          "case": "M-REC-001",
+          "clock_mode": "real-time",
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-REC-001\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/53ba335402bc42b08d0785905b3c1315/manifest.json\"}\n",
+          "stderr": ""
+        }
+      ],
+      "full_goal_complete": false
+    }
+  },
+  "candidate07_scoped_checks": {
+    "path": "/home/andy/projects/mosaic-behaviour-runs/midi-boundary-final-checks-07.json",
+    "sha256": "481675ff8acdd32a752134580075114577441899ec05fc1abfdfbe8b97e7f170",
+    "result": {
+      "status": "passed",
+      "rows": [
+        {
+          "repo": "/home/andy/projects/monome-emulator-midi-clock",
+          "command": [
+            "python3",
+            "tests/midi_output_error_object_native.py",
+            "--install",
+            "/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-07/installation.json",
+            "--clock-mode",
+            "controlled-experimental"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"path\": \"/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/59fd0bd8aa8044ffbb934ccd60d1d693/manifest.json\", \"passed\": true, \"failure\": null, \"clock_mode\": \"controlled-experimental\", \"install\": \"/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-07/installation.json\", \"scope\": \"Native unprintable subscriber/handler error isolation; not full admission\"}\n",
+          "stderr": ""
+        },
+        {
+          "repo": "/home/andy/projects/monome-emulator-midi-clock",
+          "command": [
+            "python3",
+            "tests/midi_output_error_object_native.py",
+            "--install",
+            "/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-07/installation.json",
+            "--clock-mode",
+            "real-time"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"path\": \"/home/andy/projects/monome-emulator-midi-clock/artifacts/midi-clock/83b966dc9c954972a41f3f09a9d77594/manifest.json\", \"passed\": true, \"failure\": null, \"clock_mode\": \"real-time\", \"install\": \"/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-07/installation.json\", \"scope\": \"Native unprintable subscriber/handler error isolation; not full admission\"}\n",
+          "stderr": ""
+        },
+        {
+          "repo": "/home/andy/projects/mosaic-behaviour-tests",
+          "command": [
+            "python3",
+            "tests/behaviour/run.py",
+            "--case",
+            "M-SYNC-009",
+            "--clock-mode",
+            "controlled-experimental",
+            "--experimental-install",
+            "/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-07/installation.json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-SYNC-009\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/ece3b82c4111446880bff2c3d4e5502a/manifest.json\"}\n",
+          "stderr": ""
+        },
+        {
+          "repo": "/home/andy/projects/mosaic-behaviour-tests",
+          "command": [
+            "python3",
+            "tests/behaviour/run.py",
+            "--case",
+            "M-SYNC-009",
+            "--clock-mode",
+            "real-time",
+            "--experimental-install",
+            "/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-07/installation.json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-SYNC-009\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/6ff72b9c09774f2db9efdc2beb78cf5e/manifest.json\"}\n",
+          "stderr": ""
+        },
+        {
+          "repo": "/home/andy/projects/mosaic-behaviour-tests",
+          "command": [
+            "python3",
+            "tests/behaviour/run.py",
+            "--case",
+            "M-SYNC-006",
+            "--clock-mode",
+            "controlled-experimental",
+            "--experimental-install",
+            "/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-07/installation.json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-SYNC-006\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/27fb0440e65f49d095bcb3aa2a8626a3/manifest.json\"}\n",
+          "stderr": ""
+        },
+        {
+          "repo": "/home/andy/projects/mosaic-behaviour-tests",
+          "command": [
+            "python3",
+            "tests/behaviour/run.py",
+            "--case",
+            "M-SYNC-006",
+            "--clock-mode",
+            "real-time",
+            "--experimental-install",
+            "/home/andy/projects/monome-runtime-candidates/midi-clock-boundary-07/installation.json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"case\": \"M-SYNC-006\", \"passed\": true, \"manifest\": \"/home/andy/projects/mosaic-behaviour-runs/8e9cddef35ea46d49175a77841a6759d/manifest.json\"}\n",
+          "stderr": ""
+        }
+      ],
+      "full_goal_complete": false
+    }
+  },
+  "patch_sha256": {
+    "midi-output-fault-isolation.patch": "c195d22ad36734b2a33cb7bb1aaf5edab21d90a7d957bfda2f07be5c85d6ea3b",
+    "clock-queued-epoch.patch": "158a230daf6529ecfa041a58cb27cb3fb08ad210e0d4af6286c1d5d7ceead569"
+  },
+  "remaining": [
+    "Native lifecycle rapid Start/Stop and direct init/reset",
+    "Incoming transport forwarding and routing/remapping",
+    "Master intermediate/gate/wrap/tempo matrices",
+    "Internal tempo-reference correction",
+    "Full manual campaign, WSL/Linux release, final unit/integration hardening"
+  ],
+  "full_goal_complete": false
+}

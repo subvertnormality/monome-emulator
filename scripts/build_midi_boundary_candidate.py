@@ -21,26 +21,24 @@ for item in prior['experimental']['files']:
 for n in ['matron/src/event_types.h','matron/src/events.c','matron/src/weaver.c','matron/src/weaver.h','matron/src/clocks/clock_scheduler.c','lua/core/clock.lua']:
     original.setdefault(n,(Path(base['source'])/n).read_bytes())
     changed.setdefault(n,(Path(prior['source'])/n).read_bytes())
-patches=[r/'patches/norns/candidates'/n for n in ['clock-scheduled-deadline.patch','midi-output-boundary.patch']]
+patches=[r/'patches/norns/candidates'/n for n in ['clock-scheduled-deadline.patch','midi-output-boundary.patch','clock-queued-epoch.patch','midi-output-fault-isolation.patch']]
 with tempfile.TemporaryDirectory() as temp:
     for n,b in changed.items():
         p=Path(temp)/n;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(b)
-    # The controlled seam changes indentation around scheduler dispatch. Apply
-    # the exact additive edits explicitly there; apply all other hunks normally.
-    subprocess.run(['git','apply','--unsafe-paths','--exclude=matron/src/clocks/clock_scheduler.c',str(patches[0])],cwd=temp,check=True)
-    p=Path(temp)/'matron/src/clocks/clock_scheduler.c';s=p.read_text()
-    for old,new in [
-        ('static pthread_mutex_t clock_scheduler_events_lock;','static pthread_mutex_t clock_scheduler_events_lock;\nstatic unsigned long long clock_scheduler_epoch = 0;'),
-        ('int thread_id, double value) {','int thread_id, double value, double scheduled, unsigned long long epoch) {'),
-        ('ev->clock_resume.value = value;','ev->clock_resume.value = value;\n    ev->clock_resume.scheduled = scheduled;\n    ev->clock_resume.epoch = epoch;'),
-        ('clock_scheduler_post_clock_resume_event(event->thread_id, clock_beat);','clock_scheduler_post_clock_resume_event(event->thread_id, clock_beat, event->sync_clock_beat, clock_scheduler_epoch);'),
-        ('clock_scheduler_post_clock_resume_event(event->thread_id, clock_time);','clock_scheduler_post_clock_resume_event(event->thread_id, clock_time, event->sleep_clock_time, clock_scheduler_epoch);')]:
-        assert s.count(old)==1,old;s=s.replace(old,new,1)
-    for function in ['clock_scheduler_reschedule_sync_events','clock_scheduler_reset_sync_events']:
-        i=s.index('void '+function+'()');j=s.index('pthread_mutex_lock(&clock_scheduler_events_lock);',i)+len('pthread_mutex_lock(&clock_scheduler_events_lock);')
-        s=s[:j]+'\n    clock_scheduler_epoch++;'+s[j:]
-    p.write_text(s)
-    subprocess.run(['git','apply','--unsafe-paths',str(patches[1])],cwd=temp,check=True)
+    # Apply upstream scheduler patches before extracting the existing controlled
+    # seam. Prove reconstruction matches the supplied prior scheduler exactly.
+    sys.path.insert(0,str(r/'scripts'))
+    from prepare_clock_step import transform
+    scheduler='matron/src/clocks/clock_scheduler.c'
+    stock_scheduler=(Path(base['source'])/scheduler).read_text()
+    assert transform(stock_scheduler)==changed[scheduler].decode(), 'Prior scheduler contains unaccounted edits'
+    upstream=Path(temp)/'scheduler-upstream'
+    source=upstream/scheduler;source.parent.mkdir(parents=True);source.write_text(stock_scheduler)
+    for index in (0,2):
+        subprocess.run(['git','apply','--unsafe-paths','--include='+scheduler,str(patches[index])],cwd=upstream,check=True)
+    (Path(temp)/scheduler).write_text(transform(source.read_text()))
+    for patch in patches:
+        subprocess.run(['git','apply','--unsafe-paths','--exclude='+scheduler,str(patch)],cwd=temp,check=True)
     changed={n:(Path(temp)/n).read_bytes() for n in changed}
 candidate=args.candidate_work.resolve();candidate.mkdir(parents=True,exist_ok=False)
 parts=[];files=[]
