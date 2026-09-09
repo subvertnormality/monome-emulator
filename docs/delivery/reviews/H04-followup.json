@@ -1,0 +1,45 @@
+{
+  "started_at": "2026-09-09T07:08:49.067826+00:00",
+  "packet_sha256": "2dd68960846832896987ada8e4778ab35e1b2133b9d0b8075196d67a373e5595",
+  "files": [
+    "docs/delivery/completions/H04.md",
+    "docs/delivery/references/H04-evidence.json"
+  ],
+  "tool": "query",
+  "request": {
+    "repo_path": "/mnt/c/Users/andy/Documents/ChatGPT/monome-emulator/.runtime/worktrees/audio-monitor",
+    "engine": "codex",
+    "question": "This is the single focused follow-up to H04-retry.json, session\n01a084d0-347a-7e13-a7ec-ab749760b36c; do not perform a new whole-branch review.\nTrusted single-user local norns/grid emulator; audio explicitly authorized.\nReview the accepted startup-cancellation and diagnostic-retention fixes and the\nnarrow JACK lifetime race correction their actual native regressions uncovered.\nRead H04-triage.md and H04-evidence.json. Verify reported evidence and inspect\nscripts/container/entrypoint.py, src runtime startup/cleanup changes since d875402,\ntests/container_startup_cancel.cjs and container_failures.cjs. Startup SIGTERM is\naccepted only before readiness with explicit requested_termination metadata;\nnormal ready shutdown must still succeed, and SIGSEGV/SIGKILL remain failures.\n\nFor the JACK patch, inspect scripts/jack_lifetime_patch.py, its explicit stored\npatch, builder identity integration, tests/jack_lifetime.{py,c}, and the recorded\nGDB stack. It extends the existing non-audio-thread time mutex over frame reads\nand destruction, returns frozen time after close, and guards CPU load. Current\nofficial upstream was inspected at its moved .cpp path; no equivalent fix exists\nthere. Is the synchronization narrow and correct for this captured shutdown\nrace, and do actual lifecycle plus deterministic baseline-failure/candidate-pass\nevidence adequately close the failure? Do not infer every historical crash was\nthis race or every original audible click is fixed. Old failures remain false.\n\nReport only substantive unresolved issues with these fixes or their evidence,\notherwise state which original findings are resolved. Do not require physical\nhardware/manual listening or admit macOS/native Linux from this Windows host.\nDo not modify files or launch concurrent native/audio tests; inspect evidence.\n",
+    "files": [
+      {
+        "path": "docs/delivery/completions/H04.md",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/references/H04-evidence.json",
+        "reason": "Updated delivery contract"
+      },
+      {
+        "path": "docs/delivery/reviews/H04-triage.md",
+        "reason": "Findings and fixes"
+      }
+    ],
+    "web_search": false,
+    "effort": "medium"
+  },
+  "result": {
+    "meta": null,
+    "content": [
+      {
+        "type": "text",
+        "text": "No substantive unresolved issue found in this focused follow-up. The startup-cancellation and diagnostic-retention findings are resolved; the narrow JACK synchronization correctly addresses the captured shutdown race, with adequate deterministic and actual lifecycle evidence.\n\n- **Cancellation:** `src/runtime/native.py:562` restricts direct matron termination to interrupted, pre-ready startup; line 580 records `requested_termination`. Line 602 and `src/automation/session.py:122` still reject SIGSEGV/SIGKILL. The final cancellation report records 1,212 ms cancellation and successful persisted reopen with normal matron exit 0.\n- **Diagnostics:** `tests/container_failures.cjs:20` saves logs before assertions; lines 34\u201339 remove only verified cases. The injected assertion report remains false, with retained logs/container and recorded stopped state.\n- **JACK lifetime:** `scripts/jack_lifetime_patch.py:12\u201329` places destruction, frame reads and CPU-load access under the same existing mutex. Clearing the pointer makes subsequent time reads frozen and repeated close safe. The captured stack shows the competing read and destruction at `matron-gdb.log:69` and `:158`. Builder equality checking and recorded patch identity match the stored patch.\n- **Evidence:** All 25 listed report hashes/statuses, the GDB hash, upstream-source hash and harness hash match. `tests/jack_lifetime.c:55\u201363` forces the contested boundary and checks post-close behavior; its report records baseline \u22126/candidate 0. Final native browser, cancellation/reopen, restart, negative-startup and audio cleanup evidence passes. Historical failures remain false.\n\n**CONFIDENCE: High.** Evidence was inspected without rerunning tests; this closes the captured race, not every historical crash/click, and establishes no macOS/native-Linux admission.\n\n---\n_paranoia-local \u00b7 engine=codex \u00b7 session_ref=`01a084ff-7d71-7d03-b387-b4b1c4d12547` \u2014 to dispute a finding, call `rebut` with this session_ref and your counter-evidence._",
+        "annotations": null,
+        "meta": null
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "status": "returned",
+  "finished_at": "2026-09-09T07:10:37.706533+00:00"
+}

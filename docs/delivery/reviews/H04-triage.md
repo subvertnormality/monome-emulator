@@ -96,3 +96,12 @@ bounds176.9/162.1ms exceed the150ms monitoring target. Preserve this observed
 range: delayed monitoring only, no ceiling or interactive-playing claim. No
 threshold was relaxed and earlier passing/failing evidence remains unchanged.
 No native tests are active at the focused-review checkpoint.
+
+Focused review completed: H04-followup.json, Codex session
+01a084ff-7d71-7d03-b387-b4b1c4d12547. No substantive unresolved issues. It verified
+all25 report hashes/statuses, GDB/upstream/harness hashes, strict signal gates,
+and deterministic plus native lifecycle evidence. It resolved both startup
+findings and diagnostic retention and accepted the captured JACK race fix.
+The one-critique/one-focused-follow-up budget is now closed. H04 is admitted for
+the recorded Windows Docker Desktop/amd64 image and Windows Chromium boundary.
+This is not all-engine, hardware, native-Linux or macOS admission.

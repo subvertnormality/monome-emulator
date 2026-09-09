@@ -128,7 +128,7 @@
   ],
   "image_source": "434c2da3fbefae5c7467f1365c6b60e01313a1ba",
   "image": "sha256:02ecaa29d325a2af10c0f63c713c60fccf1da699fddf6211265b1d4305805a8a",
-  "status": "focused_review_pending",
+  "status": "admitted_windows_docker_desktop_amd64",
   "upstream_period_check": {
     "result": "Both capacities remain2048 and Bus asserts numFrames<BlockSize; no existing larger-period fix in inspected official HEAD.",
     "commit": "1d7209428841bc2b38619c8238ba0d2788bdbe68",
@@ -157,5 +157,11 @@
     "upstream_commit": "1d7209428841bc2b38619c8238ba0d2788bdbe68",
     "stack": "artifacts/docker/gdb-1788936476185/matron-gdb.log",
     "upstream_path": "matron/src/jack_client.cpp"
+  },
+  "focused_review": {
+    "path": "docs/delivery/reviews/H04-followup.json",
+    "sha256": "31946e145b2f163459ef8c76bb141f27fcf21a9b44bc6c036b3c3a0fcd13153a",
+    "result": "No substantive unresolved issue",
+    "session": "01a084ff-7d71-7d03-b387-b4b1c4d12547"
   }
 }

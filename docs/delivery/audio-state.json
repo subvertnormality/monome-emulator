@@ -15,10 +15,11 @@
     "Stage2 reviewed, admitted and merged to main with post-merge native checks",
     "H01 reviewed desktop audio committed and merged9c67326; main native lifecycle passed",
     "H02 reviewed and merged7d56cf0; main browser/editor/PCM8 checks passed045101",
-    "H03 reviewed and merged996c67c; main-source browser/audio/lifecycle and cleanup passed"
+    "H03 reviewed and merged996c67c; main-source browser/audio/lifecycle and cleanup passed",
+    "H04 optional Docker admitted by focused review; imageh04-09 native/browser/audio/data lifecycle passed"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "H04 candidate434c2da/imageh04-09 has passed deterministic JACK race baseline/candidate, native startup7216973/browser7235104/failures7280992/restart7290470/lease7312920 and120sec-per-rate audio7348729/7356231. Audio p95176.9/162.1ms, delayed monitoring above150ms target. Review fixes and retained failure/GDB evidence recorded in H04-triage/evidence. Next remaining focused Paranoia query using H04-followup-question.md, then resolve and commit/merge H04 preserving main concurrent files. No live native process; stopped failed/diagnostic containers retained. H05 separate platform evidence follows admission.",
+  "next_action": "H04 focused review closed, session01a084ff-7d71-7d03-b387-b4b1c4d12547. Commit admission and FF main preserving concurrent state.json and two Mosaic progress files; then H05 independent platform matrix. Source434c2da/imageh04-09 tested; delayed audio monitoring p95176.9/162.1ms. No native tests active; retained stopped failure/diagnostic containers. H05 unavailable hosts remain not_run.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",
