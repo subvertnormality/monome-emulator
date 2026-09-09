@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "current_card": "H05 independent host validation",
-  "status": "blocked_macos_apple_silicon_amd64_emulation_jack_lifecycle",
+  "status": "in_progress_macos_apple_silicon_native_arm64",
   "worktree": ".worktrees/macos-h05",
   "branch": "codex/macos-h05",
   "completed": [
@@ -21,7 +21,7 @@
     "A04 refreshed combined WSL audio/Crow/arc/desktop candidate passed seven native/browser integration reports"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "Apple Silicon amd64-emulation H05 failed its shared native-session prerequisite. Pinned JACK1.9.12 exits135/SIGBUS in six variants; coherent official JACK1.9.19 and1.9.22 probes start but matron aborts with heap corruption on normal shutdown. Apple Virtualization Framework and Rosetta were already enabled; an approved Docker Desktop restart reproduced SIGBUS. Next, create a separately pinned native linux/arm64 candidate and run all six suites sequentially. Native Linux remains a separate untested lane.",
+  "next_action": "User approved a separately pinned native linux/arm64 continuation after the amd64/Rosetta failure. The official Ubuntu20.04 arm64 manifest and a 492-package prerequisite inventory resolve. Add an explicit committed arm64 export profile without changing amd64, build the official runtime natively, then run all six Mac suites sequentially with host Chrome. Native Linux remains a separate untested lane.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",
@@ -209,7 +209,7 @@
     "macos_apple_silicon_amd64": "failed_shared_jack_lifecycle_prerequisite",
     "windows_docker": "passed_scoped_software_gates",
     "completion": "docs/delivery/completions/H05.md",
-    "native_arm64_image": "not_implemented",
+    "native_arm64_image": "in_progress_separate_profile",
     "macos_intel": "not_run_host_unavailable",
     "document": "docs/PLATFORMS.md",
     "apple_silicon_evidence": "docs/delivery/references/H05-evidence.json",

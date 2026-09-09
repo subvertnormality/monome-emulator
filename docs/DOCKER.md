@@ -26,6 +26,24 @@ sources, patch records, package copyright notices and the emulator Git revision
 remain in the image. Builds require network access to the signed Ubuntu archives
 and pinned official source repositories.
 
+### Native Apple Silicon profile
+
+The native Apple Silicon profile is a distinct `linux/arm64` build, not a
+reinterpretation of amd64 evidence. Export it explicitly and build it without
+emulation:
+
+```sh
+python3 scripts/container/prepare.py --platform linux/arm64 --output .runtime/docker-context-arm64
+docker build --platform linux/arm64 --progress plain -t monome-emulator:arm64 .runtime/docker-context-arm64
+```
+
+This profile uses the official Ubuntu20.04 arm64 manifest
+`sha256:722ea796ac2d57eeb3627c58a582fc1acc58be51faf815e1bce1682ae5c092f7`
+and its own exact package inventory. The amd64 Dockerfile, package lock, image
+and evidence remain unchanged. The exporter must reject unknown platforms, and
+the image build must fail if its architecture or installed inventory differs
+from the selected lock.
+
 ## Start the generic demo
 
 ```sh
@@ -141,5 +159,6 @@ disposable directories in `artifacts/docker` and uniquely named containers.
 Successful containers are removed; failed containers are stopped and retained
 for diagnosis. No global Docker cleanup is performed. Review generated reports,
 including their actual host architecture and image identity, before making any
-platform claim. On Apple Silicon this pinned amd64 image would use emulation;
-that is distinct from an unimplemented native arm64 build.
+platform claim. On Apple Silicon the original pinned amd64 image uses emulation
+and has a separate H05 failure record. Native arm64 requires the explicit profile
+above and all six host gates before it can be described as tested.
