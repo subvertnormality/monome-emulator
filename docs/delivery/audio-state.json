@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "current_card": "H04 optional Docker distribution",
-  "status": "in_progress",
+  "current_card": "H05 independent platform matrix",
+  "status": "available_host_work_complete",
   "worktree": ".runtime/worktrees/audio-monitor",
   "branch": "codex/audio-monitor",
   "completed": [
@@ -16,10 +16,11 @@
     "H01 reviewed desktop audio committed and merged9c67326; main native lifecycle passed",
     "H02 reviewed and merged7d56cf0; main browser/editor/PCM8 checks passed045101",
     "H03 reviewed and merged996c67c; main-source browser/audio/lifecycle and cleanup passed",
-    "H04 optional Docker admitted by focused review; imageh04-09 native/browser/audio/data lifecycle passed"
+    "H04 optional Docker admitted by focused review; imageh04-09 native/browser/audio/data lifecycle passed",
+    "H04 merged436b05c; main five launcher contracts passed; H05 available-host matrix and reproduction documented"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "H04 focused review closed, session01a084ff-7d71-7d03-b387-b4b1c4d12547. Commit admission and FF main preserving concurrent state.json and two Mosaic progress files; then H05 independent platform matrix. Source434c2da/imageh04-09 tested; delayed audio monitoring p95176.9/162.1ms. No native tests active; retained stopped failure/diagnostic containers. H05 unavailable hosts remain not_run.",
+  "next_action": "Available-host audio/device, broader sampler/arc, desktop/Maiden/browser and optional Docker work is reviewed and merged through436b05c. H05 matrix documents measured Windows profile and six host runners. Remaining independent macOS Intel/Apple Silicon/native Linux validation needs those hosts; do not infer support from Windows Linux-container results. Commit/merge H05 documentation, preserving concurrent main Mosaic files. Main post-merge container contracts5 passed with existing ResourceWarnings; no runtime changes after accepted image434c2da/h04-09. Original clicks not all localized; final audio monitoring p95176.9/162.1ms. Default WSL installation unpromoted. No active owned runtime/review/test; stopped failed/diagnostic containers retained.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",
@@ -132,7 +133,7 @@
   },
   "desktop_queue": {
     "contract": "docs/delivery/DESKTOP.md",
-    "status": "H04_in_progress",
+    "status": "available_host_queue_complete",
     "order": [
       "Mosaic reliable audio/devices and clicks",
       "broader scripts including cheat codes 2",
@@ -201,5 +202,14 @@
     ],
     "arc_status": "native/browser/optional unchanged cheat codes window-control passed; reviewed opt-in subset",
     "final_deadlines": "artifacts/arc/deadlines-20260908-204420/report.json"
+  },
+  "platform_matrix": {
+    "native_linux_docker": "not_run_host_unavailable",
+    "macos_apple_silicon_amd64": "not_run_host_unavailable",
+    "windows_docker": "passed_scoped_software_gates",
+    "completion": "docs/delivery/completions/H05.md",
+    "native_arm64_image": "not_implemented",
+    "macos_intel": "not_run_host_unavailable",
+    "document": "docs/PLATFORMS.md"
   }
 }

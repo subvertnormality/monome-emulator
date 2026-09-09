@@ -108,8 +108,8 @@ crashes remain errors. Once ready, the normal native shutdown path is retained.
 H04 records automated Windows Docker Desktop + Windows Chromium results, including
 native framebuffer/keys/encoders/grid/MIDI, editable host scripts, persistence,
 isolation, cleanup and actual engine audio at the browser renderer. It does not
-establish native Linux, macOS or Apple Silicon support. See the delivery platform
-matrix for independent host status.
+establish native Linux, macOS or Apple Silicon support. See the
+[platform matrix](PLATFORMS.md) for independent host status and reproduction.
 
 The first image includes official engines and the tested audio helper. It omits
 the optional Crow adapter, arc build flag and Maiden bundle. They remain available
