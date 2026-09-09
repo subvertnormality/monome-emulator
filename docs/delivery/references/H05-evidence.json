@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "status": "failed_macos_apple_silicon_linux_amd64_emulation",
+  "scope": "H05 optional Docker host validation; not native arm64",
+  "host": {
+    "hardware": "MacBookPro17,1; Apple M1; arm64; 16 GB",
+    "os": "macOS 15.3.2 (24D81)",
+    "docker_desktop": "4.69.0 (224084)",
+    "docker_client": "29.4.0 darwin/arm64",
+    "docker_server": "29.4.0 linux/arm64; 6.12.76-linuxkit; 8 CPU; 8321994752 bytes",
+    "docker_context": "desktop-linux",
+    "buildx": "0.33.0; linux/amd64 advertised",
+    "browser": "Google Chrome 152.0.7977.83, host arm64",
+    "node": "24.1.0",
+    "npm": "11.3.0",
+    "playwright": "1.62.0; configured to use host Google Chrome"
+  },
+  "candidate": {
+    "tag": "monome-emulator:macos-h05-02",
+    "image": "sha256:5cb8a62986c4c29a3b6c466b556616c5147a66311d938de2b4b97ebb4e0b005b",
+    "platform": "linux/amd64 under emulation",
+    "size": 418753788,
+    "image_source": "b331ff554ca6a567b7495d634d379198b5820f3b",
+    "host_runner_source": "e2a203ea6728a70ca995d40e67eaa4eb23e30bd4",
+    "base": "ubuntu@sha256:c664f8f86ed5a386b0a340d981b8f81714e21a8b9c73f658c4bea56aa179d54a",
+    "package_lock": {
+      "path": "scripts/container/packages.lock.json",
+      "sha256": "9a7a9ac0481fd0f8e7814c54fa32ddd7ee46b232d47735f27008b49f3893eefa",
+      "exact_packages": 496,
+      "jack_package": "1.9.12~dfsg-2ubuntu2"
+    },
+    "runtime_lock_sha256": "8b84937d7d1873877f8769762bf3146c61a72df8869147591e051af161b2bd5b",
+    "build_metadata": {
+      "path": "artifacts/docker/build-macos-h05-02-metadata.json",
+      "sha256": "3cb69f2ff9db23f83ffa72026afd977eefc7215e23d9546dafb0b1f1e9c76734"
+    }
+  },
+  "runner_results": {
+    "startup_cancel": "failed",
+    "browser": "not_run_prerequisite_failed",
+    "failures": "not_run_prerequisite_failed",
+    "restart": "not_run_prerequisite_failed",
+    "lease": "not_run_prerequisite_failed",
+    "audio_120_seconds": "not_run_prerequisite_failed"
+  },
+  "reports": [
+    {
+      "path": "artifacts/docker/startup-cancel-1788949928163/report.json",
+      "sha256": "d267ce6b0f65ba8afc723e572dc89a4a01604967687d95a7564749d3a416c912",
+      "passed": false,
+      "result": "protected-workspace bind mount timed out before container creation"
+    },
+    {
+      "path": "artifacts/docker/startup-cancel-1788950077722/report.json",
+      "sha256": "b66bc1624740ddc3bbf1c955ec39a510b52553d2e18da391bdd231f455c39b07",
+      "passed": false,
+      "result": "repeat protected-workspace bind mount timeout"
+    },
+    {
+      "path": "artifacts/docker/startup-cancel-1788950901693/report.json",
+      "sha256": "2b90e92d2e0c42703fb81de47249af62f62e8ae3d226793928c762e79ee8dfd2",
+      "passed": false,
+      "result": "pinned JACK exited -7/SIGBUS after temporary mount-root fix"
+    },
+    {
+      "path": "artifacts/docker/jack-emulation-1788952122644/report.json",
+      "sha256": "b989da86695d8d012b50f930edfa8c2c05c8f6bff95794811697388bd4b0e6e6",
+      "passed": false,
+      "result": "all six JACK resource/configuration variants exited135"
+    },
+    {
+      "path": "artifacts/docker/startup-cancel-1788953437832/report.json",
+      "sha256": "45bca6c71bfa7f0be5ad8af05c2d9b0c996e0df44a642a7fef91e916fdf43de8",
+      "passed": false,
+      "result": "same JACK SIGBUS after approved Docker Desktop restart with Apple Virtualization Framework and Rosetta enabled"
+    }
+  ],
+  "upstream_probes": [
+    {
+      "jack": "1.9.22",
+      "commit": "4f58969432339a250ce87fe855fb962c67d00ddb",
+      "report": "artifacts/docker/startup-cancel-1788951733198/report.json",
+      "sha256": "31624703f4d26e5df1f6544c30b26d03f4290c7910ed69624f1eb199f08cc7af",
+      "result": "coherent client rebuild; cancellation and reopen passed; normal matron shutdown aborted -6"
+    },
+    {
+      "jack": "1.9.19",
+      "commit": "3e6ca6b734b69e2f5dfb85935068e15006fb5acf",
+      "image": "sha256:9a0eb997b2d5eeba74f3eb686616a93856dd1a299bf01a6233e9ee96c7a832e3",
+      "report": "artifacts/docker/startup-cancel-1788952030438/report.json",
+      "sha256": "6b0855c26adf388fd6c7bb1abfb3135a89c165d1efa30c58807c3e3ed0e071ff",
+      "matron_log_sha256": "b39eaf145e01decbfb2a114c1009738c1b54488ba22d3bbdbb7b7044fe8f13a0",
+      "cleanup_sha256": "44725e747c01115655708a073a30bfa11e519c1d659b600fbe113efd08384b5b",
+      "result": "coherent client rebuild; cancellation and reopen passed; normal matron shutdown aborted -6 with malloc_consolidate invalid chunk size"
+    }
+  ],
+  "docker_backend_retry": {
+    "apple_virtualization_framework": true,
+    "rosetta_available": true,
+    "rosetta_enabled": true,
+    "restart_performed": true,
+    "post_restart_result": "unchanged JACK SIGBUS",
+    "note": "The guest did not expose /run/rosetta, so the exact binary translation path remains opaque despite Docker's enabled setting."
+  },
+  "diagnosis": "The existing linux/amd64 image cannot complete the shared native JACK/matron lifecycle on this Apple Silicon Docker Desktop host. Resource sizing and the Rosetta-configured restart did not remedy packaged JACK startup, and bounded official JACK upgrades did not provide clean client shutdown.",
+  "next_route": "Create a separately pinned native linux/arm64 image and run all six suites; do not reuse this amd64 result as arm64 evidence.",
+  "review": "No adversarial integration review requested; failed disposition and review gap retained.",
+  "sources": [
+    "https://github.com/jackaudio/jack2/blob/develop/ChangeLog.rst",
+    "https://docs.docker.com/desktop/troubleshoot-and-support/troubleshoot/known-issues/",
+    "https://docs.docker.com/desktop/features/vmm/",
+    "https://docs.docker.com/desktop/settings-and-maintenance/settings/"
+  ]
+}

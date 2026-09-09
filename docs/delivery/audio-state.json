@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "current_card": "H05 independent host validation",
-  "status": "in_progress_macos_apple_silicon_amd64_emulation",
+  "status": "blocked_macos_apple_silicon_amd64_emulation_jack_lifecycle",
   "worktree": ".worktrees/macos-h05",
   "branch": "codex/macos-h05",
   "completed": [
@@ -21,7 +21,7 @@
     "A04 refreshed combined WSL audio/Crow/arc/desktop candidate passed seven native/browser integration reports"
   ],
   "priority": "Mosaic audio/n.b. and Crow first; broader app workflows later",
-  "next_action": "Apple Silicon host available. Pinned linux/amd64 image built under emulation from187db42. Two retained startup-cancel attempts timed out before container creation because Docker Desktop could not bind the privacy-protected Documents worktree; /private/tmp mount probe passed. Implement the recorded disposable mount-root portability adaptation, rerun focused contracts, then run all six host suites sequentially with Mac Chrome. Native arm64 and native Linux remain separate untested lanes.",
+  "next_action": "Apple Silicon amd64-emulation H05 failed its shared native-session prerequisite. Pinned JACK1.9.12 exits135/SIGBUS in six variants; coherent official JACK1.9.19 and1.9.22 probes start but matron aborts with heap corruption on normal shutdown. Apple Virtualization Framework and Rosetta were already enabled; an approved Docker Desktop restart reproduced SIGBUS. Next, create a separately pinned native linux/arm64 candidate and run all six suites sequentially. Native Linux remains a separate untested lane.",
   "evidence": "docs/delivery/completions/A01-tranche1.md",
   "interactive_demo_metadata": "artifacts/audio/browser-session.json",
   "contract": "docs/delivery/AUDIO.md",
@@ -206,12 +206,14 @@
   },
   "platform_matrix": {
     "native_linux_docker": "not_run_host_unavailable",
-    "macos_apple_silicon_amd64": "not_run_host_unavailable",
+    "macos_apple_silicon_amd64": "failed_shared_jack_lifecycle_prerequisite",
     "windows_docker": "passed_scoped_software_gates",
     "completion": "docs/delivery/completions/H05.md",
     "native_arm64_image": "not_implemented",
     "macos_intel": "not_run_host_unavailable",
-    "document": "docs/PLATFORMS.md"
+    "document": "docs/PLATFORMS.md",
+    "apple_silicon_evidence": "docs/delivery/references/H05-evidence.json",
+    "dependent_suites": "browser_failures_restart_lease_audio_not_run_prerequisite_failed"
   },
   "combined_wsl_candidate": {
     "install": ".runtime/wsl-integrated-tools-01/installation.json",

@@ -9,7 +9,7 @@ The following is the measured status as of 2026-09-09.
 | Windows, Ubuntu 20.04 WSL2 installation | Scoped features tested | Audio/device, sampler/arc, desktop audio, Maiden and browser results are recorded in delivery/audio-state.json and H01–H03 completion notes. Optional candidates are not a claim that every engine or peripheral works. |
 | Windows x64, Docker Desktop, Linux amd64 image, Windows Chromium | Passed H04 software gates | Windows10.0.26200; Docker Desktop4.12.0/Engine20.10.17, WSL2 kernel6.6.87.2. Actual host browser controls, grid, MIDI, host code edits, persistent data, isolation, restart, cancellation, cleanup and rendered audio passed. |
 | macOS Intel, Docker, host Chromium | not_run | No macOS host is available in this session. Linux-container results do not establish Mac mount, browser or networking behavior. |
-| macOS Apple Silicon, amd64 container under emulation | not_run | No Apple Silicon host is available. The image is pinned to linux/amd64; emulated operation must be measured separately. |
+| macOS Apple Silicon, amd64 container under emulation | Failed H05 prerequisite | On macOS15.3.2/M1 with Docker Desktop4.69.0, pinned Ubuntu JACK1.9.12 exits with SIGBUS before a native session can start. Six JACK variants reproduced it. Official JACK1.9.19 and1.9.22 probes start, but coherently rebuilt clients abort with heap corruption during normal matron shutdown. Startup/cancellation failed; the five dependent suites were not run. This is not native arm64 evidence. |
 | Apple Silicon native arm64 image | not_implemented | Requires an independently pinned base/package inventory and official runtime build, followed by the same tests. The amd64 package lock must not be reused as arm64 evidence. |
 | Native Linux host, Docker and host Chromium | not_run | WSL2 and Docker's Linux VM do not establish native Linux host behavior. |
 
@@ -64,6 +64,16 @@ Docker version, image ID, source and report hashes; an amd64 image under
 emulation must not be described as a native arm64 build. Reuse these runners
 without replacing browser input with direct runtime calls or weakening signal,
 MIDI, data-isolation or cleanup assertions.
+
+The Apple Silicon H05 failure record is
+[H05 evidence](delivery/references/H05-evidence.json). Its failed startup gate is
+a shared prerequisite for the browser, failure, restart, lease and120-second
+audio runners, so those runners remain explicitly `not_run_prerequisite_failed`.
+An approved retry confirmed Apple Virtualization Framework and Rosetta were
+already enabled, restarted Docker Desktop, and reproduced the same JACK SIGBUS.
+A future retry should use a separately pinned native arm64 image, retain the
+failed reports, rebuild from a committed source snapshot and rerun all six
+commands in order.
 
 ## Physical devices and optional components
 
