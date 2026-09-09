@@ -50,6 +50,8 @@ class NativeBackend:
         install=read_json(config.get('experimental_install') or ROOT/'.runtime/current.json')
         from .dependencies import verify_install
         verify_install(install)
+        if config.get('jack_period',1024)>install.get('experimental',{}).get('max_jack_period',1024):
+            raise ContractError('unsupported','Selected runtime has no identified support for this JACK period')
         from devices.arc import ArcInput
         self.arc_input=ArcInput(config.get('arc_enabled',False))
         self.arc_available=install.get('experimental',{}).get('arc',{}).get('profile')=='virtual-arc4'

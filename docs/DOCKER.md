@@ -64,6 +64,8 @@ The container selects a 2048-frame JACK period to allow more scheduling time;
 native scheduling dropout in a longer Docker test. The WSL launcher still defaults
 to 1024. Both profiles report xruns explicitly; neither promises hard real-time
 performance. The larger period's measured audio results are recorded in H04.
+This profile uses the documented opt-in crone buffer-capacity patch; older WSL
+audio candidates reject 2048 unless built with `--large-jack-period`.
 
 ## Editable scripts and persistent data
 

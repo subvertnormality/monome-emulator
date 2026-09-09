@@ -11,6 +11,7 @@ def main():
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--crow-build', type=Path, help='Opt-in identified Crow host build')
     parser.add_argument('--arc',action='store_true',help='Include experimental virtual arc native transport')
+    parser.add_argument('--large-jack-period',action='store_true',help='Allocate crone buffers for a 2048-frame JACK period')
     args = parser.parse_args()
     out = args.output.resolve(); out.mkdir(parents=True, exist_ok=False)
     base = json.loads((ROOT / '.runtime/current.json').read_text()); verify_install(base)
@@ -24,6 +25,13 @@ def main():
     path.write_text(after)
     patch = ''.join(difflib.unified_diff(before.splitlines(True), after.splitlines(True),
                  fromfile='a/matron/src/weaver.c', tofile='b/matron/src/weaver.c'))
+    period_patch=None
+    if args.large_jack_period:
+        from audio_period_patch import apply as apply_period
+        period_patch=apply_period(source);patch+=period_patch
+        expected=(ROOT/'patches/norns/experimental-audio-period.patch').read_text()
+        if period_patch!=expected:raise ValueError('Audio period patch differs from the documented patch')
+        (out/'audio-period.patch').write_text(period_patch)
     crow_manifest=None
     if args.crow_build:
         crow_build=args.crow_build.resolve();crow_manifest=json.loads((crow_build/'manifest.json').read_text())
@@ -95,6 +103,7 @@ def main():
         install['experimental']['crow']=dict(source=str(crow_source),manifest=crow_manifest,
             lua_files=crow_lua_identity)
     if arc_patch:install['experimental']['arc']=dict(profile='virtual-arc4',patch_sha256=hashlib.sha256(arc_patch.encode()).hexdigest())
+    if period_patch:install['experimental'].update(max_jack_period=2048,audio_period_patch_sha256=hashlib.sha256(period_patch.encode()).hexdigest())
     (out/'installation.json').write_text(json.dumps(install, indent=2)+'\n')
     verify_install(install); print(out/'installation.json', flush=True)
 

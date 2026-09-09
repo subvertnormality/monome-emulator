@@ -5,7 +5,7 @@ RUN apt-get update && xargs -r apt-get install -y --no-install-recommends < /opt
 COPY emulator.bundle revision.txt /opt/build-inputs/
 RUN git clone /opt/build-inputs/emulator.bundle /opt/emulator && cd /opt/emulator && git checkout --detach "$(cat /opt/build-inputs/revision.txt)" && test "$(git rev-parse HEAD)" = "$(cat /opt/build-inputs/revision.txt)"
 WORKDIR /opt/emulator
-RUN ./dev/emu fetch --locked && ./dev/emu build && python3 scripts/build_audio_candidate.py --output .runtime/container-audio && python3 scripts/prepare_audio_monitor.py --install .runtime/container-audio/installation.json --output .runtime/container-audio-tools
+RUN ./dev/emu fetch --locked && ./dev/emu build && python3 scripts/build_audio_candidate.py --large-jack-period --output .runtime/container-audio && python3 scripts/prepare_audio_monitor.py --install .runtime/container-audio/installation.json --output .runtime/container-audio-tools
 RUN useradd --create-home --uid 1000 emulator && mkdir -p /data /opt/emulator/.runtime/sessions && chown emulator:emulator /data && chmod 1777 /opt/emulator/.runtime/sessions && git config --system --add safe.directory /opt/emulator
 ENV HOME=/home/emulator PYTHONDONTWRITEBYTECODE=1
 USER emulator

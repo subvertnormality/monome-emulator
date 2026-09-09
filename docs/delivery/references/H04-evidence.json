@@ -28,5 +28,26 @@
   ],
   "image_source": "5a4ceaec95763af8e44315a0257f05ed030dee7c",
   "image": "sha256:7d530ae85f87625002713850fd1837fd7ce8e476d62b6445ed8c13e6ed003139",
-  "status": "final_audio_and_review_pending"
+  "status": "final_audio_and_review_pending",
+  "upstream_period_check": {
+    "result": "Both capacities remain2048 and Bus asserts numFrames<BlockSize; no existing larger-period fix in inspected official HEAD.",
+    "commit": "1d7209428841bc2b38619c8238ba0d2788bdbe68",
+    "files": [
+      {
+        "path": "crone/src/Bus.h",
+        "url": "https://raw.githubusercontent.com/monome/norns/1d7209428841bc2b38619c8238ba0d2788bdbe68/crone/src/Bus.h",
+        "sha256": "c7efe86d301c6619de7f756847b99f65ed9009d8b3ade690f0be3dcd0a6b815d"
+      },
+      {
+        "path": "crone/src/MixerClient.h",
+        "url": "https://raw.githubusercontent.com/monome/norns/1d7209428841bc2b38619c8238ba0d2788bdbe68/crone/src/MixerClient.h",
+        "sha256": "115c010d02953795bab0d4d876cb3ce995f30c645c17606d94140ecc5b612930"
+      },
+      {
+        "path": "crone/src/SoftcutClient.h",
+        "url": "https://raw.githubusercontent.com/monome/norns/1d7209428841bc2b38619c8238ba0d2788bdbe68/crone/src/SoftcutClient.h",
+        "sha256": "a8fa611599b70b81e0dd8d9b1e3b211f0f672a1eb5b2c479eee4c0ece8590d94"
+      }
+    ]
+  }
 }

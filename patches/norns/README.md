@@ -1,5 +1,23 @@
 # Official norns host patches
 
+`experimental-audio-period.patch` is an opt-in audio builder patch against official
+norns `14bbeae8646c6717f6bb44c8cd60250bf94b6042`. It changes only MixerClient's
+MaxBufFrames and SoftcutClient's MaxBlockFrames from 2048 to 4096, so a 2048-frame
+JACK callback fits the existing strict `numFrames < BlockSize` bus assertions.
+No DSP algorithm or Bus assertion is changed. The H04 Docker profile uses it to
+test a longer non-realtime scheduling window after a measured 1024-frame xrun.
+The builder requires `--large-jack-period`, verifies this exact patch, records its
+hash and advertises a maximum period of 2048 in the identified install. The
+launcher rejects 2048 on older candidates before starting native services.
+
+Official HEAD `1d7209428841bc2b38619c8238ba0d2788bdbe68`, inspected 2026-09-09,
+still has both 2048 capacities and the strict Bus assertions. Inspected file
+hashes are recorded in H04's reference evidence. This is an independent local
+configuration adaptation, with no community code copied. Remove when the pinned
+official runtime supports at least a 2048-frame period directly, or when the
+container no longer needs this scheduling profile. It does not admit larger
+periods, change the WSL default, or establish every sampler's compatibility.
+
 Base: monome/norns `v2.9.4`, commit
 `14bbeae8646c6717f6bb44c8cd60250bf94b6042`.
 
