@@ -75,3 +75,24 @@ Review-fix validation and newly localized shutdown defect:
   the deliberately failed report5312554 remains false and its stopped container
   remains retained. No failed native signal is reclassified as success.
 The one focused follow-up remains unused and must cover this additional fix.
+
+Candidate434c2da, imageh04-09
+sha256:02ecaa29d325a2af10c0f63c713c60fccf1da699fddf6211265b1d4305805a8a
+built from context10 (build-10.log). Real regressions passed: startup-cancel
+1788937216973 (1212ms and clean persisted reopen), browser1788937235104 (eight
+checks/four sessions including full MIDI sequences and all native exits),
+failures1788937280992, restart1788937290470, and lease1788937312920. Report paths
+and hashes are in references/H04-evidence.json. These execute the actual normal
+shutdown path that previously faulted; the clock boundary regression additionally
+forces the overlap and rejects the unpatched baseline. Audio endurance is running
+before the focused follow-up; H04 remains unmerged until that checkpoint closes.
+
+Final candidate audio passed in artifacts/docker/audio-1788937348729/report.json
+and artifacts/audio/latency-1788937356231/report.json:120seconds per rate,
+5,347,584/5,821,056 samples, RMS0.03534482/0.03535464, normalized residual
+1.3322e-5/6.918e-8, zero unintended underruns, all24 onset/silence measurements,
+six reconnect/cancellation checks and actual native cleanup. P95 notification
+bounds176.9/162.1ms exceed the150ms monitoring target. Preserve this observed
+range: delayed monitoring only, no ceiling or interactive-playing claim. No
+threshold was relaxed and earlier passing/failing evidence remains unchanged.
+No native tests are active at the focused-review checkpoint.

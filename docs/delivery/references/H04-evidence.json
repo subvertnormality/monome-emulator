@@ -69,11 +69,66 @@
       "sha256": "db410c777829d0d7aef1ceeb61fb94799d972f48f5a2496118db42307379cd7a",
       "passed": true,
       "path": "artifacts/docker/runtime-only.json"
+    },
+    {
+      "sha256": "023750297582a5e4280638bbed8d96cbefb985fa6333c2a5bf3e893dda4c893e",
+      "path": "artifacts/docker/jack-lifetime/report.json",
+      "passed": true
+    },
+    {
+      "sha256": "15d690b29fa45bfb025df99f773f94d50d25f5d6e06a4bd3d4e6e4d19443f4e6",
+      "path": "artifacts/docker/startup-cancel-1788936027308/report.json",
+      "passed": true
+    },
+    {
+      "sha256": "c461261e1d71df9ab4033ae1e1dc5834b48d656117206c82db596df1a7bc653d",
+      "path": "artifacts/docker/browser-1788936073027/report.json",
+      "passed": false
+    },
+    {
+      "sha256": "97eda7dae939caf819b6e46a5b052da8823b5c4ef484b1c50513400035306919",
+      "path": "artifacts/docker/retention-verification.json",
+      "passed": true
+    },
+    {
+      "passed": true,
+      "sha256": "1dbde410c55657b7d9f56946d46bd67cfcace4d2a25561d950c67beee3f4e033",
+      "path": "artifacts/docker/startup-cancel-1788937216973/report.json"
+    },
+    {
+      "passed": true,
+      "sha256": "e899e0bc078a5aab11fe35871355af1c5578e91c90758558d4ac3d0e882f5a16",
+      "path": "artifacts/docker/browser-1788937235104/report.json"
+    },
+    {
+      "passed": true,
+      "sha256": "b5bc4a2cfe3d394e448519ff1e19cb9eeb50b59482b24de053a91ee4f96fbfdb",
+      "path": "artifacts/docker/failures-1788937280992/report.json"
+    },
+    {
+      "passed": true,
+      "sha256": "fa3bd6acb89ad483b3cd4bc3257a6ffa1a3325223365a46c8976782cc5d44f18",
+      "path": "artifacts/docker/restart-1788937290470/report.json"
+    },
+    {
+      "path": "artifacts/docker/lease-1788937312920/report.json",
+      "passed": true,
+      "sha256": "42a61a96d37983084654299278ca87c6642f46de6c1937c5dcd8ae131b424f6d"
+    },
+    {
+      "passed": true,
+      "path": "artifacts/docker/audio-1788937348729/report.json",
+      "sha256": "ca98d24a8bf8119e7987aceabc2521b577717761886434b88ab94dd38980b595"
+    },
+    {
+      "passed": true,
+      "path": "artifacts/audio/latency-1788937356231/report.json",
+      "sha256": "f99e1b5b96434dae4e0925a6f05b392423408ea851dfce9121a1650146e92643"
     }
   ],
-  "image_source": "213ade4317b903c60364c76d9a44f795a4dd054d",
-  "image": "sha256:9c405f88b846ddb9c23000a1a076b79924dd789ac22ad45249205c59b3305e01",
-  "status": "candidate_review_pending",
+  "image_source": "434c2da3fbefae5c7467f1365c6b60e01313a1ba",
+  "image": "sha256:02ecaa29d325a2af10c0f63c713c60fccf1da699fddf6211265b1d4305805a8a",
+  "status": "focused_review_pending",
   "upstream_period_check": {
     "result": "Both capacities remain2048 and Bus asserts numFrames<BlockSize; no existing larger-period fix in inspected official HEAD.",
     "commit": "1d7209428841bc2b38619c8238ba0d2788bdbe68",
@@ -94,5 +149,13 @@
         "sha256": "a8fa611599b70b81e0dd8d9b1e3b211f0f672a1eb5b2c479eee4c0ece8590d94"
       }
     ]
+  },
+  "jack_lifetime_diagnosis": {
+    "stack_sha256": "8d0d3a3d14cad1e15a67830e9dc278356a4c5e02d90af86b79393e0d22a8101a",
+    "result": "Current upstream still closes JACK while clock readers can access it. Optional candidate serializes lifetime using existing time lock.",
+    "upstream_sha256": "a7cfff19eb93d95ac293fed055ae4939e891b5f368f1869ea58c7766328c3bd0",
+    "upstream_commit": "1d7209428841bc2b38619c8238ba0d2788bdbe68",
+    "stack": "artifacts/docker/gdb-1788936476185/matron-gdb.log",
+    "upstream_path": "matron/src/jack_client.cpp"
   }
 }
