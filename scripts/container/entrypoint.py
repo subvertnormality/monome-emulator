@@ -101,7 +101,9 @@ def main():
             if (session.SESSIONS/info['session_id']/'stopped.json').exists():
                 break
             # Surface unexpected server loss, rather than an apparently live container.
-            os.kill(info['pid'], 0)
+            dead, status = os.waitpid(info['pid'], os.WNOHANG)
+            if dead:
+                raise ContractError('container_server_lost', 'Session server exited unexpectedly: '+str(status))
     finally:
         try:
             if info is not None:
