@@ -21,7 +21,7 @@ from automation.scheduling_metrics import scheduling_metrics
 TEMPOS = (20, 100, 120, 300)
 TEMPO_TAPS = {300: 0, 20: 1, 100: 2, 120: 3}
 TICKS = 120
-DENSITIES = tuple(range(1, 17))
+DENSITIES = tuple(range(1, 65))
 
 
 def source_identity():
@@ -240,7 +240,7 @@ def parse_densities(value):
         raise argparse.ArgumentTypeError('Densities must be comma-separated integers') from error
     if (not densities or len(set(densities)) != len(densities) or
             any(v not in DENSITIES for v in densities)):
-        raise argparse.ArgumentTypeError('Densities must be unique values from 1 to 16')
+        raise argparse.ArgumentTypeError('Densities must be unique values from 1 to 64')
     return densities
 
 

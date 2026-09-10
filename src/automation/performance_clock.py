@@ -27,7 +27,7 @@ def internal_clock_plan(origin_ns, bpm, ticks, density, pulses_per_beat=24):
                         (ticks, 'ticks'), (density, 'density'),
                         (pulses_per_beat, 'pulses_per_beat')):
         _require(type(value) is int and value > 0, name + ' must be positive')
-    _require(density <= 16, 'density exceeds probe voice count')
+    _require(density <= 64, 'density exceeds probe voice count')
     pulse_ns = Fraction(60_000_000_000, bpm * pulses_per_beat)
     planned = []
     deadlines = []

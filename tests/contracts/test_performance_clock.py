@@ -34,7 +34,13 @@ class PerformanceClockPlanTests(unittest.TestCase):
         with self.assertRaises(ContractError):
             burst_service_times(rows[:-1], 2, 2)
         with self.assertRaises(ContractError):
-            internal_clock_plan(1, 300, 1, 17)
+            internal_clock_plan(1, 300, 1, 65)
+
+    def test_maximum_density_uses_notes_36_to_99(self):
+        events = internal_clock_plan(1, 300, 1, 64)['events']
+        self.assertEqual(len(events), 128)
+        self.assertEqual([events[0]['bytes'], events[-1]['bytes']],
+                         [[144, 36, 100], [128, 99, 0]])
 
 
 if __name__ == '__main__':

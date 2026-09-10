@@ -42,7 +42,7 @@ end
 
 function enc(n, delta)
   if n == 1 and not running then
-    density = util.clamp(density + delta, 1, 16)
+    density = util.clamp(density + delta, 1, 64)
     redraw()
   end
 end
