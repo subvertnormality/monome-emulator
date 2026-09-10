@@ -87,9 +87,9 @@ Required checkpoints:
 | P4 | C15 Linux portability diff and platform-specific evidence only | 1 critique + 1 focused follow-up |
 | P5 | C16 controlled-clock adapter, before admitting D to the Mosaic timing campaign (D18) | 1 critique + 1 focused follow-up |
 
-Use only the Codex Paranoia engine for all future reviews, as requested by the
-user on 2026-09-07 (D19). Historical reviews remain evidence; do not rerun them
-solely to change engines. Leave model selection to that engine. Pass explicit stakes,
+Use only the Opus Paranoia engine for all reviews after the user's 2026-09-10
+instruction (D21). Earlier Codex and other historical reviews remain evidence; do
+not rerun them solely to change engines. Pass explicit stakes,
 focus, repository path, and round; never inherit Parallax's financial stakes.
 Use medium effort and a 10-minute wall-time limit by default. A timed-out call
 does not count as a completed review and must be diagnosed before retrying.

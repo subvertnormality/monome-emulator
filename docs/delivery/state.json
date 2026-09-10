@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "updated": "2026-09-08",
+  "updated": "2026-09-10",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "All current native/review processes terminal: matrix56912 Dpass Rfailed live-tail retention. Preserve failure081cb06ca7a4497da59c2c2a55d8ed55. Its native export has61813contiguous MIDI events, no native errors. Replace panic live MidiWindow data assertions with post-close full native-export validation using identified input and recorded after/cursor windows; keep existing live-tail loss detector unchanged for other cases. Follow established fractional c.finish()/offline assertion/results-finally pattern. Partition every native NoteOn/Off into panic or melody windows, reject extra outside events; panic exact2048offs perport or selected-button silence; melody note_pairs and literal4note phrase checks. Add missing/extra/wrong-port/outside-window fault contracts, then fresh M-PANIC003 D/R and focused Codex follow-up for capture gate+0046. After that add active-note test: quiet playing pattern, startpanic, wait until sweep passedpitch24, press MIDI24 while sweepstillactive, waitcompletion, Stop mustemit explicit NoteOff; finallyreleasekeyboard forcleanup. Do not claim new ownership bug withoutnativeproof: current note_off already sends fallback releases even withmissingcounts. Record/publish candidates0044/45/46 and navigation evidence whenvalidated; continue full manual/emulator scope.",
+  "next_action": "Integrate the generic performance measurement foundation with the current container/release line, then implement PERF-001 quiet and dense adjacent baselines. Core base-MIDI behavior remains prioritized; Toolkit/Matrix is deferred. Use only Opus for future Paranoia reviews.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {

@@ -53,3 +53,14 @@ rounding as an undocumented contract. Full-denominator musical windows and
 bounded phase, supplemented by exact reset/no-reset invariants, replace that
 assumption. Existing Mosaic rounding is unchanged; a separate rounding patch
 would require evidence of a violated musical contract.
+
+
+D21 — Opus-only future Paranoia reviews, 2026-09-10: supersedes D19 from this
+point forward. The final Codex schedule-capacity follow-up had already completed;
+retain it as historical evidence. Do not initiate another Codex review.
+
+D22 — Norns-class performance qualification, 2026-09-10: performance is a
+required pre-refactor delivery concern. Add automated constrained, deterministic
+cost, real-time musical and comparative-regression lanes based on official norns
+CM3/CM3+ facts. Do not claim x86 quota or QEMU wall time equals physical norns.
+Toolkit/Matrix performance remains deferred with that optional integration.
