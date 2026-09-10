@@ -7,7 +7,7 @@
  * The real-time bridge polls without waiting for Lua. Controlled advancement
  * supplies logical deadlines and delivers due input before servicing timers.
  */
-#define EMU_MIDI_SCHEDULE_EVENTS 512
+#define EMU_MIDI_SCHEDULE_EVENTS 2048
 #define EMU_MIDI_SCHEDULE_BYTES 32768
 #define EMU_MIDI_SCHEDULE_HORIZON_NS 60000000000ULL
 struct emu_midi_scheduled_event {

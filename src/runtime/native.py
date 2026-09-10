@@ -14,6 +14,10 @@ import copy
 from collections import deque
 from automation.protocol import ROOT,ContractError,read_json,write_json
 
+MIDI_SCHEDULE_EVENT_LIMIT = 2048
+MIDI_SCHEDULE_BYTE_LIMIT = 32768
+MIDI_SCHEDULE_PACKET_LIMIT = 16 + MIDI_SCHEDULE_EVENT_LIMIT * 16 + MIDI_SCHEDULE_BYTE_LIMIT
+
 def free_ports(count):
     sockets=[]
     try:
@@ -408,9 +412,9 @@ class NativeBackend:
                 records=b''.join(struct.pack('=QII',e['at_'+domain+'_ns'],e['port'],len(e['bytes']))+bytes(e['bytes']) for e in action['events'])
                 packet=struct.pack('=4I',sequence,kind,action['schedule_id'],len(action['events']))+records
             else:packet=struct.pack('=6I',sequence,kind,action['schedule_id'],0,0,0)
-            if len(packet)>65536:
+            if len(packet)>MIDI_SCHEDULE_PACKET_LIMIT:
                 self.input_schedule=previous
-                raise ContractError('schedule_capacity','Native schedule packet exceeds 64 KiB')
+                raise ContractError('schedule_capacity','Native schedule packet exceeds '+str(MIDI_SCHEDULE_PACKET_LIMIT)+' bytes')
             self.controller.send(packet)
             end=time.monotonic()+2
             with self.condition:

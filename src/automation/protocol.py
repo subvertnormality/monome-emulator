@@ -7,7 +7,7 @@ import uuid
 
 ROOT = Path(__file__).resolve().parents[2]
 VERSION = 1
-MAX_BODY = 65536
+MAX_BODY = 524288
 
 class ContractError(ValueError):
     def __init__(self, code, message):
