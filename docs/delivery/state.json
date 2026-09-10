@@ -2635,7 +2635,7 @@
     "retry": "Alternative-model retry rejected twice by automatic approval review, including authorization-evidence reconsideration. Stated reason: earlier Codex-only instruction does not authorize repository context submission to Claude. No workaround or additional retry performed.",
     "raw_artifact": "emulator:artifacts/c16/memory-semantics-arbitration-fable-limit.json",
     "raw_sha256": "6d218c3f1df16249aeadba07a8cfd8ca614da11b4c4b4586e3b5c3b145d7b24f",
-    "scope": "Only this unresolved semantic decision and its dependent shifted-key tests wait. Continue all independent delivery work. Ordinary Paranoia reviews remain Codex-only."
+    "scope": "Only this unresolved semantic decision and its dependent shifted-key tests wait. Continue all independent delivery work. This historical routing note is superseded by D21; all future Paranoia reviews are Opus-only."
   },
   "tresillo_workflow_validation": {
     "status": "candidate-applied-and-validated",
