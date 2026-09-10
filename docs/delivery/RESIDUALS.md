@@ -88,3 +88,14 @@ queue-recovery claim. The recorder's queue counter covers only scheduled native
 MIDI input. Matron's event queue (`events.c` `evq.size`) and clock-scheduler
 occupancy need a small tested native patch exposing depth and high-water marks.
 No queue-recovery claim is made until this exists.
+
+R22 — Concurrent native session startup: resolved on codex/norns-performance.
+Six sessions started at the same instant failed 15 of 18 times (crone abort -6,
+matron exit 255) while registering clients with their per-session JACK servers,
+which share one per-user shared-memory registry
+(`artifacts/reliability/concurrent-startup-01`). A host-wide per-user startup
+lock (`src/runtime/startup_lock.py`) held from JACK launch to script ready gives
+0 of 18 failures (`concurrent-startup-02`), at ~4.7 s serial startup per
+session. The same race hit Mosaic's parallel regression suite on the
+codex/midi-clock checkout, which does not yet carry this lock. Promotion: move
+Mosaic's emulator configuration onto a line with the lock, or transplant it.

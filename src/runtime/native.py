@@ -77,8 +77,12 @@ class NativeBackend:
         try:
             self.prepare()
             self.reader=threading.Thread(target=self.receive,daemon=True); self.reader.start()
-            self.launch_services()
-            self.await_ready()
+            from .startup_lock import StartupLock
+            # JACK servers share one per-user registry; register sequentially.
+            with StartupLock() as lock:
+                self.config['startup_lock_wait_seconds']=lock.waited_seconds
+                self.launch_services()
+                self.await_ready()
             self.launch_desktop_audio()
         except Exception as startup_error:
             self.startup_interrupted=getattr(startup_error,'code',None)=='session_terminated'
