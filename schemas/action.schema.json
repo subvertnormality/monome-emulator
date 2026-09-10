@@ -246,7 +246,7 @@
                 "additionalProperties": false
               },
               "minItems": 1,
-              "maxItems": 512
+              "maxItems": 2048
             }
           },
           "required": [
@@ -319,7 +319,7 @@
                 "additionalProperties": false
               },
               "minItems": 1,
-              "maxItems": 512
+              "maxItems": 2048
             },
             "time_domain": {
               "const": "logical"

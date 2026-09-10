@@ -26,11 +26,11 @@ session, supply `time_domain: "logical"` on the schedule action and use
 then visits queued input deadlines along with native timer deadlines. The
 previous immediate MIDI action is unchanged when no schedule is active.
 
-One batch is active per session: up to512 events,32768 raw bytes in total,
+One batch is active per session: up to2048 events,32768 raw bytes in total,
 4096 bytes per event, and60 seconds into the future at native acceptance.
 Deadlines must be future and nondecreasing; equal deadlines retain supplied
 order. Ports must exist. Schedule IDs are positive increasing31-bit integers.
-The normal64KiB HTTP body limit also applies. Validation rejects a whole batch
+The bounded512KiB HTTP body limit also applies. Validation rejects a whole batch
 atomically; it never partially installs a valid prefix. The independent decoder
 validates the byte stream before submission. Immediate MIDI is rejected while a
 batch is active so decoder state cannot race with a previously validated stream.
@@ -76,7 +76,7 @@ and Lua callback output times across a large advance, a one-nanosecond deadline
 boundary, wrong-domain rejection, and cancellation. Both probes are development
 evidence; their required repeat/admission integration remains open.
 
-The current one-batch limit needs an extension/refill mechanism before longer
-continuous external-clock endurance tests can cross the event limit. Such tests
-must not insert gaps or re-anchor time while refilling. C10/C12 own that remaining
-capability; passing short handoff tests does not waive it.
+The2048-event bound admits a continuous16-bar24PPQN external-clock test, including
+warm-up and post-Stop pulses, in one atomic batch. Longer endurance runs still need
+an explicit larger bound or a gap-free refill protocol; tests must not insert gaps
+or re-anchor time to work around admission limits.

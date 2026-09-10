@@ -16,7 +16,7 @@ class Event(C.Structure):
 
 class Queue(C.Structure):
     _fields_ = [(name, C.c_uint32) for name in ('id', 'last_id', 'count', 'cursor')] + [
-        ('events', Event * 512), ('bytes', C.c_uint8 * 32768)]
+        ('events', Event * 2048), ('bytes', C.c_uint8 * 32768)]
 
 
 Delivery = C.CFUNCTYPE(None, C.c_uint32, C.c_uint32, C.POINTER(Event),
@@ -89,7 +89,7 @@ class NativeMidiSchedule(unittest.TestCase):
                  (record(101) + b'x', 1, b'schedule_packet'),
                  (record(101, data=b''), 1, b'schedule_bytes'),
                  (record(101), 0, b'schedule_count'),
-                 (record(101) * 513, 513, b'schedule_count'),
+                 (record(101) * 2049, 2049, b'schedule_count'),
                  (record(101, data=b'x' * 4096) * 9, 9, b'schedule_capacity')]
         for data, count, error in cases:
             with self.subTest(error=error, count=count):
@@ -97,6 +97,21 @@ class NativeMidiSchedule(unittest.TestCase):
                 self.assertEqual(self.accept(data, count), error)
                 self.assertEqual(bytes(self.queue), before)
                 self.assertEqual(self.step(100000000000), 0)
+
+    def test_combined_full_event_and_byte_capacity_is_accepted(self):
+        sizes = [4096] * 7 + [2056] + [1] * 2040
+        self.assertEqual(len(sizes), 2048)
+        self.assertEqual(sum(sizes), 32768)
+        data = b''.join(record(200 + index, data=b'x' * size)
+                        for index, size in enumerate(sizes))
+        self.assertEqual(len(data) + 16, 65552)
+        self.assertIsNone(self.accept(data, 2048))
+        for _ in range(2048):
+            self.assertEqual(self.step(3000), 1)
+        self.assertEqual(len(self.seen), 2048)
+        self.assertEqual([event[1] for event in self.seen], list(range(2048)))
+        self.assertEqual(sum(len(event[-1]) for event in self.seen), 32768)
+        self.assertEqual(self.step(3000), 0)
 
     def test_busy_rejection_preserves_pending_data(self):
         self.assertIsNone(self.accept(record(200)))

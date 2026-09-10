@@ -1,0 +1,22 @@
+--- a/matron/src/emu_bridge.c
++++ b/matron/src/emu_bridge.c
+@@ -245,7 +245,7 @@ int emu_midi_controlled_step(uint64_t now) {
+ }
+ static void *receive_loop(void *unused) {
+     (void)unused;
+-    int32_t packet[16384];
++    int32_t packet[16388];
+     int32_t *args=packet+1;
+     for (;;) {
+         /* MIDI decode and clock reference updates run on this device thread,
+--- a/matron/src/emu_midi_schedule.h
++++ b/matron/src/emu_midi_schedule.h
+@@ -7,7 +7,7 @@
+  * The real-time bridge polls without waiting for Lua. Controlled advancement
+  * supplies logical deadlines and delivers due input before servicing timers.
+  */
+-#define EMU_MIDI_SCHEDULE_EVENTS 512
++#define EMU_MIDI_SCHEDULE_EVENTS 2048
+ #define EMU_MIDI_SCHEDULE_BYTES 32768
+ #define EMU_MIDI_SCHEDULE_HORIZON_NS 60000000000ULL
+ struct emu_midi_scheduled_event {
