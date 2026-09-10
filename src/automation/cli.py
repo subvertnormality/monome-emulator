@@ -13,6 +13,9 @@ def main(argv=None):
     parser=argparse.ArgumentParser(prog='emu')
     commands=parser.add_subparsers(dest='command',required=True)
     doctor=commands.add_parser('doctor'); doctor.add_argument('--json',action='store_true')
+    performance=commands.add_parser('performance-capabilities')
+    performance.add_argument('--calibration-iterations',type=int,default=250000)
+    performance.add_argument('--require-constrained',action='store_true')
     start=commands.add_parser('start'); start.add_argument('--backend',default='native',choices=['native','contract-fixture'])
     start.add_argument('--script'); start.add_argument('--code-root'); start.add_argument('--data'); start.add_argument('--profile',default='wsl')
     start.add_argument('--fixture'); start.add_argument('--fixture-profile',default='base-midi')
@@ -39,6 +42,12 @@ def main(argv=None):
                 capability='native MIDI-only norns profile; run capabilities on a session for supported boundaries',
                 native_installation=(ROOT/'.runtime/current.json').exists(),
                 native_probe_available=(ROOT/'artifacts/c00/native-probe.json').exists())
+        elif args.command=='performance-capabilities':
+            from .performance import performance_capabilities
+            result=performance_capabilities(args.calibration_iterations)
+            if args.require_constrained and not result['constrained']['available']:
+                raise ContractError(result['constrained']['code'],
+                                    result['constrained']['reason'])
         elif args.command=='fetch':
             from runtime.dependencies import fetch
             result=fetch()

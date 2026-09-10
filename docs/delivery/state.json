@@ -3,7 +3,7 @@
   "updated": "2026-09-10",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "Finish and checkpoint M-SYNC-021/022 schedule-capacity review fixes, then implement the generic performance measurement/resource-control foundation from PERFORMANCE.md before Mosaic PERF cases. Core base-MIDI work remains prioritized; Toolkit/Matrix is deferred. Future Paranoia reviews use Opus only.",
+  "next_action": "Integrate cgroup aggregate measurements with the current container/release line, then implement generic PERF-001 quiet and dense adjacent baselines. Continue base-MIDI behavior coverage; Toolkit/Matrix remains deferred. Use only Opus for future Paranoia reviews.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -77,6 +77,12 @@
       "id": "C12",
       "status": "planned",
       "evidence": null
+    },
+    {
+      "id": "C17",
+      "status": "in_progress",
+      "evidence": null,
+      "start_revision": "1b024d6"
     },
     {
       "id": "C13",
@@ -5353,5 +5359,15 @@
     "mosaic_cases": 12,
     "default_runtime_promoted": false,
     "full_campaign_complete": false
+  },
+  "performance_foundation_checkpoint": {
+    "status": "scoped-foundation-passed",
+    "completion": "docs/delivery/completions/C17-performance-foundation.md",
+    "validation": "docs/delivery/performance-foundation-validation.json",
+    "contract_tests": 87,
+    "native_sampler_passed": true,
+    "direct_wsl_envelope": "cgroup_controllers_missing",
+    "docker_enforcement_probe": "passed",
+    "full_c17_complete": false
   }
 }
