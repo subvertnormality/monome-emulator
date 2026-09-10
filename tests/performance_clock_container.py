@@ -70,6 +70,26 @@ def tap_key(port, token, session_id, sequence, key):
     return sequence
 
 
+def complete_midi_log(name, session_id, output, expected_count):
+    """Copy the native export and return every MIDI emission, contiguously."""
+    found = command(['docker', 'exec', name, 'find',
+                     '/opt/emulator/.runtime/sessions/' + session_id,
+                     '-name', 'native-events.jsonl']).stdout.split()
+    if len(found) != 1:
+        raise ContractError('performance_log', 'Expected one native event log, found %r' % found)
+    target = output / 'native-events.jsonl'
+    command(['docker', 'cp', name + ':' + found[0], str(target)])
+    emitted = [row for row in (json.loads(line) for line in
+                               target.read_text().splitlines())
+               if 'index' in row and 'bytes' in row]
+    if [row['index'] for row in emitted] != list(range(1, len(emitted) + 1)):
+        raise ContractError('performance_log', 'Native MIDI export is not contiguous')
+    if len(emitted) != expected_count:
+        raise ContractError('performance_log', 'Native export has %d MIDI emissions, expected %d'
+                            % (len(emitted), expected_count))
+    return emitted
+
+
 def run_profile(image, output, density, bpm, repeat, poll_ms, settle_ms):
     output.mkdir(parents=True, exist_ok=False)
     data = output / 'data'
@@ -136,26 +156,21 @@ def run_profile(image, output, density, bpm, repeat, poll_ms, settle_ms):
         expected_seconds = TICKS * 60 / (bpm * 24)
         deadline = time.monotonic() + expected_seconds + 8
         observed = None
+        finished = False
         while time.monotonic() < deadline:
             observed = request(port, token, '/snapshot')
             if observed['errors']:
                 raise ContractError('runtime_error', str(observed['errors']))
             tail = observed['state']['midi']
             if tail and tail[-1]['bytes'][:2] == [176, 118]:
+                finished = True
                 break
             time.sleep(poll_ms / 1000)
-        if observed is not None and observed['state']['midi']:
-            configured = observed['state']['midi'][0]['bytes']
-            if configured != [176, 119, density]:
-                raise ContractError('performance_markers',
-                                    'Probe configured %s, expected density %d' %
-                                    (configured, density))
-        if observed is None or observed['state']['midi_count'] != expected_count:
+        if not finished:
             raise ContractError(
                 'performance_timeout',
-                'Expected %d MIDI messages, observed %s' %
-                (expected_count, None if observed is None
-                 else observed['state']['midi_count']))
+                'No end marker; observed %s MIDI messages' %
+                (None if observed is None else observed['state']['midi_count']))
         stopped = request(port, token, '/performance/stop', {})
         samples = []
         cursor = 0
@@ -169,14 +184,19 @@ def run_profile(image, output, density, bpm, repeat, poll_ms, settle_ms):
         write_json(output / 'samples.json', dict(
             schema_version=1, recording=recording, status=stopped,
             samples=samples))
-        messages = observed['state']['midi']
-        write_json(output / 'midi.json', dict(schema_version=1, messages=messages))
+        messages = complete_midi_log(name, ready['session_id'], output,
+                                     observed['state']['midi_count'])
         tempo_index = TEMPOS.index(bpm) + 1
         if (messages[0]['bytes'] != [176, 119, density] or
                 messages[1]['bytes'] != [176, 117, tempo_index] or
                 messages[-1]['bytes'] != [176, 118, TICKS % 128]):
             raise ContractError('performance_markers',
-                                'Missing PERF-001 configuration/transport markers')
+                                'PERF-001 markers %r differ from density %d, tempo %d' %
+                                ([messages[0]['bytes'], messages[1]['bytes'],
+                                  messages[-1]['bytes']], density, tempo_index))
+        if len(messages) != expected_count:
+            raise ContractError('performance_count', 'Expected %d MIDI messages, observed %d'
+                                % (expected_count, len(messages)))
         notes = messages[2:-1]
         plan = internal_clock_plan(messages[0]['monotonic_ns'], bpm,
                                    TICKS, density)
