@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "status": "scoped-experimental-admission",
+  "date": "2026-09-10",
+  "official_norns_revision": "14bbeae8646c6717f6bb44c8cd60250bf94b6042",
+  "scope": "Internal norns clock tempo continuity from 30 through 300 BPM, including changes during active clock.sync waits and restart/tempo generation interleaving.",
+  "behavior": [
+    "Tempo changes preserve the exact affine beat at the change timestamp.",
+    "Stale pre-change ticks have no side effects and cannot consume a pending restart.",
+    "Real and controlled drivers derive internal tick deadlines from the same tempo epoch.",
+    "Restart publishes beat reset and scheduler epoch atomically through clock_start_from_source_reference."
+  ],
+  "evidence": {
+    "patch": {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/patches/norns/candidates/internal-tempo-continuity.patch",
+      "sha256": "5f17474c33f4ae4c9908ff18e9ef6c047b25b54d16ba16336277ab37206c6b3b"
+    },
+    "candidate_install": {
+      "path": "/home/andy/projects/monome-runtime-candidates/internal-tempo-continuity-10/installation.json",
+      "sha256": "44ccdf20716fb80e13972170e96507ce76de3bf5812f36f5934104b2b5db084d"
+    },
+    "controlled_contract": {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/internal-tempo-contract/6b64a40ae01c416b9ac2d95b7e467f1f/manifest.json",
+      "sha256": "35cc5b05cc11ff40cf7f0215ae3ae0a25691044f53627ea72d9fb83d40391276",
+      "passed": true
+    },
+    "controlled_matrix": {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/internal-tempo/df0441d8f48646328ccca9b7c0c13584/manifest.json",
+      "sha256": "2aed174a48496076097f756120154de846eb092e9a47bdd58b6da41892b37a09",
+      "passed": true
+    },
+    "real_matrix": {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/internal-tempo/4aa96169699e4918a273e104b5785db8/manifest.json",
+      "sha256": "625b36abb03a657efb1d0a1fbaaca09a61ad19001b1419ad672dd8d536a5e718",
+      "passed": true
+    },
+    "controlled_active_waiter": {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/internal-tempo-active-waiter/5424b7d8130c462f93e01735ada52d16/manifest.json",
+      "sha256": "2a7082f61d99c66a6ee25bd3ef48dad49c9389d1e3c8b2c3043d0cbf36256a93",
+      "passed": true
+    },
+    "real_active_waiter": {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/internal-tempo-active-waiter/062010beb16f456a8558f1caad372d72/manifest.json",
+      "sha256": "344ac1a9553c7bf48c52c1a67892b18cd57c0e390338313bbd347f92b980b50b",
+      "passed": true
+    },
+    "restart_transaction": {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/internal-tempo-restart-transaction/55088e57427e4a1a88505e754ee03256/manifest.json",
+      "sha256": "ceff6027b071efcd74ff2bc48f04c8dc7b1537ec548ba39eb34a7e610f7f429e",
+      "passed": true
+    },
+    "mosaic_controlled": {
+      "path": "/home/andy/projects/mosaic-behaviour-runs/cbd166a1e421423b98471094b58eeb6d/manifest.json",
+      "sha256": "4846d5c21fd98324d9fcfb67fe1ab9dccf38cb2f89a027029d06661642a72afa",
+      "passed": true
+    },
+    "mosaic_real": {
+      "path": "/home/andy/projects/mosaic-behaviour-runs/e4d93466800c4b0a995585b540e53823/manifest.json",
+      "sha256": "4186dfab1bc5b21bfcd4727f120f0cde8203668f354fbfef37393e3e5ade4d36",
+      "passed": true
+    },
+    "mosaic_real_jitter_outlier": {
+      "path": "/home/andy/projects/mosaic-behaviour-runs/a048c420908b417e9ac368c017f88f22/manifest.json",
+      "sha256": "bfd55de755f0d9cb4ce870d86ce9a13d37f6149c819f3f95d93a1a368964871b",
+      "passed": false
+    },
+    "baseline_defect": {
+      "path": "/home/andy/projects/mosaic-behaviour-runs/generic-tempo-reference-7de2dd36ff9d4b3cb020409e08ee55b4/results.json",
+      "sha256": "c763936d9e4fda9f65e1fcf8ac13e74aa6e0e811d8ad81184876c9f3ee40f748"
+    },
+    "review": {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/docs/delivery/reviews/internal-tempo-continuity-06.json",
+      "sha256": "39e4406a5269da5156fcabb435a14aea3e1799b30eac79ee83b33f1eb225cd24"
+    },
+    "full_norns_native_suite": {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/internal-tempo-full-native-suite.json",
+      "sha256": "0ad18bb1e9ad43d559e895b9c98f95359ed07d83be07be3e6a59eac6562b0b16",
+      "passed": false
+    }
+  },
+  "native_internal_clock_target": {
+    "passed": true,
+    "mutexes": "real pthread mutexes"
+  },
+  "full_norns_native_suite": {
+    "passed": false,
+    "classification": "unpassed-existing-test-infrastructure",
+    "passing_targets_before_link_failure": 9,
+    "failure": "test_matron_clock lacks emulator, scheduler transaction, and MIDI acquisition stubs required by the evolved production clock API"
+  },
+  "review": {
+    "engine": "codex",
+    "session_ref": "01a088a8-ad4a-74a0-8786-1318b140cd2d",
+    "confidence": "high",
+    "disposition": "suitable for scoped experimental admission at tested tempos; no high-confidence continuity or restart blocker",
+    "post_review_change": "Trailing whitespace only was removed from candidate source and the generated patch; all executable evidence was recollected against the resulting installation identity."
+  },
+  "limitations": [
+    "The candidate remains optional and does not replace the default runtime.",
+    "This checkpoint does not re-admit the complete M5 inventory or complete the Mosaic campaign.",
+    "Mosaic timing is cadence/gate evidence anchored to its first observed note; absolute first-note phase has separate transport tests.",
+    "One retained wall-clock run exceeded Mosaic's existing 10 ms release tolerance by 0.137 ms after 167 events; the immediate unchanged repeat passed. Cause is not claimed.",
+    "The supported admission range is 30\u2013300 BPM; pathological direct C inputs outside the norns parameter contract are excluded."
+  ],
+  "next": "Add external MIDI clock jitter, missing/extra pulse, drift, loss/recovery, routing/remapping, and Mosaic interaction regressions before returning to advanced manual domains."
+}

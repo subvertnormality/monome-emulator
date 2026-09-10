@@ -4,3 +4,6 @@
 
 # Preserve mixed upstream line endings in this tested native diff.
 /patches/norns/experimental-screen-worker-shutdown.patch -text
+
+# Unified diff context represents blank source lines with one marker space.
+/patches/norns/candidates/*.patch whitespace=-blank-at-eol,-blank-at-eof
