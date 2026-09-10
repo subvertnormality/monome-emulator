@@ -55,3 +55,36 @@ currently imply faster feedback. Profile transport/capture and consider bounded
 event-oriented waits; preserve complete MIDI capture, exact logical schedules,
 observable predicates and fresh-repeat validation. Do not relax timing or
 coverage to improve the measurement. Run IDs are recorded in delivery state.
+
+R18 — Observer load inside the constrained envelope: fold:C17. A `/snapshot`
+serialises and schema-validates the whole observation, including a 4096-message
+MIDI tail and the frame, inside the container's CPU quota. Polled every 10 ms it
+consumed ~160 ms (quiet) and ~245 ms (dense) of CPU per PERF-001 run and caused
+throttling that the runtime workload alone does not
+(`perf-001-poll-10-01` versus `perf-001-poll-500-01`). Constrained lanes now poll
+at 500 ms and settle for 1 s after setup. Mosaic PERF-002+ drivers must bound
+observer cost the same way (event-oriented waits, bounded or incremental
+observations) and record their poll interval; their CPU-per-event figures are
+not comparable with an observer-heavy baseline. Extends R17.
+
+R19 — Stall-induced permanent phase loss in the pinned internal clock: fold:C17
+(PERF-008). Upstream `clock_internal.c` skips ticks when more than one tick
+behind, so any stall longer than about two tick periods leaves every later event
+late by a whole number of ticks. Measured under CFS throttling: a 29.6 ms
+throttle gave +25.0 ms (3 ticks at 300 BPM/24 PPQN) for the rest of the run, and
+28.5/27.6 ms throttles gave +32.9/+22.9 ms. This is stock behaviour, not an
+emulator patch; PERF-008 must state it and test recovery against it, and must
+not "fix" it by retiming expectations.
+
+R20 — CFS period shapes the proxy: later (decision needed before C17 done).
+Docker `--cpus 0.5` is a 50 ms quota per 100 ms period, which permits stalls of up
+to 50 ms; a slower CPU runs continuously slower instead. A shorter period at the
+same fraction would stall for less, but changing the profile is a contract
+amendment with focused review, never a response to a failing candidate. Current
+evidence is on the unchanged 50000/100000 profile.
+
+R21 — Runtime queue instrumentation: fold:C17, prerequisite of any PERF-008
+queue-recovery claim. The recorder's queue counter covers only scheduled native
+MIDI input. Matron's event queue (`events.c` `evq.size`) and clock-scheduler
+occupancy need a small tested native patch exposing depth and high-water marks.
+No queue-recovery claim is made until this exists.

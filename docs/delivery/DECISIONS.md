@@ -64,3 +64,11 @@ required pre-refactor delivery concern. Add automated constrained, deterministic
 cost, real-time musical and comparative-regression lanes based on official norns
 CM3/CM3+ facts. Do not claim x86 quota or QEMU wall time equals physical norns.
 Toolkit/Matrix performance remains deferred with that optional integration.
+
+D23 — Coverage before performance fixes, 2026-09-10 (user): do not attempt
+performance optimisations or the Mosaic refactor now. The goal is coverage — the
+behaviour, timing and performance test suites and a full regression suite that
+will guard the later refactor and performance work. Performance lanes measure and
+record ceilings, failures and diagnoses as regression evidence; fixes come with
+the refactor. Harness corrections that remove measurement artefacts remain in
+scope because they make the evidence true, not faster.

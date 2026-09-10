@@ -3,7 +3,7 @@
   "updated": "2026-09-10",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "Implement generic PERF-001 quiet and dense adjacent baselines on the committed constrained image, with exact MIDI/timing oracles and calibration. Add Lua scheduler queue instrumentation before claiming queue recovery. Continue base-MIDI behavior; Toolkit/Matrix remains deferred. Use only Opus for future Paranoia reviews.",
+  "next_action": "D23: coverage only, no performance fixes or refactor. PERF-001 internal-clock slice recorded in docs/delivery/completions/C17-PERF-001-clock.md (300 BPM ceiling 32 voices, first failure 40; 20/100/120 BPM pass at 1/16/32). Remaining PERF-001 rows: external-clock follower, 24 PPQN output, Start/Stop/Continue, tempo changes. PERF-002..008 need Mosaic stress cases with bounded observer cost (R18). R21 queue instrumentation precedes any queue-recovery claim. Continue Mosaic coverage per its state.json. Opus-only reviews.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -5199,5 +5199,14 @@
     "image_id": "sha256:cfa09761bdd3b6212894bd51bd56fcfc371248075005892f2343afcac668f5b0",
     "contract_tests": 96,
     "full_c17_complete": false
+  },
+  "perf_001_internal_clock": {
+    "completion": "docs/delivery/completions/C17-PERF-001-clock.md",
+    "data": "docs/delivery/completions/C17-PERF-001-clock.json",
+    "image": "monome-emulator:perf-recorder-02",
+    "image_id": "sha256:38b516ef4a8e7f85355da8d94d8f6f21c007b6a8d47fa829a8fc9039c01eea91",
+    "ceiling_300_bpm_voices": 32,
+    "first_failing_300_bpm_voices": 40,
+    "complete": false
   }
 }
