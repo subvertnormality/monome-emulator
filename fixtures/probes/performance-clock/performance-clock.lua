@@ -14,6 +14,9 @@ end
 
 function init()
   output = midi.connect(1)
+  -- One detent selects one density step: no time-based acceleration.
+  norns.enc.accel(1, false)
+  norns.enc.sens(1, 1)
   clock.set_source("internal")
   clock.internal.set_tempo(tempos[tempo_index])
   clock.transport.start = function()

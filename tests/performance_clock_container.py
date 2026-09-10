@@ -137,9 +137,16 @@ def run_profile(image, output, density, bpm, repeat):
             observed = request(port, token, '/snapshot')
             if observed['errors']:
                 raise ContractError('runtime_error', str(observed['errors']))
-            if observed['state']['midi_count'] == expected_count:
+            tail = observed['state']['midi']
+            if tail and tail[-1]['bytes'][:2] == [176, 118]:
                 break
             time.sleep(.01)
+        if observed is not None and observed['state']['midi']:
+            configured = observed['state']['midi'][0]['bytes']
+            if configured != [176, 119, density]:
+                raise ContractError('performance_markers',
+                                    'Probe configured %s, expected density %d' %
+                                    (configured, density))
         if observed is None or observed['state']['midi_count'] != expected_count:
             raise ContractError(
                 'performance_timeout',
