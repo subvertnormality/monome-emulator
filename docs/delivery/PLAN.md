@@ -123,8 +123,9 @@ system or automatically create Codex tasks to run it.
 | C09 | Verify advanced sequencing, locks, modulation and song behaviour | C08 | M2 |
 | C10 | Verify recording, mapping and device MIDI interactions | C08, C05 | M2 |
 | C11 | Verify persistence, dialogs, lifecycle and project isolation | C06, C08 | M2 |
-| C12 | Close workflow inventory; fault, timing and endurance acceptance | C09, C10, C11 | M2 + P2 review |
-| C13 | Prove autonomous LLM Mosaic iteration and usable diagnostics | C12 | M3 WSL release |
+| C12 | Close workflow inventory; fault, timing and endurance acceptance | C09, C10, C11 | M2 functional + P2 review |
+| C17 | Qualify norns-class performance proxy and drive measured optimizations | C12, C16 | M2 performance |
+| C13 | Prove autonomous LLM Mosaic iteration and usable diagnostics | C17 | M3 WSL release |
 | C14 | Package WSL2 release and verified official-dependency update workflow | C13 | M3 + P3 review |
 | C15 | Deliver native Linux parity with the same automated suite | C14 | M4 + P4 review |
 | C16 | Controlled time for musical correctness and feedback speed | C07 plus external-suite client | M5 controlled-time admission; required by Mosaic campaign |
@@ -579,6 +580,28 @@ intended assertion, and P2 findings are closed. No manual testing item remains.
 **On fail:** Block M2 with specific scenario/cause; do not disable tests, sort away
 event races, increase broad image tolerances or convert required cases to xfail.
 **Refs:** A18–A22 and complete acceptance contract.
+
+## C17 — Norns-class performance qualification
+
+**Depends:** C12 and C16. **Goal:** Prevent host surplus CPU/RAM from hiding
+musically harmful runtime or Mosaic costs. **Inputs:** Complete base-MIDI workflow
+suite, controlled/real clock lanes and [PERFORMANCE.md](PERFORMANCE.md).
+
+**Procedure:** implement the four performance lanes and PERF-001–008 matrix;
+calibrate every constrained run; establish pinned baseline measurements; minimize
+and profile failures; make measured runtime or Mosaic improvements with retained
+regressions; rerun the isolated workload, its combined interaction case and the
+functional suite it stresses. Keep optional Toolkit/Matrix work deferred until
+the user reprioritizes it.
+
+**Done when:** A25 passes without lost/reordered events or stuck notes, the
+ten-minute musical thresholds pass under the declared constrained proxy, resource
+growth and recovery gates pass, comparative regressions remain within budget,
+and evidence states the proxy's practical limits. **Outputs:** generic load probes,
+Mosaic stress cases, resource controller/calibration, profiles, comparisons and
+M2 performance manifest. **On fail:** retain the minimized workload and profile;
+fix measured costs rather than weakening timing or workload. **Refs:** A22/A25,
+PERFORMANCE.md, D22.
 
 ## C13 — Autonomous LLM development proof
 

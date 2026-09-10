@@ -120,7 +120,7 @@ to pass. Future delivery milestones are not prerequisites for earlier gates:
 |---|---|
 | M0 / C02 | C00/C01/C02 empirical probes and runner/native contracts; not full workflow acceptance |
 | M1 / C06 | Defined boot/edit/play/save slice plus device/control contracts; not all advanced workflows |
-| M2 / C12 | All A01–A19 and A21–A22 scenarios, including both modulation paths; A20 and platform packaging gates have later owners |
+| M2 / C12+C17 | All A01–A19 and A21–A22 functional scenarios plus A25 performance qualification; A20 and platform packaging gates have later owners |
 | M3 / C14 | All A01–A23 scenarios on WSL, including C13 LLM proof; A24 is not yet claimed |
 | M4 / C15 | All portable A01–A22 scenarios plus A24 on native Linux; retain WSL A23 evidence and rerun affected WSL checks if portability changes affect shared code |
 | M5 / C16 | Declared supported D scenarios plus affected E/R regressions; no weakening of M3/M4 scope |
@@ -169,6 +169,7 @@ below is a family, not permission to test one happy path and ignore its options.
 | A20 | LLM reproduce/edit/reload/verify loop on a candidate Mosaic change | Saved input recipe, failing baseline, passing candidate, unaffected regressions | C13 |
 | A21 | Error observability: Lua exceptions including coroutine errors, backend death, API failure | Nonzero runner exit and structured diagnostic artifacts, never timeout-as-pass | C01/C02/C12 |
 | A22 | Real-time mixed-feature endurance and clock/MIDI ordering | Bounded timing, no lost events, no stuck inputs/notes or leaked sessions | C12 |
+| A25 | Norns-class constrained performance, overload and recovery | Musical timing/resource budgets, exact outputs, bounded queues/RSS and comparative regression limits | C17 |
 | A23 | Automated clean install and execution on declared WSL profile | Inventory complete, browser + runtime checks, host facts identify WSL | C14 |
 | A24 | Native Linux portability on declared profile | Same suite and fixtures, host facts identify native Linux | C15 |
 
@@ -191,6 +192,7 @@ candidates must not silently select easier profiles.
 | Render propagation | Required nonanimated observable update within 500 ms of runtime-applied input, using event/frame acknowledgements |
 | Short startup timeout | Ready within 60 seconds after dependencies are built; errors retain logs; one explicit cold-start build is separate |
 | Endurance | 10 minutes real-time mixing editing/playback/transport; no lost required events, outstanding notes after drain, unhandled errors, or growing active clock/session counts |
+| Norns-class performance | Required base-MIDI PERF-001–008 lanes in PERFORMANCE.md; 768 MiB process-group cap, p99 timing/CPU comparative budgets, bounded queue drain and ≤1 MiB/min final RSS slope; label as proxy qualification until automated CM3/CM3+ calibration exists |
 | Recovery | 10 load/reload/reset cycles; no orphan processes, held keys, ports, or notes after cleanup |
 | Regression on C14 | All mandatory U/I/E/B/R/F selections once on the release tree; repeat timing lane only after a diagnosed environmental failure; D is separately admitted by M5 and required for the Mosaic timing campaign |
 | Routine feedback | Target focused smoke under 60 seconds, targeted workflow under 3 minutes; record slowness but don't hide functional failures |

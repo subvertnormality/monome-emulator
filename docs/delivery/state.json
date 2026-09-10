@@ -3,7 +3,7 @@
   "updated": "2026-09-10",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "Add the highest-value remaining Mosaic manual interactions after the accepted external-clock slice; retain burst/stochastic clock faults and ambiguous no-transport recovery as explicit later clock domains.",
+  "next_action": "Finish and checkpoint M-SYNC-021/022 schedule-capacity review fixes, then implement the generic performance measurement/resource-control foundation from PERFORMANCE.md before Mosaic PERF cases. Core base-MIDI work remains prioritized; Toolkit/Matrix is deferred. Future Paranoia reviews use Opus only.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
