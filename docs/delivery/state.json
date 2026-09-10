@@ -3,7 +3,7 @@
   "updated": "2026-09-10",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "D23: coverage only, no performance fixes or refactor. PERF-001 internal-clock slice recorded in docs/delivery/completions/C17-PERF-001-clock.md (300 BPM ceiling 32 voices, first failure 40; 20/100/120 BPM pass at 1/16/32). Remaining PERF-001 rows: external-clock follower, 24 PPQN output, Start/Stop/Continue, tempo changes. PERF-002..008 need Mosaic stress cases with bounded observer cost (R18). R21 queue instrumentation precedes any queue-recovery claim. Continue Mosaic coverage per its state.json. Opus-only reviews.",
+  "next_action": "D23: coverage only, no performance fixes or refactor; isolated bug fixes allowed. Emulator: PERF-001 internal-clock slice recorded (C17-PERF-001-clock.md); R22 startup lock landed (1760b08). Remaining PERF-001 rows: external-clock follower, 24 PPQN output, Start/Stop/Continue, tempo changes; R21 queue instrumentation before any queue-recovery claim. Mosaic owns PERF-002/003 via tests/behaviour/perf_dense.py (preliminary contended-host results; idle-host canonical runs pending). Integrating codex/midi-clock's 11 MIDI-clock commits and rebuilding the controlled candidate on the current lock is required before the Mosaic suite can move off the midi-clock checkout. Opus-only reviews.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {

@@ -99,3 +99,11 @@ lock (`src/runtime/startup_lock.py`) held from JACK launch to script ready gives
 session. The same race hit Mosaic's parallel regression suite on the
 codex/midi-clock checkout, which does not yet carry this lock. Promotion: move
 Mosaic's emulator configuration onto a line with the lock, or transplant it.
+
+R19 corroboration, 2026-09-10: Mosaic's PERF-002 runner
+(`mosaic-behaviour-tests/tests/behaviour/perf_dense.py`, preliminary record
+`docs/testing/perf-dense-preliminary.json` there) observed an 8-channel run lose
+two whole sequencer steps after a ~333 ms stall with zero CFS throttling — host
+preemption on a contended host — leaving every later step two steps late. That
+is the same stock skip-ahead consequence, reached through a different stall
+source. It stays PERF-008 evidence for the refactor (D23).
