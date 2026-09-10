@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "updated": "2026-09-09",
+  "updated": "2026-09-10",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "Candidate09 received-zero/source-serialization forwarding checkpoint accepted by Codex session01a08803-7a7a-7133-aab7-2b7b236169a8: generic D/R, M-SYNC001..013 D/R 26/26, native barrier/parity/epoch, acquisition, boundary/fault, receiver mutations and526units pass. Evidence docs/delivery/midi-received-zero-checkpoint.json. Candidate remains optional/unpromoted. Next implement and validate the next external-sync requirement (Continue/SPP support or explicit behavior) while retaining internal-tempo discontinuity as an unresolved mandatory defect. Full manual/release/final hardening incomplete.",
+  "next_action": "Add external MIDI clock jitter, missing/extra pulse, drift, loss/recovery, routing/remapping, and Mosaic interaction regressions before returning to advanced manual domains.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -5098,7 +5098,7 @@
   "active_execution_checkpoint": {
     "status": "terminal-published",
     "native_processes_active": false,
-    "next_action": "Hotplug implementation and Mosaic stopped-panic integration are published: emulator codex/midi-hotplug ae203883; Mosaic codex/behaviour-validation b9d04ea. Work directly on authorised branches: automatic review rejected main merge/runtime activation, neither ran. No active native/build/review processes. Next audit manual requirements/domain gaps using artifacts/hotplug/next-coverage-audit.json (141 requirements,431 registered cases; statuses incomplete). Start CH-PATCH-SENTINEL/CH-PATCH-RECALL: inspect current manual, parameter routing and existing cases before adding user-input bounds/sentinel and load/play persistence tests. Continue controlled-time repeatability/admission and full emulator stages; no refactor, no routine routing questions.",
+    "next_action": "Add external MIDI clock jitter, missing/extra pulse, drift, loss/recovery, routing/remapping, and Mosaic interaction regressions before returning to advanced manual domains.",
     "full_campaign_complete": false
   },
   "panic_validation": {
@@ -5335,5 +5335,14 @@
     "card": "docs/delivery/MIDI-RECEIVED-ZERO.md",
     "evidence": "docs/delivery/midi-forwarding-baseline-validation.json"
   },
-  "midi_received_zero_checkpoint": "docs/delivery/midi-received-zero-checkpoint.json"
+  "midi_received_zero_checkpoint": "docs/delivery/midi-received-zero-checkpoint.json",
+  "internal_tempo_continuity_checkpoint": {
+    "status": "scoped-experimental-admission",
+    "document": "docs/delivery/internal-tempo-continuity-checkpoint.json",
+    "candidate": "/home/andy/projects/monome-runtime-candidates/internal-tempo-continuity-10/installation.json",
+    "patch": "patches/norns/candidates/internal-tempo-continuity.patch",
+    "review_session": "01a088a8-ad4a-74a0-8786-1318b140cd2d",
+    "default_runtime_promoted": false,
+    "full_campaign_complete": false
+  }
 }

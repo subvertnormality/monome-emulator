@@ -1,0 +1,615 @@
+--- a/matron/src/clock.c
++++ b/matron/src/clock.c
+@@ -68,6 +68,21 @@
+     return beat;
+ }
+ 
++double clock_retime_source_reference(clock_reference_t *reference, double beat_duration, double *retimed_at) {
++    pthread_mutex_lock(&(reference->lock));
++
++    double current_time = clock_get_system_time();
++    double beat = reference->beat
++        + ((current_time - reference->last_beat_time) / reference->beat_duration);
++    reference->beat = beat;
++    reference->beat_duration = beat_duration;
++    reference->last_beat_time = current_time;
++    if (retimed_at != NULL) *retimed_at = current_time;
++
++    pthread_mutex_unlock(&(reference->lock));
++    return beat;
++}
++
+ double clock_get_tempo() {
+     double tempo;
+ 
+--- a/matron/src/clock.h
++++ b/matron/src/clock.h
+@@ -23,6 +23,7 @@
+ void clock_deinit();
+ void clock_update_source_reference(clock_reference_t *reference, double beats, double beat_duration);
+ double clock_get_reference_beat(clock_reference_t *reference);
++double clock_retime_source_reference(clock_reference_t *reference, double beat_duration, double *retimed_at);
+ double clock_get_reference_tempo(clock_reference_t *reference);
+ void clock_start_from_source(clock_source_t source);
+ void clock_stop_from_source(clock_source_t source);
+--- a/matron/src/clocks/clock_internal.c
++++ b/matron/src/clocks/clock_internal.c
+@@ -25,6 +25,8 @@
+ 
+ static clock_internal_tempo_t clock_internal_tempo;
+ static pthread_mutex_t clock_internal_tempo_lock;
++static uint64_t clock_internal_tempo_generation;
++static double clock_internal_tempo_epoch_time;
+ 
+ #ifdef NORNS_TEST
+ // test synchronization and state variables
+@@ -65,23 +67,36 @@
+     clock_nanosleep(CLOCK_MONOTONIC, 0, &ts, NULL);
+ }
+ 
+-/* Keep native reference/reset publication identical in real and external time.
+- * beat_duration is the tempo snapshot taken before the corresponding sleep. */
+-void clock_internal_publish_tick(uint64_t *ticks, double beat_duration) {
+-    double reference_beat;
++/* A normal publication refreshes the affine beat/time reference without changing
++ * its value. A stale pre-sleep tempo snapshot has no side effects. */
++bool clock_internal_publish_tick(uint64_t *ticks, double beat_duration, uint64_t generation) {
++    pthread_mutex_lock(&clock_internal_tempo_lock);
++    if (generation != clock_internal_tempo_generation) {
++        pthread_mutex_unlock(&clock_internal_tempo_lock);
++        return false;
++    }
+     if (clock_internal_restarted) {
+         *ticks = 0;
+-        reference_beat = 0;
+-
+-        clock_update_source_reference(&clock_internal_reference, reference_beat, beat_duration);
+-        clock_start_from_source(CLOCK_SOURCE_INTERNAL);
+-
+         clock_internal_restarted = false;
++        /* The scheduler epoch and reset reference publish under one scheduler
++         * transaction. No scheduler path acquires the tempo lock. */
++        clock_start_from_source_reference(CLOCK_SOURCE_INTERNAL,
++            &clock_internal_reference, 0, beat_duration);
+     } else {
+         (*ticks)++;
+-        reference_beat = (double)*ticks / CLOCK_INTERNAL_TICKS_PER_BEAT;
+-        clock_update_source_reference(&clock_internal_reference, reference_beat, beat_duration);
+-    }
++        clock_retime_source_reference(&clock_internal_reference, beat_duration, NULL);
++    }
++    pthread_mutex_unlock(&clock_internal_tempo_lock);
++    return true;
++}
++
++static double clock_internal_future_deadline(double deadline, double tick_duration, double now) {
++    if (!isfinite(deadline) || !isfinite(tick_duration) || tick_duration <= 0) return now;
++    if (deadline < now) {
++        double missed = ceil((now - deadline) / tick_duration);
++        deadline += missed * tick_duration;
++    }
++    return deadline;
+ }
+ 
+ static void *clock_internal_thread_run(void *p) {
+@@ -89,62 +104,58 @@
+ 
+     double current_time;
+     double next_tick_time;
+-
+     double beat_duration;
+     double tick_duration;
+-
++    double tempo_epoch_time;
++    uint64_t generation;
++    uint64_t pending_generation;
+     uint64_t ticks = 0;
+ 
+     current_time = clock_get_system_time();
+-    next_tick_time = current_time;
++    clock_internal_tempo_snapshot(&beat_duration, &tick_duration,
++        &pending_generation, &tempo_epoch_time);
++    next_tick_time = clock_internal_future_deadline(
++        tempo_epoch_time + tick_duration, tick_duration, current_time);
+ 
+     while (true) {
+ #ifdef NORNS_TEST
+-        // allow tests to stop the thread loop cleanly.
+-        if (clock_internal_thread_stop) {
+-            break;
++        if (clock_internal_thread_stop) break;
++#endif
++        current_time = clock_get_system_time();
++        clock_internal_tempo_snapshot(&beat_duration, &tick_duration,
++            &generation, &tempo_epoch_time);
++        if (generation != pending_generation) {
++            next_tick_time = clock_internal_future_deadline(
++                tempo_epoch_time + tick_duration, tick_duration, current_time);
++            pending_generation = generation;
+         }
+-#endif
+-        current_time = clock_get_system_time();
+-
+-        pthread_mutex_lock(&clock_internal_tempo_lock);
+-        beat_duration = clock_internal_tempo.beat_duration;
+-        tick_duration = clock_internal_tempo.tick_duration;
+-        pthread_mutex_unlock(&clock_internal_tempo_lock);
+-
+-        // compute sleep: base tick interval + drift correction.
+-        double raw_sleep_s = tick_duration + (next_tick_time - current_time);
++
++        double raw_sleep_s = next_tick_time - current_time;
+         double sleep_s = raw_sleep_s < 0 ? 0 : raw_sleep_s;
+ 
+ #ifdef NORNS_TEST
+-        // expose loop internals to validate scheduling.
+         clock_internal_last_current_time = current_time;
+         clock_internal_last_next_tick_time = next_tick_time;
+         clock_internal_last_tick_duration = tick_duration;
+-        // expose pre-clamp sleep value.
+         clock_internal_last_sleep_s = raw_sleep_s;
+ #endif
+         clock_internal_sleep(sleep_s);
+ 
+-        clock_internal_publish_tick(&ticks, beat_duration);
+-
+-#ifdef NORNS_TEST
+-        // count publishes so tests can wait for progress without sleeps.
+-        atomic_fetch_add(&clock_internal_published_ticks, 1);
+-#endif
+-
+-        next_tick_time += tick_duration;
+-
+-        // if schedule is >1 tick behind (time jump, suspend, or jack stall),
+-        // skip ahead to avoid runaway catchup.
++        bool published = clock_internal_publish_tick(&ticks, beat_duration, generation);
++#ifdef NORNS_TEST
++        if (published) atomic_fetch_add(&clock_internal_published_ticks, 1);
++#endif
+         current_time = clock_get_system_time();
+-        if (next_tick_time + tick_duration < current_time) {
+-            double lag = current_time - next_tick_time;
+-            // calculate skipped ticks. place
+-            // next_tick_time one tick after current_time to resume pacing.
+-            uint64_t catchup_ticks = (uint64_t)floor(lag / tick_duration);
+-            next_tick_time += (catchup_ticks + 1) * tick_duration;
++        if (published) {
++            next_tick_time += tick_duration;
++        } else {
++            clock_internal_tempo_snapshot(&beat_duration, &tick_duration,
++                &generation, &tempo_epoch_time);
++            next_tick_time = tempo_epoch_time + tick_duration;
+         }
++        next_tick_time = clock_internal_future_deadline(
++            next_tick_time, tick_duration, current_time);
++        pending_generation = generation;
+     }
+ 
+     return NULL;
+@@ -168,8 +179,10 @@
+ 
+ void clock_internal_init_external(void) {
+     pthread_mutex_init(&clock_internal_tempo_lock, NULL);
++    clock_reference_init(&clock_internal_reference);
++    clock_internal_tempo_epoch_time = clock_get_system_time();
++    clock_internal_tempo_generation = 0;
+     clock_internal_set_tempo(120);
+-    clock_reference_init(&clock_internal_reference);
+ }
+ 
+ void clock_internal_init() {
+@@ -177,26 +190,37 @@
+     clock_internal_start();
+ }
+ 
+-/* Read both quantities from the same tempo snapshot; a pending tick retains
+- * the snapshot made before its sleep, exactly as the production thread does. */
+-void clock_internal_tempo_snapshot(double *beat_duration, double *tick_duration) {
++/* Read tempo values and generation atomically so a pending tick can detect
++ * a tempo update that occurred while it slept. */
++void clock_internal_tempo_snapshot(double *beat_duration, double *tick_duration,
++        uint64_t *generation, double *tempo_epoch_time) {
+     pthread_mutex_lock(&clock_internal_tempo_lock);
+     *beat_duration = clock_internal_tempo.beat_duration;
+     *tick_duration = clock_internal_tempo.tick_duration;
++    *generation = clock_internal_tempo_generation;
++    *tempo_epoch_time = clock_internal_tempo_epoch_time;
+     pthread_mutex_unlock(&clock_internal_tempo_lock);
+ }
+ 
+ void clock_internal_set_tempo(double bpm) {
+-    pthread_mutex_lock(&clock_internal_tempo_lock);
+-
+-    clock_internal_tempo.beat_duration = 60.0 / bpm;
+-    clock_internal_tempo.tick_duration = clock_internal_tempo.beat_duration / CLOCK_INTERNAL_TICKS_PER_BEAT;
+-
++    if (!isfinite(bpm) || bpm <= 0) {
++        fprintf(stderr, "invalid internal clock tempo: %g\n", bpm);
++        return;
++    }
++    double beat_duration = 60.0 / bpm;
++    pthread_mutex_lock(&clock_internal_tempo_lock);
++    clock_retime_source_reference(&clock_internal_reference, beat_duration,
++        &clock_internal_tempo_epoch_time);
++    clock_internal_tempo.beat_duration = beat_duration;
++    clock_internal_tempo.tick_duration = beat_duration / CLOCK_INTERNAL_TICKS_PER_BEAT;
++    clock_internal_tempo_generation++;
+     pthread_mutex_unlock(&clock_internal_tempo_lock);
+ }
+ 
+ void clock_internal_restart() {
++    pthread_mutex_lock(&clock_internal_tempo_lock);
+     clock_internal_restarted = true;
++    pthread_mutex_unlock(&clock_internal_tempo_lock);
+ }
+ 
+ void clock_internal_stop() {
+@@ -228,33 +252,19 @@
+ void clock_internal_test_tick_once() {
+     double beat_duration;
+     double tick_duration;
+-
+-    pthread_mutex_lock(&clock_internal_tempo_lock);
+-    beat_duration = clock_internal_tempo.beat_duration;
+-    tick_duration = clock_internal_tempo.tick_duration;
+-    pthread_mutex_unlock(&clock_internal_tempo_lock);
+-
+-    (void)tick_duration; // unused in test stepping.
+-
+-    if (clock_internal_restarted) {
+-        clock_internal_test_ticks = 0;
+-        double reference_beat = 0;
+-
+-        clock_update_source_reference(&clock_internal_reference, reference_beat, beat_duration);
+-        clock_start_from_source(CLOCK_SOURCE_INTERNAL);
+-
+-        clock_internal_restarted = false;
+-    } else {
+-        clock_internal_test_ticks++;
+-        double reference_beat = (double)clock_internal_test_ticks / CLOCK_INTERNAL_TICKS_PER_BEAT;
+-        clock_update_source_reference(&clock_internal_reference, reference_beat, beat_duration);
+-    }
+-    atomic_fetch_add(&clock_internal_published_ticks, 1);
++    uint64_t generation;
++    clock_internal_tempo_snapshot(&beat_duration, &tick_duration, &generation, &clock_internal_tempo_epoch_time);
++    (void)tick_duration;
++    if (clock_internal_publish_tick(&clock_internal_test_ticks, beat_duration, generation)) {
++        atomic_fetch_add(&clock_internal_published_ticks, 1);
++    }
+ }
+ 
+ // set internal tick counter. simulate uptime and boundary cases.
+ void clock_internal_test_set_ticks(uint64_t v) {
++    pthread_mutex_lock(&clock_internal_tempo_lock);
+     clock_internal_test_ticks = v;
++    pthread_mutex_unlock(&clock_internal_tempo_lock);
+ }
+ 
+ // read published ticks for test sync.
+@@ -295,4 +305,4 @@
+ double clock_internal_test_get_last_tick_duration(void) {
+     return clock_internal_last_tick_duration;
+ }
+-#endif // NORNS_TEST+#endif // NORNS_TEST
+--- a/matron/src/clocks/clock_internal.h
++++ b/matron/src/clocks/clock_internal.h
+@@ -1,10 +1,11 @@
+ #pragma once
++#include <stdbool.h>
+ #include <stdint.h>
+ 
+ void clock_internal_init();
+ void clock_internal_init_external(void);
+-void clock_internal_publish_tick(uint64_t *ticks, double beat_duration);
+-void clock_internal_tempo_snapshot(double *beat_duration, double *tick_duration);
++bool clock_internal_publish_tick(uint64_t *ticks, double beat_duration, uint64_t generation);
++void clock_internal_tempo_snapshot(double *beat_duration, double *tick_duration, uint64_t *generation, double *tempo_epoch_time);
+ void clock_internal_set_tempo(double bpm);
+ void clock_internal_restart();
+ void clock_internal_stop();
+--- a/matron/src/emu_clock.c
++++ b/matron/src/emu_clock.c
+@@ -15,6 +15,9 @@
+ static uint64_t ticks;
+ static long double next_tick_ns;
+ static double pending_beat_duration;
++static double pending_tick_duration;
++static uint64_t pending_tempo_generation;
++static double pending_tempo_epoch_time;
+ static int advancing;
+ 
+ int emu_clock_enabled(void) {
+@@ -29,9 +32,9 @@
+ }
+ void emu_clock_init(void) {
+     emu_midi_set_logical_clock(emu_clock_now);
+-    double duration;
+-    clock_internal_tempo_snapshot(&pending_beat_duration,&duration);
+-    next_tick_ns=duration*1000000000.L;
++    clock_internal_tempo_snapshot(&pending_beat_duration,&pending_tick_duration,
++        &pending_tempo_generation,&pending_tempo_epoch_time);
++    next_tick_ns=((long double)pending_tempo_epoch_time+pending_tick_duration)*1000000000.L;
+ }
+ static uint64_t deadline(long double value,int strict,uint64_t now) {
+     if (!isfinite(value) || value>=UINT64_MAX) return UINT64_MAX;
+@@ -52,12 +55,24 @@
+         if (++work>200000) { failure="controlled clock work limit exceeded";break; }
+         now=emu_clock_now();
+         if (emu_midi_controlled_step(now)) continue;
++        double current_beat_duration,current_tick_duration,current_epoch_time;
++        uint64_t current_generation;
++        clock_internal_tempo_snapshot(&current_beat_duration,&current_tick_duration,
++            &current_generation,&current_epoch_time);
++        if (current_generation != pending_tempo_generation) {
++            pending_beat_duration=current_beat_duration;
++            pending_tick_duration=current_tick_duration;
++            pending_tempo_generation=current_generation;
++            pending_tempo_epoch_time=current_epoch_time;
++            next_tick_ns=((long double)pending_tempo_epoch_time+pending_tick_duration)*1000000000.L;
++        }
+         if (now>=deadline(next_tick_ns,0,0)) {
+-            clock_internal_publish_tick(&ticks,pending_beat_duration);
+-            double duration;
+-            clock_internal_tempo_snapshot(&pending_beat_duration,&duration);
+-            if (!isfinite(duration) || duration<=0) { failure="invalid internal clock interval";break; }
+-            next_tick_ns+=duration*1000000000.L;
++            bool published=clock_internal_publish_tick(&ticks,pending_beat_duration,pending_tempo_generation);
++            clock_internal_tempo_snapshot(&pending_beat_duration,&pending_tick_duration,
++                &pending_tempo_generation,&pending_tempo_epoch_time);
++            if (!isfinite(pending_tick_duration) || pending_tick_duration<=0) { failure="invalid internal clock interval";break; }
++            next_tick_ns=published ? next_tick_ns+pending_tick_duration*1000000000.L
++                : ((long double)pending_tempo_epoch_time+pending_tick_duration)*1000000000.L;
+         }
+         metros_step(now);
+         clock_scheduler_step();
+--- a/tests/matron/clocks/clock_internal/test_clock_internal.cpp
++++ b/tests/matron/clocks/clock_internal/test_clock_internal.cpp
+@@ -32,17 +32,15 @@
+         CHECK(clock_internal_get_tempo() == doctest::Approx(120.0));
+     }
+ 
+-    SUBCASE("set_tempo updates on next tick (not immediately)") {
+-        // initial 120 bpm
++    SUBCASE("set_tempo updates immediately without moving the current beat") {
+         REQUIRE(clock_internal_get_tempo() == doctest::Approx(120.0));
+-
+-        // change tempo; without a tick, reported tempo remains the old value
++        tests_set_now(0.125);
++        double beat_before = clock_internal_get_beat();
++
+         clock_internal_set_tempo(90.0);
+-        CHECK(clock_internal_get_tempo() == doctest::Approx(120.0));
+-
+-        // after one tick publish, reported tempo reflects the new value
+-        clock_internal_test_tick_once();
+-        CHECK(clock_internal_get_tempo() == doctest::Approx(90.0));
++
++        CHECK(clock_internal_get_tempo() == doctest::Approx(90.0));
++        CHECK(clock_internal_get_beat() == doctest::Approx(beat_before));
+     }
+ 
+     SUBCASE("long-run tick stepping still publishes tempo changes") {
+@@ -51,9 +49,9 @@
+             clock_internal_test_tick_once();
+         }
+ 
+-        // change tempo and confirm it publishes on the next tick
+-        clock_internal_set_tempo(60.0);
+-        CHECK(clock_internal_get_tempo() != doctest::Approx(60.0)); // not yet published
++        // change tempo and confirm the reference updates without a tick
++        clock_internal_set_tempo(60.0);
++        CHECK(clock_internal_get_tempo() == doctest::Approx(60.0));
+         clock_internal_test_tick_once();
+         CHECK(clock_internal_get_tempo() == doctest::Approx(60.0));
+     }
+@@ -67,6 +65,7 @@
+         // capture beat and ensure monotonic increase across several ticks
+         double prev_beat = clock_internal_get_beat();
+         for (int i = 0; i < 10; ++i) {
++            tests_set_now((i + 1) / 48.0);
+             clock_internal_test_tick_once();
+             double beat = clock_internal_get_beat();
+             CHECK(beat > prev_beat);
+@@ -81,31 +80,74 @@
+         // initial tempo is 120
+         REQUIRE(clock_internal_get_tempo() == doctest::Approx(120.0));
+ 
+-        // change tempo; until a tick publishes, reported tempo remains previous value
++        // tempo changes preserve the current beat and take effect immediately
+         clock_internal_set_tempo(90.0);
+-        CHECK(clock_internal_get_tempo() == doctest::Approx(120.0));
+-        clock_internal_test_tick_once();
+-        CHECK(clock_internal_get_tempo() == doctest::Approx(90.0));
+-
+-        // simulate a large forward jump in system time—publish still works on the next tick
++        CHECK(clock_internal_get_tempo() == doctest::Approx(90.0));
++        clock_internal_test_tick_once();
++        CHECK(clock_internal_get_tempo() == doctest::Approx(90.0));
++
++        // simulate a large forward jump in system time—retiming remains continuous
+         tests_set_now(6.0 * 3600.0);
+-        clock_internal_set_tempo(60.0);
+-        CHECK(clock_internal_get_tempo() == doctest::Approx(90.0));
+-        clock_internal_test_tick_once();
++        double beat_before = clock_internal_get_beat();
++        clock_internal_set_tempo(60.0);
++        CHECK(clock_internal_get_tempo() == doctest::Approx(60.0));
++        CHECK(clock_internal_get_beat() == doctest::Approx(beat_before));
++        clock_internal_test_tick_once();
++        CHECK(clock_internal_get_tempo() == doctest::Approx(60.0));
++    }
++
++    SUBCASE("stale pending tick cannot overwrite a newer tempo reference") {
++        for (int i = 0; i < 12; ++i) clock_internal_test_tick_once();
++        tests_set_now(0.125);
++
++        double old_beat_duration;
++        double old_tick_duration;
++        uint64_t old_generation;
++        double old_epoch_time;
++        clock_internal_tempo_snapshot(&old_beat_duration, &old_tick_duration, &old_generation, &old_epoch_time);
++        double beat_before = clock_internal_get_beat();
++
++        clock_internal_set_tempo(60.0);
++        CHECK(clock_internal_get_beat() == doctest::Approx(beat_before));
++        CHECK(clock_internal_get_tempo() == doctest::Approx(60.0));
++
++        uint64_t ticks = 12;
++        CHECK(clock_internal_publish_tick(&ticks, old_beat_duration, old_generation) == false);
++        CHECK(ticks == 12);
++        CHECK(clock_internal_get_beat() == doctest::Approx(beat_before));
++        CHECK(clock_internal_get_tempo() == doctest::Approx(60.0));
++
++        tests_set_now(0.400);
++        double delayed_beat = clock_internal_get_beat();
++
++        double new_beat_duration;
++        double new_tick_duration;
++        uint64_t new_generation;
++        double new_epoch_time;
++        clock_internal_tempo_snapshot(&new_beat_duration, &new_tick_duration,
++            &new_generation, &new_epoch_time);
++        CHECK(new_generation != old_generation);
++        CHECK(new_epoch_time == doctest::Approx(0.125));
++        CHECK(clock_internal_publish_tick(&ticks, new_beat_duration, new_generation) == true);
++        CHECK(ticks == 13);
++        CHECK(clock_internal_get_beat() == doctest::Approx(delayed_beat));
+         CHECK(clock_internal_get_tempo() == doctest::Approx(60.0));
+     }
+ 
+     SUBCASE("restart resets beat and applies latest tempo on next publish") {
+         // advance a few ticks so beat > 0
+         for (int i = 0; i < 10; ++i) {
++            tests_set_now((i + 1) / 48.0);
+             clock_internal_test_tick_once();
+         }
+         REQUIRE(clock_internal_get_beat() > 0.0);
+ 
+         // change tempo and restart; next publish should reset beat to 0 and apply tempo
+         clock_internal_set_tempo(75.0);
++        tests_reset_source_reference_starts();
+         clock_internal_restart();
+         clock_internal_test_tick_once();
++        CHECK(tests_source_reference_starts() == 1);
+         CHECK(clock_internal_get_beat() == doctest::Approx(0.0));
+         CHECK(clock_internal_get_tempo() == doctest::Approx(75.0));
+     }
+@@ -171,8 +213,7 @@
+         }
+         REQUIRE(clock_internal_get_tempo() == doctest::Approx(120.0));
+ 
+-        // change tempo to 90; it should update on next publish only
+-        CHECK(clock_internal_get_tempo() == doctest::Approx(120.0));
++        // change tempo to 90 while the background loop is publishing
+         pub = clock_internal_test_get_published_ticks();
+         clock_internal_set_tempo(90.0);
+ 
+--- a/tests/matron/clocks/common/helpers.c
++++ b/tests/matron/clocks/common/helpers.c
+@@ -9,6 +9,7 @@
+ static double g_beats = 0.0;
+ static bool g_nanosleep_advances_time = true;
+ static bool g_nanosleep_strict_validation = false;
++static unsigned g_source_reference_starts = 0;
+ 
+ // -----------------------------------------------------------------------------
+ // test control functions - allow tests to manipulate time and beats
+@@ -65,6 +66,15 @@
+     reference->last_beat_time = g_now;
+ }
+ 
++double clock_retime_source_reference(clock_reference_t *reference, double beat_duration, double *retimed_at) {
++    double beat = reference->beat + ((g_now - reference->last_beat_time) / reference->beat_duration);
++    reference->beat = beat;
++    reference->beat_duration = beat_duration;
++    reference->last_beat_time = g_now;
++    if (retimed_at != NULL) *retimed_at = g_now;
++    return beat;
++}
++
+ // weak symbols allow tests to override with custom implementations
+ __attribute__((weak)) double clock_get_reference_beat(clock_reference_t *reference) {
+     return reference->beat + ((g_now - reference->last_beat_time) / reference->beat_duration);
+@@ -82,6 +92,16 @@
+     (void)source;
+ }
+ 
++__attribute__((weak)) void clock_start_from_source_reference(clock_source_t source,
++        clock_reference_t *reference, double beats, double beat_duration) {
++    (void)source;
++    g_source_reference_starts++;
++    clock_update_source_reference(reference, beats, beat_duration);
++}
++
++void tests_reset_source_reference_starts(void) { g_source_reference_starts = 0; }
++unsigned tests_source_reference_starts(void) { return g_source_reference_starts; }
++
+ __attribute__((weak)) void clock_stop_from_source(clock_source_t source) {
+     (void)source;
+ }
+@@ -91,30 +111,8 @@
+     (void)source;
+ }
+ 
+-// -----------------------------------------------------------------------------
+-// pthread mutex stubs - no-ops for deterministic testing
+-// -----------------------------------------------------------------------------
+-
+-int pthread_mutex_lock(pthread_mutex_t *mutex) {
+-    (void)mutex;
+-    return 0;
+-}
+-
+-int pthread_mutex_unlock(pthread_mutex_t *mutex) {
+-    (void)mutex;
+-    return 0;
+-}
+-
+-int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr) {
+-    (void)mutex;
+-    (void)attr;
+-    return 0;
+-}
+-
+-int pthread_mutex_trylock(pthread_mutex_t *mutex) {
+-    (void)mutex;
+-    return 0; // success
+-}
++// pthread mutexes use the real implementation. Threaded clock tests must
++// exercise the production lock order; replacing locks with no-ops creates data races.
+ 
+ // -----------------------------------------------------------------------------
+ // time sleeping stub - advance virtual time instead of real sleeping
+--- a/tests/matron/clocks/common/helpers.h
++++ b/tests/matron/clocks/common/helpers.h
+@@ -31,14 +31,11 @@
+ 
+ // clock control stubs used by clock_crow, clock_internal, clock_midi, clock_link
+ void clock_start_from_source(clock_source_t source);
++void clock_start_from_source_reference(clock_source_t source, clock_reference_t *reference, double beats, double beat_duration);
++void tests_reset_source_reference_starts(void);
++unsigned tests_source_reference_starts(void);
+ void clock_stop_from_source(clock_source_t source);
+ void clock_reschedule_sync_events_from_source(clock_source_t source);
+-
+-// pthread mutex stubs for deterministic testing
+-int pthread_mutex_lock(pthread_mutex_t *mutex);
+-int pthread_mutex_unlock(pthread_mutex_t *mutex);
+-int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr);
+-int pthread_mutex_trylock(pthread_mutex_t *mutex);
+ 
+ #ifdef __cplusplus
+ }
+--- a/tests/wscript
++++ b/tests/wscript
+@@ -16,9 +16,8 @@
+ import os
+ import sys
+ 
+-from collections.abc import Iterable
+ from dataclasses import dataclass
+-from typing import Any, Dict, List, Set, Tuple
++from typing import Any, Dict, Iterable, List, Set, Tuple
+ from waflib import Logs
+ from waflib.Build import BuildContext
+ 

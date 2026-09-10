@@ -134,6 +134,14 @@ and profiles. If you want to try it:
 The `midi-modulation` profile additionally enables the fixture's pinned mods.
 Both profiles boot, but complete Mosaic workflow acceptance is still in progress.
 
+An optional pinned-norns tempo-continuity candidate is recorded at
+`patches/norns/candidates/internal-tempo-continuity.patch`. It preserves the
+current musical beat when internal tempo changes and is covered in controlled
+and wall-clock modes, including active `clock.sync` waits. It remains an
+experimental candidate; the default runtime is unchanged. See
+`docs/delivery/internal-tempo-continuity-checkpoint.json` for the exact tested
+scope and retained evidence.
+
 ## Troubleshooting and contributing
 
 Start with `./dev/emu doctor --json` and `./dev/emu <command> --help`. For fetch
