@@ -58,6 +58,60 @@ def _rss_slope(samples, window_ns=300_000_000_000):
             denominator)
 
 
+THROTTLE_FIELDS = ('throttled_periods', 'throttled_ns')
+
+
+def throttling_deltas(samples):
+    """Report cgroup CFS throttling accumulated between the first and last sample.
+
+    The kernel counters are cumulative, so a decrease is a counter defect, not
+    a negative delta.  A sampler that cannot read the counters reports None;
+    that makes the whole population unavailable rather than silently zero.
+    """
+    _require(isinstance(samples, list) and len(samples) >= 2,
+             'At least two resource samples are required')
+    missing = [field for field in THROTTLE_FIELDS
+               if any(row.get(field) is None for row in samples)]
+    if missing:
+        return dict(available=False, code='throttle_counters_unavailable',
+                    missing=missing)
+    for field in THROTTLE_FIELDS:
+        values = [row[field] for row in samples]
+        _require(all(type(value) is int and value >= 0 for value in values),
+                 'Throttle counters must be nonnegative integer values')
+        _require(all(b >= a for a, b in zip(values, values[1:])),
+                 'Throttle counter %s moved backwards' % field)
+    intervals = [dict(start_ns=a['monotonic_ns'], end_ns=b['monotonic_ns'],
+                      periods=b['throttled_periods'] - a['throttled_periods'],
+                      throttled_ns=b['throttled_ns'] - a['throttled_ns'])
+                 for a, b in zip(samples, samples[1:])
+                 if (b['throttled_periods'] != a['throttled_periods'] or
+                     b['throttled_ns'] != a['throttled_ns'])]
+    return dict(available=True, code=None,
+                periods_delta=(samples[-1]['throttled_periods'] -
+                               samples[0]['throttled_periods']),
+                throttled_ns_delta=(samples[-1]['throttled_ns'] -
+                                    samples[0]['throttled_ns']),
+                window_ns=samples[-1]['monotonic_ns'] - samples[0]['monotonic_ns'],
+                throttled_intervals=intervals)
+
+
+def bracketing_samples(samples, start_ns, end_ns):
+    """Select the samples enclosing [start_ns, end_ns], widening to the edges."""
+    _require(isinstance(samples, list) and len(samples) >= 2,
+             'At least two resource samples are required')
+    _require(type(start_ns) is int and type(end_ns) is int and start_ns <= end_ns,
+             'Window must be an ordered integer interval')
+    first = max([index for index, row in enumerate(samples)
+                 if row['monotonic_ns'] <= start_ns] or [0])
+    last = min([index for index, row in enumerate(samples)
+                if row['monotonic_ns'] >= end_ns] or [len(samples) - 1])
+    if last == first:
+        last = min(first + 1, len(samples) - 1)
+        first = last - 1
+    return samples[first:last + 1]
+
+
 def performance_metrics(samples, timing_errors_ns, service_times_ns,
                         musical_events, shortest_deadline_ns,
                         quiet_queue_depth=0, overload_end_ns=None,
@@ -140,6 +194,7 @@ def performance_metrics(samples, timing_errors_ns, service_times_ns,
                        final_window_rss_slope_bytes_per_minute=slope,
                        queue_high_water=max(row['queue_depth'] for row in samples),
                        queue_recovery_ns=recovered_ns),
+        throttling=throttling_deltas(samples),
         gates=gates, passed=all(applicable))
 
 
@@ -436,7 +491,12 @@ class PerformanceRecorder:
 
 
 def cgroup_capability(root=Path('/sys/fs/cgroup'), proc_cgroup=None):
-    """Report whether a delegated cgroup v2 can enforce the required envelope."""
+    """Report whether this user can create a delegated child cgroup v2.
+
+    This answers "could the launcher impose an envelope itself?".  It says
+    nothing about an envelope already enforced on this process by a container
+    runtime; enforced_envelope() answers that separate question.
+    """
     root = Path(root)
     if proc_cgroup is None:
         try:
@@ -465,6 +525,82 @@ def cgroup_capability(root=Path('/sys/fs/cgroup'), proc_cgroup=None):
                     path=str(current), controllers=sorted(controllers))
     return dict(available=True, code=None, reason=None, path=str(current),
                 controllers=sorted(controllers))
+
+
+def cpuset_size(value):
+    """Count CPUs in a kernel cpuset list such as '0', '0-3' or '0,2-3'."""
+    _require(isinstance(value, str) and value.strip(), 'Empty cpuset')
+    count = 0
+    for part in value.strip().split(','):
+        first, _, last = part.partition('-')
+        try:
+            low = int(first)
+            high = int(last) if last else low
+        except ValueError as error:
+            raise ContractError('performance_evidence',
+                                'Malformed cpuset ' + value) from error
+        _require(0 <= low <= high, 'Malformed cpuset ' + value)
+        count += high - low + 1
+    return count
+
+
+def envelope_violations(limits):
+    """List departures of kernel-reported limits from the constrained profile."""
+    violations = []
+    quota, period = limits.get('cpu_quota_us'), limits.get('cpu_period_us')
+    if quota is None or quota < 0:
+        violations.append('cpu_quota_unlimited')
+    elif not period or quota > period:
+        violations.append('cpu_quota_exceeds_one_cpu')
+    memory = limits.get('memory_limit_bytes')
+    if memory is None or memory > MEMORY_LIMIT_BYTES:
+        violations.append('memory_limit_exceeds_768_mib')
+    if limits.get('cgroup_version') == 1:
+        swap_total = limits.get('memory_and_swap_limit_bytes')
+        if swap_total is None or memory is None or swap_total > memory:
+            violations.append('swap_permitted')
+    elif limits.get('memory_swap_limit_bytes') != 0:
+        violations.append('swap_permitted')
+    try:
+        if cpuset_size(limits.get('cpuset_cpus')) != 1:
+            violations.append('cpuset_not_single_cpu')
+    except ContractError:
+        violations.append('cpuset_unreadable')
+    return violations
+
+
+def enforced_envelope(root=Path('/sys/fs/cgroup')):
+    """Report the cgroup limits already enforced on this process, if readable."""
+    try:
+        sampler = CgroupStatsSampler(root)
+        limits = sampler.limits()
+    except ContractError as error:
+        return dict(available=False, code=error.code, reason=str(error),
+                    limits=None, violations=None)
+    except (OSError, ValueError, IndexError) as error:
+        return dict(available=False, code='cgroup_limits_unreadable',
+                    reason=str(error), limits=None, violations=None)
+    violations = envelope_violations(limits)
+    return dict(available=not violations,
+                code='envelope_outside_profile' if violations else None,
+                reason=(None if not violations else
+                        'Enforced limits depart from the constrained profile: ' +
+                        ', '.join(violations)),
+                limits=limits, violations=violations)
+
+
+def constrained_lane(envelope, delegation):
+    """Decide whether the constrained lane can run, naming the mechanism."""
+    if envelope['available']:
+        return dict(available=True, mechanism='enforced_envelope',
+                    code=None, reason=None)
+    if delegation['available']:
+        return dict(available=True, mechanism='delegated_cgroup_v2',
+                    code=None, reason=None)
+    return dict(available=False, mechanism=None, code='constrained_lane_unavailable',
+                reason=('No enforced envelope matches the profile (%s) and no '
+                        'delegated cgroup v2 can be created (%s)' %
+                        (envelope['code'], delegation['code'])))
 
 
 def calibrate_cpu(iterations=250_000):
@@ -499,9 +635,12 @@ def performance_capabilities(calibration_iterations=250_000):
     affinity = None
     if hasattr(os, 'sched_getaffinity'):
         affinity = sorted(os.sched_getaffinity(0))
-    return dict(schema_version=1, claim='norns-class-proxy-only',
+    envelope = enforced_envelope()
+    delegation = cgroup_capability()
+    return dict(schema_version=2, claim='norns-class-proxy-only',
                 host=dict(platform=platform.platform(), machine=platform.machine(),
                           python=platform.python_version(), cpu_count=os.cpu_count(),
                           affinity=affinity, memory=memory),
-                constrained=cgroup_capability(),
+                enforced_envelope=envelope, delegation=delegation,
+                constrained=constrained_lane(envelope, delegation),
                 calibration=calibrate_cpu(calibration_iterations))

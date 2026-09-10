@@ -1,10 +1,11 @@
--- Generic native clock-load probe. Physical-style encoder input selects output
+-- Generic native clock-load probe. Physical-style inputs select tempo/output
 -- density; K2 starts the official internal norns transport and scheduler.
 local output
 local density = 1
 local running = false
 local ticks = 120
-local bpm = 300
+local tempos = {20, 100, 120, 300}
+local tempo_index = 4
 local pulses_per_beat = 24
 
 local function marker(controller, value)
@@ -14,11 +15,12 @@ end
 function init()
   output = midi.connect(1)
   clock.set_source("internal")
-  clock.internal.set_tempo(bpm)
+  clock.internal.set_tempo(tempos[tempo_index])
   clock.transport.start = function()
     if running then return end
     running = true
     marker(119, density)
+    marker(117, tempo_index)
     clock.run(function()
       for step = 1, ticks do
         clock.sync(1 / pulses_per_beat)
@@ -43,9 +45,14 @@ function enc(n, delta)
 end
 
 function key(n, state)
-  if n == 2 and state == 1 and not running then
-    clock.internal.set_tempo(bpm)
+  if state ~= 1 or running then return end
+  if n == 2 then
+    clock.internal.set_tempo(tempos[tempo_index])
     clock.internal.start()
+  elseif n == 3 then
+    tempo_index = tempo_index % #tempos + 1
+    clock.internal.set_tempo(tempos[tempo_index])
+    redraw()
   end
 end
 
@@ -55,6 +62,6 @@ function redraw()
   screen.move(2, 12)
   screen.text("PERF CLOCK")
   screen.move(2, 24)
-  screen.text(string.format("%d BPM x%d", bpm, density))
+  screen.text(string.format("%d BPM x%d", tempos[tempo_index], density))
   screen.update()
 end

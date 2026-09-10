@@ -127,3 +127,18 @@ It does not yet expose the Lua clock scheduler or application-owned queues, so
 PERF rows that claim those queues require additional explicit instrumentation.
 On an unrestricted WSL session the endpoint fails with a named missing-cgroup
 counter error; it never substitutes per-process limits for the required group.
+
+`performance-capabilities` (schema 2) separates two questions. `enforced_envelope`
+reports the kernel limits already imposed on the process (for example by Docker's
+cgroup v1 or v2 envelope) and names each departure from the profile: unlimited or
+more-than-one-CPU quota, memory above 768 MiB, permitted swap, or a cpuset larger
+than one CPU. `delegation` reports only whether this user could create a writable
+delegated cgroup v2 child. `constrained` is available when either mechanism holds
+and records which one; otherwise it names both causes. A container whose envelope
+is enforced is not reported as missing a limit merely because it cannot delegate.
+
+Resource reports include `throttling`: cumulative CFS `nr_throttled` and throttled
+time deltas across the recording plus each sampled interval in which they moved.
+Counters that the kernel does not expose are reported unavailable, never as zero,
+and a decreasing counter fails the report. Throttling is diagnostic evidence for
+classifying a timing failure; it is not a pass gate and cannot excuse one.

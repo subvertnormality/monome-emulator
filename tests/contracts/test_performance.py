@@ -7,9 +7,11 @@ import sys
 
 from automation.performance import (
     CgroupStatsSampler, MEMORY_LIMIT_BYTES, PerformanceRecorder,
-    ProcessTreeSampler, cgroup_capability,
-    calibrate_cpu, compare_performance, nearest_rank, performance_capabilities,
-    performance_metrics, process_stat)
+    ProcessTreeSampler, bracketing_samples, cgroup_capability,
+    constrained_lane, cpuset_size,
+    calibrate_cpu, compare_performance, enforced_envelope, envelope_violations,
+    nearest_rank, performance_capabilities, performance_metrics, process_stat,
+    throttling_deltas)
 from automation.protocol import ContractError, ROOT
 from automation import session
 
@@ -78,6 +80,64 @@ class PerformanceMetricsTests(unittest.TestCase):
         with self.assertRaises(ContractError): self.report(
             samples=[sample(0, 2, 0), sample(1, 1, 0)])
 
+    def test_throttling_deltas_come_from_cumulative_counters(self):
+        rows = [dict(sample(0, 0, 1), throttled_periods=4, throttled_ns=100),
+                dict(sample(1, 5, 1), throttled_periods=4, throttled_ns=100),
+                dict(sample(2, 9, 1), throttled_periods=7, throttled_ns=40_100),
+                dict(sample(3, 12, 1), throttled_periods=9, throttled_ns=50_100)]
+        throttling = self.report(samples=rows)['throttling']
+        self.assertEqual(throttling['available'], True)
+        self.assertEqual(throttling['periods_delta'], 5)
+        self.assertEqual(throttling['throttled_ns_delta'], 50_000)
+        self.assertEqual(throttling['window_ns'], 3_000_000_000)
+        self.assertEqual(throttling['throttled_intervals'], [
+            dict(start_ns=1_000_000_000, end_ns=2_000_000_000,
+                 periods=3, throttled_ns=40_000),
+            dict(start_ns=2_000_000_000, end_ns=3_000_000_000,
+                 periods=2, throttled_ns=10_000)])
+
+    def test_throttling_is_diagnostic_not_a_gate(self):
+        rows = [dict(sample(0, 0, 1), throttled_periods=0, throttled_ns=0),
+                dict(sample(300, 10, 1), throttled_periods=900, throttled_ns=9)]
+        report = self.report(samples=rows)
+        self.assertTrue(report['passed'])
+        self.assertNotIn('throttling', report['gates'])
+
+    def test_unavailable_throttle_counters_are_named_not_zero(self):
+        rows = [dict(sample(0, 0, 1), throttled_periods=None, throttled_ns=0),
+                dict(sample(1, 1, 1), throttled_periods=None, throttled_ns=5)]
+        self.assertEqual(throttling_deltas(rows), dict(
+            available=False, code='throttle_counters_unavailable',
+            missing=['throttled_periods']))
+        self.assertEqual(throttling_deltas([sample(0, 0, 1), sample(1, 1, 1)])['missing'],
+                         ['throttled_periods', 'throttled_ns'])
+
+    def test_throttle_counter_regression_is_rejected(self):
+        for field in ('throttled_periods', 'throttled_ns'):
+            rows = [dict(sample(0, 0, 1), throttled_periods=5, throttled_ns=5),
+                    dict(sample(1, 1, 1), throttled_periods=5, throttled_ns=5)]
+            rows[1][field] = 4
+            with self.assertRaises(ContractError):
+                throttling_deltas(rows)
+        with self.assertRaises(ContractError):
+            throttling_deltas([dict(sample(0, 0, 1), throttled_periods=-1,
+                                    throttled_ns=0)] * 2)
+
+    def test_bracketing_samples_enclose_the_window(self):
+        rows = [sample(second, second, 1) for second in range(5)]
+        second = 1_000_000_000
+        self.assertEqual([row['monotonic_ns'] // second for row in
+                          bracketing_samples(rows, second + 1, 3 * second - 1)],
+                         [1, 2, 3])
+        self.assertEqual([row['monotonic_ns'] // second for row in
+                          bracketing_samples(rows, 2 * second, 2 * second)], [2, 3])
+        self.assertEqual([row['monotonic_ns'] // second for row in
+                          bracketing_samples(rows, -1, 9 * second)], [0, 1, 2, 3, 4])
+        self.assertEqual([row['monotonic_ns'] // second for row in
+                          bracketing_samples(rows, 9 * second, 9 * second)], [3, 4])
+        with self.assertRaises(ContractError):
+            bracketing_samples(rows, 2, 1)
+
     def test_calibration_is_versioned_and_bounded(self):
         report = calibrate_cpu(10_000)
         self.assertEqual(report['algorithm'], 'python-byte-mix-v1')
@@ -88,10 +148,12 @@ class PerformanceMetricsTests(unittest.TestCase):
 
     def test_capability_report_disclaims_hardware_equivalence(self):
         report = performance_capabilities(10_000)
-        self.assertEqual(report['schema_version'], 1)
+        self.assertEqual(report['schema_version'], 2)
         self.assertEqual(report['claim'], 'norns-class-proxy-only')
-        self.assertIn('constrained', report)
-        self.assertIn('calibration', report)
+        for key in ('enforced_envelope', 'delegation', 'constrained', 'calibration'):
+            self.assertIn(key, report)
+        self.assertEqual(report['constrained'], constrained_lane(
+            report['enforced_envelope'], report['delegation']))
 
     def test_cli_emits_machine_readable_capability_report(self):
         result = subprocess.run(
@@ -212,6 +274,85 @@ class ProcessSamplingTests(unittest.TestCase):
             self.assertEqual(sampler.limits()['cpu_quota_us'], 25000)
             self.assertEqual(sampler.limits()['cpuset_cpus'], '2')
             self.assertEqual(sampler.limits()['memory_swap_limit_bytes'], 0)
+
+    def write_v1(self, root, **overrides):
+        values = {
+            'cpuacct/cpuacct.usage': '1',
+            'cpu/cpu.stat': 'nr_periods 0\nnr_throttled 0\nthrottled_time 0\n',
+            'cpu/cpu.cfs_quota_us': '50000',
+            'cpu/cpu.cfs_period_us': '100000',
+            'memory/memory.usage_in_bytes': '1',
+            'memory/memory.max_usage_in_bytes': '1',
+            'memory/memory.limit_in_bytes': str(MEMORY_LIMIT_BYTES),
+            'memory/memory.memsw.limit_in_bytes': str(MEMORY_LIMIT_BYTES),
+            'cpuset/cpuset.cpus': '0',
+        }
+        values.update(overrides)
+        for name, value in values.items():
+            path = root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(value)
+
+    def test_enforced_v1_envelope_is_reported_separately_from_delegation(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.write_v1(root)
+            envelope = enforced_envelope(root)
+            self.assertEqual(envelope['available'], True)
+            self.assertEqual(envelope['violations'], [])
+            self.assertEqual(envelope['limits']['cpu_quota_us'], 50000)
+            delegation = cgroup_capability(root, '4:cpu:/docker/x\n')
+            self.assertEqual(delegation['available'], False)
+            self.assertEqual(constrained_lane(envelope, delegation), dict(
+                available=True, mechanism='enforced_envelope', code=None,
+                reason=None))
+
+    def test_envelope_violations_name_each_departure(self):
+        cases = {
+            'cpu/cpu.cfs_quota_us': ('-1', 'cpu_quota_unlimited'),
+            'memory/memory.limit_in_bytes': (str(MEMORY_LIMIT_BYTES + 1),
+                                             'memory_limit_exceeds_768_mib'),
+            'memory/memory.memsw.limit_in_bytes': (str(MEMORY_LIMIT_BYTES * 2),
+                                                   'swap_permitted'),
+            'cpuset/cpuset.cpus': ('0-1', 'cpuset_not_single_cpu'),
+        }
+        for name, (value, expected) in cases.items():
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                self.write_v1(root, **{name: value})
+                envelope = enforced_envelope(root)
+                self.assertEqual(envelope['available'], False)
+                self.assertEqual(envelope['code'], 'envelope_outside_profile')
+                self.assertEqual(envelope['violations'], [expected])
+        self.assertEqual(envelope_violations(dict(
+            cgroup_version=1, cpu_quota_us=200000, cpu_period_us=100000,
+            memory_limit_bytes=1, memory_and_swap_limit_bytes=1,
+            cpuset_cpus='3')), ['cpu_quota_exceeds_one_cpu'])
+        self.assertEqual(envelope_violations(dict(
+            cgroup_version=2, cpu_quota_us=50000, cpu_period_us=100000,
+            memory_limit_bytes=1, memory_swap_limit_bytes=None,
+            cpuset_cpus='3')), ['swap_permitted'])
+
+    def test_missing_envelope_and_delegation_names_both_causes(self):
+        with tempfile.TemporaryDirectory() as temp:
+            envelope = enforced_envelope(Path(temp))
+            self.assertEqual(envelope['available'], False)
+            self.assertEqual(envelope['code'], 'cgroup_counters_missing')
+            lane = constrained_lane(envelope, dict(available=False,
+                                                   code='cgroup_v2_required'))
+            self.assertEqual(lane['available'], False)
+            self.assertEqual(lane['code'], 'constrained_lane_unavailable')
+            self.assertIn('cgroup_counters_missing', lane['reason'])
+            self.assertIn('cgroup_v2_required', lane['reason'])
+            self.assertEqual(constrained_lane(envelope, dict(available=True))['mechanism'],
+                             'delegated_cgroup_v2')
+
+    def test_cpuset_size(self):
+        self.assertEqual(cpuset_size('0'), 1)
+        self.assertEqual(cpuset_size('0-3'), 4)
+        self.assertEqual(cpuset_size('0,2-3\n'), 3)
+        for value in ('', '3-1', 'a'):
+            with self.assertRaises(ContractError): cpuset_size(value)
 
     def test_cgroup_sampler_rejects_partial_mount(self):
         with tempfile.TemporaryDirectory() as temp:

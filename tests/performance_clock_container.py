@@ -1,5 +1,6 @@
-"""Run adjacent quiet/dense PERF-001 baselines in the constrained image."""
+"""Run repeated quiet/dense PERF-001 baselines in the constrained image."""
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -11,16 +12,37 @@ import uuid
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
-from automation.performance import performance_metrics
+from automation.performance import (bracketing_samples, performance_metrics,
+                                     throttling_deltas)
 from automation.performance_clock import burst_service_times, internal_clock_plan
 from automation.protocol import ContractError, write_json
 from automation.scheduling_metrics import scheduling_metrics
+
+TEMPOS = (20, 100, 120, 300)
+TEMPO_TAPS = {300: 0, 20: 1, 100: 2, 120: 3}
+TICKS = 120
+DENSITIES = tuple(range(1, 17))
+
+
+def source_identity():
+    revision = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=ROOT,
+                              capture_output=True, text=True, check=True).stdout.strip()
+    diff = subprocess.run(['git', 'diff', 'HEAD'], cwd=ROOT, capture_output=True,
+                          check=True).stdout
+    return dict(revision=revision, dirty=bool(diff),
+                dirty_patch_sha256=hashlib.sha256(diff).hexdigest() if diff else None)
+
+
+def window_throttling(samples, start_ns, end_ns):
+    return dict(start_ns=start_ns, end_ns=end_ns,
+                **throttling_deltas(bracketing_samples(samples, start_ns, end_ns)))
 
 
 def command(args, timeout=60, check=True):
     result = subprocess.run(args, capture_output=True, text=True, timeout=timeout)
     if check and result.returncode:
-        raise ContractError('container_command', ' '.join(args[:3]) + ': ' + result.stderr[-1000:])
+        raise ContractError('container_command',
+                            ' '.join(args[:3]) + ': ' + result.stderr[-1000:])
     return result
 
 
@@ -40,7 +62,15 @@ def action(port, token, session_id, sequence, value):
         sequence=sequence, action=value))
 
 
-def run_profile(image, output, density):
+def tap_key(port, token, session_id, sequence, key):
+    for state in (1, 0):
+        sequence += 1
+        action(port, token, session_id, sequence,
+               dict(type='key', n=key, state=state))
+    return sequence
+
+
+def run_profile(image, output, density, bpm, repeat):
     output.mkdir(parents=True, exist_ok=False)
     data = output / 'data'
     data.mkdir()
@@ -48,13 +78,15 @@ def run_profile(image, output, density):
     container = None
     result = dict(schema_version=1, passed=False, workload='PERF-001',
                   profile='quiet' if density == 1 else 'dense',
-                  bpm=300, density=density, ticks=120, image=image)
+                  bpm=bpm, density=density, ticks=TICKS, repeat=repeat,
+                  image=image)
     run = [
         'docker', 'run', '-d', '--name', name, '--cpus', '0.5',
         '--memory', '768m', '--memory-swap', '768m', '--cpuset-cpus', '0',
         '--shm-size', '256m', '-p', '127.0.0.1::8765',
         '--mount', 'type=bind,source=%s,target=/data' % data,
-        '--mount', 'type=bind,source=%s,target=/code,readonly' % (ROOT / 'fixtures/probes'),
+        '--mount', 'type=bind,source=%s,target=/code,readonly' %
+        (ROOT / 'fixtures/probes'),
         image, '--script', '/code/performance-clock/performance-clock.lua',
         '--code-root', '/code']
     try:
@@ -62,7 +94,8 @@ def run_profile(image, output, density):
         deadline = time.monotonic() + 60
         ready = None
         while time.monotonic() < deadline:
-            for line in command(['docker', 'logs', name], check=False).stdout.splitlines():
+            for line in command(['docker', 'logs', name],
+                                check=False).stdout.splitlines():
                 try:
                     value = json.loads(line)
                 except ValueError:
@@ -73,27 +106,32 @@ def run_profile(image, output, density):
                 break
             if command(['docker', 'inspect', '-f', '{{.State.Status}}', name],
                        check=False).stdout.strip() in ('exited', 'dead'):
-                raise ContractError('container_start', 'Container exited before ready')
+                raise ContractError('container_start',
+                                    'Container exited before ready')
             time.sleep(.1)
         if not ready:
-            raise ContractError('container_timeout', 'Container did not become ready')
+            raise ContractError('container_timeout',
+                                'Container did not become ready')
         mapping = command(['docker', 'port', name, '8765/tcp']).stdout.strip()
         port = int(mapping.rsplit(':', 1)[1])
         token = ready['token']
+        calibration = json.loads(command([
+            'docker', 'exec', name, './dev/emu', 'performance-capabilities',
+            '--calibration-iterations', '100000']).stdout)
         sequence = request(port, token, '/health')['sequence']
         if density > 1:
             for _ in range(density - 1):
                 sequence += 1
                 action(port, token, ready['session_id'], sequence,
                        dict(type='enc', n=1, delta=1))
+        for _ in range(TEMPO_TAPS[bpm]):
+            sequence = tap_key(port, token, ready['session_id'], sequence, 3)
         recording = request(port, token, '/performance/start',
-                            dict(period_ms=10, maximum_seconds=10))
-        for state in (1, 0):
-            sequence += 1
-            action(port, token, ready['session_id'], sequence,
-                   dict(type='key', n=2, state=state))
-        expected_count = 2 + 120 * density * 2
-        deadline = time.monotonic() + 8
+                            dict(period_ms=10, maximum_seconds=30))
+        sequence = tap_key(port, token, ready['session_id'], sequence, 2)
+        expected_count = 3 + TICKS * density * 2
+        expected_seconds = TICKS * 60 / (bpm * 24)
+        deadline = time.monotonic() + expected_seconds + 8
         observed = None
         while time.monotonic() < deadline:
             observed = request(port, token, '/snapshot')
@@ -103,8 +141,11 @@ def run_profile(image, output, density):
                 break
             time.sleep(.01)
         if observed is None or observed['state']['midi_count'] != expected_count:
-            raise ContractError('performance_timeout', 'Expected %d MIDI messages, observed %s' %
-                                (expected_count, None if observed is None else observed['state']['midi_count']))
+            raise ContractError(
+                'performance_timeout',
+                'Expected %d MIDI messages, observed %s' %
+                (expected_count, None if observed is None
+                 else observed['state']['midi_count']))
         stopped = request(port, token, '/performance/stop', {})
         samples = []
         cursor = 0
@@ -115,28 +156,46 @@ def run_profile(image, output, density):
             cursor = page['cursor']
             if not page['has_more']:
                 break
+        write_json(output / 'samples.json', dict(
+            schema_version=1, recording=recording, status=stopped,
+            samples=samples))
         messages = observed['state']['midi']
-        expected_marker = [176, 119, density]
-        expected_finish = [176, 118, 120]
-        if messages[0]['bytes'] != expected_marker or messages[-1]['bytes'] != expected_finish:
-            raise ContractError('performance_markers', 'Missing PERF-001 transport markers')
-        notes = messages[1:-1]
-        plan = internal_clock_plan(messages[0]['monotonic_ns'], 300, 120, density)
-        exact = [row['bytes'] for row in notes] == [row['bytes'] for row in plan['events']]
+        write_json(output / 'midi.json', dict(schema_version=1, messages=messages))
+        tempo_index = TEMPOS.index(bpm) + 1
+        if (messages[0]['bytes'] != [176, 119, density] or
+                messages[1]['bytes'] != [176, 117, tempo_index] or
+                messages[-1]['bytes'] != [176, 118, TICKS % 128]):
+            raise ContractError('performance_markers',
+                                'Missing PERF-001 configuration/transport markers')
+        notes = messages[2:-1]
+        plan = internal_clock_plan(messages[0]['monotonic_ns'], bpm,
+                                   TICKS, density)
+        exact = ([row['bytes'] for row in notes] ==
+                 [row['bytes'] for row in plan['events']])
         if not exact:
-            raise ContractError('performance_midi', 'MIDI bytes/order differ from independent plan')
+            raise ContractError('performance_midi',
+                                'MIDI bytes/order differ from independent plan')
         timing = scheduling_metrics(plan['events'], notes)
-        service = burst_service_times(notes, 120, density)
+        service = burst_service_times(notes, TICKS, density)
         metrics = performance_metrics(
             samples, timing['scheduling_errors_ns'], service, len(notes),
             plan['pulse_ns'])
         inspect = json.loads(command(['docker', 'inspect', name]).stdout)[0]
+        origin = messages[0]['monotonic_ns']
+        windows = dict(
+            before_transport=window_throttling(
+                samples, samples[0]['monotonic_ns'], origin),
+            lead_in=window_throttling(samples, origin, notes[0]['monotonic_ns']),
+            workload=window_throttling(samples, notes[0]['monotonic_ns'],
+                                       notes[-1]['monotonic_ns']))
         result.update(
             passed=timing['within_event_profile'] and metrics['passed'],
             session_id=ready['session_id'], image_id=inspect['Image'],
-            limits=recording['limits'], sample_count=len(samples),
-            midi_count=len(messages), exact_midi=exact, timing=timing,
-            service_times_ns=service, metrics=metrics,
+            calibration=calibration, limits=recording['limits'],
+            sample_count=len(samples), midi_count=len(messages),
+            exact_midi=exact, timing=timing, service_times_ns=service,
+            metrics=metrics, throttling_windows=windows,
+            first_note_error_ns=timing['scheduling_errors_ns'][0],
             recorder_status=stopped['status'])
         request(port, token, '/stop', {}, timeout=45)
         command(['docker', 'wait', name], timeout=40)
@@ -147,10 +206,32 @@ def run_profile(image, output, density):
         if container:
             (output / 'container.log').write_text(
                 command(['docker', 'logs', name], check=False).stdout)
-            command(['docker', 'stop', '--time', '40', name], timeout=50, check=False)
+            command(['docker', 'stop', '--time', '40', name],
+                    timeout=50, check=False)
             command(['docker', 'rm', name], check=False)
         write_json(output / 'result.json', result)
     return result
+
+
+def parse_tempos(value):
+    try:
+        tempos = tuple(int(item) for item in value.split(','))
+    except ValueError as error:
+        raise argparse.ArgumentTypeError('Tempos must be comma-separated integers') from error
+    if not tempos or len(set(tempos)) != len(tempos) or any(v not in TEMPOS for v in tempos):
+        raise argparse.ArgumentTypeError('Tempos must be unique selections from 20,100,120,300')
+    return tempos
+
+
+def parse_densities(value):
+    try:
+        densities = tuple(int(item) for item in value.split(','))
+    except ValueError as error:
+        raise argparse.ArgumentTypeError('Densities must be comma-separated integers') from error
+    if (not densities or len(set(densities)) != len(densities) or
+            any(v not in DENSITIES for v in densities)):
+        raise argparse.ArgumentTypeError('Densities must be unique values from 1 to 16')
+    return densities
 
 
 def main():
@@ -158,12 +239,24 @@ def main():
     parser.add_argument('--image', default=os.environ.get(
         'EMULATOR_IMAGE', 'monome-emulator:perf-recorder-01'))
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--tempos', type=parse_tempos, default=(300,))
+    parser.add_argument('--densities', type=parse_densities, default=(1, 16))
+    parser.add_argument('--repeats', type=int, choices=range(1, 4), default=3)
     args = parser.parse_args()
     root = args.output.resolve()
     root.mkdir(parents=True, exist_ok=False)
-    rows = [run_profile(args.image, root / name, density)
-            for name, density in (('quiet', 1), ('dense', 16))]
-    report = dict(schema_version=1, workload='PERF-001',
+    rows = []
+    for bpm in args.tempos:
+        for density in args.densities:
+            for repeat in range(1, args.repeats + 1):
+                rows.append(run_profile(
+                    args.image,
+                    root / ('bpm-%d' % bpm) / ('density-%d-%d' % (density, repeat)),
+                    density, bpm, repeat))
+    report = dict(schema_version=2, workload='PERF-001',
+                  argv=sys.argv[1:], source=source_identity(),
+                  tempos=list(args.tempos), densities=list(args.densities),
+                  repeats=args.repeats,
                   passed=all(row['passed'] for row in rows), profiles=rows)
     write_json(root / 'result.json', report)
     print(root / 'result.json')
