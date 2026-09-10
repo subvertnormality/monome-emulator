@@ -60,6 +60,7 @@ class Application:
         self.closed=False
         self.cleanup_complete=False
         self.restart_result=None
+        self.performance_recorder=None;self.performance_lock=threading.RLock()
     def close(self):
         if self.cleanup_complete:return
         self.closed=True
@@ -69,6 +70,7 @@ class Application:
             closers += [capture.cancel for capture in self.audio_captures.values()]
             closers.append(self.close_audio)
             closers.append(self.backend.close)
+            if self.performance_recorder:closers.append(self.performance_recorder.stop)
             for close in closers:
                 try:close()
                 except Exception as error:failures.append(str(error))
@@ -78,6 +80,35 @@ class Application:
             if self.writers_stopped() and self.dataset_lease:self.dataset_lease.close()
         if failures:raise ContractError('cleanup_failed','; '.join(failures))
         self.cleanup_complete=True
+    def performance_queue_depth(self):
+        condition=getattr(self.backend,'condition',None)
+        if condition:
+            with condition:return self._performance_queue_depth()
+        return self._performance_queue_depth()
+    def _performance_queue_depth(self):
+        schedule=getattr(self.backend,'input_schedule',None)
+        if not schedule or schedule.get('status') not in ('submitting','accepted'):return 0
+        return max(0,len(schedule.get('events',[]))-len(schedule.get('delivered',[]))-len(schedule.get('dropped',[])))
+    def performance_request(self,path,payload):
+        if self.config['backend']!='native':raise ContractError('unsupported','Performance recording requires native runtime counters')
+        with self.performance_lock:
+            if path=='/performance/start':
+                if not isinstance(payload,dict) or set(payload)!={'period_ms','maximum_seconds'}:
+                    raise ContractError('performance_request','Expected period_ms and maximum_seconds')
+                if self.performance_recorder is not None:
+                    raise ContractError('performance_busy','This session already has a performance recording')
+                from .performance import CgroupStatsSampler,PerformanceRecorder
+                self.performance_recorder=PerformanceRecorder(CgroupStatsSampler(),payload['period_ms'],payload['maximum_seconds'],self.performance_queue_depth)
+                return dict(self.performance_recorder.status(),limits=self.performance_recorder.sampler.limits())
+            if self.performance_recorder is None:raise ContractError('performance_job','No performance recording exists')
+            if path=='/performance/read':
+                if not isinstance(payload,dict) or set(payload) not in ({'after'},{'after','limit'}):
+                    raise ContractError('performance_request','Expected after and optional limit')
+                return self.performance_recorder.read(payload['after'],payload.get('limit',1000))
+            if payload!={}:raise ContractError('performance_request','Expected an empty request')
+            if path=='/performance/status':return self.performance_recorder.status()
+            if path=='/performance/stop':return self.performance_recorder.stop()
+            raise ContractError('endpoint','Unknown performance endpoint')
     def writers_stopped(self):
         native_stopped=getattr(self.backend,'closed',False) if self.config['backend']=='native' else self.backend.proc.poll() is not None
         editor_stopped=not self.maiden or self.maiden.closed
@@ -352,6 +383,8 @@ def serve_application(directory,app):
                     return
                 if self.command=='POST' and self.path in ('/audio/start','/audio/read','/audio/stop'):
                     self.respond(200,app.audio_request(self.path,payload));return
+                if self.command=='POST' and self.path in ('/performance/start','/performance/read','/performance/status','/performance/stop'):
+                    self.respond(200,app.performance_request(self.path,payload));return
                 with app.lock:
                     if app.closed and self.path!='/stop':raise ContractError('session_stopped','This session has stopped')
                     if self.command=='POST' and self.path=='/crow/ii/read':

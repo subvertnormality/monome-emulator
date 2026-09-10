@@ -7,6 +7,8 @@ the norns-class proxy described in docs/delivery/PERFORMANCE.md.
 import hashlib
 import os
 import platform
+import secrets
+import threading
 import time
 from pathlib import Path
 
@@ -110,11 +112,14 @@ def performance_metrics(samples, timing_errors_ns, service_times_ns,
                 break
         recovery_passed = recovered_ns is not None and recovered_ns <= one_bar_ns
 
+    peak_rss = max((row.get('peak_rss_bytes')
+                    if row.get('peak_rss_bytes') is not None
+                    else row['rss_bytes']) for row in samples)
     gates = dict(
         event_timing=(timing['p99_ns'] <= 10_000_000 and
                       timing['maximum_ns'] <= 50_000_000 and
                       abs(timing_errors_ns[-1]) <= 20_000_000),
-        memory_peak=max(row['rss_bytes'] for row in samples) <= MEMORY_LIMIT_BYTES,
+        memory_peak=peak_rss <= MEMORY_LIMIT_BYTES,
         memory_slope=slope is not None and slope <= RSS_SLOPE_LIMIT_BYTES_PER_MINUTE,
         sustained_service=service['p99_deadline_fraction'] <= 0.5,
         hard_service=service['maximum_deadline_fraction'] <= 1.0,
@@ -128,7 +133,7 @@ def performance_metrics(samples, timing_errors_ns, service_times_ns,
         service=service,
         resources=dict(cpu_delta_ns=cpu_delta,
                        cpu_ns_per_musical_event=cpu_delta / musical_events,
-                       peak_rss_bytes=max(row['rss_bytes'] for row in samples),
+                       peak_rss_bytes=peak_rss,
                        final_window_rss_slope_bytes_per_minute=slope,
                        queue_high_water=max(row['queue_depth'] for row in samples),
                        queue_recovery_ns=recovered_ns),
@@ -298,11 +303,15 @@ class CgroupStatsSampler:
     def limits(self):
         if self.version == 2:
             cpu = (self.root / 'cpu.max').read_text().split()
+            swap_path = self.root / 'memory.swap.max'
+            swap = swap_path.read_text().strip() if swap_path.is_file() else None
             return dict(cgroup_version=2,
                         cpu_quota_us=None if cpu[0] == 'max' else int(cpu[0]),
                         cpu_period_us=int(cpu[1]),
                         memory_limit_bytes=None if (self.root / 'memory.max').read_text().strip() == 'max'
                         else self._integer(self.root / 'memory.max'),
+                        memory_swap_limit_bytes=(None if swap in (None, 'max')
+                                                 else int(swap)),
                         cpuset_cpus=(self.root / 'cpuset.cpus.effective').read_text().strip())
         return dict(cgroup_version=1,
                     cpu_quota_us=self._integer(self.root / 'cpu/cpu.cfs_quota_us'),
@@ -311,6 +320,116 @@ class CgroupStatsSampler:
                     memory_and_swap_limit_bytes=self._integer(
                         self.root / 'memory/memory.memsw.limit_in_bytes'),
                     cpuset_cpus=(self.root / 'cpuset/cpuset.cpus').read_text().strip())
+
+
+class PerformanceRecorder:
+    """Bounded, paginated background capture of aggregate resource counters."""
+    def __init__(self, sampler, period_ms, maximum_seconds, queue_depth=None,
+                 autostart=True):
+        _require(type(period_ms) is int and 10 <= period_ms <= 1000,
+                 'Performance sample period must be from 10 to 1000 ms')
+        _require(type(maximum_seconds) is int and 1 <= maximum_seconds <= 600,
+                 'Performance recording must be from 1 to 600 seconds')
+        self.id = secrets.token_hex(16)
+        self.sampler = sampler
+        self.period_ms = period_ms
+        self.maximum_seconds = maximum_seconds
+        self.maximum_samples = maximum_seconds * 1000 // period_ms + 2
+        self.queue_depth = queue_depth or (lambda: 0)
+        self.samples = []
+        self.lock = threading.Lock()
+        self.stopping = threading.Event()
+        self.state = 'running'
+        self.error = None
+        self.started_ns = time.monotonic_ns()
+        self.finished_ns = None
+        self.thread = None
+        if autostart:
+            if not self.record_once():
+                raise ContractError(self.error['code'], self.error['message'])
+            self.thread = threading.Thread(target=self._run, daemon=True)
+            self.thread.start()
+
+    def record_once(self, monotonic_ns=None):
+        with self.lock:
+            if self.state != 'running':
+                return False
+            if len(self.samples) >= self.maximum_samples:
+                self.state = 'complete'
+                self.finished_ns = time.monotonic_ns()
+                self.stopping.set()
+                return False
+        try:
+            value = self.sampler.sample(
+                monotonic_ns if monotonic_ns is not None else time.monotonic_ns(),
+                self.queue_depth())
+            _require(isinstance(value, dict), 'Performance sampler returned no record')
+        except Exception as error:
+            failure = (error if isinstance(error, ContractError) else
+                       ContractError('performance_sample', str(error)))
+            with self.lock:
+                self.error = failure.as_dict()
+                self.state = 'failed'
+                self.finished_ns = time.monotonic_ns()
+                self.stopping.set()
+            return False
+        with self.lock:
+            if self.state != 'running':
+                return False
+            sequence = len(self.samples) + 1
+            self.samples.append(dict(sequence=sequence, **value))
+            return True
+
+    def _run(self):
+        deadline = time.monotonic() + self.maximum_seconds
+        while self.state == 'running':
+            remaining = min(self.period_ms / 1000,
+                            max(0, deadline - time.monotonic()))
+            if self.stopping.wait(remaining):
+                break
+            if time.monotonic() >= deadline:
+                with self.lock:
+                    if self.state == 'running':
+                        self.state = 'complete'
+                        self.finished_ns = time.monotonic_ns()
+                break
+            self.record_once()
+
+    def status(self):
+        with self.lock:
+            return dict(recording_id=self.id, status=self.state,
+                        period_ms=self.period_ms,
+                        maximum_seconds=self.maximum_seconds,
+                        sample_count=len(self.samples), cursor=len(self.samples),
+                        started_ns=self.started_ns, finished_ns=self.finished_ns,
+                        error=self.error)
+
+    def read(self, after, limit=1000):
+        _require(type(after) is int and after >= 0,
+                 'Performance cursor must be a nonnegative integer')
+        _require(type(limit) is int and 1 <= limit <= 1000,
+                 'Performance page limit must be from 1 to 1000')
+        with self.lock:
+            _require(after <= len(self.samples),
+                     'Performance cursor is beyond recorded samples')
+            rows = self.samples[after:after + limit]
+            cursor = after + len(rows)
+            return dict(recording_id=self.id, samples=list(rows), cursor=cursor,
+                        has_more=cursor < len(self.samples), status=self.state,
+                        error=self.error)
+
+    def stop(self):
+        with self.lock:
+            if self.state == 'running':
+                self.state = 'stopped'
+                self.finished_ns = time.monotonic_ns()
+        self.stopping.set()
+        if self.thread and self.thread is not threading.current_thread():
+            self.thread.join(timeout=2)
+            if self.thread.is_alive():
+                raise ContractError('performance_stop',
+                                    'Performance recorder did not stop within two seconds')
+        return self.status()
 
 
 def cgroup_capability(root=Path('/sys/fs/cgroup'), proc_cgroup=None):

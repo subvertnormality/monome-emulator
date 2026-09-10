@@ -6,10 +6,12 @@ import subprocess
 import sys
 
 from automation.performance import (
-    CgroupStatsSampler, MEMORY_LIMIT_BYTES, ProcessTreeSampler, cgroup_capability,
+    CgroupStatsSampler, MEMORY_LIMIT_BYTES, PerformanceRecorder,
+    ProcessTreeSampler, cgroup_capability,
     calibrate_cpu, compare_performance, nearest_rank, performance_capabilities,
     performance_metrics, process_stat)
 from automation.protocol import ContractError, ROOT
+from automation import session
 
 
 def sample(second, cpu, rss, queue=0):
@@ -47,6 +49,9 @@ class PerformanceMetricsTests(unittest.TestCase):
         self.assertFalse(self.report(services=[1_000_000] * 99 + [10_000_001])['gates']['hard_service'])
         rows = [sample(0, 0, MEMORY_LIMIT_BYTES + 1), sample(300, 1, MEMORY_LIMIT_BYTES + 1)]
         self.assertFalse(self.report(samples=rows)['gates']['memory_peak'])
+        hidden_peak = [dict(sample(0,0,100),peak_rss_bytes=MEMORY_LIMIT_BYTES+1),
+                       dict(sample(300,1,100),peak_rss_bytes=MEMORY_LIMIT_BYTES+1)]
+        self.assertFalse(self.report(samples=hidden_peak)['gates']['memory_peak'])
         growing = [sample(0, 0, 0), sample(300, 1, 5 * 1024 * 1024 + 1)]
         self.assertFalse(self.report(samples=growing)['gates']['memory_slope'])
         recovery = [sample(0, 0, 0, 0), sample(1, 1, 0, 2), sample(5, 2, 0, 1)]
@@ -194,6 +199,7 @@ class ProcessSamplingTests(unittest.TestCase):
                 'memory.current': '400',
                 'memory.peak': '500',
                 'memory.max': str(MEMORY_LIMIT_BYTES),
+                'memory.swap.max': '0',
                 'cpuset.cpus.effective': '2',
             }
             for name, value in values.items(): (root / name).write_text(value)
@@ -205,10 +211,62 @@ class ProcessSamplingTests(unittest.TestCase):
                 throttled_ns=7000))
             self.assertEqual(sampler.limits()['cpu_quota_us'], 25000)
             self.assertEqual(sampler.limits()['cpuset_cpus'], '2')
+            self.assertEqual(sampler.limits()['memory_swap_limit_bytes'], 0)
 
     def test_cgroup_sampler_rejects_partial_mount(self):
         with tempfile.TemporaryDirectory() as temp:
             with self.assertRaises(ContractError): CgroupStatsSampler(Path(temp))
+
+
+class RecorderTests(unittest.TestCase):
+    class Sampler:
+        def __init__(self, fail=False): self.calls=0;self.fail=fail
+        def sample(self, now, queue):
+            self.calls+=1
+            if self.fail:raise ContractError('injected_sample','failed')
+            return dict(monotonic_ns=now,cpu_ns=self.calls*10,rss_bytes=100,
+                        peak_rss_bytes=100,queue_depth=queue,
+                        throttled_periods=0,throttled_ns=0)
+
+    def test_bounded_paginated_recording(self):
+        sampler=self.Sampler();recorder=PerformanceRecorder(
+            sampler,10,1,queue_depth=lambda:3,autostart=False)
+        recorder.maximum_samples=3
+        self.assertTrue(recorder.record_once(10))
+        self.assertTrue(recorder.record_once(20))
+        self.assertTrue(recorder.record_once(30))
+        self.assertFalse(recorder.record_once(40))
+        self.assertEqual(recorder.status()['status'],'complete')
+        first=recorder.read(0,2)
+        self.assertEqual([x['sequence'] for x in first['samples']],[1,2])
+        self.assertTrue(first['has_more'])
+        last=recorder.read(first['cursor'],2)
+        self.assertEqual([x['queue_depth'] for x in last['samples']],[3])
+        self.assertFalse(last['has_more'])
+        with self.assertRaises(ContractError):recorder.read(4)
+
+    def test_failure_and_stop_are_explicit(self):
+        failed=PerformanceRecorder(self.Sampler(True),10,1,autostart=False)
+        self.assertFalse(failed.record_once(1))
+        self.assertEqual(failed.status()['status'],'failed')
+        self.assertEqual(failed.status()['error']['code'],'injected_sample')
+        stopped=PerformanceRecorder(self.Sampler(),10,1,autostart=False)
+        self.assertEqual(stopped.stop()['status'],'stopped')
+        self.assertFalse(stopped.record_once(1))
+
+    def test_background_start_has_a_sample_before_returning(self):
+        recorder=PerformanceRecorder(self.Sampler(),1000,1)
+        try:self.assertGreaterEqual(recorder.status()['sample_count'],1)
+        finally:recorder.stop()
+
+    def test_fixture_session_rejects_native_performance_endpoint(self):
+        info=session.start('contract-fixture')
+        try:
+            with self.assertRaises(ContractError) as caught:
+                session.request(info['session_id'],'/performance/start',
+                                dict(period_ms=10,maximum_seconds=1))
+            self.assertEqual(caught.exception.code,'unsupported')
+        finally:session.stop(info['session_id'])
 
 
 if __name__ == '__main__':
