@@ -40,6 +40,8 @@ def nearest_rank(values, percent):
 def _rss_slope(samples, window_ns=300_000_000_000):
     """Least-squares RSS slope over the final window, in bytes per minute."""
     finish = samples[-1]['monotonic_ns']
+    if finish - samples[0]['monotonic_ns'] < window_ns:
+        return None
     selected = [row for row in samples
                 if row['monotonic_ns'] >= finish - window_ns]
     if len(selected) < 2 or selected[-1]['monotonic_ns'] == selected[0]['monotonic_ns']:
@@ -120,7 +122,8 @@ def performance_metrics(samples, timing_errors_ns, service_times_ns,
                       timing['maximum_ns'] <= 50_000_000 and
                       abs(timing_errors_ns[-1]) <= 20_000_000),
         memory_peak=peak_rss <= MEMORY_LIMIT_BYTES,
-        memory_slope=slope is not None and slope <= RSS_SLOPE_LIMIT_BYTES_PER_MINUTE,
+        memory_slope=(None if slope is None else
+                      slope <= RSS_SLOPE_LIMIT_BYTES_PER_MINUTE),
         sustained_service=service['p99_deadline_fraction'] <= 0.5,
         hard_service=service['maximum_deadline_fraction'] <= 1.0,
         queue_recovery=recovery_passed,
