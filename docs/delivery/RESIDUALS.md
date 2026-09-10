@@ -107,3 +107,15 @@ two whole sequencer steps after a ~333 ms stall with zero CFS throttling — hos
 preemption on a contended host — leaving every later step two steps late. That
 is the same stock skip-ahead consequence, reached through a different stall
 source. It stays PERF-008 evidence for the refactor (D23).
+
+R23 — Integrate codex/midi-clock for the Mosaic campaign: fold:C16/C17. Mosaic's
+suite runs on the codex/midi-clock checkout with candidate
+midi-schedule-capacity-12 (lock 36358f), which lacks R22's startup lock and reads
+libmonome from the Windows checkout's prefix. Measured 2026-09-10 in a scratch
+worktree: its 11 MIDI-clock feature commits (917f200..58ec399) cherry-pick onto
+codex/norns-performance with conflicts only in docs/delivery/state.json, and the
+result passes all 115 contract tests. The two performance-foundation commits are
+already superseded here. The only lock difference is patch 0013 revision a0c8ed4
+(input timestamp taken inside the connection lock), so the controlled/capacity
+candidate chain must be rebuilt on lock dc7b1ae before Mosaic can switch
+checkouts. Promotion: before the next canonical Mosaic baseline.
