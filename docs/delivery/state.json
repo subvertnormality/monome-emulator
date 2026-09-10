@@ -3,7 +3,7 @@
   "updated": "2026-09-10",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "Integrate the generic performance measurement foundation with the current container/release line, then implement PERF-001 quiet and dense adjacent baselines. Core base-MIDI behavior remains prioritized; Toolkit/Matrix is deferred. Use only Opus for future Paranoia reviews.",
+  "next_action": "Integrate cgroup aggregate measurements with the current container/release line, then implement generic PERF-001 quiet and dense adjacent baselines. Continue base-MIDI behavior coverage; Toolkit/Matrix remains deferred. Use only Opus for future Paranoia reviews.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -77,6 +77,12 @@
       "id": "C12",
       "status": "planned",
       "evidence": null
+    },
+    {
+      "id": "C17",
+      "status": "in_progress",
+      "evidence": null,
+      "start_revision": "0ada99e"
     },
     {
       "id": "C13",
@@ -5174,5 +5180,15 @@
     "overlap_passes": 4,
     "review": "01a080f4-f7fd-7b00-b1ed-73d95c9d081e",
     "manual_clarification": "Panic sends Note Off sweeps; transport and scheduled voices continue."
+  },
+  "performance_foundation_checkpoint": {
+    "status": "scoped-foundation-passed",
+    "completion": "docs/delivery/completions/C17-performance-foundation.md",
+    "validation": "docs/delivery/performance-foundation-validation.json",
+    "contract_tests": 92,
+    "native_sampler_passed": true,
+    "direct_wsl_envelope": "cgroup_controllers_missing",
+    "docker_enforcement_probe": "passed",
+    "full_c17_complete": false
   }
 }

@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "status": "scoped-foundation-passed",
+  "date": "2026-09-10",
+  "claim": "norns-class-proxy-only",
+  "contract_suite": {
+    "collected": 92,
+    "passed": 92,
+    "skipped": 0
+  },
+  "native_sampler": {
+    "runtime_candidate": ".runtime/current.json (lock dc7b1aee28f3cf61487bf7cf3953dc001a6e192fa339aed8490548e669a16d0a)",
+    "script": "fixtures/probes/probe-a/probe-a.lua",
+    "raw_artifact": "artifacts/performance/sampler-native-mainline-03.json",
+    "raw_sha256": "ff4373226c7cee211b38897f381e03b8c167850a845d98756950eafc3c57be0e",
+    "actions": 40,
+    "samples": 42,
+    "process_count_min": 7,
+    "process_count_max": 7,
+    "thread_count_min": 65,
+    "thread_count_max": 66,
+    "cpu_delta_ns": 110000000,
+    "peak_rss_bytes": 544677888,
+    "passed": true
+  },
+  "direct_wsl_envelope": {
+    "available": false,
+    "code": "cgroup_controllers_missing",
+    "missing": [
+      "cpu",
+      "cpuset",
+      "memory"
+    ]
+  },
+  "docker_envelope_probe": {
+    "engine_version": "20.10.17",
+    "cgroup_version": "1",
+    "cgroup_driver": "cgroupfs",
+    "image": "monome-emulator:h06-02",
+    "ephemeral": true,
+    "cpu_quota_us": 50000,
+    "cpu_period_us": 100000,
+    "memory_limit_bytes": 805306368,
+    "memory_and_swap_limit_bytes": 805306368,
+    "cpuset_cpus": "0",
+    "passed": true,
+    "sampler_readback": {
+      "cgroup_version": 1,
+      "cpu_quota_us": 50000,
+      "cpu_period_us": 100000,
+      "memory_limit_bytes": 805306368,
+      "memory_and_swap_limit_bytes": 805306368,
+      "cpuset_cpus": "0",
+      "cpu_ns": 77251707,
+      "rss_bytes": 16216064,
+      "peak_rss_bytes": 16502784,
+      "throttled_periods": 0,
+      "throttled_ns": 0
+    }
+  },
+  "scope_complete": false,
+  "next": "Integrate cgroup aggregate metrics with the current container runtime and implement generic PERF-001 quiet/dense adjacent baselines."
+}
