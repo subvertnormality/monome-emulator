@@ -70,7 +70,7 @@ def tap_key(port, token, session_id, sequence, key):
     return sequence
 
 
-def run_profile(image, output, density, bpm, repeat, poll_ms):
+def run_profile(image, output, density, bpm, repeat, poll_ms, settle_ms):
     output.mkdir(parents=True, exist_ok=False)
     data = output / 'data'
     data.mkdir()
@@ -79,7 +79,7 @@ def run_profile(image, output, density, bpm, repeat, poll_ms):
     result = dict(schema_version=1, passed=False, workload='PERF-001',
                   profile='quiet' if density == 1 else 'dense',
                   bpm=bpm, density=density, ticks=TICKS, repeat=repeat,
-                  poll_ms=poll_ms, image=image)
+                  poll_ms=poll_ms, settle_ms=settle_ms, image=image)
     run = [
         'docker', 'run', '-d', '--name', name, '--cpus', '0.5',
         '--memory', '768m', '--memory-swap', '768m', '--cpuset-cpus', '0',
@@ -128,6 +128,9 @@ def run_profile(image, output, density, bpm, repeat, poll_ms):
             sequence = tap_key(port, token, ready['session_id'], sequence, 3)
         recording = request(port, token, '/performance/start',
                             dict(period_ms=10, maximum_seconds=30))
+        # Setup work (calibration exec, configuration actions) must not share
+        # a CFS period with the measured transport; the recorder covers it.
+        time.sleep(settle_ms / 1000)
         sequence = tap_key(port, token, ready['session_id'], sequence, 2)
         expected_count = 3 + TICKS * density * 2
         expected_seconds = TICKS * 60 / (bpm * 24)
@@ -249,8 +252,10 @@ def main():
     parser.add_argument('--tempos', type=parse_tempos, default=(300,))
     parser.add_argument('--densities', type=parse_densities, default=(1, 16))
     parser.add_argument('--repeats', type=int, choices=range(1, 4), default=3)
-    parser.add_argument('--poll-ms', type=int, choices=(10, 100, 250, 500), default=10,
+    parser.add_argument('--poll-ms', type=int, choices=(10, 100, 250, 500), default=500,
                         help='Observer /snapshot interval during the workload')
+    parser.add_argument('--settle-ms', type=int, choices=(0, 500, 1000), default=1000,
+                        help='Recorded idle interval between setup and transport start')
     args = parser.parse_args()
     root = args.output.resolve()
     root.mkdir(parents=True, exist_ok=False)
@@ -261,11 +266,12 @@ def main():
                 rows.append(run_profile(
                     args.image,
                     root / ('bpm-%d' % bpm) / ('density-%d-%d' % (density, repeat)),
-                    density, bpm, repeat, args.poll_ms))
+                    density, bpm, repeat, args.poll_ms, args.settle_ms))
     report = dict(schema_version=2, workload='PERF-001',
                   argv=sys.argv[1:], source=source_identity(),
                   tempos=list(args.tempos), densities=list(args.densities),
                   repeats=args.repeats, poll_ms=args.poll_ms,
+                  settle_ms=args.settle_ms,
                   passed=all(row['passed'] for row in rows), profiles=rows)
     write_json(root / 'result.json', report)
     print(root / 'result.json')
