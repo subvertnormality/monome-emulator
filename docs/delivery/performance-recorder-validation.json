@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "status": "committed-image-passed",
+  "date": "2026-09-10",
+  "source_revision": "986c2055f271365e00f070b47d89994cbdfb2300",
+  "contract_suite": {
+    "collected": 96,
+    "passed": 96,
+    "skipped": 0
+  },
+  "image": {
+    "reference": "monome-emulator:perf-recorder-01",
+    "id": "sha256:cfa09761bdd3b6212894bd51bd56fcfc371248075005892f2343afcac668f5b0",
+    "source_overlay": false
+  },
+  "run": {
+    "raw_artifact": "artifacts/performance/container/recorder-image-01/result.json",
+    "raw_sha256": "26f0d8f2ff9c3eee8ffe6311ab5bce1bb7e568538a473d74a69932d774e4de98",
+    "actions": 40,
+    "samples": 43,
+    "peak_rss_bytes": 371208192,
+    "throttled_periods": 32,
+    "limits": {
+      "cgroup_version": 1,
+      "cpu_quota_us": 50000,
+      "cpu_period_us": 100000,
+      "memory_limit_bytes": 805306368,
+      "memory_and_swap_limit_bytes": 805306368,
+      "cpuset_cpus": "0"
+    },
+    "held_inputs": 0,
+    "runtime_errors": 0,
+    "cleanup": "container-and-data-lease-removed",
+    "passed": true
+  },
+  "scope_complete": false,
+  "remaining_measurement_gap": "Lua scheduler and application-owned queue depths are not exposed by the current MIDI-input queue counter.",
+  "next": "Implement generic PERF-001 quiet and dense adjacent baselines with exact MIDI and timing oracles."
+}

@@ -107,3 +107,23 @@ by process/thread and by Mosaic callback or Lua function where tooling permits.
 Optimize the largest measured cost first, retain the failure as a regression, and
 rerun the affected isolated and combined rows. Do not change musical tolerances,
 drop redraws/events, or reduce workload cardinality merely to make a candidate pass.
+
+## Resource recorder protocol
+
+The authenticated session server exposes a single bounded recording per fresh
+native session. `POST /performance/start` takes `period_ms` (10–1000) and
+`maximum_seconds` (1–600). `POST /performance/read` takes an `after` cursor and
+optional `limit` (1–1000). `POST /performance/status` and
+`POST /performance/stop` take an empty object. Reads return ordered, numbered
+raw samples and explicit terminal or failure state; invalid or future cursors
+fail. A start returns the kernel-reported cgroup limits and guarantees that the
+first sample exists before acknowledging success.
+
+The cgroup sampler is the authoritative whole-container CPU/current-memory/peak-
+memory/throttling source. `/proc` process-tree samples remain diagnostics because
+they can miss a process that starts and exits between samples. The initial queue
+counter covers accepted scheduled MIDI input remaining at the native boundary.
+It does not yet expose the Lua clock scheduler or application-owned queues, so
+PERF rows that claim those queues require additional explicit instrumentation.
+On an unrestricted WSL session the endpoint fails with a named missing-cgroup
+counter error; it never substitutes per-process limits for the required group.

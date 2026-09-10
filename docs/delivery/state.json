@@ -3,7 +3,7 @@
   "updated": "2026-09-10",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "Integrate cgroup aggregate measurements with the current container/release line, then implement generic PERF-001 quiet and dense adjacent baselines. Continue base-MIDI behavior coverage; Toolkit/Matrix remains deferred. Use only Opus for future Paranoia reviews.",
+  "next_action": "Implement generic PERF-001 quiet and dense adjacent baselines on the committed constrained image, with exact MIDI/timing oracles and calibration. Add Lua scheduler queue instrumentation before claiming queue recovery. Continue base-MIDI behavior; Toolkit/Matrix remains deferred. Use only Opus for future Paranoia reviews.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -5189,6 +5189,15 @@
     "native_sampler_passed": true,
     "direct_wsl_envelope": "cgroup_controllers_missing",
     "docker_enforcement_probe": "passed",
+    "full_c17_complete": false
+  },
+  "performance_recorder_checkpoint": {
+    "status": "committed-image-passed",
+    "completion": "docs/delivery/completions/C17-performance-recorder.md",
+    "validation": "docs/delivery/performance-recorder-validation.json",
+    "source_revision": "986c2055f271365e00f070b47d89994cbdfb2300",
+    "image_id": "sha256:cfa09761bdd3b6212894bd51bd56fcfc371248075005892f2343afcac668f5b0",
+    "contract_tests": 96,
     "full_c17_complete": false
   }
 }
