@@ -142,6 +142,12 @@ experimental candidate; the default runtime is unchanged. See
 `docs/delivery/internal-tempo-continuity-checkpoint.json` for the exact tested
 scope and retained evidence.
 
+The same optional runtime now has a generic external MIDI-clock fault matrix for
+jitter, missing and extra pulses, tempo steps and drift, input-port selection,
+and explicit-Start recovery after clock loss. Mosaic remains an opt-in fixture;
+its corresponding application results are linked from
+`docs/delivery/external-midi-fault-checkpoint.json`.
+
 ## Troubleshooting and contributing
 
 Start with `./dev/emu doctor --json` and `./dev/emu <command> --help`. For fetch

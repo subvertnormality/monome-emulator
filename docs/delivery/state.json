@@ -3,7 +3,7 @@
   "updated": "2026-09-10",
   "mode": "executing",
   "current_card": "C08",
-  "next_action": "Add external MIDI clock jitter, missing/extra pulse, drift, loss/recovery, routing/remapping, and Mosaic interaction regressions before returning to advanced manual domains.",
+  "next_action": "Add the highest-value remaining Mosaic manual interactions after the accepted external-clock slice; retain burst/stochastic clock faults and ambiguous no-transport recovery as explicit later clock domains.",
   "decisions_file": "docs/delivery/DECISIONS.md",
   "cards": [
     {
@@ -5342,6 +5342,15 @@
     "candidate": "/home/andy/projects/monome-runtime-candidates/internal-tempo-continuity-10/installation.json",
     "patch": "patches/norns/candidates/internal-tempo-continuity.patch",
     "review_session": "01a088a8-ad4a-74a0-8786-1318b140cd2d",
+    "default_runtime_promoted": false,
+    "full_campaign_complete": false
+  },
+  "external_midi_fault_checkpoint": {
+    "status": "scoped-pass-codex-accepted",
+    "document": "docs/delivery/external-midi-fault-checkpoint.json",
+    "runtime_changes": false,
+    "generic_scenarios": 14,
+    "mosaic_cases": 12,
     "default_runtime_promoted": false,
     "full_campaign_complete": false
   }
