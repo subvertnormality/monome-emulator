@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "status": "scoped-pass-codex-accepted",
+  "date": "2026-09-10",
+  "scope": "Generic norns external MIDI-clock fault probe plus Mosaic opt-in application validation",
+  "base_revision": "a65f07601cfca655d3fc08f20314380d5df71cf7",
+  "implementation": {
+    "runtime_changes": false,
+    "probe": "fixtures/probes/midi-clock-faults/midi-clock-faults.lua",
+    "runner": "tests/external_midi_faults_native.py",
+    "source_sha256": {
+      "probe": "46c493f60b577ad41bd3340d5b8aaf8a276b8af2621d9cafba230428cdef6637",
+      "runner": "67b1a5bc4b84b954b40572ac339eafd4d135a60c3665c031834df219b19cd8d9"
+    }
+  },
+  "evidence": {
+    "controlled-experimental": {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/external-midi-faults/d1b68e74ec374b0f890f9fe3b956df6b/manifest.json",
+      "sha256": "d000709cc5bcc8926427d890d993fc1af5f4b9574d0fcbda65d3385ee6ca0b9b",
+      "passed": true
+    },
+    "real-time": {
+      "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/external-midi-faults/0080af5a555e48f1b7575317a955bf0c/manifest.json",
+      "sha256": "fff7e0ccd08a12142c6bd89178d72cf97c6fc5970a63b895d2ff36dc9274236d",
+      "passed": true
+    }
+  },
+  "oracle_mutations": {
+    "path": "/home/andy/projects/monome-emulator-midi-clock/artifacts/external-midi-faults/output-oracle-causalfix.log",
+    "sha256": "3b34ceabc73ea97d6509b6cf4990c95da168b42ab88167c08daf8380c9c773cd",
+    "summary": "5 passing tests covering complete event accounting and causal transport bounds"
+  },
+  "mosaic_validation": {
+    "path": "/home/andy/projects/mosaic-behaviour-tests/docs/testing/external-clock-fault-validation.json",
+    "sha256": "811554ccd3db4fafa1558d4fa0fb17c7116b7856d7a474e32c647b33c844d6c0",
+    "cases": 12,
+    "revision": "061fc8c453af0c242284a8954021e2dce24d5fd0"
+  },
+  "semantics": [
+    "The probe disables clock receive on port2 and proves its transport bytes have no effect.",
+    "Steady, alternating jitter, one missing pulse, one extra pulse, tempo step and gradual drift each emit seven ordered quarter-step markers.",
+    "No-Stop clock loss freewheels at the acquired estimate; explicit Start marks the next Clock as beat zero and establishes one new phase owner.",
+    "After Stop, twelve further Clock pulses produce no output."
+  ],
+  "limitations": [
+    "Loss without Start/Stop is characterized as pinned-norns holdover; its ambiguous resume policy is not certified.",
+    "Repeated/burst corruption, stochastic long jitter, simultaneous source/menu edits and broader feature interactions remain.",
+    "The optional candidate remains unpromoted; this checkpoint does not complete the manual campaign, emulator release or final hardening."
+  ],
+  "default_runtime_promoted": false,
+  "full_campaign_complete": false,
+  "review": {
+    "status": "accepted",
+    "provider": "codex-only",
+    "path": "/home/andy/projects/mosaic-behaviour-tests/docs/testing/reviews/external-clock-review-followup-02.json",
+    "session": "01a0891b-bf33-7800-9fd4-ee6d30cd41e5",
+    "sha256": "4da9c80760dfb007fb979b4cf5588c3cbb7af3cdd955a9754cd4c33dde882787"
+  }
+}
