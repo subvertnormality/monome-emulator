@@ -70,7 +70,7 @@ def tap_key(port, token, session_id, sequence, key):
     return sequence
 
 
-def run_profile(image, output, density, bpm, repeat):
+def run_profile(image, output, density, bpm, repeat, poll_ms):
     output.mkdir(parents=True, exist_ok=False)
     data = output / 'data'
     data.mkdir()
@@ -79,7 +79,7 @@ def run_profile(image, output, density, bpm, repeat):
     result = dict(schema_version=1, passed=False, workload='PERF-001',
                   profile='quiet' if density == 1 else 'dense',
                   bpm=bpm, density=density, ticks=TICKS, repeat=repeat,
-                  image=image)
+                  poll_ms=poll_ms, image=image)
     run = [
         'docker', 'run', '-d', '--name', name, '--cpus', '0.5',
         '--memory', '768m', '--memory-swap', '768m', '--cpuset-cpus', '0',
@@ -140,7 +140,7 @@ def run_profile(image, output, density, bpm, repeat):
             tail = observed['state']['midi']
             if tail and tail[-1]['bytes'][:2] == [176, 118]:
                 break
-            time.sleep(.01)
+            time.sleep(poll_ms / 1000)
         if observed is not None and observed['state']['midi']:
             configured = observed['state']['midi'][0]['bytes']
             if configured != [176, 119, density]:
@@ -249,6 +249,8 @@ def main():
     parser.add_argument('--tempos', type=parse_tempos, default=(300,))
     parser.add_argument('--densities', type=parse_densities, default=(1, 16))
     parser.add_argument('--repeats', type=int, choices=range(1, 4), default=3)
+    parser.add_argument('--poll-ms', type=int, choices=(10, 100, 250, 500), default=10,
+                        help='Observer /snapshot interval during the workload')
     args = parser.parse_args()
     root = args.output.resolve()
     root.mkdir(parents=True, exist_ok=False)
@@ -259,11 +261,11 @@ def main():
                 rows.append(run_profile(
                     args.image,
                     root / ('bpm-%d' % bpm) / ('density-%d-%d' % (density, repeat)),
-                    density, bpm, repeat))
+                    density, bpm, repeat, args.poll_ms))
     report = dict(schema_version=2, workload='PERF-001',
                   argv=sys.argv[1:], source=source_identity(),
                   tempos=list(args.tempos), densities=list(args.densities),
-                  repeats=args.repeats,
+                  repeats=args.repeats, poll_ms=args.poll_ms,
                   passed=all(row['passed'] for row in rows), profiles=rows)
     write_json(root / 'result.json', report)
     print(root / 'result.json')
