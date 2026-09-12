@@ -64,6 +64,10 @@ class NativeBackend:
         self.schedule_supported=(any(item['path']=='matron/src/emu_midi_schedule.c'
             for item in install.get('experimental',{}).get('files',[])) or
             any(item['path']=='patches/norns/0012-scheduled-midi-input.patch' for item in install.get('patches',[])))
+        self.clock_trace_supported=any(item['path']=='patches/norns/0014-clock-phase-trace.patch' for item in install.get('patches',[]))
+        if config.get('clock_trace') and not self.clock_trace_supported:
+            raise ContractError('unsupported','Selected runtime has no identified clock phase trace support')
+        self.clock_trace_ordinal=0
         self.schedule_domains=install.get('experimental',{}).get('midi_schedule_domains',
             ['monotonic'] if self.schedule_supported else [])
         if self.clock_mode!='real-time' and install.get('experimental',{}).get('status')!='experimental-unadmitted':
@@ -192,11 +196,13 @@ class NativeBackend:
         if self.config['runtime_identity'].get('experimental',{}).get('status')=='audio-feasibility-only':
             self.env['NORNS_EMU_SCLANG_PORT']=str(self.ports['sclang'])
         self.env.pop('NORNS_EMU_CLOCK',None)
+        self.env.pop('NORNS_EMU_CLOCK_TRACE',None)
+        if self.config.get('clock_trace'):self.env['NORNS_EMU_CLOCK_TRACE']='1'
         if self.clock_mode!='real-time':self.env.update(NORNS_EMU_CLOCK=self.clock_mode,TZ='UTC')
         if self.config.get('random_seed') is not None:self.env['NORNS_EMU_RANDOM_SEED']=str(self.config['random_seed'])
         write_json(self.directory/'native-config.json',dict(script=str(entry),mapped=str(self.mapped_entry),code_root=str(code),
             ports=self.ports,midi=self.midi_config,jack_server=self.env['JACK_DEFAULT_SERVER'],enabled_mods=mods,runtime=str(self.native),random_seed=self.config.get('random_seed'),clock_mode=self.clock_mode,crow_enabled=self.config.get('crow_enabled',True),
-            jack_profile=dict(driver='dummy',rate=48000,period=self.config.get('jack_period',1024),realtime=False,clock_source='system')))
+            jack_profile=dict(driver='dummy',rate=48000,period=self.config.get('jack_period',1024),realtime=False,clock_source='system'),clock_trace=bool(self.config.get('clock_trace'))))
     def launch(self,name,args,bridge=False):
         logfile=open(self.directory/(name+'.log'),'w'); self.logs.append(logfile)
         env=dict(self.env)
@@ -395,6 +401,11 @@ class NativeBackend:
                         connected,rotation,intensity=payload
                         self.grid_device.update(connected=bool(connected),rotation=rotation,intensity=intensity,device_id=identifier)
                         record.update(self.grid_device)
+                    elif kind==26:
+                        if not self.config.get('clock_trace'):raise ValueError('Unrequested native clock trace')
+                        from automation.clock_trace import decode_clock_trace
+                        record.update(decode_clock_trace(identifier,ns,payload,self.clock_trace_ordinal))
+                        self.clock_trace_ordinal=record['ordinal']
                     elif kind==24:
                         if not self.arc_input.enabled or len(payload)!=256 or any(v>15 for v in payload):raise ValueError('Invalid arc LED packet')
                         self.arc=[list(payload[i:i+64]) for i in range(0,256,64)]
