@@ -108,6 +108,12 @@ class Contracts(unittest.TestCase):
         self.assertEqual(app.last_native_input_schedule_id,1)
         thread.return_value.start.assert_called_once()
 
+    def test_runtime_stall_is_native_automation_only(self):
+        checked('action',self.action(uid(),action=dict(type='runtime_stall',milliseconds=1)))
+        sid=self.start()
+        with self.assertRaisesRegex(ContractError,'native automation session'):
+            session.request(sid,'/action',self.action(sid,action=dict(type='runtime_stall',milliseconds=1)))
+
     def test_schema_rejects_future_unimplemented_constraint(self):
         from automation.protocol import validate
         with self.assertRaisesRegex(ContractError,'Unsupported schema'): validate('x',dict(type='string',pattern='^y$'))

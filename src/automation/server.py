@@ -316,6 +316,8 @@ class Application:
             self.start_native_input_schedule(action)
         elif self.native_input_schedule and self.native_input_schedule['status']=='accepted' and kind in ('key','enc','grid','release_all'):
             raise ContractError('schedule_busy','Wait for the active native control schedule before injecting controls')
+        if kind=='runtime_stall' and (self.config['backend']!='native' or client_id):
+            raise ContractError('unsupported','Runtime stalls require a native automation session without browser ownership')
         if scheduled:action.pop('at_monotonic_ns')
         key=(kind,action.get('n'),action.get('x'),action.get('y'))
         if client_id: self.heartbeat(client_id)

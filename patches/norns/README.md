@@ -178,3 +178,9 @@ its bytes and reconstructed inputs; it does not promote the default lock/runtime
 It changes shutdown ownership only, not musical scheduling. Remove when official
 norns supplies equivalent joined screen teardown. This is separate from the
 private-data double-free correction and does not certify all other native workers.
+
+### 0014-runtime-stall.patch
+Adds emulator protocol kind 13, a test-only 1-1000 ms Lua event-thread stall.
+Native MIDI and clock threads continue while the application event loop is busy,
+allowing automated backlog and responsiveness tests without application hooks.
+The public automation schema applies the same bound and rejects browser/fixture use.
