@@ -1,0 +1,227 @@
+diff --git a/matron/src/clocks/clock_internal.c b/matron/src/clocks/clock_internal.c
+index 610920a..d976bc6 100644
+--- a/matron/src/clocks/clock_internal.c
++++ b/matron/src/clocks/clock_internal.c
+@@ -10,6 +10,7 @@
+ #include "clock.h"
+ #include "clock_internal.h"
+ #include "clock_scheduler.h"
++#include "../emu_bridge.h"
+
+ #define CLOCK_INTERNAL_TICKS_PER_BEAT 24
+
+@@ -132,12 +133,17 @@ static void *clock_internal_thread_run(void *p) {
+         // if schedule is >1 tick behind (time jump, suspend, or jack stall),
+         // skip ahead to avoid runaway catchup.
+         current_time = clock_get_system_time();
++        emu_clock_trace(EMU_CLOCK_TRACE_INTERNAL_PUBLISH,0,-1,next_tick_time,
++            current_time,0.0,0.0,reference_beat,beat_duration,ticks,0);
+         if (next_tick_time + tick_duration < current_time) {
+             double lag = current_time - next_tick_time;
+             // calculate skipped ticks. place
+             // next_tick_time one tick after current_time to resume pacing.
+             uint64_t catchup_ticks = (uint64_t)floor(lag / tick_duration);
++            double overdue_deadline=next_tick_time;
+             next_tick_time += (catchup_ticks + 1) * tick_duration;
++            emu_clock_trace(EMU_CLOCK_TRACE_INTERNAL_SKIP,0,-1,overdue_deadline,
++                current_time,next_tick_time,0.0,reference_beat,beat_duration,ticks,catchup_ticks+1);
+         }
+     }
+
+diff --git a/matron/src/clocks/clock_scheduler.c b/matron/src/clocks/clock_scheduler.c
+index e9dc65f..723370f 100644
+--- a/matron/src/clocks/clock_scheduler.c
++++ b/matron/src/clocks/clock_scheduler.c
+@@ -7,6 +7,7 @@
+
+ #include "../clock.h"
+ #include "../events.h"
++#include "../emu_bridge.h"
+
+ #include "clock_scheduler.h"
+
+@@ -34,10 +35,19 @@ static volatile bool clock_scheduler_thread_stop = false;
+ static clock_scheduler_event_t clock_scheduler_events[NUM_CLOCK_SCHEDULER_EVENTS];
+ static pthread_mutex_t clock_scheduler_events_lock;
+
+-static void clock_scheduler_post_clock_resume_event(int thread_id, double value) {
++static void clock_scheduler_post_clock_resume_event(int thread_id, double value,
++    uint32_t event_type,double target_jack_s,double observed_jack_s,
++    double target_beat,double observed_beat) {
+     union event_data *ev = event_data_new(EVENT_CLOCK_RESUME);
+     ev->clock_resume.thread_id = thread_id;
+     ev->clock_resume.value = value;
++    ev->clock_resume.trace_event_type=event_type;
++    ev->clock_resume.trace_target_jack_s=target_jack_s;
++    ev->clock_resume.trace_observed_jack_s=observed_jack_s;
++    ev->clock_resume.trace_target_beat=target_beat;
++    ev->clock_resume.trace_observed_beat=observed_beat;
++    emu_clock_trace(EMU_CLOCK_TRACE_POST,event_type,thread_id,target_jack_s,
++        observed_jack_s,0.0,target_beat,observed_beat,value,0,0);
+     event_post(ev);
+ }
+
+@@ -105,12 +115,14 @@ static void *clock_scheduler_tick_thread_run(void *p) {
+             if (event->ready) {
+                 if (event->type == CLOCK_SCHEDULER_EVENT_SYNC) {
+                     if (clock_beat > event->sync_clock_beat) {
+-                        clock_scheduler_post_clock_resume_event(event->thread_id, clock_beat);
++                        clock_scheduler_post_clock_resume_event(event->thread_id,clock_beat,1,
++                            0.0,clock_time,event->sync_clock_beat,clock_beat);
+                         event->ready = false;
+                     }
+                 } else {
+                     if (clock_time >= event->sleep_clock_time) {
+-                        clock_scheduler_post_clock_resume_event(event->thread_id, clock_time);
++                        clock_scheduler_post_clock_resume_event(event->thread_id,clock_time,2,
++                            event->sleep_clock_time,clock_time,0.0,clock_beat);
+                         event->ready = false;
+                     }
+                 }
+@@ -182,6 +194,9 @@ bool clock_scheduler_schedule_sync(int thread_id, double sync_beat, double sync_
+             event->type = CLOCK_SCHEDULER_EVENT_SYNC;
+         }
+
++        emu_clock_trace(EMU_CLOCK_TRACE_SCHEDULE,1,thread_id,0.0,
++            clock_get_system_time(),0.0,event->sync_clock_beat,clock_beat,
++            clock_get_tempo(),0,0);
+         pthread_mutex_unlock(&clock_scheduler_events_lock);
+         return true;
+     }
+@@ -203,6 +218,8 @@ bool clock_scheduler_schedule_sleep(int thread_id, double seconds) {
+         event->sleep_clock_time = clock_time + seconds;
+         event->type = CLOCK_SCHEDULER_EVENT_SLEEP;
+
++        emu_clock_trace(EMU_CLOCK_TRACE_SCHEDULE,2,thread_id,event->sleep_clock_time,
++            clock_time,0.0,0.0,clock_get_beats(),seconds,0,0);
+         pthread_mutex_unlock(&clock_scheduler_events_lock);
+         return true;
+     }
+diff --git a/matron/src/emu_bridge.c b/matron/src/emu_bridge.c
+index 6f0e92a..5b4e9d0 100644
+--- a/matron/src/emu_bridge.c
++++ b/matron/src/emu_bridge.c
+@@ -32,6 +32,9 @@ static struct dev_monome *grid_device;
+ static pthread_mutex_t output_lock = PTHREAD_MUTEX_INITIALIZER;
+ static int bridge_fd = -1;
+ static atomic_int grid_connected=1, grid_rotation=0, grid_intensity=15;
++static atomic_uint_fast64_t clock_trace_ordinal;
++static pthread_mutex_t clock_trace_lock=PTHREAD_MUTEX_INITIALIZER;
++static atomic_int clock_trace_enabled;
+
+ int emu_enabled(void) { return getenv("NORNS_EMU_FD") != NULL; }
+
+@@ -51,6 +54,28 @@ static void emit(uint32_t kind, uint32_t id, const void *data, size_t size) {
+     if (written != (ssize_t)(size+16)) { perror("EMU_ERROR output transport"); _exit(70); }
+ }
+
++struct emu_clock_trace_record {
++    uint32_t version,stage,event_type,thread_id;
++    uint64_t ordinal;
++    double target_jack_s,observed_jack_s,resumed_jack_s,target_beat,observed_beat,value;
++    uint64_t tick,skipped;
++};
++_Static_assert(sizeof(struct emu_clock_trace_record)==88,"clock trace wire layout");
++void emu_clock_trace(uint32_t stage,uint32_t event_type,int32_t thread_id,
++    double target_jack_s,double observed_jack_s,double resumed_jack_s,double target_beat,
++    double observed_beat,double value,uint64_t tick,uint64_t skipped) {
++    if (!atomic_load(&clock_trace_enabled)) return;
++    pthread_mutex_lock(&clock_trace_lock);
++    struct emu_clock_trace_record row={
++        .version=1,.stage=stage,.event_type=event_type,.thread_id=(uint32_t)thread_id,
++        .ordinal=atomic_fetch_add(&clock_trace_ordinal,1)+1,
++        .target_jack_s=target_jack_s,.observed_jack_s=observed_jack_s,.resumed_jack_s=resumed_jack_s,
++        .target_beat=target_beat,.observed_beat=observed_beat,.value=value,
++        .tick=tick,.skipped=skipped};
++    emit(26,(uint32_t)row.ordinal,&row,sizeof(row));
++    pthread_mutex_unlock(&clock_trace_lock);
++}
++
+ void emu_error(const char *message) {
+     if (emu_enabled()) emit(5,0,message ? message : "unknown Lua error",strlen(message ? message : "unknown Lua error"));
+ }
+@@ -172,6 +197,8 @@ void emu_frame(cairo_surface_t *surface) {
+ void emu_devices(void) {
+     bridge_fd = atoi(getenv("NORNS_EMU_FD"));
+     if (bridge_fd < 3) { fprintf(stderr,"EMU_ERROR invalid inherited descriptor\n"); abort(); }
++    const char *trace=getenv("NORNS_EMU_CLOCK_TRACE");
++    atomic_store(&clock_trace_enabled,trace && strcmp(trace,"1")==0);
+     const char *config=getenv("NORNS_EMU_MIDI_PORTS");
+     char *names=strdup(config ? config : "Emulator MIDI"), *save=NULL;
+     for (char *name=strtok_r(names,"\n",&save); name; name=strtok_r(NULL,"\n",&save))
+diff --git a/matron/src/emu_bridge.h b/matron/src/emu_bridge.h
+index f277f68..374e799 100644
+--- a/matron/src/emu_bridge.h
++++ b/matron/src/emu_bridge.h
+@@ -6,6 +6,17 @@
+ struct dev_midi;
+ struct dev_monome;
+ int emu_enabled(void);
++enum emu_clock_trace_stage {
++    EMU_CLOCK_TRACE_SCHEDULE=1,
++    EMU_CLOCK_TRACE_POST=2,
++    EMU_CLOCK_TRACE_DISPATCH_BEGIN=3,
++    EMU_CLOCK_TRACE_DISPATCH_END=4,
++    EMU_CLOCK_TRACE_INTERNAL_PUBLISH=5,
++    EMU_CLOCK_TRACE_INTERNAL_SKIP=6,
++};
++void emu_clock_trace(uint32_t stage,uint32_t event_type,int32_t thread_id,
++    double target_jack_s,double observed_jack_s,double resumed_jack_s,double target_beat,
++    double observed_beat,double value,uint64_t tick,uint64_t skipped);
+ void emu_error(const char *message);
+ int emu_report(lua_State *l);
+ void emu_devices(void);
+diff --git a/matron/src/event_types.h b/matron/src/event_types.h
+index 68d44c2..6034eeb 100644
+--- a/matron/src/event_types.h
++++ b/matron/src/event_types.h
+@@ -225,7 +225,12 @@ struct event_clock_resume {
+     struct event_common common;
+     uint32_t thread_id;
+     double value;
+-}; // + 12
++    uint32_t trace_event_type;
++    double trace_target_jack_s;
++    double trace_observed_jack_s;
++    double trace_target_beat;
++    double trace_observed_beat;
++};
+
+ struct event_clock_start {
+     struct event_common common;
+diff --git a/matron/src/events.c b/matron/src/events.c
+index d08689b..11a4549 100644
+--- a/matron/src/events.c
++++ b/matron/src/events.c
+@@ -9,6 +9,7 @@
+ #include <pthread.h>
+
+ #include "battery.h"
++#include "clock.h"
+ #include "device_monome.h"
+ #include "events.h"
+ #include "oracle.h"
+@@ -17,6 +18,7 @@
+
+ #include "event_custom.h"
+ #include "event_types.h"
++#include "emu_bridge.h"
+
+ //----------------------------
+ //--- types and variables
+@@ -211,7 +213,15 @@ static void handle_event(union event_data *ev) {
+         w_handle_metro(ev->metro.id, ev->metro.stage);
+         break;
+     case EVENT_CLOCK_RESUME:
++        emu_clock_trace(EMU_CLOCK_TRACE_DISPATCH_BEGIN,ev->clock_resume.trace_event_type,
++            ev->clock_resume.thread_id,ev->clock_resume.trace_target_jack_s,
++            clock_get_system_time(),0.0,ev->clock_resume.trace_target_beat,
++            clock_get_beats(),ev->clock_resume.value,0,0);
+         w_handle_clock_resume(ev->clock_resume.thread_id, ev->clock_resume.value);
++        emu_clock_trace(EMU_CLOCK_TRACE_DISPATCH_END,ev->clock_resume.trace_event_type,
++            ev->clock_resume.thread_id,ev->clock_resume.trace_target_jack_s,
++            clock_get_system_time(),0.0,ev->clock_resume.trace_target_beat,
++            clock_get_beats(),ev->clock_resume.value,0,0);
+         break;
+     case EVENT_CLOCK_START:
+         w_handle_clock_start();

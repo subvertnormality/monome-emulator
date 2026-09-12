@@ -142,6 +142,10 @@
     {
       "path": "patches/norns/0013-midi-connection-lifecycle.patch",
       "sha256": "5598ce08c2829565e8614c8f8b3c88834c5ebb003d62342384e72d879fa90e29"
+    },
+    {
+      "path": "patches/norns/0014-clock-phase-trace.patch",
+      "sha256": "59bc5bfe8bb2ade106288a805bf554f32a7d67215ae977a4fc73039f8f375747"
     }
   ],
   "serialosc": {
