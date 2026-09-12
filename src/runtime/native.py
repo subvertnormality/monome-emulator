@@ -544,6 +544,7 @@ class NativeBackend:
                 if self.clock_mode=='real-time':raise ContractError('unsupported','advance requires explicit experimental controlled time')
                 seconds,nanoseconds=divmod(action['nanoseconds'],1000000000)
                 send(8,seconds,nanoseconds)
+            elif kind=='runtime_stall': send(13,action['milliseconds'])
             elif kind=='release_all':
                 for held in list(self.held.values()):
                     release=dict(held,state=0); self.query({'action':release},deadline=deadline)
@@ -564,7 +565,7 @@ class NativeBackend:
             result['state'].update(arc=[ring.copy() for ring in self.arc],arc_device=dict(self.arc_device))
             result['state']['clock']=dict(mode=self.clock_mode,logical_ns=self.logical_ns if self.clock_mode!='real-time' else None,admitted=self.clock_mode=='real-time')
             result['state']['midi_input_schedule']=copy.deepcopy(self.input_schedule)
-            if payload.get('action',{}).get('type') in ('key','enc','grid','grid_connection','midi_connection','midi','advance','arc_delta','arc_key','arc_connection'):
+            if payload.get('action',{}).get('type') in ('key','enc','grid','grid_connection','midi_connection','midi','advance','arc_delta','arc_key','arc_connection','runtime_stall'):
                 result['native_ack']=dict(self.last_native_ack)
         # A Windows-mounted filesystem can pause for tens of milliseconds.
         # Never hold the native event reader's condition during artifact I/O.

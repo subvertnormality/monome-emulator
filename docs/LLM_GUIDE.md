@@ -91,6 +91,7 @@ Arrange cleanup even when assertions fail. For programmatic work, prefer
 the Python module path. Export evidence to a fresh caller-owned directory.
 
 Action bodies follow [action.schema.json](../schemas/action.schema.json).
+Use [`runtime_stall`](architecture/runtime-stall.md) to test bounded Lua callback backlog while native MIDI scheduling continues.
 Public grid coordinates are 1-based (x 1–16, y 1–8); key/encoder IDs are 1–3.
 Key/grid state is 1 for press and 0 for release. Encoder deltas are raw pulses;
 upstream sensitivity and acceleration still apply. Pair holds with releases.

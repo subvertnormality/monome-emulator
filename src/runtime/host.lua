@@ -98,6 +98,16 @@ norns.crow.send=function(command)
   return crow_send(command)
 end
 
+-- Test-only bounded main-thread stall. The native bridge validates the bound before
+-- queuing this call; native clock/MIDI threads continue while Lua is deliberately busy.
+_norns.emu_stall=function(milliseconds)
+  if type(milliseconds)~='number' or milliseconds<1 or milliseconds>1000 then
+    error('invalid emulator runtime stall',2)
+  end
+  local finish=os.clock()+milliseconds/1000
+  while os.clock()<finish do end
+end
+
 -- Diagnostic readout is restricted to public runtime values. It is not a way to
 -- mutate application globals or bypass the physical-style input path.
 _norns.emu_observe=function()

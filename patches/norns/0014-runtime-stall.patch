@@ -1,0 +1,15 @@
+--- a/matron/src/emu_bridge.c
++++ b/matron/src/emu_bridge.c
+@@ -236,6 +236,12 @@ static void *receive_loop(void *unused) {
+               pthread_mutex_unlock(&midi_connection_lock);
+               ev=NULL; }
+             break;
++        case 13:
++            if(args[1]<1 || args[1]>1000) goto invalid;
++            ev=event_data_new(EVENT_EXEC_CODE_LINE);
++            if(asprintf(&ev->exec_code_line.line,"_norns.emu_stall(%d)",args[1])<0)
++                abort();
++            break;
+         case 6:
+             if(args[1]<0 || args[1]>1) goto invalid;
+             { int *connected=malloc(sizeof(int)); if (!connected) abort();

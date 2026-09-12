@@ -40,9 +40,17 @@ class Contracts(unittest.TestCase):
         invalid=[dict(type='grid',x=0,y=1,state=1),dict(type='grid',x=16,y=9,state=1),
           dict(type='key',n=True,state=1),dict(type='enc',n=4,delta=1),dict(type='enc',n=2,delta=128),
           dict(type='key',n=2,state=1,ignored=True),dict(type='midi',port=1,bytes=[256]),
-          dict(type='midi',port=0,bytes=[144,60,100])]
+          dict(type='midi',port=0,bytes=[144,60,100]),dict(type='runtime_stall',milliseconds=0),
+          dict(type='runtime_stall',milliseconds=1001),dict(type='runtime_stall',milliseconds=1.5),
+          dict(type='runtime_stall',milliseconds=10,ignored=True)]
         for action in invalid:
             with self.subTest(action=action),self.assertRaises(ContractError): checked('action',self.action(uid(),action=action))
+    def test_runtime_stall_is_native_automation_only(self):
+        checked('action',self.action(uid(),action=dict(type='runtime_stall',milliseconds=1)))
+        sid=self.start()
+        with self.assertRaisesRegex(ContractError,'native automation session'):
+            session.request(sid,'/action',self.action(sid,action=dict(type='runtime_stall',milliseconds=1)))
+
     def test_schema_rejects_future_unimplemented_constraint(self):
         from automation.protocol import validate
         with self.assertRaisesRegex(ContractError,'Unsupported schema'): validate('x',dict(type='string',pattern='^y$'))
