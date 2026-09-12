@@ -60,6 +60,54 @@ class Contracts(unittest.TestCase):
             with self.assertRaises(ContractError):
                 checked('action', self.action(sid, action=action))
 
+    def test_schema_accepts_bounded_native_control_schedule(self):
+        sid=uid()
+        action=dict(type='native_input_schedule',schedule_id=9,events=[
+            dict(type='grid',x=8,y=4,state=1,at_monotonic_ns=100),
+            dict(type='grid',x=8,y=4,state=0,at_monotonic_ns=200),
+            dict(type='key',n=2,state=1,at_monotonic_ns=300),
+            dict(type='key',n=2,state=0,at_monotonic_ns=400),
+            dict(type='enc',n=3,delta=-2,at_monotonic_ns=500),
+        ])
+        checked('action',self.action(sid,action=action))
+        checked('scenario',self.recipe([dict(action=action)]))
+        for broken in (
+            dict(type='native_input_schedule',schedule_id=1,events=[]),
+            dict(type='native_input_schedule',schedule_id=1,events=[dict(type='grid',x=1,y=1,state=1)]),
+            dict(type='native_input_schedule',schedule_id=1,events=[dict(type='midi',port=1,bytes=[248],at_monotonic_ns=1)]),
+        ):
+            with self.subTest(broken=broken),self.assertRaises(ContractError):
+                checked('action',self.action(sid,action=broken))
+    def test_native_control_schedule_rejects_fixture_and_controlled_modes(self):
+        sid=self.start()
+        with self.assertRaisesRegex(ContractError,'native backend'):
+            session.request(sid,'/action',self.action(sid,action=dict(type='native_input_schedule',schedule_id=1,events=[dict(type='key',n=2,state=1,at_monotonic_ns=1)])))
+        from automation.server import Application
+        controlled=Application.__new__(Application);controlled.config=dict(backend='native',clock_mode='controlled-experimental')
+        with self.assertRaisesRegex(ContractError,'controlled time'):
+            controlled.start_native_input_schedule(dict(schedule_id=1,events=[]))
+
+    def test_native_control_schedule_requires_acknowledgement_lead(self):
+        from types import SimpleNamespace
+        from automation.server import Application,NATIVE_INPUT_SCHEDULE_MIN_LEAD_NS
+        class Backend:
+            held={};grid_input=SimpleNamespace(connected=True)
+            def check_processes(self):pass
+        app=Application.__new__(Application)
+        app.config=dict(backend='native',clock_mode='real-time',input_timeout=2)
+        app.backend=Backend();app.directory=self.directory;app.input_owners={}
+        app.native_input_schedule=None;app.last_native_input_schedule_id=0
+        app.native_input_cancel=threading.Event();app.native_input_thread=None
+        now=1_000_000_000
+        too_soon=dict(schedule_id=1,events=[dict(type='key',n=2,state=1,at_monotonic_ns=now+NATIVE_INPUT_SCHEDULE_MIN_LEAD_NS-1)])
+        with mock.patch('automation.server.time.monotonic_ns',return_value=now),self.assertRaisesRegex(ContractError,'100 ms'):
+            app.start_native_input_schedule(too_soon)
+        boundary=dict(schedule_id=1,events=[dict(type='key',n=2,state=1,at_monotonic_ns=now+NATIVE_INPUT_SCHEDULE_MIN_LEAD_NS)])
+        with mock.patch('automation.server.time.monotonic_ns',return_value=now),mock.patch('automation.server.threading.Thread') as thread:
+            app.start_native_input_schedule(boundary)
+        self.assertEqual(app.last_native_input_schedule_id,1)
+        thread.return_value.start.assert_called_once()
+
     def test_schema_rejects_future_unimplemented_constraint(self):
         from automation.protocol import validate
         with self.assertRaisesRegex(ContractError,'Unsupported schema'): validate('x',dict(type='string',pattern='^y$'))

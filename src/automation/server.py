@@ -1,4 +1,5 @@
 """Authenticated loopback session server; serializes action application."""
+import copy
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
@@ -10,6 +11,8 @@ import sys
 import threading
 import time
 from .protocol import MAX_BODY,ROOT,ContractError,checked,read_json,write_json,uid
+
+NATIVE_INPUT_SCHEDULE_MIN_LEAD_NS=100_000_000
 
 class FixtureBackend:
     fidelity='contract-fixture-only'
@@ -55,6 +58,10 @@ class Application:
         else: self.backend=FixtureBackend(directory)
         self.sequence=0; self.action_ids=set(); self.lock=threading.Lock(); self.action_lock=threading.Lock(); self.errors=[]
         self.clients={}; self.client_lock=threading.RLock(); self.input_owners={}; self.client_timeout=2.5
+        self.native_input_schedule=None
+        self.last_native_input_schedule_id=0
+        self.native_input_cancel=threading.Event()
+        self.native_input_thread=None
         self.audio_monitor=None;self.audio_lock=threading.RLock()
         self.audio_captures={}
         self.closed=False
@@ -64,6 +71,13 @@ class Application:
     def close(self):
         if self.cleanup_complete:return
         self.closed=True
+        self.native_input_cancel.set()
+        # close normally holds self.lock, which the delivery worker also needs.
+        # Record terminal cancellation here instead of joining into a deadlock.
+        if self.native_input_schedule and self.native_input_schedule['status']=='accepted':
+            self.native_input_schedule['status']='cancelled'
+            self.native_input_schedule['cancelled_monotonic_ns']=time.monotonic_ns()
+            self.write_native_input_schedule('cancelled',self.native_input_schedule)
         failures=[]
         try:
             closers=([self.maiden.close] if self.maiden else [])
@@ -186,6 +200,8 @@ class Application:
             if expired:self.release_client(client_id)
     def snapshot(self):
         raw=self.backend.query({})
+        if self.config['backend']=='native':
+            raw['state']['native_input_schedule']=copy.deepcopy(self.native_input_schedule)
         return checked('observation',dict(schema_version=1,session_id=self.config['session_id'],
           backend=self.config['backend'],fidelity=self.backend.fidelity,monotonic_ns=time.monotonic_ns(),
           frame_revision=raw['frame_revision'],grid_revision=raw['grid_revision'],state=raw['state'],errors=self.errors))
@@ -205,6 +221,71 @@ class Application:
         except ContractError as error:
             with open(self.directory/'actions.jsonl','a') as stream:stream.write(json.dumps(dict(request=payload,error=error.as_dict()))+'\n')
             raise
+    def start_native_input_schedule(self,action):
+        """Admit bounded native controls before their first deadline."""
+        if self.config['backend']!='native':
+            raise ContractError('unsupported','Native control schedules require the native backend')
+        if self.config.get('clock_mode','real-time')!='real-time':
+            raise ContractError('unsupported','Native control schedules are unavailable in controlled time; advance then inject')
+        self.backend.check_processes()
+        if self.input_owners:
+            raise ContractError('input_owner','Native control schedules require no browser-owned held inputs')
+        previous=self.native_input_schedule
+        if previous and previous['status']=='accepted':
+            raise ContractError('schedule_busy','A native control schedule is still active')
+        if action['schedule_id']<=self.last_native_input_schedule_id:
+            raise ContractError('schedule_id','Native control schedule identifiers must increase within a session')
+        now=time.monotonic_ns(); events=copy.deepcopy(action['events']); held=set(self.backend.held); prior=None
+        for index,event in enumerate(events):
+            due=event['at_monotonic_ns']
+            if due-now<NATIVE_INPUT_SCHEDULE_MIN_LEAD_NS:
+                raise ContractError('input_schedule_lead','Native control schedules need at least 100 ms admission lead')
+            if due-now>2_000_000_000:
+                raise ContractError('input_schedule_time','Every native control deadline must be in the next two seconds')
+            if prior is not None and due<prior:
+                raise ContractError('input_schedule_order','Native control deadlines must be ordered')
+            prior=due; kind=event['type']
+            if kind=='grid' and not self.backend.grid_input.connected:
+                raise ContractError('grid_disconnected','Cannot schedule input to a disconnected grid')
+            if kind in ('key','grid'):
+                key=(kind,event.get('n'),event.get('x'),event.get('y'))
+                if bool(event['state'])==(key in held):
+                    raise ContractError('duplicate_'+kind+'_transition','Native '+kind+' already has requested state at scheduled transition '+str(index))
+                if event['state']:held.add(key)
+                else:held.remove(key)
+        record=dict(schedule_id=action['schedule_id'],status='accepted',submitted_monotonic_ns=now,
+                    events=events,delivered=[],failed=None)
+        self.native_input_schedule=record; self.last_native_input_schedule_id=action['schedule_id'];self.native_input_cancel.clear()
+        thread=threading.Thread(target=self.deliver_native_input_schedule,args=(record,),daemon=True,name='native-input-schedule-'+str(action['schedule_id']))
+        self.native_input_thread=thread;thread.start()
+        self.write_native_input_schedule('accepted',record)
+    def write_native_input_schedule(self,kind,record):
+        with open(self.directory/'native-input-schedules.jsonl','a') as stream:
+            stream.write(json.dumps(dict(kind=kind,schedule=copy.deepcopy(record)))+'\n')
+    def deliver_native_input_schedule(self,record):
+        for index,event in enumerate(record['events']):
+            delay=max(0,(event['at_monotonic_ns']-time.monotonic_ns())/1e9)
+            if self.native_input_cancel.wait(delay):
+                with self.lock:
+                    if record['status']=='accepted':record['status']='cancelled'
+                return
+            with self.lock:
+                if self.closed:
+                    if record['status']=='accepted':record['status']='cancelled'
+                    return
+                try:
+                    ordinary={key:value for key,value in event.items() if key!='at_monotonic_ns'}
+                    result=self.backend.query(dict(action=ordinary),deadline=time.monotonic()+self.config.get('input_timeout',2))
+                    native=result.get('native_ack',{})
+                    callback_completed=native.get('monotonic_ns')
+                    record['delivered'].append(dict(index=index,planned_monotonic_ns=event['at_monotonic_ns'],applied_monotonic_ns=callback_completed,callback_completed_monotonic_ns=callback_completed,native_sequence=native.get('sequence'),action=ordinary))
+                except ContractError as error:
+                    record['status']='failed';record['failed']=dict(index=index,error=error.as_dict())
+                    self.write_native_input_schedule('failed',record)
+                    return
+        with self.lock:
+            if record['status']=='accepted':record['status']='completed'
+            self.write_native_input_schedule('completed',record)
     def action(self,payload,scheduled=False):
         record=dict(request=payload)
         try:
@@ -229,6 +310,12 @@ class Application:
         action=dict(payload['action']); client_id=payload.get('client_id'); kind=action['type']
         if kind in ('midi_schedule','midi_schedule_cancel') and (self.config['backend']!='native' or client_id):
             raise ContractError('unsupported','MIDI schedules require a native automation session without browser ownership')
+        if kind=='native_input_schedule' and client_id:
+            raise ContractError('unsupported','Native control schedules require a native automation session without browser ownership')
+        if kind=='native_input_schedule':
+            self.start_native_input_schedule(action)
+        elif self.native_input_schedule and self.native_input_schedule['status']=='accepted' and kind in ('key','enc','grid','release_all'):
+            raise ContractError('schedule_busy','Wait for the active native control schedule before injecting controls')
         if scheduled:action.pop('at_monotonic_ns')
         key=(kind,action.get('n'),action.get('x'),action.get('y'))
         if client_id: self.heartbeat(client_id)
@@ -242,7 +329,9 @@ class Application:
         def query(action):
             if self.config['backend']=='native':return self.backend.query({'action':action},deadline=deadline)
             return self.backend.query({'action':action})
-        if kind=='release_all' and client_id:
+        if kind=='native_input_schedule':
+            raw=None
+        elif kind=='release_all' and client_id:
             for held_key,(owner,held) in list(self.input_owners.items()):
                 if owner==client_id:
                     query(dict(held,state=0)); self.input_owners.pop(held_key,None)
@@ -258,7 +347,7 @@ class Application:
                 else: self.input_owners.pop(key,None)
         self.sequence+=1; self.action_ids.add(payload['action_id'])
         ack=checked('ack',dict(schema_version=1,session_id=payload['session_id'],action_id=payload['action_id'],
-               sequence=self.sequence,status='accepted' if kind=='midi_schedule' else 'applied',monotonic_ns=time.monotonic_ns(),
+               sequence=self.sequence,status='accepted' if kind in ('midi_schedule','native_input_schedule') else 'applied',monotonic_ns=time.monotonic_ns(),
                **({'native':raw['native_ack']} if raw and 'native_ack' in raw else {})))
         return ack
 

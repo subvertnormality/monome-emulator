@@ -134,6 +134,70 @@ def timed_controls():
                     bound_ns=25_000_000)
     finally:c.finish('timed-controls')
 
+def scheduled_gesture():
+    """One acknowledged submission carries both transitions before either is due."""
+    c=Client()
+    try:
+        due=time.monotonic_ns()+350_000_000
+        events=[
+            dict(type='grid',x=8,y=4,state=1,at_monotonic_ns=due),
+            dict(type='grid',x=8,y=4,state=0,at_monotonic_ns=due+60_000_000),
+            dict(type='key',n=2,state=1,at_monotonic_ns=due+80_000_000),
+            dict(type='key',n=2,state=0,at_monotonic_ns=due+120_000_000),
+            dict(type='enc',n=3,delta=5,at_monotonic_ns=due+140_000_000),
+        ]
+        ack=c.action(type='native_input_schedule',schedule_id=1,events=events)
+        submitted=time.monotonic_ns()
+        assert ack['status']=='accepted' and submitted<due,(ack,submitted,due)
+        accepted=c.snapshot()['state']['native_input_schedule']
+        assert accepted['status']=='accepted' and accepted['events']==events,accepted
+        try:c.action(type='grid',x=1,y=1,state=1)
+        except ContractError as error:assert error.code=='schedule_busy',error
+        else:raise AssertionError('Immediate input bypassed an admitted schedule')
+        finished=c.wait(lambda o:o['state']['native_input_schedule']['status']=='completed','native control schedule did not complete')
+        record=finished['state']['native_input_schedule']
+        assert [event['index'] for event in record['delivered']]==list(range(len(events))),record
+        wire=[json.loads(line) for line in (session.SESSIONS/c.sid/'native-events.jsonl').read_text().splitlines()]
+        wanted=[(3,[7,3,1]),(3,[7,3,0]),(1,[2,1]),(1,[2,0]),(2,[3,5])]
+        actual=[(event['type'],event['args']) for event in wire if event.get('kind')=='input' and event['type'] in (1,2,3)][-len(wanted):]
+        assert actual==wanted,(actual,wanted)
+        for event,delivery in zip(events,record['delivered']):
+            assert delivery['action']=={key:value for key,value in event.items() if key!='at_monotonic_ns'}
+            assert delivery['callback_completed_monotonic_ns']==delivery['applied_monotonic_ns'],delivery
+            assert 0<=delivery['applied_monotonic_ns']-event['at_monotonic_ns']<=25_000_000,delivery
+        grid_callback=[event for event in wire if event.get('kind')==3 and event.get('bytes')==[176,8,4]]
+        assert grid_callback and grid_callback[-1]['monotonic_ns']<=record['delivered'][0]['callback_completed_monotonic_ns'],(grid_callback,record)
+        assert c.snapshot()['state']['held']==[]
+        invalid=[
+            (dict(type='native_input_schedule',schedule_id=2,events=[dict(type='grid',x=1,y=1,state=1,at_monotonic_ns=time.monotonic_ns()+300_000_000),dict(type='grid',x=1,y=1,state=1,at_monotonic_ns=time.monotonic_ns()+350_000_000)]),'duplicate_grid_transition'),
+            (dict(type='native_input_schedule',schedule_id=3,events=[dict(type='enc',n=1,delta=1,at_monotonic_ns=time.monotonic_ns()+350_000_000),dict(type='enc',n=1,delta=1,at_monotonic_ns=time.monotonic_ns()+300_000_000)]),'input_schedule_order'),
+        ]
+        for action,code in invalid:
+            try:c.action(**action)
+            except ContractError as error:assert error.code==code,error
+            else:raise AssertionError('Invalid native control schedule was accepted: '+code)
+        return dict(name='native-control-schedule',passed=True,submitted_ns=submitted,due_ns=due,deliveries=record['delivered'])
+    finally:c.finish('scheduled-gesture')
+
+def scheduled_shutdown():
+    """Shutdown terminally records, rather than races, an admitted gesture."""
+    c=Client()
+    try:
+        due=time.monotonic_ns()+1_000_000_000
+        ack=c.action(type='native_input_schedule',schedule_id=1,events=[
+            dict(type='key',n=2,state=1,at_monotonic_ns=due),
+            dict(type='key',n=2,state=0,at_monotonic_ns=due+50_000_000),
+        ])
+        assert ack['status']=='accepted'
+        session.stop(c.sid)
+        records=[json.loads(line) for line in (session.SESSIONS/c.sid/'native-input-schedules.jsonl').read_text().splitlines()]
+        terminal=records[-1]
+        assert terminal['kind']=='cancelled',terminal
+        assert terminal['schedule']['status']=='cancelled',terminal
+        assert terminal['schedule']['schedule_id']==1,terminal
+        return dict(name='native-control-schedule-shutdown',passed=True,terminal=terminal)
+    finally:c.finish('scheduled-shutdown')
+
 def mosaic():
     c=Client(fixture=True)
     try:
@@ -173,6 +237,8 @@ if __name__=='__main__':
     try:
         results.append(conformance()); print('PASS grid conformance',flush=True)
         results.append(timed_controls()); print('PASS timed physical controls',flush=True)
+        results.append(scheduled_gesture()); print('PASS native control schedule',flush=True)
+        results.append(scheduled_shutdown()); print('PASS scheduled control shutdown',flush=True)
         results.append(mosaic()); print('PASS Mosaic navigation',flush=True)
         results.extend(faults()); print('PASS seeded coordinate/release fault detection',flush=True)
         from automation import runner,evidence
