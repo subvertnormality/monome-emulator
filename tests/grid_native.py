@@ -20,7 +20,7 @@ class Client:
     def action(self,**action):
         request=dict(schema_version=1,session_id=self.sid,action_id=uid(),sequence=self.seq+1,action=action)
         ack=session.request(self.sid,'/action',request)
-        self.seq+=1; self.trace.append(dict(request=request,ack=ack))
+        self.seq+=1; self.trace.append(dict(request=request,ack=ack)); return ack
     def press(self,x,y,z): self.action(type='grid',x=x,y=y,state=z)
     def key(self,n): self.action(type='key',n=n,state=1); self.action(type='key',n=n,state=0)
     def wait(self,predicate,description):
@@ -99,6 +99,41 @@ def conformance():
         return dict(name='grid-contract',passed=True,checks='128 cells, levels 0–15, bulk/refresh, relative clamps, four rotations, intensity, holds, duplicates, reconnect')
     finally: c.finish('conformance')
 
+def timed_controls():
+    """Real-time deadlines reach the unchanged native control packet path."""
+    c=Client()
+    checks=[]
+    try:
+        transitions=[
+            (dict(type='grid',x=8,y=4,state=1),3,[7,3,1]),
+            (dict(type='grid',x=8,y=4,state=0),3,[7,3,0]),
+            (dict(type='enc',n=3,delta=5),2,[3,5]),
+            (dict(type='key',n=2,state=1),1,[2,1]),
+            (dict(type='key',n=2,state=0),1,[2,0]),
+        ]
+        for action,native_type,native_args in transitions:
+            due=time.monotonic_ns()+150_000_000
+            began=time.monotonic_ns()
+            ack=c.action(**dict(action,at_monotonic_ns=due))
+            returned=time.monotonic_ns()
+            assert returned>=due,(action,due,returned)
+            assert returned-began>=125_000_000,(action,began,returned)
+            events=[json.loads(line) for line in
+                    (session.SESSIONS/c.sid/'native-events.jsonl').read_text().splitlines()]
+            matches=[e for e in events if e.get('kind')=='input' and
+                     e.get('sequence')==ack['native']['sequence']]
+            assert len(matches)==1,(action,matches)
+            event=matches[0]
+            assert event['type']==native_type and event['args']==native_args,(action,event)
+            lateness=event['monotonic_ns']-due
+            assert 0<=lateness<=25_000_000,(action,lateness)
+            checks.append(dict(action=action,due_ns=due,applied_ns=event['monotonic_ns'],
+                               lateness_ns=lateness,native_sequence=event['sequence']))
+        assert c.snapshot()['state']['held']==[]
+        return dict(name='timed-controls',passed=True,checks=checks,
+                    bound_ns=25_000_000)
+    finally:c.finish('timed-controls')
+
 def mosaic():
     c=Client(fixture=True)
     try:
@@ -137,6 +172,7 @@ if __name__=='__main__':
     identity=source_identity(); results=[]
     try:
         results.append(conformance()); print('PASS grid conformance',flush=True)
+        results.append(timed_controls()); print('PASS timed physical controls',flush=True)
         results.append(mosaic()); print('PASS Mosaic navigation',flush=True)
         results.extend(faults()); print('PASS seeded coordinate/release fault detection',flush=True)
         from automation import runner,evidence

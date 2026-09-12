@@ -68,6 +68,11 @@
                         "type": "integer",
                         "minimum": 0,
                         "maximum": 1
+                      },
+                      "at_monotonic_ns": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100000000000000000000
                       }
                     },
                     "required": [
@@ -92,6 +97,11 @@
                         "type": "integer",
                         "minimum": -127,
                         "maximum": 127
+                      },
+                      "at_monotonic_ns": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100000000000000000000
                       }
                     },
                     "required": [
@@ -121,6 +131,11 @@
                         "type": "integer",
                         "minimum": 0,
                         "maximum": 1
+                      },
+                      "at_monotonic_ns": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100000000000000000000
                       }
                     },
                     "required": [

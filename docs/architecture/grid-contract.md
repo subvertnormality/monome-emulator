@@ -21,6 +21,14 @@ Reconnect clears the buffer and runs native discovery again, preserving physical
 identity. The virtual native allocation remains owned by the session during
 disconnect, preventing stale queued redraws from addressing freed memory.
 
+In real-time mode, grid transitions may include `at_monotonic_ns` within the
+next two seconds. The automation server waits until that deadline, then sends
+the ordinary native grid packet and returns its acknowledgement. This schedules
+the input transition rather than a script callback; native event timestamps and
+application output remain the evidence. Key and encoder actions use the same
+optional deadline. Controlled time rejects wall-clock deadlines and uses
+`advance` followed by ordinary input.
+
 Duplicate down/up transitions and input to a disconnected grid fail explicitly.
 Multiple keys remain independently held until released; `release_all` uses the
 same input path. Physical tilt is unsupported and produces a named Lua error.

@@ -194,10 +194,10 @@ class Application:
             checked('action',payload)
             action=payload['action']
             if 'at_monotonic_ns' not in action:return False
-            if self.config['backend']!='native':raise ContractError('unsupported','Scheduled MIDI requires the native clock')
-            if self.config.get('clock_mode','real-time')!='real-time':raise ContractError('unsupported','Wall-time MIDI scheduling is unavailable in controlled time; advance then inject')
+            if self.config['backend']!='native':raise ContractError('unsupported','Scheduled input requires the native clock')
+            if self.config.get('clock_mode','real-time')!='real-time':raise ContractError('unsupported','Wall-time input scheduling is unavailable in controlled time; advance then inject')
             delay=(action['at_monotonic_ns']-time.monotonic_ns())/1e9
-            if delay<0 or delay>2:raise ContractError('midi_input_time','Scheduled MIDI input must be in the next two seconds on the backend monotonic clock')
+            if delay<0 or delay>2:raise ContractError('midi_input_time' if action['type']=='midi' else 'input_time','Scheduled input must be in the next two seconds on the backend monotonic clock')
             # Serialize input requests, but leave observation and heartbeat paths
             # available throughout an intentional future-input delay.
             time.sleep(delay)

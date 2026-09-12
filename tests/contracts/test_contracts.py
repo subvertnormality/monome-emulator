@@ -43,6 +43,23 @@ class Contracts(unittest.TestCase):
           dict(type='midi',port=0,bytes=[144,60,100])]
         for action in invalid:
             with self.subTest(action=action),self.assertRaises(ContractError): checked('action',self.action(uid(),action=action))
+    def test_schema_accepts_monotonic_deadlines_for_physical_controls(self):
+        # Real-time native automation may place control transitions at a known
+        # musical boundary. The backend strips this scheduling field before the
+        # fixed native key/encoder/grid packets are emitted.
+        sid = uid()
+        actions = [
+            dict(type='key', n=2, state=1, at_monotonic_ns=123),
+            dict(type='enc', n=3, delta=-2, at_monotonic_ns=456),
+            dict(type='grid', x=16, y=8, state=0, at_monotonic_ns=789),
+        ]
+        for action in actions:
+            checked('action', self.action(sid, action=action))
+        for action in actions:
+            action['at_monotonic_ns'] = -1
+            with self.assertRaises(ContractError):
+                checked('action', self.action(sid, action=action))
+
     def test_schema_rejects_future_unimplemented_constraint(self):
         from automation.protocol import validate
         with self.assertRaisesRegex(ContractError,'Unsupported schema'): validate('x',dict(type='string',pattern='^y$'))
