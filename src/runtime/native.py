@@ -493,7 +493,7 @@ class NativeBackend:
                     if kind in (9,11):self.input_schedule=previous
                     raise ContractError(response['error'],'Native MIDI schedule rejected: '+response['error'])
             return response
-    def query(self,payload,deadline=None):
+    def query(self,payload,deadline=None,ack_only=False):
         self.check_processes()
         if deadline is None:deadline=time.monotonic()+self.config.get('input_timeout',2)
         def send(kind,*args):return self.send(kind,*args,deadline=deadline)
@@ -508,7 +508,7 @@ class NativeBackend:
                 self.arc_input.validate(action)
                 if kind=='arc_connection':
                     if not action['connected']:
-                        for held in list(self.arc_input.held.values()):self.query({'action':dict(held,state=0)},deadline=deadline)
+                        for held in list(self.arc_input.held.values()):self.query({'action':dict(held,state=0)},deadline=deadline,ack_only=True)
                     send(18,int(action['connected']))
                 elif kind=='arc_delta':send(16,action['n']-1,action['delta'])
                 else:send(17,action['n']-1,action['state'])
@@ -521,7 +521,7 @@ class NativeBackend:
                 connected=action['connected']
                 if connected==self.grid_input.connected: raise ContractError('grid_connection','Grid already has requested connection state')
                 if not connected:
-                    for held in list(self.grid_input.held.values()): self.query({'action':dict(held,state=0)},deadline=deadline)
+                    for held in list(self.grid_input.held.values()): self.query({'action':dict(held,state=0)},deadline=deadline,ack_only=True)
                 send(6,int(connected)); self.grid_input.connected=connected
             elif kind=='midi_connection':
                 if not self.midi_connection_supported:raise ContractError('unsupported','Runtime does not support MIDI connection changes')
@@ -550,11 +550,15 @@ class NativeBackend:
                 send(8,seconds,nanoseconds)
             elif kind=='release_all':
                 for held in list(self.held.values()):
-                    release=dict(held,state=0); self.query({'action':release},deadline=deadline)
+                    release=dict(held,state=0); self.query({'action':release},deadline=deadline,ack_only=True)
             if kind in ('key','grid','arc_key'):
                 key=(kind,action.get('n'),action.get('x'),action.get('y'))
                 if action['state']: self.held[key]=action
                 else: self.held.pop(key,None)
+            if ack_only:
+                acknowledged=('key','enc','grid','grid_connection','midi_connection','midi','advance',
+                              'arc_delta','arc_key','arc_connection')
+                return {'native_ack':dict(self.last_native_ack)} if kind in acknowledged else {}
         else: send(5)
         with self.condition:
             frame=self.frame; revision=self.frame_revision

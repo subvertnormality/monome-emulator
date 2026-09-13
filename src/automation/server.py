@@ -240,7 +240,7 @@ class Application:
         if self.config['backend']=='native':self.backend.check_processes()
         deadline=time.monotonic()+self.config.get('input_timeout',2)
         def query(action):
-            if self.config['backend']=='native':return self.backend.query({'action':action},deadline=deadline)
+            if self.config['backend']=='native':return self.backend.query({'action':action},deadline=deadline,ack_only=True)
             return self.backend.query({'action':action})
         if kind=='release_all' and client_id:
             for held_key,(owner,held) in list(self.input_owners.items()):
