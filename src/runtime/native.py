@@ -493,6 +493,18 @@ class NativeBackend:
                     if kind in (9,11):self.input_schedule=previous
                     raise ContractError(response['error'],'Native MIDI schedule rejected: '+response['error'])
             return response
+    def display(self):
+        """Return the latest exported frame/grid without a Lua observation barrier."""
+        self.check_processes()
+        with self.condition:
+            frame=bytes(self.frame)
+            frame_revision=self.frame_revision
+            grid=self.grid.copy()
+            grid_revision=self.grid_revision
+        return dict(frame_revision=frame_revision,grid_revision=grid_revision,state=dict(
+          frame=dict(width=128,height=64,format='BGRA8',
+            sha256=hashlib.sha256(frame).hexdigest(),pixels_base64=base64.b64encode(frame).decode()),grid=grid))
+
     def query(self,payload,deadline=None,ack_only=False):
         self.check_processes()
         if deadline is None:deadline=time.monotonic()+self.config.get('input_timeout',2)

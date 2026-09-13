@@ -184,6 +184,14 @@ class Application:
                 last=self.clients.get(client_id)
                 expired=last is not None and time.monotonic()-last>self.client_timeout
             if expired:self.release_client(client_id)
+    def display(self):
+        if self.config['backend']!='native' or not callable(getattr(self.backend,'display',None)):
+            raise ContractError('unsupported','Display observation requires the native backend')
+        raw=self.backend.display()
+        return checked('observation',dict(schema_version=1,session_id=self.config['session_id'],
+          backend=self.config['backend'],fidelity=self.backend.fidelity,monotonic_ns=time.monotonic_ns(),
+          frame_revision=raw['frame_revision'],grid_revision=raw['grid_revision'],state=raw['state'],errors=self.errors))
+
     def snapshot(self):
         raw=self.backend.query({})
         return checked('observation',dict(schema_version=1,session_id=self.config['session_id'],
@@ -426,6 +434,7 @@ def serve_application(directory,app):
                         self.respond(200,dict(status='ready',session_id=app.config['session_id'],sequence=app.sequence,
                                              backend=app.config['backend'],fidelity=app.backend.fidelity,
                                              editor_url=app.config.get('editor_url'))); return
+                    if self.command=='GET' and self.path=='/display': self.respond(200,app.display()); return
                     if self.command=='GET' and self.path=='/snapshot': self.respond(200,app.snapshot()); return
                     if self.command=='GET' and self.path=='/capabilities':
                         identity=app.config.get('runtime_identity',{});experimental=identity.get('experimental',{});binaries=identity.get('binaries',{})

@@ -28,7 +28,11 @@ Monotonic timestamps use integer nanoseconds; frame/grid revisions are counters,
 not timestamps. Later musical assertions use explicitly named beat units.
 
 `GET /health`, `/snapshot`, `/capabilities` and `POST /stop` expose the running
-session. `POST /fixture-fault` exists only for the C01 contract subprocess; crash
+session. Native sessions also expose authenticated `GET /display`, an observation
+envelope whose state contains only the latest exported frame and grid. This path
+does not queue the Lua diagnostic observation barrier or copy snapshot diagnostics
+or MIDI. Normal process/error-log checks still run; use `/snapshot` when its
+full observation guarantees are required. `POST /fixture-fault` exists only for the C01 contract subprocess; crash
 and stall must cause failed scenario evidence. Unknown endpoints/fields fail.
 The schema validator supports exactly the keywords used by the versioned schemas
 and rejects unsupported schema keywords instead of ignoring constraints.
