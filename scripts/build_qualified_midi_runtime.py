@@ -199,9 +199,10 @@ def main():
         [
             ROOT / "patches/norns/candidates/internal-tempo-continuity.patch",
             ROOT / "patches/norns/experimental-screen-worker-shutdown.patch",
+            ROOT / "patches/norns/experimental-sdl-ownership.patch",
         ],
         output / "continuity",
-        "internal-tempo-continuity-and-screen-worker-shutdown",
+        "internal-tempo-continuity-and-native-teardown",
     )
     final = output / "runtime"
     call(
