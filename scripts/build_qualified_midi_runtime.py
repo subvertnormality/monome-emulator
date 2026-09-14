@@ -200,6 +200,7 @@ def main():
             ROOT / "patches/norns/candidates/internal-tempo-continuity.patch",
             ROOT / "patches/norns/experimental-screen-worker-shutdown.patch",
             ROOT / "patches/norns/experimental-sdl-ownership.patch",
+            ROOT / "patches/norns/experimental-jack-lifetime.patch",
         ],
         output / "continuity",
         "internal-tempo-continuity-and-native-teardown",
