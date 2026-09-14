@@ -27,8 +27,11 @@ def main():
     source = output / 'norns'
     shutil.copytree(base['source'], source,
                     ignore=shutil.ignore_patterns('.lock-waf*', '*.pyc', '__pycache__'))
-    subprocess.run(['git', 'apply', '--check', str(PATCH)], cwd=source, check=True)
-    subprocess.run(['git', 'apply', str(PATCH)], cwd=source, check=True)
+    header = (source / 'matron/src/emu_midi_schedule.h').read_text()
+    apply_args = (['--include=matron/src/emu_bridge.c']
+                  if '#define EMU_MIDI_SCHEDULE_EVENTS 2048' in header else [])
+    subprocess.run(['git', 'apply', '--check', *apply_args, str(PATCH)], cwd=source, check=True)
+    subprocess.run(['git', 'apply', *apply_args, str(PATCH)], cwd=source, check=True)
     prefix = Path(base['prefix'])
     env = dict(os.environ,
                CFLAGS='-I' + str(prefix / 'include') + ' -Wno-error=unused-result',

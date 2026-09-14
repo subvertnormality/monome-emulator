@@ -290,7 +290,9 @@
  double clock_internal_test_get_last_tick_duration(void) {
      return clock_internal_last_tick_duration;
  }
--#endif // NORNS_TEST+#endif // NORNS_TEST
+-#endif // NORNS_TEST
+\ No newline at end of file
++#endif // NORNS_TEST
 --- a/matron/src/clocks/clock_internal.h
 +++ b/matron/src/clocks/clock_internal.h
 @@ -1,10 +1,11 @@
