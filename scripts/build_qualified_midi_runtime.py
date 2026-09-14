@@ -196,9 +196,12 @@ def main():
     continuity = build_patched(
         boundary / "installation.json",
         baseline,
-        [ROOT / "patches/norns/candidates/internal-tempo-continuity.patch"],
+        [
+            ROOT / "patches/norns/candidates/internal-tempo-continuity.patch",
+            ROOT / "patches/norns/experimental-screen-worker-shutdown.patch",
+        ],
         output / "continuity",
-        "internal-tempo-continuity",
+        "internal-tempo-continuity-and-screen-worker-shutdown",
     )
     final = output / "runtime"
     call(
