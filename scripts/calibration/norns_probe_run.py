@@ -10,7 +10,7 @@ on-device thread sampler, load the probe through Maiden, wait for its result,
 fetch it, clear the script, restore system.state, and remove only the probe's
 own code/data directories. Any Lua error is recorded and fails the repeat.
 """
-import argparse, hashlib, json, subprocess, sys, threading, time
+import argparse, hashlib, json, shlex, subprocess, sys, threading, time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -30,7 +30,8 @@ class Device:
         self.base = ['ssh', '-S', socket, host]
 
     def run(self, script, input_bytes=None, timeout=120):
-        result = subprocess.run(self.base + ['bash', '-s'], input=(script.encode() if input_bytes is None else input_bytes),
+        # The script is an argument; stdin carries only data (never executed).
+        result = subprocess.run(self.base + ['bash -c ' + shlex.quote(script)], input=input_bytes if input_bytes is not None else b'',
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
         if result.returncode:
             raise RuntimeError('remote failed (%d): %s' % (result.returncode, result.stderr.decode()[-2000:]))

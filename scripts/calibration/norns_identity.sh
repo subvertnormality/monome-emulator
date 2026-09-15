@@ -3,8 +3,8 @@
 #
 #   ssh we@<norns> bash -s < scripts/calibration/norns_identity.sh > identity.txt
 #
-# Writes nothing on the device: no sudo, no Lua evaluation, no git index refresh
-# (--no-optional-locks), no service changes. Every section is delimited so the
+# Writes nothing on the device: no sudo, no Lua evaluation, no git status or
+# describe (both can refresh the index stat cache), no service changes. Sections are delimited so the
 # host-side parser can keep missing tools as explicit UNAVAILABLE rows.
 set -u
 export LC_ALL=C GIT_OPTIONAL_LOCKS=0
@@ -31,8 +31,9 @@ run swapon --show; ls -d /proc/pressure/* 2>&1; show /proc/self/schedstat
 run timedatectl show; run systemctl is-active systemd-timesyncd
 section norns
 show /home/we/version.txt
-run git -C /home/we/norns rev-parse HEAD; run git -C /home/we/norns describe --always --dirty
-run git -C /home/we/norns status --porcelain --untracked-files=no
+run git -C /home/we/norns rev-parse HEAD
+# status/describe --dirty may refresh the index stat cache even without locks; hash tracked files instead.
+run git -C /home/we/norns ls-files -s -- lua matron/src crone/src | sha256sum
 for f in /home/we/norns/build/matron/matron /home/we/norns/build/crone/crone /home/we/norns/lua/core/clock.lua /home/we/norns/lua/core/midi.lua /home/we/norns/lua/core/grid.lua; do
   [ -e "$f" ] && { sha256sum "$f"; stat -c '%n %s %y' "$f"; } || echo "MISSING: $f"
 done
