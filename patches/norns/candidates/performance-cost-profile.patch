@@ -1,0 +1,246 @@
+diff --git a/matron/wscript b/matron/wscript
+--- a/matron/wscript
++++ b/matron/wscript
+@@ -3,6 +3,7 @@
+ def build(bld):
+     matron_sources = [
+         'src/emu_bridge.c',
++        'src/emu_cost.c',
+         'src/emu_midi_schedule.c',
+         'src/config.c',
+         'src/device/device.c',
+diff --git a/matron/src/weaver.c b/matron/src/weaver.c
+--- a/matron/src/weaver.c
++++ b/matron/src/weaver.c
+@@ -24,6 +24,7 @@
+ 
+ // norns
+ #include "clock.h"
++#include "emu_cost.h"
+ #include "clocks/clock_crow.h"
+ #include "clocks/clock_internal.h"
+ #include "clocks/clock_link.h"
+@@ -619,6 +620,9 @@
+     lua_register_norns("platform_shield", &_platform_shield);
+ 
+     if (emu_enabled()) lua_register_norns("emu_report", &emu_report);
++
++    // optional emulator performance profile: wraps native bindings before naming the table
++    emu_cost_install(lvm);
+ 
+     // name global extern table
+     lua_setglobal(lvm, "_norns");
+diff --git a/matron/src/emu_cost.h b/matron/src/emu_cost.h
+new file mode 100644
+--- /dev/null
++++ b/matron/src/emu_cost.h
+@@ -0,0 +1,8 @@
++#pragma once
++
++#include <lua.h>
++
++// Opt-in execution-cost profile (NORNS_EMU_COST_PROFILE). Without that
++// environment variable this installs nothing and the runtime is unchanged.
++// Expects the _norns extern table on top of the stack.
++void emu_cost_install(lua_State *l);
+diff --git a/matron/src/emu_cost.c b/matron/src/emu_cost.c
+new file mode 100644
+--- /dev/null
++++ b/matron/src/emu_cost.c
+@@ -0,0 +1,196 @@
++// Emulator execution-cost profile.
++//
++// Models a slower device by consuming extra CPU on the Lua thread in
++// proportion to measured host work. Lua execution (everything on the Lua
++// thread outside the wrapped native bindings) is scaled by lua_factor;
++// native MIDI, grid/arc and screen bindings are scaled by their own factors
++// plus an optional fixed cost per call. Debt is repaid by busy-waiting on the
++// same thread so the cost also appears as CPU load and blocks later work,
++// as it would on the device.
++//
++// NORNS_EMU_COST_PROFILE="lua_factor=19;midi_factor=2.7;midi_fixed_us=0;
++//   grid_factor=5;grid_fixed_us=0;screen_factor=3.8;screen_fixed_us=0;
++//   hook_instructions=200;pay_threshold_us=20"
++
++#ifndef _GNU_SOURCE
++#define _GNU_SOURCE
++#endif
++#include <lauxlib.h>
++#include <lua.h>
++#include <pthread.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <time.h>
++
++#include "emu_cost.h"
++
++enum { COST_MIDI, COST_GRID, COST_SCREEN, COST_KINDS };
++static const char *kind_names[COST_KINDS] = {"midi", "grid", "screen"};
++
++static double lua_factor = 1.0;
++static double factor[COST_KINDS] = {1.0, 1.0, 1.0};
++static double fixed_ns[COST_KINDS];
++static int hook_instructions = 200;
++static long long pay_threshold_ns = 20000;
++
++static pthread_t owner;
++static long long last_ns;
++static double debt_ns;
++static long long lua_ns, native_ns[COST_KINDS], calls[COST_KINDS], paid_ns, hooks, pays;
++
++static long long cpu_now(void) {
++    struct timespec ts;
++    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts);
++    return (long long)ts.tv_sec * 1000000000LL + ts.tv_nsec;
++}
++
++static void account_lua(long long now) {
++    long long elapsed = now - last_ns;
++    if (elapsed > 0) {
++        lua_ns += elapsed;
++        debt_ns += (double)elapsed * (lua_factor - 1.0);
++    }
++}
++
++static void settle(void) {
++    long long now = cpu_now();
++    if (debt_ns >= (double)pay_threshold_ns) {
++        long long target = now + (long long)debt_ns;
++        long long spun = now;
++        while (spun < target) {
++            spun = cpu_now();
++        }
++        paid_ns += spun - now;
++        debt_ns -= (double)(spun - now);
++        pays++;
++    }
++    last_ns = cpu_now();
++}
++
++static void hook(lua_State *l, lua_Debug *ar) {
++    (void)l;
++    (void)ar;
++    if (!pthread_equal(pthread_self(), owner)) {
++        return;
++    }
++    hooks++;
++    account_lua(cpu_now());
++    settle();
++}
++
++static int wrapped(lua_State *l) {
++    lua_CFunction original = (lua_CFunction)lua_touserdata(l, lua_upvalueindex(1));
++    int kind = (int)lua_tointeger(l, lua_upvalueindex(2));
++    if (!pthread_equal(pthread_self(), owner)) {
++        return original(l);
++    }
++    long long before = cpu_now();
++    account_lua(before);
++    int results = original(l);
++    long long after = cpu_now();
++    native_ns[kind] += after - before;
++    calls[kind]++;
++    debt_ns += (double)(after - before) * (factor[kind] - 1.0) + fixed_ns[kind];
++    settle();
++    return results;
++}
++
++static int stats(lua_State *l) {
++    lua_newtable(l);
++    lua_pushnumber(l, lua_factor);
++    lua_setfield(l, -2, "lua_factor");
++    lua_pushinteger(l, lua_ns);
++    lua_setfield(l, -2, "lua_ns");
++    lua_pushinteger(l, paid_ns);
++    lua_setfield(l, -2, "paid_ns");
++    lua_pushnumber(l, debt_ns);
++    lua_setfield(l, -2, "debt_ns");
++    lua_pushinteger(l, hooks);
++    lua_setfield(l, -2, "hooks");
++    lua_pushinteger(l, pays);
++    lua_setfield(l, -2, "pays");
++    for (int k = 0; k < COST_KINDS; k++) {
++        char key[32];
++        snprintf(key, sizeof key, "%s_native_ns", kind_names[k]);
++        lua_pushinteger(l, native_ns[k]);
++        lua_setfield(l, -2, key);
++        snprintf(key, sizeof key, "%s_calls", kind_names[k]);
++        lua_pushinteger(l, calls[k]);
++        lua_setfield(l, -2, key);
++        snprintf(key, sizeof key, "%s_factor", kind_names[k]);
++        lua_pushnumber(l, factor[k]);
++        lua_setfield(l, -2, key);
++    }
++    return 1;
++}
++
++static int classify(const char *name) {
++    if (strcmp(name, "midi_send") == 0) return COST_MIDI;
++    if (strncmp(name, "grid_", 5) == 0 || strncmp(name, "arc_", 4) == 0 || strncmp(name, "monome_", 7) == 0) return COST_GRID;
++    if (strncmp(name, "screen_", 7) == 0) return COST_SCREEN;
++    return -1;
++}
++
++static int parse(const char *text) {
++    char *copy = strdup(text), *save = NULL;
++    int ok = copy != NULL;
++    for (char *item = copy ? strtok_r(copy, ";", &save) : NULL; item; item = strtok_r(NULL, ";", &save)) {
++        char *eq = strchr(item, '=');
++        if (!eq) { ok = 0; break; }
++        *eq = 0;
++        char *end = NULL;
++        double value = strtod(eq + 1, &end);
++        if (end == eq + 1 || *end != 0 || value < 0) { ok = 0; break; }
++        if (strcmp(item, "lua_factor") == 0 && value >= 1) lua_factor = value;
++        else if (strcmp(item, "midi_factor") == 0 && value >= 1) factor[COST_MIDI] = value;
++        else if (strcmp(item, "grid_factor") == 0 && value >= 1) factor[COST_GRID] = value;
++        else if (strcmp(item, "screen_factor") == 0 && value >= 1) factor[COST_SCREEN] = value;
++        else if (strcmp(item, "midi_fixed_us") == 0) fixed_ns[COST_MIDI] = value * 1000.0;
++        else if (strcmp(item, "grid_fixed_us") == 0) fixed_ns[COST_GRID] = value * 1000.0;
++        else if (strcmp(item, "screen_fixed_us") == 0) fixed_ns[COST_SCREEN] = value * 1000.0;
++        else if (strcmp(item, "hook_instructions") == 0 && value >= 1 && value <= 100000) hook_instructions = (int)value;
++        else if (strcmp(item, "pay_threshold_us") == 0 && value <= 10000) pay_threshold_ns = (long long)(value * 1000.0);
++        else { ok = 0; break; }
++    }
++    free(copy);
++    return ok;
++}
++
++void emu_cost_install(lua_State *l) {
++    const char *profile = getenv("NORNS_EMU_COST_PROFILE");
++    if (!profile || !*profile) {
++        return;
++    }
++    if (!parse(profile)) {
++        fprintf(stderr, "emu_cost: invalid NORNS_EMU_COST_PROFILE: %s\n", profile);
++        exit(2);
++    }
++    owner = pthread_self();
++    int table = lua_gettop(l);
++    const char *names[512];
++    int count = 0;
++    lua_pushnil(l);
++    while (lua_next(l, table) != 0 && count < 512) {
++        if (lua_type(l, -2) == LUA_TSTRING && lua_iscfunction(l, -1) && classify(lua_tostring(l, -2)) >= 0) {
++            names[count++] = lua_tostring(l, -2); // keys are interned and stay referenced by the table
++        }
++        lua_pop(l, 1);
++    }
++    for (int i = 0; i < count; i++) {
++        lua_getfield(l, table, names[i]);
++        lua_CFunction original = lua_tocfunction(l, -1);
++        lua_pop(l, 1);
++        lua_pushlightuserdata(l, (void *)original);
++        lua_pushinteger(l, classify(names[i]));
++        lua_pushcclosure(l, wrapped, 2);
++        lua_setfield(l, table, names[i]);
++    }
++    lua_pushcfunction(l, stats);
++    lua_setfield(l, table, "emu_cost_stats");
++    last_ns = cpu_now();
++    lua_sethook(l, hook, LUA_MASKCOUNT, hook_instructions);
++    fprintf(stderr, "emu_cost: enabled lua_factor=%.3f midi=%.3f+%.0fns grid=%.3f+%.0fns screen=%.3f+%.0fns hook=%d wrapped=%d\n",
++            lua_factor, factor[COST_MIDI], fixed_ns[COST_MIDI], factor[COST_GRID], fixed_ns[COST_GRID], factor[COST_SCREEN],
++            fixed_ns[COST_SCREEN], hook_instructions, count);
++}

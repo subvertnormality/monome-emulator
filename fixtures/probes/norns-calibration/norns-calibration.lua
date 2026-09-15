@@ -41,8 +41,20 @@ local function encode(value)
   return "null"
 end
 
+local function cost_stats()
+  -- Present only in the emulator's opt-in performance-profile runtime.
+  if _norns.emu_cost_stats then return _norns.emu_cost_stats() end
+  return nil
+end
+
+local block_stats_before
+
 local function record(name, value)
   value.name = name
+  if block_stats_before then
+    value.cost_stats_before, value.cost_stats_after = block_stats_before, cost_stats()
+  end
+  block_stats_before = cost_stats()
   results.blocks[#results.blocks + 1] = value
   print("NORNS_CALIBRATION_BLOCK " .. name)
 end
@@ -255,6 +267,7 @@ local function run_all()
   clock.sleep(SETTLE_S)
   local previous_tempo = clock.get_tempo()
   results.started = now()
+  block_stats_before = cost_stats()
   results.previous_tempo = previous_tempo
   results.lua_version = _VERSION
   local ok, err = pcall(function()

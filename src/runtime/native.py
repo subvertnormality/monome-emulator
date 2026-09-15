@@ -59,6 +59,8 @@ class NativeBackend:
         verify_install(install)
         if config.get('jack_period',1024)>install.get('experimental',{}).get('max_jack_period',1024):
             raise ContractError('unsupported','Selected runtime has no identified support for this JACK period')
+        if config.get('cost_profile') is not None and not any(item['path']=='matron/src/emu_cost.c' for item in install.get('experimental',{}).get('files',[])):
+            raise ContractError('unsupported','Selected runtime has no identified performance cost profile support')
         from devices.arc import ArcInput
         self.arc_input=ArcInput(config.get('arc_enabled',False))
         self.arc_available=install.get('experimental',{}).get('arc',{}).get('profile')=='virtual-arc4'
@@ -195,12 +197,14 @@ class NativeBackend:
         self.env.pop('NORNS_EMU_SCLANG_PORT',None)
         if self.config['runtime_identity'].get('experimental',{}).get('status')=='audio-feasibility-only':
             self.env['NORNS_EMU_SCLANG_PORT']=str(self.ports['sclang'])
+        self.env.pop('NORNS_EMU_COST_PROFILE',None)
+        if self.config.get('cost_profile') is not None:self.env['NORNS_EMU_COST_PROFILE']=self.config['cost_profile']
         self.env.pop('NORNS_EMU_CLOCK',None)
         if self.clock_mode!='real-time':self.env.update(NORNS_EMU_CLOCK=self.clock_mode,TZ='UTC')
         if self.config.get('random_seed') is not None:self.env['NORNS_EMU_RANDOM_SEED']=str(self.config['random_seed'])
         write_json(self.directory/'native-config.json',dict(script=str(entry),mapped=str(self.mapped_entry),code_root=str(code),
             ports=self.ports,midi=self.midi_config,jack_server=self.env['JACK_DEFAULT_SERVER'],enabled_mods=mods,runtime=str(self.native),random_seed=self.config.get('random_seed'),clock_mode=self.clock_mode,crow_enabled=self.config.get('crow_enabled',True),
-            jack_profile=dict(driver='dummy',rate=48000,period=self.config.get('jack_period',1024),realtime=False,clock_source='system')))
+            jack_profile=dict(driver='dummy',rate=48000,period=self.config.get('jack_period',1024),realtime=False,clock_source='system'),cost_profile=self.config.get('cost_profile')))
     def launch(self,name,args,bridge=False):
         logfile=open(self.directory/(name+'.log'),'w'); self.logs.append(logfile)
         env=dict(self.env)
