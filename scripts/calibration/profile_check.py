@@ -67,6 +67,24 @@ def main():
                 rows.append(dict(block=block, metric=metric, device=device, emulator=emulator, ratio=ratio, passed=ok))
             if not ok:
                 failures.append('%s.%s outside bounds' % (block, metric))
+    composite = check.get('kernel_composite')
+    if composite:
+        import math
+        total, weight = 0.0, 0.0
+        detail = []
+        for block, device, w in zip(composite['blocks'], composite['device_wall_ms_median'], composite['weights']):
+            values = [s[block]['wall_ms_median'] for s in summaries if block in s]
+            if not values or w <= 0:
+                continue
+            ratio = device / statistics.median(values)
+            detail.append(dict(block=block, ratio=ratio, weight=w))
+            total += w * math.log(ratio)
+            weight += w
+        value = math.exp(total / weight) if weight else float('nan')
+        ok = weight > 0 and low <= value <= high
+        rows.append(dict(block='kernel_composite', metric='weighted_geometric_ratio', device=1.0, emulator=value, ratio=value, passed=ok, kernels=detail))
+        if not ok:
+            failures.append('kernel composite outside bounds')
     verdict = dict(schema_version=1, profile_id=profile['profile_id'], profile_version=profile['version'], probe_run=str(Path(args.probe_run).resolve()),
                    ratio_bounds=[low, high], calibrations=calibrations, metrics=rows, failures=failures, passed=not failures)
     for row in rows:

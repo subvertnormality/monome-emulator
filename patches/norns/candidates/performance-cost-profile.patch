@@ -85,7 +85,7 @@ diff --git a/matron/src/emu_cost.c b/matron/src/emu_cost.c
 new file mode 100644
 --- /dev/null
 +++ b/matron/src/emu_cost.c
-@@ -0,0 +1,463 @@
+@@ -0,0 +1,524 @@
 +// Emulator execution-cost profile.
 +//
 +// Models a slower device by consuming extra time on the Lua thread in
@@ -108,9 +108,9 @@ new file mode 100644
 +// (host_wait_ns, preempted_events) so a calibration check can reject a noisy
 +// host instead of silently mis-modelling it.
 +//
-+// NORNS_EMU_COST_PROFILE="lua_targets_us=82410:110417:182008:77344;
-+//   reference_lua_factor=18.9;calibration_bias=0.932;midi_fixed_us=-2.9;grid_fixed_us=-2.36;
-+//   screen_fixed_us=-4"   (or lua_factor=<n> for a fixed, host-relative factor)
++// NORNS_EMU_COST_PROFILE="lua_targets_us=<six device kernel medians>;lua_kernel_weights=<six>;
++//   reference_host_us=<six>;reference_lua_factor=<n>;calibration_bias=<n>;midi_call_us=<n>;
++//   grid_call_us=<n>;screen_call_us=<n>"   (or lua_factor=<n> for a fixed, host-relative factor)
 +
 +#ifndef _GNU_SOURCE
 +#define _GNU_SOURCE
@@ -130,23 +130,53 @@ new file mode 100644
 +enum { COST_MIDI, COST_GRID, COST_SCREEN, COST_KINDS, COST_TIME = COST_KINDS };
 +static const char *kind_names[COST_KINDS] = {"midi", "grid", "screen"};
 +
-+#define KERNELS 4
-+static const char *kernel_names[KERNELS] = {"lua_arith", "lua_table", "lua_string", "lua_calls"};
-+// Byte-identical to the generic calibration probe's pure-Lua kernels.
++#define KERNELS 6
++static const char *kernel_names[KERNELS] = {"lua_arith", "lua_table", "lua_string", "lua_calls", "lua_memory_access", "lua_memory_churn"};
++// Same statements as the generic calibration probe's kernels. Each chunk
++// performs untimed setup and returns the function that is timed.
 +static const char *kernel_sources[KERNELS] = {
++    "return function()\n"
 +    "local x, y = 0, 1.5\n"
-+    "for i = 1, 200000 do x = (x + i * 3) % 1000003; y = y * 1.0000001 + (i & 7) end",
++    "for i = 1, 200000 do x = (x + i * 3) % 1000003; y = y * 1.0000001 + (i & 7) end\n"
++    "end",
++    "return function()\n"
 +    "local keep = {}\n"
 +    "for i = 1, 20000 do\n"
 +    "  local t = {i, i + 1, name = \"n\", step = i % 16}\n"
 +    "  keep[(i % 64) + 1] = t\n"
 +    "  t[#t + 1] = i\n"
++    "end\n"
 +    "end",
++    "return function()\n"
 +    "local s\n"
-+    "for i = 1, 20000 do s = string.format(\"%d:%s:%.2f\", i, \"ch\", i / 7) end",
++    "for i = 1, 20000 do s = string.format(\"%d:%s:%.2f\", i, \"ch\", i / 7) end\n"
++    "end",
++    "return function()\n"
 +    "local function f(a, b) return a + b end\n"
 +    "local acc = 0\n"
-+    "for i = 1, 200000 do acc = f(acc, i) end",
++    "for i = 1, 200000 do acc = f(acc, i) end\n"
++    "end",
++    "local n = 262144\n"
++    "local big = {}\n"
++    "for i = 1, n do big[i] = {i, i + i} end\n"
++    "return function()\n"
++    "  local acc, j = 0, 1\n"
++    "  for i = 1, 400000 do\n"
++    "    j = (j * 1103515245 + 12345) % n + 1\n"
++    "    local t = big[j]\n"
++    "    acc = acc + t[1] + t[2]\n"
++    "  end\n"
++    "  return acc\n"
++    "end",
++    "local n = 262144\n"
++    "local big = {}\n"
++    "for i = 1, n do big[i] = {i} end\n"
++    "return function()\n"
++    "  for i = 1, 60000 do\n"
++    "    local slot = big[(i * 7919) % n + 1]\n"
++    "    slot[2] = {i, \"x\"}\n"
++    "  end\n"
++    "end",
 +};
 +
 +static int enabled;
@@ -154,7 +184,9 @@ new file mode 100644
 +static double reference_lua_factor = 0.0;
 +static double lua_targets_us[KERNELS];
 +// Reference host's calibration kernel times: normalise the consistency check.
-+static double reference_host_us[KERNELS] = {1.0, 1.0, 1.0, 1.0};
++static double reference_host_us[KERNELS] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
++// Geometric weights of the per-kernel device/host ratios (normalised).
++static double kernel_weights[KERNELS] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 +static int have_targets;
 +static int calibrated;
 +static lua_State *main_state;
@@ -168,6 +200,9 @@ new file mode 100644
 +static double reference_factor[COST_KINDS] = {1.0, 1.0, 1.0};
 +static double factor[COST_KINDS] = {1.0, 1.0, 1.0};
 +static double fixed_ns[COST_KINDS];
++// Absolute device cost per binding call; replaces host-scaled native time.
++static double call_ns[COST_KINDS];
++static int have_call[COST_KINDS];
 +static int hook_instructions = 0;
 +static long long pay_threshold_ns = 2000000;
 +
@@ -233,8 +268,9 @@ new file mode 100644
 +        for (int k = 0; k < COST_KINDS; k++) {
 +            factor[k] = reference_factor[k] * scale;
 +        }
-+        fprintf(stderr, "emu_cost: calibrated lua_factor=%.3f host_us=%.0f:%.0f:%.0f:%.0f spread=%.3f attempts=%d scale=%.3f\n", lua_factor,
-+                host_kernel_us[0], host_kernel_us[1], host_kernel_us[2], host_kernel_us[3], calibration_spread, calibration_attempts, scale);
++        fprintf(stderr, "emu_cost: calibrated lua_factor=%.3f host_us=%.0f:%.0f:%.0f:%.0f:%.0f:%.0f spread=%.3f attempts=%d scale=%.3f\n",
++                lua_factor, host_kernel_us[0], host_kernel_us[1], host_kernel_us[2], host_kernel_us[3], host_kernel_us[4], host_kernel_us[5],
++                calibration_spread, calibration_attempts, scale);
 +    }
 +    active = 1;
 +    events++;
@@ -294,7 +330,11 @@ new file mode 100644
 +    long long after = wall_now();
 +    native_ns[kind] += after - before;
 +    calls[kind]++;
-+    debt_ns += (double)(after - before) * (factor[kind] - 1.0) + fixed_ns[kind];
++    if (have_call[kind]) {
++        debt_ns += call_ns[kind] - (double)(after - before);
++    } else {
++        debt_ns += (double)(after - before) * (factor[kind] - 1.0) + fixed_ns[kind];
++    }
 +    mark_ns = after;
 +    return results;
 +}
@@ -338,6 +378,8 @@ new file mode 100644
 +        set_number(l, key, factor[k]);
 +        snprintf(key, sizeof key, "%s_fixed_ns", kind_names[k]);
 +        set_number(l, key, fixed_ns[k]);
++        snprintf(key, sizeof key, "%s_call_ns", kind_names[k]);
++        set_number(l, key, have_call[k] ? call_ns[k] : -1.0);
 +    }
 +    for (int k = 0; k < KERNELS; k++) {
 +        char key[40];
@@ -363,7 +405,7 @@ new file mode 100644
 +    for (char *item = copy ? strtok_r(copy, ":", &save) : NULL; item; item = strtok_r(NULL, ":", &save)) {
 +        char *end = NULL;
 +        double value = strtod(item, &end);
-+        if (end == item || *end != 0 || value <= 0 || count >= KERNELS) {
++        if (end == item || *end != 0 || value < 0 || count >= KERNELS) {
 +            free(copy);
 +            return 0;
 +        }
@@ -393,9 +435,13 @@ new file mode 100644
 +            ok = parse_list(raw, reference_host_us);
 +            continue;
 +        }
++        if (strcmp(item, "lua_kernel_weights") == 0) {
++            ok = parse_list(raw, kernel_weights);
++            continue;
++        }
 +        char *end = NULL;
 +        double value = strtod(raw, &end);
-+        int signed_item = strstr(item, "_fixed_us") != NULL;
++        int signed_item = strstr(item, "_fixed_us") != NULL || strstr(item, "_call_us") != NULL;
 +        if (end == raw || *end != 0 || (value < 0 && !signed_item) || value < -10000 || value > 10000000) ok = 0;
 +        else if (strcmp(item, "lua_factor") == 0 && value >= 1) lua_factor = value, fixed_factor = 1;
 +        else if (strcmp(item, "reference_lua_factor") == 0 && value >= 1) reference_lua_factor = value;
@@ -405,6 +451,9 @@ new file mode 100644
 +        else if (strcmp(item, "midi_fixed_us") == 0) fixed_ns[COST_MIDI] = value * 1000.0;
 +        else if (strcmp(item, "grid_fixed_us") == 0) fixed_ns[COST_GRID] = value * 1000.0;
 +        else if (strcmp(item, "screen_fixed_us") == 0) fixed_ns[COST_SCREEN] = value * 1000.0;
++        else if (strcmp(item, "midi_call_us") == 0) call_ns[COST_MIDI] = value * 1000.0, have_call[COST_MIDI] = 1;
++        else if (strcmp(item, "grid_call_us") == 0) call_ns[COST_GRID] = value * 1000.0, have_call[COST_GRID] = 1;
++        else if (strcmp(item, "screen_call_us") == 0) call_ns[COST_SCREEN] = value * 1000.0, have_call[COST_SCREEN] = 1;
 +        else if (strcmp(item, "hook_instructions") == 0 && value <= 100000) hook_instructions = (int)value;
 +        else if (strcmp(item, "pay_threshold_us") == 0 && value <= 10000) pay_threshold_ns = (long long)(value * 1000.0);
 +        else if (strcmp(item, "calibration_repeats") == 0 && value >= 3 && value <= 51) calibration_repeats = (int)value;
@@ -429,9 +478,17 @@ new file mode 100644
 +static int calibrate_once(lua_State *scratch) {
 +    int top = lua_gettop(scratch);
 +    long long samples[51];
-+    double log_sum = 0, low = 1e30, high = 0;
++    double log_sum = 0, weight_sum = 0, low = 1e30, high = 0;
 +    for (int k = 0; k < KERNELS; k++) {
-+        if (luaL_loadstring(scratch, kernel_sources[k]) != LUA_OK) {
++        if (kernel_weights[k] <= 0) {
++            continue;
++        }
++        if (lua_targets_us[k] <= 0 || reference_host_us[k] <= 0) {
++            lua_settop(scratch, top);
++            return 0;
++        }
++        if (luaL_loadstring(scratch, kernel_sources[k]) != LUA_OK || lua_pcall(scratch, 0, 1, 0) != LUA_OK ||
++            !lua_isfunction(scratch, -1)) {
 +            lua_settop(scratch, top);
 +            return 0;
 +        }
@@ -452,12 +509,16 @@ new file mode 100644
 +        double relative = reference_host_us[k] / host_kernel_us[k];
 +        low = relative < low ? relative : low;
 +        high = relative > high ? relative : high;
-+        log_sum += log(ratio);
++        log_sum += kernel_weights[k] * log(ratio);
++        weight_sum += kernel_weights[k];
 +    }
 +    lua_gc(scratch, LUA_GCCOLLECT, 0);
 +    lua_settop(scratch, top);
 +    calibration_spread = high / low;
-+    lua_factor = exp(log_sum / KERNELS) * calibration_bias;
++    if (weight_sum <= 0) {
++        return 0;
++    }
++    lua_factor = exp(log_sum / weight_sum) * calibration_bias;
 +    if (calibration_spread > 1.5) {
 +        return -1;
 +    }
