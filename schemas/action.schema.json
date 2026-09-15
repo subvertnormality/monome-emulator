@@ -27,6 +27,7 @@
         {"type":"object","properties":{"type":{"const":"arc_key"},"n":{"type":"integer","minimum":1,"maximum":4},"state":{"type":"integer","minimum":0,"maximum":1}},"required":["type","n","state"],"additionalProperties":false},
         {"type":"object","properties":{"type":{"const":"arc_connection"},"connected":{"type":"boolean"}},"required":["type","connected"],"additionalProperties":false},
         {"type":"object","properties":{"type":{"const":"runtime_stall"},"milliseconds":{"type":"integer","minimum":1,"maximum":1000}},"required":["type","milliseconds"],"additionalProperties":false},
+        {"type":"object","properties":{"type":{"const":"runtime_lua_load"},"iterations":{"type":"integer","minimum":1,"maximum":100000000}},"required":["type","iterations"],"additionalProperties":false},
         {
           "type": "object",
           "properties": {

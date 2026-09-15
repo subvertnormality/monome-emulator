@@ -59,7 +59,8 @@ class NativeBackend:
         verify_install(install)
         if config.get('jack_period',1024)>install.get('experimental',{}).get('max_jack_period',1024):
             raise ContractError('unsupported','Selected runtime has no identified support for this JACK period')
-        if config.get('cost_profile') is not None and not any(item['path']=='matron/src/emu_cost.c' for item in install.get('experimental',{}).get('files',[])):
+        self.lua_load_supported=any(item['path']=='matron/src/emu_cost.c' for item in install.get('experimental',{}).get('files',[]))
+        if (config.get('cost_profile') is not None or config.get('lua_profile_instructions')) and not self.lua_load_supported:
             raise ContractError('unsupported','Selected runtime has no identified performance cost profile support')
         from devices.arc import ArcInput
         self.arc_input=ArcInput(config.get('arc_enabled',False))
@@ -198,6 +199,9 @@ class NativeBackend:
         if self.config['runtime_identity'].get('experimental',{}).get('status')=='audio-feasibility-only':
             self.env['NORNS_EMU_SCLANG_PORT']=str(self.ports['sclang'])
         self.env.pop('NORNS_EMU_COST_PROFILE',None)
+        self.env.pop('NORNS_EMU_LUA_PROFILE',None)
+        if self.config.get('lua_profile_instructions'):
+            self.env['NORNS_EMU_LUA_PROFILE']='output=%s;instructions=%d'%(self.directory/'lua-profile.json',self.config['lua_profile_instructions'])
         if self.config.get('cost_profile') is not None:self.env['NORNS_EMU_COST_PROFILE']=self.config['cost_profile']
         self.env.pop('NORNS_EMU_CLOCK',None)
         if self.clock_mode!='real-time':self.env.update(NORNS_EMU_CLOCK=self.clock_mode,TZ='UTC')
@@ -557,6 +561,7 @@ class NativeBackend:
                 seconds,nanoseconds=divmod(action['nanoseconds'],1000000000)
                 send(8,seconds,nanoseconds)
             elif kind=='runtime_stall': send(13,action['milliseconds'])
+            elif kind=='runtime_lua_load': send(28,action['iterations'])
             elif kind=='release_all':
                 for held in list(self.held.values()):
                     release=dict(held,state=0); self.query({'action':release},deadline=deadline)
@@ -577,7 +582,7 @@ class NativeBackend:
             result['state'].update(arc=[ring.copy() for ring in self.arc],arc_device=dict(self.arc_device))
             result['state']['clock']=dict(mode=self.clock_mode,logical_ns=self.logical_ns if self.clock_mode!='real-time' else None,admitted=self.clock_mode=='real-time')
             result['state']['midi_input_schedule']=copy.deepcopy(self.input_schedule)
-            if payload.get('action',{}).get('type') in ('key','enc','grid','grid_connection','midi_connection','midi','advance','arc_delta','arc_key','arc_connection','runtime_stall'):
+            if payload.get('action',{}).get('type') in ('key','enc','grid','grid_connection','midi_connection','midi','advance','arc_delta','arc_key','arc_connection','runtime_stall','runtime_lua_load'):
                 result['native_ack']=dict(self.last_native_ack)
         # A Windows-mounted filesystem can pause for tens of milliseconds.
         # Never hold the native event reader's condition during artifact I/O.
