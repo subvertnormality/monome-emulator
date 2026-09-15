@@ -59,8 +59,9 @@ class DefaultRuntimeUnchanged(unittest.TestCase):
     def test_native_profile_is_inert_without_environment(self):
         text = PATCH.read_text()
         self.assertIn('if (!profile || !*profile) {\n+        return;', text)
-        self.assertIn('void emu_cost_event_begin(void) {\n+    if (!enabled) {', text)
-        self.assertIn('if (hook_instructions > 0) {', text)
+        self.assertIn('void emu_cost_event_begin(void) {\n+    dispatching = 1;\n+    if (!enabled) {', text)
+        self.assertIn('if (sampling && *sampling) {', text)
+        self.assertIn('if (hook_instructions > 0 && !profile_instructions) {', text)
 
     def test_native_environment_is_set_only_from_explicit_config(self):
         source = (ROOT / 'src/runtime/native.py').read_text()
