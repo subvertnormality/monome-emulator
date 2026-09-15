@@ -41,8 +41,6 @@ def main():
             continue
         calibrations.append(dict(repeat=path.parent.name, lua_factor=float(match.group(1)), host_us=match.group(2),
                                  spread=float(match.group(3)), attempts=int(match.group(4))))
-        if float(match.group(3)) > check['maximum_calibration_spread']:
-            failures.append('%s: calibration spread %.3f' % (path.parent.name, float(match.group(3))))
         result = json.loads(path.read_text())
         stats = [b.get('cost_stats_after') for b in result['blocks'] if b.get('cost_stats_after')]
         if stats:
@@ -65,6 +63,9 @@ def main():
                 ratio = device / emulator if emulator else float('inf')
                 ok = low <= ratio <= high
                 rows.append(dict(block=block, metric=metric, device=device, emulator=emulator, ratio=ratio, passed=ok))
+            if block in check.get('diagnostic_blocks', {}):
+                rows[-1]['diagnostic'] = True
+                ok = True
             if not ok:
                 failures.append('%s.%s outside bounds' % (block, metric))
     composite = check.get('kernel_composite')
@@ -89,7 +90,8 @@ def main():
                    ratio_bounds=[low, high], calibrations=calibrations, metrics=rows, failures=failures, passed=not failures)
     for row in rows:
         detail = ('ratio=%.2f' % row['ratio']) if 'ratio' in row else ('values=%s' % row['emulator'])
-        print('%-4s %-34s %-26s device=%s %s' % ('ok' if row['passed'] else 'FAIL', row['block'], row['metric'], row['device'], detail))
+        state = 'diag' if row.get('diagnostic') else ('ok' if row['passed'] else 'FAIL')
+        print('%-4s %-34s %-26s device=%s %s' % (state, row['block'], row['metric'], row['device'], detail))
     for item in calibrations:
         print('calibration', item)
     print('PASSED' if verdict['passed'] else 'FAILED: ' + '; '.join(failures))

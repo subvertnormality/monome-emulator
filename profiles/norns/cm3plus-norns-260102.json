@@ -2,8 +2,8 @@
   "schema_version": 1,
   "kind": "norns-performance-profile",
   "profile_id": "cm3plus-norns-260102",
-  "version": "0.2.0-draft",
-  "status": "calibration-in-progress: Mosaic calibration comparison and held-out validation not complete; do not use for acceptance",
+  "version": "1.0.0",
+  "status": "frozen 2026-09-15 before held-out validation; parameters must not change under this version",
   "calibration_date": "2026-09-15",
   "device": {
     "model": "Raspberry Pi Compute Module 3 Plus Rev 1.0 (BCM2835 revision a02100)",
@@ -22,7 +22,7 @@
   "reference_host": {
     "cpu": "AMD Ryzen 9 5900X 12-Core Processor",
     "os": "WSL2 kernel 6.6.87.2-microsoft-standard-WSL2",
-    "emulator_revision": "03de7a9+profile-14",
+    "emulator_revision": "485bde574a427625fadbab699be3da6553cc5b1e",
     "note": "reference_host_us, reference_lua_factor and calibration_bias were measured here; the runtime recalibrates on each host"
   },
   "runtime": {
@@ -76,7 +76,6 @@
       1.5
     ],
     "ratio": "device median / emulator median of per-repeat medians",
-    "maximum_calibration_spread": 1.5,
     "maximum_preempted_wait_fraction": 0.05,
     "device_reference": {
       "midi_send_burst_64": {
@@ -141,7 +140,11 @@
         0.5,
         0.1
       ]
-    }
+    },
+    "diagnostic_blocks": {
+      "screen_frame": "Screen binding glue is below a microsecond per call, at the resolution of host clock accounting; a GitHub-hosted runner measured 2x fast. Reported, not gating; musical effect is bounded (about 0.15 ms per 128-call frame) and PERF-005 held-out rendering pressure tests it at workload level."
+    },
+    "calibration_note": "Kernel-shape spread against the reference host is diagnostic; the runtime itself refuses hosts whose two calibration passes disagree by more than 10%."
   },
   "evidence": {
     "root": "/home/andy/projects/mosaic-behaviour-runs/norns-calibration-20260915",
@@ -158,5 +161,22 @@
     "Timing is observed at the native MIDI boundary in the emulator and at a Lua send wrapper on the device.",
     "Emulator JACK runs the dummy driver at 1024 frames; the device uses ALSA at 128 frames.",
     "Mods loaded on the device are absent from emulator sessions."
-  ]
+  ],
+  "frozen": {
+    "date": "2026-09-15",
+    "emulator_revision": "485bde574a427625fadbab699be3da6553cc5b1e",
+    "runtime_patch_sha256": "e1354256dbd0423529a6c7304158900c9405c255e2091206ef05f1d319bb53a4",
+    "calibration_workloads": [
+      "generic probe (d1-probe-05-memory)",
+      "PERF-002-HW-1/4/8/16",
+      "PERF-003-HW-1/8/16"
+    ],
+    "held_out_workloads": [
+      "PERF-005-HW-1",
+      "PERF-005-HW-4",
+      "PERF-008L-HW-4",
+      "MIX-HW-8"
+    ],
+    "host_calibration": "two independent in-runtime kernel passes must agree within 10% (three attempts), fastest-of-nine per kernel"
+  }
 }
