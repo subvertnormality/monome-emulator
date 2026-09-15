@@ -12,7 +12,7 @@ from pathlib import Path
 from .protocol import ContractError
 
 SCHEMA_VERSION = 1
-KERNELS = ('lua_arith', 'lua_table', 'lua_string', 'lua_calls')
+KERNELS = ('lua_arith', 'lua_table', 'lua_string', 'lua_calls', 'lua_memory_access', 'lua_memory_churn')
 PARAMETERS = {
     'lua_factor': (1.0, 200.0),
     'reference_lua_factor': (1.0, 200.0),
@@ -22,16 +22,19 @@ PARAMETERS = {
     'midi_fixed_us': (-10000.0, 10000.0),
     'grid_fixed_us': (-10000.0, 10000.0),
     'screen_fixed_us': (-10000.0, 10000.0),
+    'midi_call_us': (-10000.0, 10000.0),
+    'grid_call_us': (-10000.0, 10000.0),
+    'screen_call_us': (-10000.0, 10000.0),
     'hook_instructions': (0.0, 100000.0),
     'pay_threshold_us': (0.0, 10000.0),
     'calibration_repeats': (3.0, 51.0),
     'calibration_bias': (0.5, 2.0),
 }
-LISTS = ('lua_targets_us', 'reference_host_us')
+LISTS = ('lua_targets_us', 'reference_host_us', 'lua_kernel_weights')
 ORDER = LISTS + tuple(PARAMETERS)
 _NUMBER = r'-?[0-9]+(?:\.[0-9]+)?'
 _ITEM = re.compile(r'^([a-z_]+)=(%s)$' % _NUMBER)
-_LIST = re.compile(r'^(lua_targets_us|reference_host_us)=([0-9]+(?:\.[0-9]+)?(?::[0-9]+(?:\.[0-9]+)?){%d})$' % (len(KERNELS) - 1))
+_LIST = re.compile(r'^(lua_targets_us|reference_host_us|lua_kernel_weights)=([0-9]+(?:\.[0-9]+)?(?::[0-9]+(?:\.[0-9]+)?){%d})$' % (len(KERNELS) - 1))
 
 
 def validate_cost_profile(text):
@@ -45,8 +48,10 @@ def validate_cost_profile(text):
             if listed.group(1) in values:
                 raise ContractError('cost_profile', 'Duplicate ' + listed.group(1))
             parsed = [float(v) for v in listed.group(2).split(':')]
-            if any(v <= 0 for v in parsed):
+            if any(v < 0 for v in parsed) or (listed.group(1) != 'lua_kernel_weights' and any(v <= 0 for v in parsed)):
                 raise ContractError('cost_profile', listed.group(1) + ' values must be positive')
+            if listed.group(1) == 'lua_kernel_weights' and not sum(parsed) > 0:
+                raise ContractError('cost_profile', 'lua_kernel_weights must not all be zero')
             values[listed.group(1)] = parsed
             continue
         match = _ITEM.match(item)

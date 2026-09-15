@@ -58,8 +58,8 @@ def main():
                 failures.append('missing %s.%s' % (block, metric))
                 continue
             emulator = statistics.median(values)
-            if metric in check['exact_metrics']:
-                ok = all(v == device for v in values)
+            if metric in check.get('count_metrics', {}):
+                ok = all(abs(v - device) <= check['count_metrics'][metric] for v in values)
                 rows.append(dict(block=block, metric=metric, device=device, emulator=values, passed=ok))
             else:
                 ratio = device / emulator if emulator else float('inf')

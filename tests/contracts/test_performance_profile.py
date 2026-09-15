@@ -14,22 +14,23 @@ class CostProfileString(unittest.TestCase):
     def test_accepts_known_bounded_values_and_signed_fixed_costs(self):
         values = validate_cost_profile('lua_factor=18.9;midi_factor=1;midi_fixed_us=-2.9;screen_fixed_us=0.5')
         self.assertEqual(values, dict(lua_factor=18.9, midi_factor=1.0, midi_fixed_us=-2.9, screen_fixed_us=0.5))
-        portable = validate_cost_profile('lua_targets_us=82410:110417.5:182008:77344;reference_lua_factor=18.9;grid_fixed_us=-2.36')
-        self.assertEqual(portable['lua_targets_us'], [82410.0, 110417.5, 182008.0, 77344.0])
+        portable = validate_cost_profile('lua_targets_us=82410:110417.5:182008:77344:1:2;lua_kernel_weights=1:1:1:1:0:2;reference_lua_factor=18.9;grid_call_us=-2.36')
+        self.assertEqual(portable['lua_targets_us'], [82410.0, 110417.5, 182008.0, 77344.0, 1.0, 2.0])
+        self.assertEqual(portable['lua_kernel_weights'], [1.0, 1.0, 1.0, 1.0, 0.0, 2.0])
 
     def test_rejects_unknown_duplicate_out_of_range_and_negative_factors(self):
         for text in ('', 'unknown=1', 'lua_factor=2;lua_factor=3', 'lua_factor=0.5', 'lua_factor=-2',
                      'grid_fixed_us=-20000', 'hook_instructions=1e3', 'lua_factor=2;', 'lua_factor = 2', 'midi_fixed_us=1',
-                     'lua_targets_us=1:2:3;reference_lua_factor=2', 'lua_targets_us=1:2:3:4', 'lua_targets_us=1:2:3:4;lua_factor=2;reference_lua_factor=2',
-                     'lua_targets_us=1:2:0:4;reference_lua_factor=2'):
+                     'lua_targets_us=1:2:3:4;reference_lua_factor=2', 'lua_targets_us=1:2:3:4:5:6', 'lua_targets_us=1:2:3:4:5:6;lua_factor=2;reference_lua_factor=2',
+                     'lua_targets_us=1:2:0:4:5:6;reference_lua_factor=2', 'lua_factor=2;lua_kernel_weights=0:0:0:0:0:0'):
             with self.subTest(text=text), self.assertRaises(ContractError):
                 validate_cost_profile(text)
 
     def test_parameters_serialize_in_stable_order(self):
         text = cost_profile_string({'screen_fixed_us': -4, 'lua_factor': 18.9, 'midi_fixed_us': -2.9})
         self.assertEqual(text, 'lua_factor=18.9;midi_fixed_us=-2.9;screen_fixed_us=-4')
-        portable = cost_profile_string({'reference_lua_factor': 18.9, 'lua_targets_us': [82410, 110417, 182008, 77344]})
-        self.assertEqual(portable, 'lua_targets_us=82410:110417:182008:77344;reference_lua_factor=18.9')
+        portable = cost_profile_string({'reference_lua_factor': 18.9, 'lua_targets_us': [82410, 110417, 182008, 77344, 5, 6]})
+        self.assertEqual(portable, 'lua_targets_us=82410:110417:182008:77344:5:6;reference_lua_factor=18.9')
 
     def test_profile_document_requires_kind_and_schema(self):
         with tempfile.TemporaryDirectory() as temp:

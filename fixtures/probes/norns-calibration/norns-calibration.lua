@@ -100,6 +100,38 @@ local function lua_kernels()
     local acc = 0
     for i = 1, 200000 do acc = f(acc, i) end
   end, {iterations = 200000})
+  -- Memory-bound kernels: a large live heap makes host and device cache and
+  -- collector behaviour dominate. Setup is untimed; the returned function is
+  -- timed. The emulator cost profile runs byte-identical kernel text.
+  local memory_access = load([[
+local n = 262144
+local big = {}
+for i = 1, n do big[i] = {i, i + i} end
+return function()
+  local acc, j = 0, 1
+  for i = 1, 400000 do
+    j = (j * 1103515245 + 12345) % n + 1
+    local t = big[j]
+    acc = acc + t[1] + t[2]
+  end
+  return acc
+end]])()
+  repeat_timed("lua_memory_access", memory_access, {iterations = 400000, live_tables = 262144})
+  memory_access = nil
+  collectgarbage("collect")
+  local memory_churn = load([[
+local n = 262144
+local big = {}
+for i = 1, n do big[i] = {i} end
+return function()
+  for i = 1, 60000 do
+    local slot = big[(i * 7919) % n + 1]
+    slot[2] = {i, "x"}
+  end
+end]])()
+  repeat_timed("lua_memory_churn", memory_churn, {iterations = 60000, live_tables = 262144})
+  memory_churn = nil
+  collectgarbage("collect")
 end
 
 -- The pass-through trace used by the physical Mosaic runner, applied to a
