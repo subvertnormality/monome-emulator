@@ -85,7 +85,7 @@ diff --git a/matron/src/emu_cost.c b/matron/src/emu_cost.c
 new file mode 100644
 --- /dev/null
 +++ b/matron/src/emu_cost.c
-@@ -0,0 +1,524 @@
+@@ -0,0 +1,529 @@
 +// Emulator execution-cost profile.
 +//
 +// Models a slower device by consuming extra time on the Lua thread in
@@ -132,6 +132,9 @@ new file mode 100644
 +
 +#define KERNELS 6
 +static const char *kernel_names[KERNELS] = {"lua_arith", "lua_table", "lua_string", "lua_calls", "lua_memory_access", "lua_memory_churn"};
++// Consistency is checked within the CPU-bound group only: cache-bound speed
++// legitimately differs between hosts, which is why it is measured.
++static const int kernel_cpu_bound[KERNELS] = {1, 1, 1, 1, 0, 1};
 +// Same statements as the generic calibration probe's kernels. Each chunk
 +// performs untimed setup and returns the function that is timed.
 +static const char *kernel_sources[KERNELS] = {
@@ -507,14 +510,16 @@ new file mode 100644
 +        host_kernel_us[k] = samples[0] / 1000.0;
 +        double ratio = lua_targets_us[k] / host_kernel_us[k];
 +        double relative = reference_host_us[k] / host_kernel_us[k];
-+        low = relative < low ? relative : low;
-+        high = relative > high ? relative : high;
++        if (kernel_cpu_bound[k]) {
++            low = relative < low ? relative : low;
++            high = relative > high ? relative : high;
++        }
 +        log_sum += kernel_weights[k] * log(ratio);
 +        weight_sum += kernel_weights[k];
 +    }
 +    lua_gc(scratch, LUA_GCCOLLECT, 0);
 +    lua_settop(scratch, top);
-+    calibration_spread = high / low;
++    calibration_spread = high > 0 ? high / low : 1.0;
 +    if (weight_sum <= 0) {
 +        return 0;
 +    }

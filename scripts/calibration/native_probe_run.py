@@ -60,6 +60,13 @@ def one_repeat(args, out, cost_profile):
         record['snapshot_errors'] = session.observe().get('errors')
     except Exception as error:
         record['errors'].append(repr(error)[:2000])
+        import re as _re
+        found = _re.search(r'logs: ([^\s\'")]+)', str(error))
+        if found and Path(found.group(1)).is_dir():
+            try:
+                shutil.copytree(found.group(1), out / 'failed-session', ignore=shutil.ignore_patterns('*.sock', 'dust'))
+            except (OSError, shutil.Error) as copy_error:
+                record['errors'].append('log copy: ' + repr(copy_error)[:300])
     finally:
         if session is not None:
             try:
@@ -67,7 +74,8 @@ def one_repeat(args, out, cost_profile):
             except Exception as error:
                 record['errors'].append('close: ' + repr(error)[:500])
         shutil.rmtree(work, ignore_errors=True)
-        matron_log = next(iter(sorted((out / 'native').rglob('matron.log'))), None) if (out / 'native').exists() else None
+        logs = sorted((out / 'native').rglob('matron.log')) if (out / 'native').exists() else sorted(out.rglob('matron.log'))
+        matron_log = logs[0] if logs else None
         if matron_log:
             text = matron_log.read_text(errors='replace')
             record['cost_profile_banner'] = [line for line in text.splitlines() if line.startswith('emu_cost:')]
