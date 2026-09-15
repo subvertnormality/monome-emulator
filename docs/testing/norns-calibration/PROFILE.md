@@ -97,5 +97,17 @@ Evidence: `/home/andy/projects/mosaic-behaviour-runs/norns-calibration-20260915`
 - **MIDI port load.** The device ran with its real ESI USB MIDI output and ten
   mods loaded; emulator sessions have neither.
 
+## Known issues
+
+- **Matron segfault at session shutdown.** In CI run 34972318611 matron exited
+  with SIGSEGV after "shutting down lua vm", once in nine Mosaic sessions on the
+  profile runtime. It happened after the measured windows had completed. The
+  profile runtime is built on the default locked runtime, which lacks the
+  optional teardown fixes (`experimental-screen-worker-shutdown`,
+  `experimental-sdl-ownership`, `experimental-jack-lifetime`) that Mosaic's
+  behaviour CI uses. This is suspected, not proven, to be that existing teardown
+  fault. The Mosaic lane records it as `teardown_error` and keeps the
+  measurements.
+
 Confirm any accepted Mosaic performance change on hardware
 (`tests/behaviour/real_norns.py performance`).
