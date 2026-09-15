@@ -37,7 +37,7 @@ jobs:
         run: |
           mkdir -p out
           docker run --rm --user root --shm-size 256m -v "$PWD/out:/out" -v "$RUNNER_TEMP/app:/app:ro" \
-            -e APP_CASES="PERF-002-HW-1 PERF-002-HW-4 PERF-002-HW-8 PERF-002-HW-16 PERF-003-HW-16" \
+            -e APP_CASES="PERF-002-HW-1 PERF-002-HW-4 PERF-002-HW-8 PERF-002-HW-16 PERF-003-HW-16 PERF-005-HW-1 PERF-005-HW-4 PERF-008L-HW-4 MIX-HW-8" \
             -e APP_LANE=tests/behaviour/perf_calibration_emulator.py \
             --entrypoint bash monome-emulator:profile-check scripts/calibration/ci_profile_check.sh
       - name: Upload evidence
