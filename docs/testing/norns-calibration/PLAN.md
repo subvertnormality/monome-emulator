@@ -1,8 +1,10 @@
 # Physical-norns performance calibration: preparation record
 
-Status 2026-09-15: preparation complete, **physical-device access paused**. Nothing
-below has been run on the norns in this task. Device facts marked *(recorded
-2026-09-13)* come from retained evidence and must be re-confirmed from the device.
+Status 2026-09-15: **superseded by [PROFILE.md](PROFILE.md)** (profile v1.0.0 frozen
+and validated). This file is the pre-access preparation record. Device access
+was later reauthorised and the device had been updated to release 260102
+(`f9fa0c5c`, the emulator pin plus two non-runtime commits), which removed the
+runtime mismatch described in findings 1–2 and decision 1.
 
 ## 1. Identities
 
