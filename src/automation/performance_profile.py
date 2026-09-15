@@ -27,10 +27,11 @@ PARAMETERS = {
     'calibration_repeats': (3.0, 51.0),
     'calibration_bias': (0.5, 2.0),
 }
-ORDER = ('lua_targets_us',) + tuple(PARAMETERS)
+LISTS = ('lua_targets_us', 'reference_host_us')
+ORDER = LISTS + tuple(PARAMETERS)
 _NUMBER = r'-?[0-9]+(?:\.[0-9]+)?'
 _ITEM = re.compile(r'^([a-z_]+)=(%s)$' % _NUMBER)
-_TARGETS = re.compile(r'^lua_targets_us=([0-9]+(?:\.[0-9]+)?(?::[0-9]+(?:\.[0-9]+)?){%d})$' % (len(KERNELS) - 1))
+_LIST = re.compile(r'^(lua_targets_us|reference_host_us)=([0-9]+(?:\.[0-9]+)?(?::[0-9]+(?:\.[0-9]+)?){%d})$' % (len(KERNELS) - 1))
 
 
 def validate_cost_profile(text):
@@ -39,14 +40,14 @@ def validate_cost_profile(text):
         raise ContractError('cost_profile', 'Cost profile must be a nonempty string of at most 512 characters')
     values = {}
     for item in text.split(';'):
-        targets = _TARGETS.match(item)
-        if targets:
-            if 'lua_targets_us' in values:
-                raise ContractError('cost_profile', 'Duplicate lua_targets_us')
-            parsed = [float(v) for v in targets.group(1).split(':')]
+        listed = _LIST.match(item)
+        if listed:
+            if listed.group(1) in values:
+                raise ContractError('cost_profile', 'Duplicate ' + listed.group(1))
+            parsed = [float(v) for v in listed.group(2).split(':')]
             if any(v <= 0 for v in parsed):
-                raise ContractError('cost_profile', 'Lua targets must be positive')
-            values['lua_targets_us'] = parsed
+                raise ContractError('cost_profile', listed.group(1) + ' values must be positive')
+            values[listed.group(1)] = parsed
             continue
         match = _ITEM.match(item)
         if not match or match.group(1) not in PARAMETERS or match.group(1) in values:
@@ -73,8 +74,8 @@ def cost_profile_string(parameters):
     for name in ORDER:
         if name not in parameters:
             continue
-        if name == 'lua_targets_us':
-            items.append('lua_targets_us=' + ':'.join(_format(v) for v in parameters[name]))
+        if name in LISTS:
+            items.append(name + '=' + ':'.join(_format(v) for v in parameters[name]))
         else:
             items.append('%s=%s' % (name, _format(parameters[name])))
     unknown = set(parameters) - set(ORDER)
