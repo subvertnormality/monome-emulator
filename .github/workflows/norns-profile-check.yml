@@ -1,0 +1,36 @@
+name: norns performance profile check
+
+on:
+  push:
+    branches: [codex/norns-performance-calibration]
+    paths:
+      - profiles/norns/**
+      - patches/norns/candidates/performance-cost-profile.patch
+      - scripts/calibration/**
+      - fixtures/probes/norns-calibration/**
+      - src/automation/performance_profile.py
+      - .github/workflows/norns-profile-check.yml
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Prepare container context
+        run: python3 scripts/container/prepare.py --output .runtime/docker-context
+      - name: Build emulator image
+        run: docker build --platform linux/amd64 --progress plain -t monome-emulator:profile-check .runtime/docker-context
+      - name: Run profile check
+        run: |
+          mkdir -p out
+          docker run --rm --user root --shm-size 256m -v "$PWD/out:/out" --entrypoint bash monome-emulator:profile-check scripts/calibration/ci_profile_check.sh
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: norns-profile-check
+          path: out
