@@ -1,0 +1,105 @@
+name: norns performance profile check
+
+on:
+  push:
+    branches: [main, codex/norns-performance-calibration]
+    paths:
+      - profiles/norns/**
+      - patches/norns/candidates/performance-cost-profile.patch
+      - scripts/build_performance_profile_runtime.py
+      - scripts/calibration/**
+      - fixtures/probes/norns-calibration/**
+      - src/automation/performance_profile.py
+      - src/automation/session.py
+      - src/runtime/native.py
+      - dependencies.lock.json
+      - patches/norns/0*.patch
+      - .github/workflows/norns-profile-check.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - profiles/norns/**
+      - patches/norns/candidates/performance-cost-profile.patch
+      - scripts/build_performance_profile_runtime.py
+      - scripts/calibration/**
+      - fixtures/probes/norns-calibration/**
+      - src/automation/performance_profile.py
+      - src/automation/session.py
+      - src/runtime/native.py
+      - dependencies.lock.json
+      - patches/norns/0*.patch
+      - .github/workflows/norns-profile-check.yml
+  workflow_dispatch:
+    inputs:
+      mosaic_ref:
+        description: Mosaic ref providing tests/behaviour/perf_calibration_emulator.py
+        default: codex/behaviour-validation
+
+env:
+  # Until the runner branch is merged into codex/behaviour-validation, pushes to the
+  # calibration branch use the runner branch.
+  MOSAIC_REF: ${{ github.event.inputs.mosaic_ref || (github.ref == 'refs/heads/codex/norns-performance-calibration' && 'codex/norns-calibration-runners') || 'codex/behaviour-validation' }}
+
+jobs:
+  profile-check:
+    # Generic and gating: the profile must reproduce the device probe on this
+    # host, and the unprofiled runtime must not. No application is involved.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build emulator image
+        run: |
+          python3 scripts/container/prepare.py --output .runtime/docker-context
+          docker build --platform linux/amd64 --progress plain -t monome-emulator:profile-check .runtime/docker-context
+      - name: Run generic profile check
+        run: |
+          mkdir -p out
+          docker run --rm --user root --shm-size 256m -v "$PWD/out:/out" \
+            --entrypoint bash monome-emulator:profile-check scripts/calibration/ci_profile_check.sh
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: norns-profile-check
+          path: out
+
+  mosaic-fixture:
+    # Opt-in application evidence: records Mosaic's musical pass/fail under the
+    # profile. Non-gating; a missing lane on the selected ref is reported.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check out opt-in application fixture
+        uses: actions/checkout@v4
+        with:
+          repository: subvertnormality/mosaic
+          ref: ${{ env.MOSAIC_REF }}
+          path: app
+          submodules: true
+      - name: Build emulator image
+        run: |
+          mv app "$RUNNER_TEMP/app"
+          test -f "$RUNNER_TEMP/app/tests/behaviour/perf_calibration_emulator.py" || { echo "::warning::$MOSAIC_REF has no perf_calibration_emulator.py"; exit 1; }
+          python3 scripts/container/prepare.py --output .runtime/docker-context
+          docker build --platform linux/amd64 --progress plain -t monome-emulator:profile-check .runtime/docker-context
+      - name: Run Mosaic calibration and held-out cases under the profile
+        run: |
+          mkdir -p out
+          docker run --rm --user root --shm-size 256m -v "$PWD/out:/out" -v "$RUNNER_TEMP/app:/app:ro" \
+            -e APP_ONLY=1 \
+            -e APP_CASES="PERF-002-HW-1 PERF-002-HW-4 PERF-002-HW-8 PERF-002-HW-16 PERF-003-HW-16 PERF-005-HW-1 PERF-005-HW-4 PERF-008L-HW-4 MIX-HW-8" \
+            -e APP_LANE=tests/behaviour/perf_calibration_emulator.py \
+            --entrypoint bash monome-emulator:profile-check scripts/calibration/ci_profile_check.sh
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mosaic-profile-fixture
+          path: out

@@ -318,6 +318,8 @@ class Application:
             raise ContractError('schedule_busy','Wait for the active native control schedule before injecting controls')
         if kind=='runtime_stall' and (self.config['backend']!='native' or client_id):
             raise ContractError('unsupported','Runtime stalls require a native automation session without browser ownership')
+        if kind=='runtime_lua_load' and (self.config['backend']!='native' or client_id or not getattr(self.backend,'lua_load_supported',False)):
+            raise ContractError('unsupported','Fixed Lua load requires a native automation session on the performance-profile runtime')
         if scheduled:action.pop('at_monotonic_ns')
         key=(kind,action.get('n'),action.get('x'),action.get('y'))
         if client_id: self.heartbeat(client_id)
@@ -450,7 +452,7 @@ def serve_application(directory,app):
                                 from .session import start
                                 fields=('script','code_root','enabled_mods','midi_config','random_seed','clock_mode',
                                     'experimental_install','crow_enabled','audio_files','audio_directory','input_timeout',
-                                    'arc_enabled','desktop_audio','startup_chime','maiden_install','listen_address','http_port','jack_period')
+                                    'arc_enabled','desktop_audio','startup_chime','maiden_install','listen_address','http_port','jack_period','cost_profile','lua_profile_instructions')
                                 options={key:app.config[key] for key in fields}
                                 options['reopen_data']=app.config['data']
                                 result=start('native',**options)

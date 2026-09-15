@@ -9,6 +9,12 @@ import subprocess
 from . import evidence,runner,session
 from .protocol import ContractError,ROOT,read_json,uid
 
+def profile_string(args):
+    if not getattr(args,'performance_profile',None):return None
+    if not args.experimental_install:raise ContractError('performance_profile','--performance-profile requires --experimental-install of the performance-profile runtime')
+    from .performance_profile import load_profile
+    return load_profile(args.performance_profile)[1]
+
 def main(argv=None):
     parser=argparse.ArgumentParser(prog='emu')
     commands=parser.add_subparsers(dest='command',required=True)
@@ -25,6 +31,7 @@ def main(argv=None):
     start.add_argument('--midi-config',help='JSON with ordered virtual port names and optional capture_limit')
     start.add_argument('--random-seed',type=int,help='Opt-in repeatable native Lua seed, including script reseeding')
     start.add_argument('--experimental-install',help='Use an identified experimental installation without promoting it')
+    start.add_argument('--performance-profile',help='Opt-in versioned norns performance profile JSON (requires its performance-profile installation)')
     start.add_argument('--no-crow',action='store_true',help='Leave the optional virtual Crow disconnected for this session')
     start.add_argument('--audio-file',action='append',default=[],help='Copy a host sample into this session audio directory; repeat for multiple files')
     start.add_argument('--audio-directory',help='Copy an audio directory tree into this isolated session, preserving relative paths')
@@ -78,8 +85,8 @@ def main(argv=None):
                 if args.script or args.code_root: raise ContractError('fixture_inputs','Choose either a fixture or external script inputs')
                 import app_fixtures
                 options=app_fixtures.launch_options(args.fixture,args.fixture_profile)
-                result=session.start(args.backend,data=args.data,midi_config=midi_config,random_seed=args.random_seed,experimental_install=args.experimental_install,crow_enabled=not args.no_crow,audio_files=args.audio_file,audio_directory=args.audio_directory,input_timeout=args.input_timeout,arc_enabled=args.arc,desktop_audio=desktop_audio,startup_chime=not args.no_startup_chime,reopen_data=args.reopen_data,maiden_install=args.maiden_install,listen_address=args.listen_address,http_port=args.http_port,jack_period=args.jack_period,**options)
-            else: result=session.start(args.backend,args.script,args.code_root,args.data,midi_config=midi_config,random_seed=args.random_seed,experimental_install=args.experimental_install,crow_enabled=not args.no_crow,audio_files=args.audio_file,audio_directory=args.audio_directory,input_timeout=args.input_timeout,arc_enabled=args.arc,desktop_audio=desktop_audio,startup_chime=not args.no_startup_chime,reopen_data=args.reopen_data,maiden_install=args.maiden_install,listen_address=args.listen_address,http_port=args.http_port,jack_period=args.jack_period)
+                result=session.start(args.backend,data=args.data,midi_config=midi_config,random_seed=args.random_seed,experimental_install=args.experimental_install,crow_enabled=not args.no_crow,audio_files=args.audio_file,audio_directory=args.audio_directory,input_timeout=args.input_timeout,arc_enabled=args.arc,desktop_audio=desktop_audio,startup_chime=not args.no_startup_chime,reopen_data=args.reopen_data,maiden_install=args.maiden_install,listen_address=args.listen_address,http_port=args.http_port,jack_period=args.jack_period,cost_profile=profile_string(args),**options)
+            else: result=session.start(args.backend,args.script,args.code_root,args.data,midi_config=midi_config,random_seed=args.random_seed,experimental_install=args.experimental_install,crow_enabled=not args.no_crow,audio_files=args.audio_file,audio_directory=args.audio_directory,input_timeout=args.input_timeout,arc_enabled=args.arc,desktop_audio=desktop_audio,startup_chime=not args.no_startup_chime,reopen_data=args.reopen_data,maiden_install=args.maiden_install,listen_address=args.listen_address,http_port=args.http_port,jack_period=args.jack_period,cost_profile=profile_string(args))
         elif args.command=='snapshot': result=session.request(args.session_id,'/snapshot')
         elif args.command=='capabilities': result=session.request(args.session_id,'/capabilities')
         elif args.command=='stop': result=session.stop(args.session_id)

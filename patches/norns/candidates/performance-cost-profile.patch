@@ -1,0 +1,840 @@
+diff --git a/matron/wscript b/matron/wscript
+--- a/matron/wscript
++++ b/matron/wscript
+@@ -3,6 +3,7 @@
+ def build(bld):
+     matron_sources = [
+         'src/emu_bridge.c',
++        'src/emu_cost.c',
+         'src/emu_midi_schedule.c',
+         'src/config.c',
+         'src/device/device.c',
+diff --git a/matron/src/weaver.c b/matron/src/weaver.c
+--- a/matron/src/weaver.c
++++ b/matron/src/weaver.c
+@@ -24,6 +24,7 @@
+ 
+ // norns
+ #include "clock.h"
++#include "emu_cost.h"
+ #include "clocks/clock_crow.h"
+ #include "clocks/clock_internal.h"
+ #include "clocks/clock_link.h"
+@@ -619,6 +620,9 @@
+     lua_register_norns("platform_shield", &_platform_shield);
+ 
+     if (emu_enabled()) lua_register_norns("emu_report", &emu_report);
++
++    // optional emulator performance profile: wraps native bindings before naming the table
++    emu_cost_install(lvm);
+ 
+     // name global extern table
+     lua_setglobal(lvm, "_norns");
+diff --git a/matron/src/events.c b/matron/src/events.c
+--- a/matron/src/events.c
++++ b/matron/src/events.c
+@@ -11,6 +11,7 @@
+ #include "battery.h"
+ #include "device_monome.h"
+ #include "events.h"
++#include "emu_cost.h"
+ #include "oracle.h"
+ #include "stat.h"
+ #include "weaver.h"
+@@ -194,7 +195,9 @@
+         ev = evq_pop();
+         pthread_mutex_unlock(&evq.lock);
+         if (ev != NULL) {
++            emu_cost_event_begin();
+             handle_event(ev);
++            emu_cost_event_end();
+         }
+     }
+ }
+@@ -387,7 +390,9 @@
+         }
+         pthread_mutex_unlock(&evq.lock);
+         if (ev != NULL) {
++            emu_cost_event_begin();
+             handle_event(ev);
+-        }
+-    }
+-}
++            emu_cost_event_end();
++        }
++    }
++}
+diff --git a/matron/src/emu_bridge.c b/matron/src/emu_bridge.c
+--- a/matron/src/emu_bridge.c
++++ b/matron/src/emu_bridge.c
+@@ -329,6 +329,13 @@
+             if(asprintf(&ev->exec_code_line.line,"_norns.emu_stall(%d)",args[1])<0)
+                 abort();
+             break;
++        case 28:
++            // Bounded fixed-iteration Lua work (same statements on every host).
++            if(args[1]<1 || args[1]>100000000) goto invalid;
++            ev=event_data_new(EVENT_EXEC_CODE_LINE);
++            if(asprintf(&ev->exec_code_line.line,"_norns.emu_lua_load(%d)",args[1])<0)
++                abort();
++            break;
+         case 6:
+             if(args[1]<0 || args[1]>1) goto invalid;
+             { int *connected=malloc(sizeof(int)); if (!connected) abort();
+diff --git a/matron/src/emu_cost.h b/matron/src/emu_cost.h
+new file mode 100644
+--- /dev/null
++++ b/matron/src/emu_cost.h
+@@ -0,0 +1,12 @@
++#pragma once
++
++#include <lua.h>
++
++// Opt-in execution-cost profile (NORNS_EMU_COST_PROFILE). Without that
++// environment variable nothing is installed and every hook is a no-op.
++// emu_cost_install expects the _norns extern table on top of the stack.
++void emu_cost_install(lua_State *l);
++// Bracket one event dispatch on the Lua thread; waiting between events is
++// never charged.
++void emu_cost_event_begin(void);
++void emu_cost_event_end(void);
+diff --git a/matron/src/emu_cost.c b/matron/src/emu_cost.c
+new file mode 100644
+--- /dev/null
++++ b/matron/src/emu_cost.c
+@@ -0,0 +1,735 @@
++// Emulator execution-cost profile.
++//
++// Models a slower device by consuming extra time on the Lua thread in
++// proportion to host work. Within each event dispatch, host time spent
++// outside wrapped native bindings is treated as Lua execution and scaled by
++// the Lua factor; native MIDI, grid/arc and screen bindings are scaled by
++// their own factors plus a signed fixed device cost per call. Debt is repaid
++// by busy-waiting before native outputs, clock reads and at event end, so it
++// delays later work and appears as CPU load, as it would on the device.
++//
++// Portability: the profile stores device kernel timings, not a host ratio.
++// Before the first event dispatch the same Lua kernels run on this host in
++// the runtime's own Lua state and the Lua factor is their geometric-mean
++// device/host ratio. Native factors are scaled by lua_factor /
++// reference_lua_factor so they follow host speed.
++//
++// Crossings are timed with CLOCK_MONOTONIC (vDSO, tens of ns on Linux hosts);
++// its per-crossing cost is measured and not scaled. Thread CPU time is read
++// only at dispatch boundaries to measure host preemption, which is reported
++// (host_wait_ns, preempted_events) so a calibration check can reject a noisy
++// host instead of silently mis-modelling it.
++//
++// NORNS_EMU_COST_PROFILE="lua_targets_us=<six device kernel medians>;lua_kernel_weights=<six>;
++//   reference_host_us=<six>;reference_lua_factor=<n>;calibration_bias=<n>;midi_call_us=<n>;
++//   grid_call_us=<n>;screen_call_us=<n>"   (or lua_factor=<n> for a fixed, host-relative factor)
++
++#ifndef _GNU_SOURCE
++#define _GNU_SOURCE
++#endif
++#include <lauxlib.h>
++#include <lua.h>
++#include <lualib.h>
++#include <math.h>
++#include <pthread.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <time.h>
++
++#include "emu_cost.h"
++
++enum { COST_MIDI, COST_GRID, COST_SCREEN, COST_KINDS, COST_TIME = COST_KINDS };
++static const char *kind_names[COST_KINDS] = {"midi", "grid", "screen"};
++
++#define KERNELS 6
++static const char *kernel_names[KERNELS] = {"lua_arith", "lua_table", "lua_string", "lua_calls", "lua_memory_access", "lua_memory_churn"};
++// Consistency is checked within the CPU-bound group only: cache-bound speed
++// legitimately differs between hosts, which is why it is measured.
++static const int kernel_cpu_bound[KERNELS] = {1, 1, 1, 1, 0, 1};
++// Same statements as the generic calibration probe's kernels. Each chunk
++// performs untimed setup and returns the function that is timed.
++static const char *kernel_sources[KERNELS] = {
++    "return function()\n"
++    "local x, y = 0, 1.5\n"
++    "for i = 1, 200000 do x = (x + i * 3) % 1000003; y = y * 1.0000001 + (i & 7) end\n"
++    "end",
++    "return function()\n"
++    "local keep = {}\n"
++    "for i = 1, 20000 do\n"
++    "  local t = {i, i + 1, name = \"n\", step = i % 16}\n"
++    "  keep[(i % 64) + 1] = t\n"
++    "  t[#t + 1] = i\n"
++    "end\n"
++    "end",
++    "return function()\n"
++    "local s\n"
++    "for i = 1, 20000 do s = string.format(\"%d:%s:%.2f\", i, \"ch\", i / 7) end\n"
++    "end",
++    "return function()\n"
++    "local function f(a, b) return a + b end\n"
++    "local acc = 0\n"
++    "for i = 1, 200000 do acc = f(acc, i) end\n"
++    "end",
++    "local n = 262144\n"
++    "local big = {}\n"
++    "for i = 1, n do big[i] = {i, i + i} end\n"
++    "return function()\n"
++    "  local acc, j = 0, 1\n"
++    "  for i = 1, 400000 do\n"
++    "    j = (j * 1103515245 + 12345) % n + 1\n"
++    "    local t = big[j]\n"
++    "    acc = acc + t[1] + t[2]\n"
++    "  end\n"
++    "  return acc\n"
++    "end",
++    "local n = 262144\n"
++    "local big = {}\n"
++    "for i = 1, n do big[i] = {i} end\n"
++    "return function()\n"
++    "  for i = 1, 60000 do\n"
++    "    local slot = big[(i * 7919) % n + 1]\n"
++    "    slot[2] = {i, \"x\"}\n"
++    "  end\n"
++    "end",
++};
++
++static int enabled;
++static double lua_factor = 1.0;
++static double reference_lua_factor = 0.0;
++static double lua_targets_us[KERNELS];
++// Reference host's calibration kernel times: normalise the consistency check.
++static double reference_host_us[KERNELS] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
++// Geometric weights of the per-kernel device/host ratios (normalised).
++static double kernel_weights[KERNELS] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
++static int have_targets;
++static int calibrated;
++static lua_State *main_state;
++static double host_kernel_us[KERNELS];
++static int calibration_repeats = 9;
++static double calibration_spread;
++static double calibration_disagreement;
++static int calibration_attempts;
++// Ratio of script-context to calibration-context kernel cost on the reference
++// host; the same interpreter paths make it host-independent to first order.
++static double calibration_bias = 1.0;
++static double reference_factor[COST_KINDS] = {1.0, 1.0, 1.0};
++static double factor[COST_KINDS] = {1.0, 1.0, 1.0};
++static double fixed_ns[COST_KINDS];
++// Absolute device cost per binding call; replaces host-scaled native time.
++static double call_ns[COST_KINDS];
++static int have_call[COST_KINDS];
++static int hook_instructions = 0;
++static long long pay_threshold_ns = 2000000;
++
++static pthread_t owner;
++static int active;
++static long long mark_ns;
++static long long event_wall_start_ns, event_cpu_start_ns, event_paid_start_ns;
++static double debt_ns;
++static long long lua_ns, native_ns[COST_KINDS], calls[COST_KINDS], paid_ns, hooks, pays, events, time_reads;
++static long long host_wait_ns, preempted_events, max_host_wait_ns;
++// Host cost of one accounting crossing, measured at install and not scaled.
++static long long crossing_ns;
++
++// ---------------------------------------------------------------------------
++// Fixed-iteration Lua load: identical statements run on the device through
++// Maiden, so a burst represents the same work on every runtime.
++static const char *load_source = "local n = ...\nlocal x = 0\nfor i = 1, n do x = (x + i * 3) % 1000003 end\nreturn x";
++
++static int fixed_lua_load(lua_State *l) {
++    lua_Integer n = luaL_checkinteger(l, 1);
++    luaL_argcheck(l, n >= 1 && n <= 100000000, 1, "iterations out of range");
++    if (luaL_loadstring(l, load_source) != LUA_OK) {
++        return lua_error(l);
++    }
++    lua_pushinteger(l, n);
++    lua_call(l, 1, 1);
++    return 1;
++}
++
++// ---------------------------------------------------------------------------
++// Opt-in instruction-sampling Lua profiler (NORNS_EMU_LUA_PROFILE=
++// "output=<path>;instructions=<n>"). Every n VM instructions it attributes one
++// sample to the current source line (self) and to each distinct function on
++// the stack (inclusive), inside event dispatch only, and rewrites the output
++// at most twice a second. Counts are deterministic work, independent of host
++// speed. The count hook slows the interpreter, so a profiled session is never
++// a timing measurement.
++#define PROFILE_SLOTS 16384
++#define PROFILE_KEY 200
++typedef struct {
++    char key[PROFILE_KEY];
++    long long count;
++} profile_entry;
++static profile_entry *profile_lines, *profile_functions;
++static char profile_output[512];
++static int profile_instructions;
++static long long profile_samples, profile_dropped;
++// Sampling only inside event dispatch: never during VM teardown.
++static int dispatching;
++static long long profile_last_dump_ns;
++
++static unsigned long profile_hash(const char *text) {
++    unsigned long h = 5381;
++    while (*text) {
++        h = h * 33 + (unsigned char)*text++;
++    }
++    return h;
++}
++
++static void profile_add(profile_entry *table, const char *key) {
++    unsigned long slot = profile_hash(key) % PROFILE_SLOTS;
++    for (int probe = 0; probe < PROFILE_SLOTS; probe++, slot = (slot + 1) % PROFILE_SLOTS) {
++        if (!table[slot].key[0]) {
++            snprintf(table[slot].key, PROFILE_KEY, "%s", key);
++            table[slot].count = 1;
++            return;
++        }
++        if (strncmp(table[slot].key, key, PROFILE_KEY - 1) == 0) {
++            table[slot].count++;
++            return;
++        }
++    }
++    profile_dropped++;
++}
++
++static void profile_hook(lua_State *l, lua_Debug *ar) {
++    (void)ar;
++    if (!dispatching) {
++        return;
++    }
++    lua_Debug frame;
++    char key[PROFILE_KEY];
++    profile_samples++;
++    if (lua_getstack(l, 0, &frame) && lua_getinfo(l, "Sl", &frame)) {
++        snprintf(key, sizeof key, "%s:%d", frame.short_src, frame.currentline);
++        profile_add(profile_lines, key);
++    }
++    // Inclusive attribution: each of the 24 innermost stack levels once per
++    // sample (a recursive function is counted once per level it occupies).
++    for (int level = 0; level < 24 && lua_getstack(l, level, &frame); level++) {
++        if (!lua_getinfo(l, "Sn", &frame)) {
++            break;
++        }
++        snprintf(key, sizeof key, "%s:%d %s", frame.short_src, frame.linedefined, frame.name ? frame.name : "?");
++        profile_add(profile_functions, key);
++    }
++}
++
++static void profile_write_table(FILE *out, const char *name, profile_entry *table) {
++    fprintf(out, "\"%s\":{", name);
++    int first = 1;
++    for (int i = 0; i < PROFILE_SLOTS; i++) {
++        if (!table[i].key[0]) {
++            continue;
++        }
++        fputs(first ? "\"" : ",\"", out);
++        for (const char *c = table[i].key; *c; c++) {
++            if (*c == '"' || *c == '\\') fputc('\\', out);
++            if ((unsigned char)*c >= 32) fputc(*c, out);
++        }
++        fprintf(out, "\":%lld", table[i].count);
++        first = 0;
++    }
++    fputs("}", out);
++}
++
++static int profile_dump(lua_State *l) {
++    (void)l;
++    if (!profile_instructions) {
++        return 0;
++    }
++    char temporary[600];
++    snprintf(temporary, sizeof temporary, "%s.tmp", profile_output);
++    FILE *out = fopen(temporary, "w");
++    if (!out) {
++        return 0;
++    }
++    fprintf(out, "{\"schema_version\":1,\"instructions_per_sample\":%d,\"samples\":%lld,\"dropped\":%lld,", profile_instructions,
++            profile_samples, profile_dropped);
++    profile_write_table(out, "lines", profile_lines);
++    fputs(",", out);
++    profile_write_table(out, "functions", profile_functions);
++    fputs("}\n", out);
++    fclose(out);
++    rename(temporary, profile_output);
++    return 0;
++}
++
++static int profile_parse(const char *text) {
++    char *copy = strdup(text), *save = NULL;
++    int ok = copy != NULL;
++    for (char *item = copy ? strtok_r(copy, ";", &save) : NULL; ok && item; item = strtok_r(NULL, ";", &save)) {
++        char *eq = strchr(item, '=');
++        if (!eq) {
++            ok = 0;
++            break;
++        }
++        *eq = 0;
++        if (strcmp(item, "output") == 0 && strlen(eq + 1) > 0 && strlen(eq + 1) < sizeof profile_output) {
++            snprintf(profile_output, sizeof profile_output, "%s", eq + 1);
++        } else if (strcmp(item, "instructions") == 0) {
++            char *end = NULL;
++            long value = strtol(eq + 1, &end, 10);
++            ok = end != eq + 1 && *end == 0 && value >= 10 && value <= 1000000;
++            profile_instructions = (int)value;
++        } else {
++            ok = 0;
++        }
++    }
++    free(copy);
++    return ok && profile_output[0] && profile_instructions;
++}
++
++static long long wall_now(void) {
++    struct timespec ts;
++    clock_gettime(CLOCK_MONOTONIC, &ts);
++    return (long long)ts.tv_sec * 1000000000LL + ts.tv_nsec;
++}
++
++static long long cpu_now(void) {
++    struct timespec ts;
++    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts);
++    return (long long)ts.tv_sec * 1000000000LL + ts.tv_nsec;
++}
++
++static void charge_lua(long long now) {
++    long long elapsed = now - mark_ns - crossing_ns;
++    if (elapsed > 0) {
++        lua_ns += elapsed;
++        debt_ns += (double)elapsed * (lua_factor - 1.0);
++    }
++}
++
++// Repay debt by spinning (device time is wall time), then restart the mark.
++static void settle(int force) {
++    if (debt_ns >= (double)pay_threshold_ns || (force && debt_ns > 0)) {
++        long long start = wall_now();
++        long long target = start + (long long)debt_ns;
++        long long spun = start;
++        while (spun < target) {
++            spun = wall_now();
++        }
++        paid_ns += spun - start;
++        debt_ns -= (double)(spun - start);
++        pays++;
++    }
++    mark_ns = wall_now();
++}
++
++static int calibrate_lua(lua_State *state);
++
++void emu_cost_event_begin(void) {
++    dispatching = 1;
++    if (!enabled) {
++        return;
++    }
++    if (have_targets && !calibrated) {
++        calibrated = 1;
++        if (!calibrate_lua(main_state)) {
++            fprintf(stderr, "emu_cost: host Lua calibration failed\n");
++            exit(2);
++        }
++        double scale = lua_factor / reference_lua_factor;
++        for (int k = 0; k < COST_KINDS; k++) {
++            factor[k] = reference_factor[k] * scale;
++        }
++        fprintf(stderr, "emu_cost: calibrated lua_factor=%.3f host_us=%.0f:%.0f:%.0f:%.0f:%.0f:%.0f spread=%.3f attempts=%d disagreement=%.3f scale=%.3f\n",
++                lua_factor, host_kernel_us[0], host_kernel_us[1], host_kernel_us[2], host_kernel_us[3], host_kernel_us[4], host_kernel_us[5],
++                calibration_spread, calibration_attempts, calibration_disagreement, scale);
++    }
++    active = 1;
++    events++;
++    event_cpu_start_ns = cpu_now();
++    event_paid_start_ns = paid_ns;
++    mark_ns = event_wall_start_ns = wall_now();
++}
++
++void emu_cost_event_end(void) {
++    dispatching = 0;
++    if (profile_instructions) {
++        long long now = wall_now();
++        if (now - profile_last_dump_ns > 500000000LL) {
++            profile_last_dump_ns = now;
++            profile_dump(NULL);
++        }
++    }
++    if (!enabled || !active) {
++        return;
++    }
++    charge_lua(wall_now());
++    settle(1);
++    // Negative corrections only offset over-scaled glue within one dispatch.
++    if (debt_ns < 0) {
++        debt_ns = 0;
++    }
++    long long wall = wall_now() - event_wall_start_ns - (paid_ns - event_paid_start_ns);
++    long long waited = wall - (cpu_now() - event_cpu_start_ns);
++    if (waited > 200000) {
++        host_wait_ns += waited;
++        preempted_events++;
++        if (waited > max_host_wait_ns) {
++            max_host_wait_ns = waited;
++        }
++    }
++    active = 0;
++}
++
++static void hook(lua_State *l, lua_Debug *ar) {
++    (void)l;
++    (void)ar;
++    if (!active || !pthread_equal(pthread_self(), owner)) {
++        return;
++    }
++    hooks++;
++    charge_lua(wall_now());
++    settle(0);
++}
++
++static int wrapped(lua_State *l) {
++    lua_CFunction original = (lua_CFunction)lua_touserdata(l, lua_upvalueindex(1));
++    int kind = (int)lua_tointeger(l, lua_upvalueindex(2));
++    if (!active || !pthread_equal(pthread_self(), owner)) {
++        return original(l);
++    }
++    // Earlier work delays this output or observation: repay it first.
++    charge_lua(wall_now());
++    settle(1);
++    if (kind == COST_TIME) {
++        time_reads++;
++        return original(l);
++    }
++    long long before = mark_ns;
++    int results = original(l);
++    long long after = wall_now();
++    native_ns[kind] += after - before;
++    calls[kind]++;
++    if (have_call[kind]) {
++        debt_ns += call_ns[kind] - (double)(after - before);
++    } else {
++        debt_ns += (double)(after - before) * (factor[kind] - 1.0) + fixed_ns[kind];
++    }
++    mark_ns = after;
++    return results;
++}
++
++static void set_integer(lua_State *l, const char *key, long long value) {
++    lua_pushinteger(l, value);
++    lua_setfield(l, -2, key);
++}
++
++static void set_number(lua_State *l, const char *key, double value) {
++    lua_pushnumber(l, value);
++    lua_setfield(l, -2, key);
++}
++
++static int stats(lua_State *l) {
++    lua_newtable(l);
++    set_number(l, "lua_factor", lua_factor);
++    set_number(l, "reference_lua_factor", reference_lua_factor);
++    set_number(l, "calibration_bias", calibration_bias);
++    set_number(l, "calibration_spread", calibration_spread);
++    set_integer(l, "calibration_attempts", calibration_attempts);
++    set_number(l, "calibration_disagreement", calibration_disagreement);
++    set_integer(l, "lua_profile_samples", profile_samples);
++    set_integer(l, "lua_ns", lua_ns);
++    set_integer(l, "paid_ns", paid_ns);
++    set_number(l, "debt_ns", debt_ns);
++    set_integer(l, "hooks", hooks);
++    set_integer(l, "pays", pays);
++    set_integer(l, "events", events);
++    set_integer(l, "time_reads", time_reads);
++    set_integer(l, "crossing_ns", crossing_ns);
++    set_integer(l, "host_wait_ns", host_wait_ns);
++    set_integer(l, "preempted_events", preempted_events);
++    set_integer(l, "max_host_wait_ns", max_host_wait_ns);
++    set_integer(l, "calibrated", calibrated);
++    for (int k = 0; k < COST_KINDS; k++) {
++        char key[40];
++        snprintf(key, sizeof key, "%s_native_ns", kind_names[k]);
++        set_integer(l, key, native_ns[k]);
++        snprintf(key, sizeof key, "%s_calls", kind_names[k]);
++        set_integer(l, key, calls[k]);
++        snprintf(key, sizeof key, "%s_factor", kind_names[k]);
++        set_number(l, key, factor[k]);
++        snprintf(key, sizeof key, "%s_fixed_ns", kind_names[k]);
++        set_number(l, key, fixed_ns[k]);
++        snprintf(key, sizeof key, "%s_call_ns", kind_names[k]);
++        set_number(l, key, have_call[k] ? call_ns[k] : -1.0);
++    }
++    for (int k = 0; k < KERNELS; k++) {
++        char key[40];
++        snprintf(key, sizeof key, "host_%s_us", kernel_names[k]);
++        set_number(l, key, host_kernel_us[k]);
++        snprintf(key, sizeof key, "target_%s_us", kernel_names[k]);
++        set_number(l, key, lua_targets_us[k]);
++    }
++    return 1;
++}
++
++static int classify(const char *name) {
++    if (strcmp(name, "midi_send") == 0) return COST_MIDI;
++    if (strncmp(name, "grid_", 5) == 0 || strncmp(name, "arc_", 4) == 0 || strncmp(name, "monome_", 7) == 0) return COST_GRID;
++    if (strncmp(name, "screen_", 7) == 0) return COST_SCREEN;
++    if (strcmp(name, "get_time") == 0 || strcmp(name, "clock_get_time_beats") == 0) return COST_TIME;
++    return -1;
++}
++
++static int parse_list(const char *text, double *values) {
++    char *copy = strdup(text), *save = NULL;
++    int count = 0;
++    for (char *item = copy ? strtok_r(copy, ":", &save) : NULL; item; item = strtok_r(NULL, ":", &save)) {
++        char *end = NULL;
++        double value = strtod(item, &end);
++        if (end == item || *end != 0 || value < 0 || count >= KERNELS) {
++            free(copy);
++            return 0;
++        }
++        values[count++] = value;
++    }
++    free(copy);
++    return count == KERNELS;
++}
++
++static int parse(const char *text) {
++    char *copy = strdup(text), *save = NULL;
++    int ok = copy != NULL, fixed_factor = 0;
++    for (char *item = copy ? strtok_r(copy, ";", &save) : NULL; ok && item; item = strtok_r(NULL, ";", &save)) {
++        char *eq = strchr(item, '=');
++        if (!eq) {
++            ok = 0;
++            break;
++        }
++        *eq = 0;
++        const char *raw = eq + 1;
++        if (strcmp(item, "lua_targets_us") == 0) {
++            ok = parse_list(raw, lua_targets_us);
++            have_targets = ok;
++            continue;
++        }
++        if (strcmp(item, "reference_host_us") == 0) {
++            ok = parse_list(raw, reference_host_us);
++            continue;
++        }
++        if (strcmp(item, "lua_kernel_weights") == 0) {
++            ok = parse_list(raw, kernel_weights);
++            continue;
++        }
++        char *end = NULL;
++        double value = strtod(raw, &end);
++        int signed_item = strstr(item, "_fixed_us") != NULL || strstr(item, "_call_us") != NULL;
++        if (end == raw || *end != 0 || (value < 0 && !signed_item) || value < -10000 || value > 10000000) ok = 0;
++        else if (strcmp(item, "lua_factor") == 0 && value >= 1) lua_factor = value, fixed_factor = 1;
++        else if (strcmp(item, "reference_lua_factor") == 0 && value >= 1) reference_lua_factor = value;
++        else if (strcmp(item, "midi_factor") == 0) reference_factor[COST_MIDI] = value;
++        else if (strcmp(item, "grid_factor") == 0) reference_factor[COST_GRID] = value;
++        else if (strcmp(item, "screen_factor") == 0) reference_factor[COST_SCREEN] = value;
++        else if (strcmp(item, "midi_fixed_us") == 0) fixed_ns[COST_MIDI] = value * 1000.0;
++        else if (strcmp(item, "grid_fixed_us") == 0) fixed_ns[COST_GRID] = value * 1000.0;
++        else if (strcmp(item, "screen_fixed_us") == 0) fixed_ns[COST_SCREEN] = value * 1000.0;
++        else if (strcmp(item, "midi_call_us") == 0) call_ns[COST_MIDI] = value * 1000.0, have_call[COST_MIDI] = 1;
++        else if (strcmp(item, "grid_call_us") == 0) call_ns[COST_GRID] = value * 1000.0, have_call[COST_GRID] = 1;
++        else if (strcmp(item, "screen_call_us") == 0) call_ns[COST_SCREEN] = value * 1000.0, have_call[COST_SCREEN] = 1;
++        else if (strcmp(item, "hook_instructions") == 0 && value <= 100000) hook_instructions = (int)value;
++        else if (strcmp(item, "pay_threshold_us") == 0 && value <= 10000) pay_threshold_ns = (long long)(value * 1000.0);
++        else if (strcmp(item, "calibration_repeats") == 0 && value >= 3 && value <= 51) calibration_repeats = (int)value;
++        else if (strcmp(item, "calibration_bias") == 0 && value >= 0.5 && value <= 2.0) calibration_bias = value;
++        else ok = 0;
++    }
++    free(copy);
++    // Exactly one way to choose the Lua factor.
++    return ok && (have_targets != fixed_factor) && (!have_targets || reference_lua_factor >= 1);
++}
++
++static int compare_long(const void *a, const void *b) {
++    long long x = *(const long long *)a, y = *(const long long *)b;
++    return (x > y) - (x < y);
++}
++
++// Fastest host CPU time of each probe kernel (the least-disturbed estimate of
++// host speed), run in the runtime's own Lua state so allocator and collector
++// conditions resemble script execution. Returns 0 on Lua failure, -1 when the
++// kernel ratios are not computable, 1 on success.
++static int calibrate_once(lua_State *scratch) {
++    int top = lua_gettop(scratch);
++    long long samples[51];
++    double log_sum = 0, weight_sum = 0, low = 1e30, high = 0;
++    for (int k = 0; k < KERNELS; k++) {
++        if (kernel_weights[k] <= 0) {
++            continue;
++        }
++        if (lua_targets_us[k] <= 0 || reference_host_us[k] <= 0) {
++            lua_settop(scratch, top);
++            return 0;
++        }
++        if (luaL_loadstring(scratch, kernel_sources[k]) != LUA_OK || lua_pcall(scratch, 0, 1, 0) != LUA_OK ||
++            !lua_isfunction(scratch, -1)) {
++            lua_settop(scratch, top);
++            return 0;
++        }
++        for (int r = 0; r < calibration_repeats; r++) {
++            lua_gc(scratch, LUA_GCCOLLECT, 0);
++            lua_pushvalue(scratch, -1);
++            long long start = cpu_now();
++            if (lua_pcall(scratch, 0, 0, 0) != LUA_OK) {
++                lua_settop(scratch, top);
++                return 0;
++            }
++            samples[r] = cpu_now() - start;
++        }
++        lua_pop(scratch, 1);
++        qsort(samples, (size_t)calibration_repeats, sizeof samples[0], compare_long);
++        host_kernel_us[k] = samples[0] / 1000.0;
++        double ratio = lua_targets_us[k] / host_kernel_us[k];
++        double relative = reference_host_us[k] / host_kernel_us[k];
++        if (kernel_cpu_bound[k]) {
++            low = relative < low ? relative : low;
++            high = relative > high ? relative : high;
++        }
++        log_sum += kernel_weights[k] * log(ratio);
++        weight_sum += kernel_weights[k];
++    }
++    lua_gc(scratch, LUA_GCCOLLECT, 0);
++    lua_settop(scratch, top);
++    calibration_spread = high > 0 ? high / low : 1.0;
++    if (weight_sum <= 0) {
++        return 0;
++    }
++    lua_factor = exp(log_sum / weight_sum) * calibration_bias;
++    if (lua_factor < 1.0) {
++        lua_factor = 1.0; // a host slower than the device cannot be sped up
++    }
++    return 1;
++}
++
++// Two independent passes must agree within 10%; a disturbed host retries up to
++// three pairs and then refuses to model the device. Kernel-shape spread
++// against the reference host is reported only: hosts legitimately differ.
++
++
++static int calibrate_lua(lua_State *state) {
++    for (calibration_attempts = 1; calibration_attempts <= 3; calibration_attempts++) {
++        if (calibrate_once(state) == 0) {
++            return 0;
++        }
++        double first = lua_factor, first_spread = calibration_spread;
++        double first_host[KERNELS];
++        memcpy(first_host, host_kernel_us, sizeof first_host);
++        if (calibrate_once(state) == 0) {
++            return 0;
++        }
++        calibration_disagreement = fabs(first / lua_factor - 1.0);
++        if (calibration_disagreement <= 0.10) {
++            // Keep the faster (less disturbed) host estimate of each kernel.
++            double log_sum = 0, weight_sum = 0;
++            for (int k = 0; k < KERNELS; k++) {
++                if (first_host[k] > 0 && first_host[k] < host_kernel_us[k]) {
++                    host_kernel_us[k] = first_host[k];
++                }
++                if (kernel_weights[k] > 0) {
++                    log_sum += kernel_weights[k] * log(lua_targets_us[k] / host_kernel_us[k]);
++                    weight_sum += kernel_weights[k];
++                }
++            }
++            lua_factor = exp(log_sum / weight_sum) * calibration_bias;
++            if (lua_factor < 1.0) {
++                lua_factor = 1.0;
++            }
++            if (first_spread > calibration_spread) {
++                calibration_spread = first_spread;
++            }
++            return 1;
++        }
++        struct timespec pause = {0, 100000000};
++        nanosleep(&pause, NULL);
++    }
++    fprintf(stderr, "emu_cost: calibration passes disagree by %.1f%%; host not stable enough to model the device\n",
++            100.0 * calibration_disagreement);
++    return 0;
++}
++
++static void calibrate_crossing(void) {
++    long long samples[101];
++    for (int i = 0; i < 101; i++) {
++        long long start = wall_now();
++        for (int j = 0; j < 64; j++) {
++            mark_ns = wall_now();
++            charge_lua(wall_now());
++            debt_ns = 0;
++            settle(0);
++        }
++        samples[i] = (wall_now() - start) / 64;
++    }
++    qsort(samples, 101, sizeof samples[0], compare_long);
++    crossing_ns = samples[50];
++    lua_ns = 0;
++    debt_ns = 0;
++    paid_ns = 0;
++    pays = 0;
++}
++
++void emu_cost_install(lua_State *l) {
++    lua_pushcfunction(l, fixed_lua_load);
++    lua_setfield(l, -2, "emu_lua_load");
++    const char *sampling = getenv("NORNS_EMU_LUA_PROFILE");
++    if (sampling && *sampling) {
++        profile_lines = calloc(PROFILE_SLOTS, sizeof(profile_entry));
++        profile_functions = calloc(PROFILE_SLOTS, sizeof(profile_entry));
++        if (!profile_lines || !profile_functions || !profile_parse(sampling)) {
++            fprintf(stderr, "emu_cost: invalid NORNS_EMU_LUA_PROFILE: %s\n", sampling);
++            exit(2);
++        }
++        lua_pushcfunction(l, profile_dump);
++        lua_setfield(l, -2, "emu_lua_profile_dump");
++        lua_sethook(l, profile_hook, LUA_MASKCOUNT, profile_instructions);
++        fprintf(stderr, "emu_cost: lua profiler enabled instructions=%d output=%s (not a timing run)\n", profile_instructions, profile_output);
++    }
++    const char *profile = getenv("NORNS_EMU_COST_PROFILE");
++    if (!profile || !*profile) {
++        return;
++    }
++    if (!parse(profile)) {
++        fprintf(stderr, "emu_cost: invalid NORNS_EMU_COST_PROFILE: %s\n", profile);
++        exit(2);
++    }
++    for (int k = 0; k < COST_KINDS; k++) {
++        factor[k] = reference_factor[k];
++    }
++    main_state = l;
++    owner = pthread_self();
++    int table = lua_gettop(l);
++    const char *names[512];
++    int count = 0;
++    lua_pushnil(l);
++    while (lua_next(l, table) != 0) {
++        if (count < 512 && lua_type(l, -2) == LUA_TSTRING && lua_iscfunction(l, -1) && classify(lua_tostring(l, -2)) >= 0) {
++            names[count++] = lua_tostring(l, -2); // interned keys stay referenced by the table
++        }
++        lua_pop(l, 1);
++    }
++    for (int i = 0; i < count; i++) {
++        lua_getfield(l, table, names[i]);
++        lua_CFunction original = lua_tocfunction(l, -1);
++        lua_pop(l, 1);
++        lua_pushlightuserdata(l, (void *)original);
++        lua_pushinteger(l, classify(names[i]));
++        lua_pushcclosure(l, wrapped, 2);
++        lua_setfield(l, table, names[i]);
++    }
++    calibrate_crossing();
++    lua_pushcfunction(l, stats);
++    lua_setfield(l, table, "emu_cost_stats");
++    // Off by default: any Lua 5.3 count hook checks every VM instruction and
++    // slows the interpreter itself.
++    if (hook_instructions > 0 && !profile_instructions) {
++        lua_sethook(l, hook, LUA_MASKCOUNT, hook_instructions);
++    }
++    enabled = 1;
++    fprintf(stderr,
++            "emu_cost: enabled lua_%s=%.3f midi=%.3f+%.0fns grid=%.3f+%.0fns "
++            "screen=%.3f+%.0fns hook=%d wrapped=%d crossing_ns=%lld\n",
++            have_targets ? "reference_factor" : "factor", have_targets ? reference_lua_factor : lua_factor,
++            factor[COST_MIDI], fixed_ns[COST_MIDI], factor[COST_GRID], fixed_ns[COST_GRID], factor[COST_SCREEN],
++            fixed_ns[COST_SCREEN], hook_instructions, count, crossing_ns);
++}

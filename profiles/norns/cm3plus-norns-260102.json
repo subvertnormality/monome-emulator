@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "kind": "norns-performance-profile",
+  "profile_id": "cm3plus-norns-260102",
+  "version": "1.0.0",
+  "status": "frozen 2026-09-15 before held-out validation; parameters must not change under this version",
+  "calibration_date": "2026-09-15",
+  "device": {
+    "model": "Raspberry Pi Compute Module 3 Plus Rev 1.0 (BCM2835 revision a02100)",
+    "cpu": "4x ARMv7 Processor rev 4 (Cortex-A53), armv7l userspace, 1200 MHz, performance governor, throttled=0x0",
+    "memory_bytes": 1024258048,
+    "swap": "none",
+    "os": "Raspbian GNU/Linux 11 (bullseye), kernel 5.10.92-18-g458e2253667a SMP PREEMPT",
+    "jack": "jackd -R -P 95 -d alsa -d hw:sndrpimonome -r 48000 -n 3 -p 128 -S -s",
+    "background": "10 mods loaded at boot (emplaitress, nb_polyperc, matrix, toolkit, oilcan, nb_rudiments, nb_ansible, nb_jf, nb_crow, doubledecker); Wi-Fi (RT5370) up; idle matron main thread about 2.2% CPU"
+  },
+  "norns_runtime": {
+    "release": "260102",
+    "revision": "f9fa0c5ce5883ec7f185765ffdf8b3750061289e",
+    "note": "14bbeae (emulator pin) plus release-notes and update.sh commits only; stock clock.lua 39b6c3ac..., matron c1c2d5e0..."
+  },
+  "reference_host": {
+    "cpu": "AMD Ryzen 9 5900X 12-Core Processor",
+    "os": "WSL2 kernel 6.6.87.2-microsoft-standard-WSL2",
+    "emulator_revision": "485bde574a427625fadbab699be3da6553cc5b1e",
+    "note": "reference_host_us, reference_lua_factor and calibration_bias were measured here; the runtime recalibrates on each host"
+  },
+  "runtime": {
+    "installation": "scripts/build_performance_profile_runtime.py (patches/norns/candidates/performance-cost-profile.patch)",
+    "cost_parameters": {
+      "lua_targets_us": [
+        82047,
+        109052,
+        182264,
+        76348,
+        563379,
+        128304
+      ],
+      "lua_kernel_weights": [
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.5,
+        0.1
+      ],
+      "reference_host_us": [
+        4342,
+        4386,
+        9728,
+        3892,
+        76059,
+        6485
+      ],
+      "reference_lua_factor": 11.58,
+      "calibration_bias": 0.936,
+      "midi_call_us": 4.3,
+      "grid_call_us": 0.14,
+      "screen_call_us": -0.65
+    },
+    "units": {
+      "lua_targets_us": "device median wall time of the probe kernels lua_arith, lua_table, lua_string, lua_calls, lua_memory_access, lua_memory_churn (microseconds)",
+      "lua_kernel_weights": "geometric weights of per-kernel device/host ratios: fixed prior of half memory-bound, half CPU-bound (not fitted)",
+      "reference_host_us": "median fastest-of-nine in-runtime calibration kernel times on the reference host (microseconds); normalises the consistency check",
+      "reference_lua_factor": "weighted in-script device/host ratio on the reference host at which binding costs were fitted",
+      "calibration_bias": "in-script / in-runtime calibrated factor ratio on the reference host",
+      "_call_us": "signed device-equivalent microseconds per binding call, replacing host native time (includes correction for over-scaled binding glue)"
+    }
+  },
+  "check": {
+    "probe": "fixtures/probes/norns-calibration/norns-calibration.lua",
+    "device_probe_sha256": "4f26cfcc5d858eb6a93c7a99424f568c5c1258057d6d417dbe6ff836a3cb36a7",
+    "probe_change_since_device_run": "none",
+    "ratio_bounds": [
+      0.67,
+      1.5
+    ],
+    "ratio": "device median / emulator median of per-repeat medians",
+    "maximum_preempted_wait_fraction": 0.05,
+    "device_reference": {
+      "midi_send_burst_64": {
+        "wall_ms_median": 0.7089
+      },
+      "screen_frame": {
+        "wall_ms_median": 0.2921
+      },
+      "grid_frame": {
+        "wall_ms_median": 0.4499
+      },
+      "clock_density_300_bpm_16_voices": {
+        "service_ms_p50": 0.3815
+      },
+      "clock_density_300_bpm_32_voices": {
+        "service_ms_p50": 0.7035
+      },
+      "clock_density_300_bpm_48_voices": {
+        "service_ms_p50": 1.072,
+        "service_ms_p99": 4.6291
+      },
+      "stall_42ms_bpm_120": {
+        "burst_intervals_under_5ms": 1,
+        "pulse_count_deficit": 0
+      },
+      "stall_200ms_bpm_120": {
+        "burst_intervals_under_5ms": 9,
+        "pulse_count_deficit": 0
+      }
+    },
+    "unchecked_known_gaps": {
+      "midi_send_burst_1 / midi_send_burst_16 / 1- and 8-voice service": "emulator 1.6-4x slower: host wake-up cost after idle is scaled with the Lua work"
+    },
+    "count_metrics": {
+      "burst_intervals_under_5ms": 1,
+      "pulse_count_deficit": 0
+    },
+    "count_tolerance_rationale": "Burst counts depend on stall phase relative to ticks; unprofiled local emulator runs already varied by one (native-default-01, 2026-09-15) before the CI run; the initial exact rule was a check design error.",
+    "kernel_expectation": "One Lua factor cannot reproduce every code shape: individual kernels are not expected to match. The weighted geometric mean of device/emulator kernel ratios (the calibrated quantity) must lie within ratio_bounds.",
+    "kernel_composite": {
+      "blocks": [
+        "lua_arith",
+        "lua_table",
+        "lua_string",
+        "lua_calls",
+        "lua_memory_access",
+        "lua_memory_churn"
+      ],
+      "device_wall_ms_median": [
+        82.0472,
+        109.0519,
+        182.2641,
+        76.3481,
+        563.379,
+        128.304
+      ],
+      "weights": [
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.5,
+        0.1
+      ]
+    },
+    "diagnostic_blocks": {
+      "screen_frame": "Screen binding glue is below a microsecond per call, at the resolution of host clock accounting; a GitHub-hosted runner measured 2x fast. Reported, not gating; musical effect is bounded (about 0.15 ms per 128-call frame) and PERF-005 held-out rendering pressure tests it at workload level."
+    },
+    "calibration_note": "Kernel-shape spread against the reference host is diagnostic; the runtime itself refuses hosts whose two calibration passes disagree by more than 10%."
+  },
+  "evidence": {
+    "root": "/home/andy/projects/mosaic-behaviour-runs/norns-calibration-20260915",
+    "files": {
+      "d0/identity.txt": "b1802b0b808f712480bf44a1fed677b1cae872a42755c838fd91d831fd6e9e83",
+      "d1-probe-05-memory/repeat-1/probe-result.json": "468f30df1ee1d34dab4ed1840455259b1e91dd1709ba0f9edc746d1fb22ac385",
+      "d1-probe-05-memory/repeat-2/probe-result.json": "0fa55bca53692cb57502b1ef12945ea2b784ac4b69e0ae17fa0f525a1e3a135d",
+      "d1-probe-05-memory/repeat-3/probe-result.json": "577edb6affaf040e1e9851b8e52f4318edf322d5b96e0ebc84a1beccbbfe08e2"
+    }
+  },
+  "limitations": [
+    "A single Lua factor blends code shapes: on the reference host pure CPU-bound Lua runs about 1.6x faster than the device and cache-bound table access about 2x slower. Workload conclusions hold where the Lua mix resembles the calibration workloads.",
+    "Models Lua-thread execution and MIDI/grid/screen binding cost only; screen rendering thread, JACK/crone audio load, SD storage latency and memory pressure are not modelled.",
+    "Timing is observed at the native MIDI boundary in the emulator and at a Lua send wrapper on the device.",
+    "Emulator JACK runs the dummy driver at 1024 frames; the device uses ALSA at 128 frames.",
+    "Mods loaded on the device are absent from emulator sessions."
+  ],
+  "frozen": {
+    "date": "2026-09-15",
+    "emulator_revision": "485bde574a427625fadbab699be3da6553cc5b1e",
+    "runtime_patch_sha256": "e1354256dbd0423529a6c7304158900c9405c255e2091206ef05f1d319bb53a4",
+    "calibration_workloads": [
+      "generic probe (d1-probe-05-memory)",
+      "PERF-002-HW-1/4/8/16",
+      "PERF-003-HW-1/8/16"
+    ],
+    "held_out_workloads": [
+      "PERF-005-HW-1",
+      "PERF-005-HW-4",
+      "PERF-008L-HW-4",
+      "MIX-HW-8"
+    ],
+    "host_calibration": "two independent in-runtime kernel passes must agree within 10% (three attempts), fastest-of-nine per kernel"
+  }
+}
