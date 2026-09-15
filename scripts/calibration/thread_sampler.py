@@ -12,7 +12,7 @@ schedstat`` (nanoseconds). Nothing is written except stdout. Python 3.5+.
 """
 import argparse, json, os, sys, time
 
-RUNTIME = ('matron', 'crone', 'jackd', 'sclang', 'scsynth', 'maiden', 'norns-watcher', 'watcher')
+RUNTIME = ('matron', 'crone', 'jackd', 'sclang', 'scsynth')
 
 
 def read(path):
@@ -37,7 +37,8 @@ def processes(names):
     return found
 
 
-def thread_rows(pid):
+def thread_rows(pid, comms, detail=False):
+    """Compact per-thread row: [tid, cpu_ns, runqueue_wait_ns, timeslices]."""
     rows = []
     try:
         tids = os.listdir('/proc/%d/task' % pid)
@@ -45,24 +46,17 @@ def thread_rows(pid):
         return rows
     for tid in tids:
         base = '/proc/%d/task/%s/' % (pid, tid)
-        stat, sched = read(base + 'stat'), read(base + 'schedstat')
-        if stat is None:
+        sched = read(base + 'schedstat')
+        if sched is None:
             continue
-        fields = stat[stat.rfind(')') + 2:].split()
-        row = dict(tid=int(tid), comm=(read(base + 'comm') or '').strip(), state=fields[0],
-                   utime=int(fields[11]), stime=int(fields[12]), priority=int(fields[15]),
-                   nice=int(fields[16]), processor=int(fields[36]), rt_priority=int(fields[37]),
-                   policy=int(fields[38]), vcsw=None, ivcsw=None)
-        if sched:
-            run_ns, wait_ns, slices = (int(x) for x in sched.split()[:3])
-            row.update(cpu_ns=run_ns, runqueue_wait_ns=wait_ns, timeslices=slices)
-        status = read(base + 'status') or ''
-        for line in status.splitlines():
-            if line.startswith('voluntary_ctxt_switches'):
-                row['vcsw'] = int(line.split()[1])
-            elif line.startswith('nonvoluntary_ctxt_switches'):
-                row['ivcsw'] = int(line.split()[1])
-        rows.append(row)
+        run_ns, wait_ns, slices = (int(x) for x in sched.split()[:3])
+        key = (pid, tid)
+        if detail or key not in comms:
+            stat = read(base + 'stat') or ''
+            fields = stat[stat.rfind(')') + 2:].split()
+            comms[key] = dict(comm=(read(base + 'comm') or '').strip(), policy=int(fields[38]) if len(fields) > 38 else None,
+                              rt_priority=int(fields[37]) if len(fields) > 37 else None, nice=int(fields[16]) if len(fields) > 16 else None)
+        rows.append([int(tid), run_ns, wait_ns, slices])
     return rows
 
 
@@ -117,6 +111,7 @@ def main():
     parser.add_argument('--seconds', type=float, required=True)
     parser.add_argument('--period', type=float, default=0.1)
     parser.add_argument('--names', default=','.join(RUNTIME))
+    parser.add_argument('--system-every', type=int, default=10, help='system counters every N samples; 0 disables')
     args = parser.parse_args()
     if not 0.02 <= args.period <= 5 or not 0 < args.seconds <= 3600:
         parser.error('period must be 0.02..5 s and seconds 0..3600')
@@ -127,14 +122,18 @@ def main():
                           processes={str(pid): dict(comm=comm, cmdline=(read('/proc/%d/cmdline' % pid) or '').replace('\0', ' ').strip(),
                                                     start_ticks=int((read('/proc/%d/stat' % pid) or '').rsplit(')', 1)[-1].split()[19]))
                                      for pid, comm in procs.items()},
-                          sampler_pid=os.getpid(), period_s=args.period, throttled_start=throttled())), flush=True)
+                          sampler_pid=os.getpid(), period_s=args.period, throttled_start=throttled(), system=system_row(),
+                          thread_row_fields=['tid', 'cpu_ns', 'runqueue_wait_ns', 'timeslices'])), flush=True)
+    comms = {}
     deadline = time.monotonic() + args.seconds
     ordinal = 0
     while True:
         started = ns_now(time.CLOCK_MONOTONIC)
         row = dict(kind='sample', ordinal=ordinal, monotonic_ns=started, realtime_ns=ns_now(time.CLOCK_REALTIME),
-                   threads={str(pid): thread_rows(pid) for pid in procs}, system=system_row(),
-                   sampler_threads=thread_rows(os.getpid()))
+                   threads={str(pid): thread_rows(pid, comms) for pid in procs},
+                   sampler=thread_rows(os.getpid(), comms))
+        if args.system_every and ordinal % args.system_every == 0:
+            row['system'] = system_row()
         row['sample_cost_ns'] = ns_now(time.CLOCK_MONOTONIC) - started
         print(json.dumps(row), flush=True)
         ordinal += 1
@@ -142,7 +141,8 @@ def main():
             break
         time.sleep(max(0.0, args.period - row['sample_cost_ns'] / 1e9))
     print(json.dumps(dict(kind='end', monotonic_ns=ns_now(time.CLOCK_MONOTONIC), realtime_ns=ns_now(time.CLOCK_REALTIME),
-                          throttled_end=throttled(), samples=ordinal)), flush=True)
+                          throttled_end=throttled(), samples=ordinal, system=system_row(),
+                          thread_names={'%d/%s' % key: value for key, value in comms.items()})), flush=True)
 
 
 if __name__ == '__main__':
