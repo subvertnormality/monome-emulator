@@ -113,13 +113,16 @@ def one_repeat(device, maiden_url, out, sampler_seconds, timeout_s):
             if state_backup is not None:
                 device.run('set -eu; cat > %s.calibration-restore; mv %s.calibration-restore %s' % (STATE, STATE, STATE), input_bytes=state_backup)
                 record['system_state_restored'] = sha256(device.command('cat', STATE)) == sha256(state_backup)
-            record['journal'] = device.run('journalctl -u norns-matron -u norns-jack --since "@%d" --no-pager | tail -200' % int(time.time() - 600))
+            time.sleep(1.0)
+            record['journal'] = device.run('journalctl -u norns-matron -u norns-jack --since "@%d" --no-pager | tail -400' % (record['started_host_monotonic_ns'] and int(time.time() - (time.monotonic_ns() - record['started_host_monotonic_ns']) / 1e9) - 1))
             device.run('rm -rf %s %s' % (CODE, DATA))
             record['cleanup'] = device.run('test ! -e %s && test ! -e %s && echo removed' % (CODE, DATA)).strip()
         except Exception as error:
             record['errors'].append('cleanup: ' + repr(error)[:500])
-        lua_errors = [text for key in ('load_output', 'clear_output') for text in [record.get(key, '')] if 'stack traceback' in text or 'error' in text.lower()]
-        record['lua_error_outputs'] = lua_errors
+        journal = record.get('journal', '')
+        record['lua_error_outputs'] = [text for key in ('load_output', 'clear_output') for text in [record.get(key, '')] if 'stack traceback' in text]
+        record['journal_tracebacks'] = [line for line in journal.splitlines() if 'lua:' in line or 'traceback' in line]
+        record['journal_xruns'] = sum('XRun' in line for line in journal.splitlines())
         record['passed'] = not record['errors'] and not record.get('probe_errors') and record.get('system_state_restored') is True
         (out / 'record.json').write_text(json.dumps(record, indent=2) + '\n')
     return record
