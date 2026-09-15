@@ -30,37 +30,80 @@ diff --git a/matron/src/weaver.c b/matron/src/weaver.c
  
      // name global extern table
      lua_setglobal(lvm, "_norns");
+diff --git a/matron/src/events.c b/matron/src/events.c
+--- a/matron/src/events.c
++++ b/matron/src/events.c
+@@ -11,6 +11,7 @@
+ #include "battery.h"
+ #include "device_monome.h"
+ #include "events.h"
++#include "emu_cost.h"
+ #include "oracle.h"
+ #include "stat.h"
+ #include "weaver.h"
+@@ -194,7 +195,9 @@
+         ev = evq_pop();
+         pthread_mutex_unlock(&evq.lock);
+         if (ev != NULL) {
++            emu_cost_event_begin();
+             handle_event(ev);
++            emu_cost_event_end();
+         }
+     }
+ }
+@@ -387,7 +390,9 @@
+         }
+         pthread_mutex_unlock(&evq.lock);
+         if (ev != NULL) {
++            emu_cost_event_begin();
+             handle_event(ev);
+-        }
+-    }
+-}
++            emu_cost_event_end();
++        }
++    }
++}
 diff --git a/matron/src/emu_cost.h b/matron/src/emu_cost.h
 new file mode 100644
 --- /dev/null
 +++ b/matron/src/emu_cost.h
-@@ -0,0 +1,8 @@
+@@ -0,0 +1,12 @@
 +#pragma once
 +
 +#include <lua.h>
 +
 +// Opt-in execution-cost profile (NORNS_EMU_COST_PROFILE). Without that
-+// environment variable this installs nothing and the runtime is unchanged.
-+// Expects the _norns extern table on top of the stack.
++// environment variable nothing is installed and every hook is a no-op.
++// emu_cost_install expects the _norns extern table on top of the stack.
 +void emu_cost_install(lua_State *l);
++// Bracket one event dispatch on the Lua thread; waiting between events is
++// never charged.
++void emu_cost_event_begin(void);
++void emu_cost_event_end(void);
 diff --git a/matron/src/emu_cost.c b/matron/src/emu_cost.c
 new file mode 100644
 --- /dev/null
 +++ b/matron/src/emu_cost.c
-@@ -0,0 +1,196 @@
+@@ -0,0 +1,287 @@
 +// Emulator execution-cost profile.
 +//
-+// Models a slower device by consuming extra CPU on the Lua thread in
-+// proportion to measured host work. Lua execution (everything on the Lua
-+// thread outside the wrapped native bindings) is scaled by lua_factor;
-+// native MIDI, grid/arc and screen bindings are scaled by their own factors
-+// plus an optional fixed cost per call. Debt is repaid by busy-waiting on the
-+// same thread so the cost also appears as CPU load and blocks later work,
-+// as it would on the device.
++// Models a slower device by consuming extra time on the Lua thread in
++// proportion to measured host work. Time inside each event dispatch that is
++// not spent in a wrapped native binding is treated as Lua execution and
++// scaled by lua_factor. Native MIDI, grid/arc and screen bindings are scaled
++// by their own factors plus a signed fixed cost per call. A negative fixed
++// cost corrects binding glue that the Lua factor over-scales. Debt is repaid
++// by busy-waiting on the Lua thread, so it blocks later work and shows up as
++// CPU load, as the slower device would.
 +//
-+// NORNS_EMU_COST_PROFILE="lua_factor=19;midi_factor=2.7;midi_fixed_us=0;
-+//   grid_factor=5;grid_fixed_us=0;screen_factor=3.8;screen_fixed_us=0;
-+//   hook_instructions=200;pay_threshold_us=20"
++// Accounting uses CLOCK_MONOTONIC (vDSO) because thread CPU clocks are system
++// calls whose own cost would be scaled. Host preemption inside a dispatch is
++// therefore charged as work; waiting between dispatches never is.
++//
++// NORNS_EMU_COST_PROFILE="lua_factor=19;midi_factor=3.6;midi_fixed_us=0;
++//   grid_factor=5;grid_fixed_us=0;screen_factor=4;screen_fixed_us=0;
++//   hook_instructions=0;pay_threshold_us=2000"
 +
 +#ifndef _GNU_SOURCE
 +#define _GNU_SOURCE
@@ -75,102 +118,150 @@ new file mode 100644
 +
 +#include "emu_cost.h"
 +
-+enum { COST_MIDI, COST_GRID, COST_SCREEN, COST_KINDS };
++enum { COST_MIDI, COST_GRID, COST_SCREEN, COST_KINDS, COST_TIME = COST_KINDS };
 +static const char *kind_names[COST_KINDS] = {"midi", "grid", "screen"};
 +
++static int enabled;
 +static double lua_factor = 1.0;
 +static double factor[COST_KINDS] = {1.0, 1.0, 1.0};
 +static double fixed_ns[COST_KINDS];
-+static int hook_instructions = 200;
-+static long long pay_threshold_ns = 20000;
++static int hook_instructions = 0;
++static long long pay_threshold_ns = 2000000;
 +
 +static pthread_t owner;
-+static long long last_ns;
++static int active;
++static long long mark_ns;
 +static double debt_ns;
-+static long long lua_ns, native_ns[COST_KINDS], calls[COST_KINDS], paid_ns, hooks, pays;
++static long long lua_ns, native_ns[COST_KINDS], calls[COST_KINDS], paid_ns, hooks, pays, events, time_reads;
++// Host cost of one wrapper crossing, measured at install and not scaled.
++static long long crossing_ns;
 +
-+static long long cpu_now(void) {
++static long long now_ns(void) {
 +    struct timespec ts;
-+    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts);
++    clock_gettime(CLOCK_MONOTONIC, &ts);
 +    return (long long)ts.tv_sec * 1000000000LL + ts.tv_nsec;
 +}
 +
-+static void account_lua(long long now) {
-+    long long elapsed = now - last_ns;
++static void charge_lua(long long now) {
++    long long elapsed = now - mark_ns - crossing_ns;
 +    if (elapsed > 0) {
 +        lua_ns += elapsed;
 +        debt_ns += (double)elapsed * (lua_factor - 1.0);
 +    }
 +}
 +
-+static void settle(void) {
-+    long long now = cpu_now();
-+    if (debt_ns >= (double)pay_threshold_ns) {
++// Repay accumulated debt by spinning, then restart the accounting mark. Hooks
++// repay only large debts: frequent spinning disturbs the interpreter's cache
++// and branch state and inflates the measured host work.
++static void settle(int force) {
++    long long now = now_ns();
++    if (debt_ns >= (double)pay_threshold_ns || (force && debt_ns > 0)) {
 +        long long target = now + (long long)debt_ns;
 +        long long spun = now;
 +        while (spun < target) {
-+            spun = cpu_now();
++            spun = now_ns();
 +        }
 +        paid_ns += spun - now;
 +        debt_ns -= (double)(spun - now);
 +        pays++;
++        now = spun;
 +    }
-+    last_ns = cpu_now();
++    mark_ns = now;
++}
++
++void emu_cost_event_begin(void) {
++    if (!enabled) {
++        return;
++    }
++    active = 1;
++    events++;
++    mark_ns = now_ns();
++}
++
++void emu_cost_event_end(void) {
++    if (!enabled || !active) {
++        return;
++    }
++    charge_lua(now_ns());
++    settle(1);
++    // Negative fixed costs only correct over-scaled glue within one dispatch;
++    // they never make a later event faster than the host.
++    if (debt_ns < 0) {
++        debt_ns = 0;
++    }
++    active = 0;
 +}
 +
 +static void hook(lua_State *l, lua_Debug *ar) {
 +    (void)l;
 +    (void)ar;
-+    if (!pthread_equal(pthread_self(), owner)) {
++    if (!active || !pthread_equal(pthread_self(), owner)) {
 +        return;
 +    }
 +    hooks++;
-+    account_lua(cpu_now());
-+    settle();
++    charge_lua(now_ns());
++    settle(0);
 +}
 +
 +static int wrapped(lua_State *l) {
 +    lua_CFunction original = (lua_CFunction)lua_touserdata(l, lua_upvalueindex(1));
 +    int kind = (int)lua_tointeger(l, lua_upvalueindex(2));
-+    if (!pthread_equal(pthread_self(), owner)) {
++    if (!active || !pthread_equal(pthread_self(), owner)) {
 +        return original(l);
 +    }
-+    long long before = cpu_now();
-+    account_lua(before);
++    if (kind == COST_TIME) {
++        // Anything that observes elapsed time must see the work done so far.
++        charge_lua(now_ns());
++        settle(1);
++        time_reads++;
++        return original(l);
++    }
++    // Earlier work delays this output: repay everything before calling it.
++    charge_lua(now_ns());
++    settle(1);
++    long long before = mark_ns;
 +    int results = original(l);
-+    long long after = cpu_now();
++    long long after = now_ns();
 +    native_ns[kind] += after - before;
 +    calls[kind]++;
++    // The native call's own extra cost delays whatever follows it.
 +    debt_ns += (double)(after - before) * (factor[kind] - 1.0) + fixed_ns[kind];
-+    settle();
++    mark_ns = after;
 +    return results;
++}
++
++static void set_integer(lua_State *l, const char *key, long long value) {
++    lua_pushinteger(l, value);
++    lua_setfield(l, -2, key);
++}
++
++static void set_number(lua_State *l, const char *key, double value) {
++    lua_pushnumber(l, value);
++    lua_setfield(l, -2, key);
 +}
 +
 +static int stats(lua_State *l) {
 +    lua_newtable(l);
-+    lua_pushnumber(l, lua_factor);
-+    lua_setfield(l, -2, "lua_factor");
-+    lua_pushinteger(l, lua_ns);
-+    lua_setfield(l, -2, "lua_ns");
-+    lua_pushinteger(l, paid_ns);
-+    lua_setfield(l, -2, "paid_ns");
-+    lua_pushnumber(l, debt_ns);
-+    lua_setfield(l, -2, "debt_ns");
-+    lua_pushinteger(l, hooks);
-+    lua_setfield(l, -2, "hooks");
-+    lua_pushinteger(l, pays);
-+    lua_setfield(l, -2, "pays");
++    set_number(l, "lua_factor", lua_factor);
++    set_integer(l, "lua_ns", lua_ns);
++    set_integer(l, "paid_ns", paid_ns);
++    set_number(l, "debt_ns", debt_ns);
++    set_integer(l, "hooks", hooks);
++    set_integer(l, "pays", pays);
++    set_integer(l, "events", events);
++    set_integer(l, "hook_instructions", hook_instructions);
++    set_integer(l, "time_reads", time_reads);
++    set_integer(l, "crossing_ns", crossing_ns);
 +    for (int k = 0; k < COST_KINDS; k++) {
 +        char key[32];
 +        snprintf(key, sizeof key, "%s_native_ns", kind_names[k]);
-+        lua_pushinteger(l, native_ns[k]);
-+        lua_setfield(l, -2, key);
++        set_integer(l, key, native_ns[k]);
 +        snprintf(key, sizeof key, "%s_calls", kind_names[k]);
-+        lua_pushinteger(l, calls[k]);
-+        lua_setfield(l, -2, key);
++        set_integer(l, key, calls[k]);
 +        snprintf(key, sizeof key, "%s_factor", kind_names[k]);
-+        lua_pushnumber(l, factor[k]);
-+        lua_setfield(l, -2, key);
++        set_number(l, key, factor[k]);
++        snprintf(key, sizeof key, "%s_fixed_ns", kind_names[k]);
++        set_number(l, key, fixed_ns[k]);
 +    }
 +    return 1;
 +}
@@ -179,29 +270,34 @@ new file mode 100644
 +    if (strcmp(name, "midi_send") == 0) return COST_MIDI;
 +    if (strncmp(name, "grid_", 5) == 0 || strncmp(name, "arc_", 4) == 0 || strncmp(name, "monome_", 7) == 0) return COST_GRID;
 +    if (strncmp(name, "screen_", 7) == 0) return COST_SCREEN;
++    if (strcmp(name, "get_time") == 0 || strcmp(name, "clock_get_time_beats") == 0) return COST_TIME;
 +    return -1;
 +}
 +
 +static int parse(const char *text) {
 +    char *copy = strdup(text), *save = NULL;
 +    int ok = copy != NULL;
-+    for (char *item = copy ? strtok_r(copy, ";", &save) : NULL; item; item = strtok_r(NULL, ";", &save)) {
++    for (char *item = copy ? strtok_r(copy, ";", &save) : NULL; ok && item; item = strtok_r(NULL, ";", &save)) {
 +        char *eq = strchr(item, '=');
-+        if (!eq) { ok = 0; break; }
++        if (!eq) {
++            ok = 0;
++            break;
++        }
 +        *eq = 0;
 +        char *end = NULL;
 +        double value = strtod(eq + 1, &end);
-+        if (end == eq + 1 || *end != 0 || value < 0) { ok = 0; break; }
-+        if (strcmp(item, "lua_factor") == 0 && value >= 1) lua_factor = value;
++        int fixed = strstr(item, "_fixed_us") != NULL;
++        if (end == eq + 1 || *end != 0 || (value < 0 && !fixed) || value < -10000 || value > 10000000) ok = 0;
++        else if (strcmp(item, "lua_factor") == 0 && value >= 1) lua_factor = value;
 +        else if (strcmp(item, "midi_factor") == 0 && value >= 1) factor[COST_MIDI] = value;
 +        else if (strcmp(item, "grid_factor") == 0 && value >= 1) factor[COST_GRID] = value;
 +        else if (strcmp(item, "screen_factor") == 0 && value >= 1) factor[COST_SCREEN] = value;
 +        else if (strcmp(item, "midi_fixed_us") == 0) fixed_ns[COST_MIDI] = value * 1000.0;
 +        else if (strcmp(item, "grid_fixed_us") == 0) fixed_ns[COST_GRID] = value * 1000.0;
 +        else if (strcmp(item, "screen_fixed_us") == 0) fixed_ns[COST_SCREEN] = value * 1000.0;
-+        else if (strcmp(item, "hook_instructions") == 0 && value >= 1 && value <= 100000) hook_instructions = (int)value;
++        else if (strcmp(item, "hook_instructions") == 0 && value <= 100000) hook_instructions = (int)value;
 +        else if (strcmp(item, "pay_threshold_us") == 0 && value <= 10000) pay_threshold_ns = (long long)(value * 1000.0);
-+        else { ok = 0; break; }
++        else ok = 0;
 +    }
 +    free(copy);
 +    return ok;
@@ -221,9 +317,9 @@ new file mode 100644
 +    const char *names[512];
 +    int count = 0;
 +    lua_pushnil(l);
-+    while (lua_next(l, table) != 0 && count < 512) {
-+        if (lua_type(l, -2) == LUA_TSTRING && lua_iscfunction(l, -1) && classify(lua_tostring(l, -2)) >= 0) {
-+            names[count++] = lua_tostring(l, -2); // keys are interned and stay referenced by the table
++    while (lua_next(l, table) != 0) {
++        if (count < 512 && lua_type(l, -2) == LUA_TSTRING && lua_iscfunction(l, -1) && classify(lua_tostring(l, -2)) >= 0) {
++            names[count++] = lua_tostring(l, -2); // interned keys stay referenced by the table
 +        }
 +        lua_pop(l, 1);
 +    }
@@ -236,11 +332,44 @@ new file mode 100644
 +        lua_pushcclosure(l, wrapped, 2);
 +        lua_setfield(l, table, names[i]);
 +    }
++    // Median host cost of the accounting done per crossing (two clock reads
++    // plus the settle bookkeeping without debt).
++    long long samples[101];
++    for (int i = 0; i < 101; i++) {
++        long long start = now_ns();
++        for (int j = 0; j < 64; j++) {
++            mark_ns = now_ns();
++            charge_lua(now_ns());
++            debt_ns = 0;
++            settle(0);
++        }
++        samples[i] = (now_ns() - start) / 64;
++    }
++    for (int i = 1; i < 101; i++) {
++        long long v = samples[i];
++        int j = i - 1;
++        while (j >= 0 && samples[j] > v) {
++            samples[j + 1] = samples[j];
++            j--;
++        }
++        samples[j + 1] = v;
++    }
++    crossing_ns = samples[50];
++    lua_ns = 0;
++    debt_ns = 0;
++    paid_ns = 0;
++    pays = 0;
 +    lua_pushcfunction(l, stats);
 +    lua_setfield(l, table, "emu_cost_stats");
-+    last_ns = cpu_now();
-+    lua_sethook(l, hook, LUA_MASKCOUNT, hook_instructions);
-+    fprintf(stderr, "emu_cost: enabled lua_factor=%.3f midi=%.3f+%.0fns grid=%.3f+%.0fns screen=%.3f+%.0fns hook=%d wrapped=%d\n",
-+            lua_factor, factor[COST_MIDI], fixed_ns[COST_MIDI], factor[COST_GRID], fixed_ns[COST_GRID], factor[COST_SCREEN],
-+            fixed_ns[COST_SCREEN], hook_instructions, count);
++    // Off by default: any Lua 5.3 count hook checks every VM instruction and
++    // slows the interpreter itself. Debt is repaid before each wrapped native
++    // call and at the end of every event, which fixes output timing.
++    if (hook_instructions > 0) {
++        lua_sethook(l, hook, LUA_MASKCOUNT, hook_instructions);
++    }
++    enabled = 1;
++    fprintf(stderr,
++            "emu_cost: enabled lua_factor=%.3f midi=%.3f+%.0fns grid=%.3f+%.0fns screen=%.3f+%.0fns hook=%d wrapped=%d crossing_ns=%lld\n",
++            lua_factor, factor[COST_MIDI], fixed_ns[COST_MIDI], factor[COST_GRID], fixed_ns[COST_GRID],
++            factor[COST_SCREEN], fixed_ns[COST_SCREEN], hook_instructions, count, crossing_ns);
 +}

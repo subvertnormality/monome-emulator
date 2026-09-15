@@ -11,13 +11,13 @@ PARAMETERS = {
     'midi_factor': (1.0, 200.0),
     'grid_factor': (1.0, 200.0),
     'screen_factor': (1.0, 200.0),
-    'midi_fixed_us': (0.0, 10000.0),
-    'grid_fixed_us': (0.0, 10000.0),
-    'screen_fixed_us': (0.0, 10000.0),
-    'hook_instructions': (1.0, 100000.0),
+    'midi_fixed_us': (-10000.0, 10000.0),
+    'grid_fixed_us': (-10000.0, 10000.0),
+    'screen_fixed_us': (-10000.0, 10000.0),
+    'hook_instructions': (0.0, 100000.0),
     'pay_threshold_us': (0.0, 10000.0),
 }
-_ITEM = re.compile(r'^([a-z_]+)=([0-9]+(?:\.[0-9]+)?)$')
+_ITEM = re.compile(r'^([a-z_]+)=(-?[0-9]+(?:\.[0-9]+)?)$')
 
 
 def validate_cost_profile(text):
