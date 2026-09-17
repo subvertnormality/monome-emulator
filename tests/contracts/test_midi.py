@@ -26,3 +26,15 @@ class MidiContracts(unittest.TestCase):
         capture.accept(4,1,102,[177,123,0]);self.assertEqual(capture.state()['outstanding'],[])
         with self.assertRaises(ContractError) as error: capture.accept(5,1,103,[248])
         self.assertEqual(error.exception.code,'midi_overflow')
+    def test_capture_records_each_message_of_a_multi_message_write(self):
+        capture=Capture(['a'],8)
+        self.assertEqual([r['bytes'] for r in capture.accept(1,1,100,[144,60,100])],[[144,60,100]])
+        records=capture.accept(2,1,101,[176,1,20,2,40,145,60,100])
+        self.assertEqual([(r['index'],r['bytes'],r['emission'],r['monotonic_ns']) for r in records],
+                         [(2,[176,1,20],2,101),(3,[176,2,40],2,101),(4,[145,60,100],2,101)])
+        self.assertEqual(records[1]['decoded'],[dict(type='cc',channel=1,data=[2,40])])
+        self.assertEqual(capture.state()['count'],4)
+        with self.assertRaises(ContractError) as error: capture.accept(4,1,102,[248])
+        self.assertEqual(error.exception.code,'midi_drop')
+        with self.assertRaises(ContractError) as error: capture.accept(3,1,102,[128,60,0,129,60,0,130,60,0,131,60,0,132,60,0])
+        self.assertEqual(error.exception.code,'midi_overflow')
