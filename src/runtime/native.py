@@ -43,7 +43,8 @@ class NativeBackend:
         self.frame_revision=0; self.grid_revision=0; self.frame=bytes(32768); self.grid=[0]*128
         self.saved_frame=None
         self.clock_mode=config.get('clock_mode','real-time');self.logical_ns=0
-        from devices.midi import Capture,Decoder,configuration
+        from devices.midi import Capture,Decoder,configuration,logged_event
+        self.logged_event=logged_event
         self.midi_config=configuration(config.get('midi_config'))
         self.capture=Capture(self.midi_config['ports'],self.midi_config['capture_limit'])
         self.midi_inputs=[Decoder() for _ in self.midi_config['ports']]
@@ -331,13 +332,17 @@ class NativeBackend:
                         sequence=struct.unpack('=Q',payload[:8])[0]
                         raw=list(payload[offset:]); record.update(sequence=sequence,bytes=raw)
                         # Retain the offending emission even if its capture contract fails.
-                        try: item=self.capture.accept(sequence,identifier+1,ns,raw)
+                        try: items=self.capture.accept(sequence,identifier+1,ns,raw)
                         except ContractError as error:
                             self.events.write(json.dumps(record)+'\n')
                             if not self.errors: self.errors.append(dict(code=error.code,message=str(error)))
                             self.condition.notify_all(); continue
-                        if kind==11:item['logical_ns']=struct.unpack('=Q',payload[8:16])[0]
-                        self.midi_count=self.capture.count; record.update(item)
+                        if kind==11:
+                            for item in items:item['logical_ns']=struct.unpack('=Q',payload[8:16])[0]
+                        # A write holding several messages is logged as one event per message.
+                        logged=[self.logged_event(item,sequence) for item in items]
+                        for item in logged[:-1]:self.events.write(json.dumps(dict(record,**item))+'\n')
+                        self.midi_count=self.capture.count; record.update(logged[-1])
                     elif kind==18:
                         if len(payload)!=5 or payload[0] not in (0,1) or not 0<=identifier<len(self.midi_inputs):
                             raise ValueError('Invalid MIDI connection metadata')
