@@ -1,0 +1,40 @@
+Handle a closed or reset input socket as the end of a session.
+
+The device thread ended the process with "invalid input packet" for any recv()
+that did not return a whole packet, including recv() failures. Closing a session
+from the controlling process can reset the socket pair, so an ordinary teardown
+could kill matron with exit 71 and leave the session unreachable over HTTP. A
+failed recv is now retried (EINTR/EAGAIN), treated as the end of the session
+when the peer has gone, or reported with its errno. A genuinely malformed
+packet still ends the process, and now names its size.
+
+diff --git a/matron/src/emu_bridge.c b/matron/src/emu_bridge.c
+--- a/matron/src/emu_bridge.c
++++ b/matron/src/emu_bridge.c
+@@ -245,12 +245,16 @@ static void *receive_loop(void *unused) {
+         if (ready<0) { perror("EMU_ERROR input poll"); _exit(71); }
+         if (!ready) continue;
+         ssize_t size = recv(bridge_fd,packet,sizeof(packet),MSG_TRUNC);
+-        if (size==0) {
++        if (size<0 && (errno==EINTR || errno==EAGAIN || errno==EWOULDBLOCK)) continue;
++        /* The controlling process closing the session can reset this socket
++         * pair; that is the end of the session, not a malformed packet. */
++        if (size==0 || (size<0 && (errno==ECONNRESET || errno==ENOTCONN || errno==EPIPE || errno==EBADF))) {
+             pthread_mutex_lock(&input_schedule_lock);
+             input_schedule.cursor=input_schedule.count;
+             pthread_mutex_unlock(&input_schedule_lock);
+             event_post(event_data_new(EVENT_QUIT)); return NULL;
+         }
++        if (size<0) { perror("EMU_ERROR input recv"); _exit(71); }
+         if (size>=16 && size<=(ssize_t)sizeof(packet) && (packet[1]==9 || packet[1]==11)) {
+             pthread_mutex_lock(&input_schedule_lock);
+             const char *error=(logical_schedule() != (packet[1]==11)) ? "schedule_time_domain" :
+@@ -272,7 +276,7 @@ static void *receive_loop(void *unused) {
+         }
+         if (size<16 || (packet[1]!=7 && size!=24) ||
+             (packet[1]==7 && (packet[3]<1 || packet[3]>4096 || size!=16+packet[3]))) {
+-            fprintf(stderr,"EMU_ERROR invalid input packet\n"); _exit(71);
++            fprintf(stderr,"EMU_ERROR invalid input packet (%zd bytes)\n",size); _exit(71);
+         }
+         union event_data *ev;
+         switch(args[0]) {

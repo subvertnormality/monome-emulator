@@ -146,6 +146,10 @@
     {
       "path": "patches/norns/0014-runtime-stall.patch",
       "sha256": "3bbec21eae0c2b684cd2ac85e0fa8810da5d274c278e1dd576dca3c8e3d36ec9"
+    },
+    {
+      "path": "patches/norns/0015-input-socket-shutdown.patch",
+      "sha256": "8c10e7ba33379ee966c0b45d50d9d840a75694afc7e22fe95774f144e19dc1b1"
     }
   ],
   "serialosc": {
