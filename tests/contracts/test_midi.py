@@ -1,5 +1,5 @@
 import unittest
-from devices.midi import configuration,Decoder,Capture
+from devices.midi import configuration,Decoder,Capture,logged_event
 from automation.protocol import ContractError
 
 class MidiContracts(unittest.TestCase):
@@ -38,3 +38,9 @@ class MidiContracts(unittest.TestCase):
         self.assertEqual(error.exception.code,'midi_drop')
         with self.assertRaises(ContractError) as error: capture.accept(3,1,102,[128,60,0,129,60,0,130,60,0,131,60,0,132,60,0])
         self.assertEqual(error.exception.code,'midi_overflow')
+    def test_logged_events_number_messages_contiguously_and_keep_the_write(self):
+        capture=Capture(['a'],8)
+        logged=[logged_event(record,sequence) for sequence,data in ((1,[144,60,100]),(2,[176,1,20,2,40]),(3,[128,60,0]))
+                for record in capture.accept(sequence,1,100+sequence,data)]
+        self.assertEqual([(e['sequence'],e.get('emission'),e['bytes']) for e in logged],
+                         [(1,None,[144,60,100]),(2,2,[176,1,20]),(3,2,[176,2,40]),(4,3,[128,60,0])])

@@ -53,6 +53,14 @@ class Decoder:
             messages.append((message,[status,a] if needed==1 else [status,a,b]))
         return messages
 
+def logged_event(record,native_sequence):
+    """Event-log fields for one capture record. `sequence` numbers messages contiguously, which
+    consumers use to order messages and prove the capture complete; once a write has held several
+    messages it no longer equals the native emission number, which `emission` then keeps."""
+    fields=dict(record,sequence=record['index'])
+    if record['index']!=native_sequence: fields['emission']=native_sequence
+    return fields
+
 class Capture:
     def __init__(self,ports,limit):
         self.ports=ports; self.limit=limit; self.count=0; self.emissions=0; self.last_ns=0
