@@ -3,9 +3,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'src'))
+sys.path.insert(0, str(ROOT / 'scripts'))
 from automation import session  # noqa: E402
 from automation.performance_profile import cost_profile_string, load_profile, validate_cost_profile  # noqa: E402
 from automation.protocol import ContractError  # noqa: E402
+from build_performance_profile_runtime import PATCHES  # noqa: E402
 
 PATCH = ROOT / 'patches/norns/candidates/performance-cost-profile.patch'
 
@@ -44,6 +46,24 @@ class CostProfileString(unittest.TestCase):
 
 
 class DefaultRuntimeUnchanged(unittest.TestCase):
+    def test_ci_uses_released_immutable_mosaic_fixture(self):
+        workflow = (ROOT / '.github/workflows/norns-profile-check.yml').read_text()
+        fixture = '5384d0babb01fd5004bdcd6a95eaa8609aa72915'
+        self.assertEqual(workflow.count(fixture), 2)
+        self.assertNotIn("'codex/behaviour-validation'", workflow)
+
+    def test_profile_runtime_includes_qualified_native_teardown_fixes(self):
+        self.assertEqual(
+            [path.name for path in PATCHES],
+            [
+                'experimental-screen-worker-shutdown.patch',
+                'experimental-sdl-ownership.patch',
+                'experimental-jack-lifetime.patch',
+                'performance-cost-profile.patch',
+            ],
+        )
+        self.assertTrue(all(path.is_file() for path in PATCHES))
+
     def test_cost_profile_requires_native_real_time_and_explicit_installation(self):
         for options in (dict(backend='contract-fixture'), dict(backend='native'), dict(backend='native', clock_mode='controlled-experimental', experimental_install='x')):
             backend = options.pop('backend')

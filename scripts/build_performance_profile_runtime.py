@@ -13,7 +13,12 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from build_qualified_midi_runtime import build_patched  # noqa: E402
 from runtime.dependencies import verify_install  # noqa: E402
 
-PATCH = ROOT / "patches/norns/candidates/performance-cost-profile.patch"
+PATCHES = [
+    ROOT / "patches/norns/experimental-screen-worker-shutdown.patch",
+    ROOT / "patches/norns/experimental-sdl-ownership.patch",
+    ROOT / "patches/norns/experimental-jack-lifetime.patch",
+    ROOT / "patches/norns/candidates/performance-cost-profile.patch",
+]
 
 
 def main():
@@ -23,7 +28,13 @@ def main():
     args = parser.parse_args()
     base = args.base_install.resolve()
     verify_install(json.loads(base.read_text()))
-    install = build_patched(base, base, [PATCH], args.output, "performance-cost-profile")
+    install = build_patched(
+        base,
+        base,
+        PATCHES,
+        args.output,
+        "performance-cost-profile-and-native-teardown",
+    )
     print(install)
 
 

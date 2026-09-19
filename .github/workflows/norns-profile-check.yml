@@ -33,12 +33,11 @@ on:
     inputs:
       mosaic_ref:
         description: Mosaic ref providing tests/behaviour/perf_calibration_emulator.py
-        default: codex/behaviour-validation
+        default: 5384d0babb01fd5004bdcd6a95eaa8609aa72915
 
 env:
-  # Until the runner branch is merged into codex/behaviour-validation, pushes to the
-  # calibration branch use the runner branch.
-  MOSAIC_REF: ${{ github.event.inputs.mosaic_ref || (github.ref == 'refs/heads/codex/norns-performance-calibration' && 'codex/norns-calibration-runners') || 'codex/behaviour-validation' }}
+  # Mosaic 1.3.0, pinned so application evidence cannot change underneath a run.
+  MOSAIC_REF: ${{ github.event.inputs.mosaic_ref || '5384d0babb01fd5004bdcd6a95eaa8609aa72915' }}
 
 jobs:
   profile-check:
